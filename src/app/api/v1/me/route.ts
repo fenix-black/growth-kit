@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyAppAuth } from '@/lib/security/auth';
-import { generateReferralCode } from '@/lib/security/hmac';
+import { generateReferralCode, verifyClaim } from '@/lib/security/hmac';
 import { checkRateLimit, getClientIp, rateLimits } from '@/lib/middleware/rateLimit';
 import { withCorsHeaders, handleCorsPreflightResponse } from '@/lib/middleware/cors';
 import { successResponse, errors } from '@/lib/utils/response';
@@ -30,9 +30,9 @@ export async function POST(request: NextRequest) {
       return rateLimitCheck.response!;
     }
 
-    // Get fingerprint from request body
+    // Get fingerprint and optional claim from request body
     const body = await request.json();
-    const { fingerprint } = body;
+    const { fingerprint, claim } = body;
 
     if (!fingerprint || !isValidFingerprint(fingerprint)) {
       return errors.badRequest('Invalid or missing fingerprint');
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Log event
+      // Log fingerprint creation event
       await prisma.eventLog.create({
         data: {
           appId: authContext.app.id,
@@ -93,6 +93,122 @@ export async function POST(request: NextRequest) {
           userAgent: request.headers.get('user-agent'),
         },
       });
+    }
+
+    // Process referral claim if present (works for both new and existing users)
+    if (claim) {
+      const claimPayload = verifyClaim(claim);
+      
+      if (claimPayload && claimPayload.referralCode) {
+        // Check if this user has already claimed a referral
+        const existingReferral = await prisma.referral.findFirst({
+          where: {
+            referredId: fingerprintRecord.id,
+          },
+        });
+
+        // Only process if they haven't been referred before
+        if (!existingReferral) {
+          // Find the referrer by their referral code
+          const referrerFingerprint = await prisma.fingerprint.findUnique({
+            where: { 
+              referralCode: claimPayload.referralCode 
+            },
+          });
+
+          if (referrerFingerprint && referrerFingerprint.appId === authContext.app.id) {
+            // Prevent self-referral
+            if (referrerFingerprint.id !== fingerprintRecord.id) {
+              const policy = authContext.app.policyJson as any;
+              const referralCredits = policy?.referralCredits || 5;
+              const referredCredits = policy?.referredCredits || 3;
+
+              // Check daily referral cap for the referrer
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              
+              const todaysReferrals = await prisma.referral.count({
+                where: {
+                  referrerId: referrerFingerprint.id,
+                  claimedAt: { gte: today },
+                },
+              });
+
+              const dailyCap = policy?.dailyReferralCap || 10;
+              
+              if (todaysReferrals < dailyCap) {
+                // Create referral record
+                const referral = await prisma.referral.create({
+                  data: {
+                    appId: authContext.app.id,
+                    referrerId: referrerFingerprint.id,
+                    referredId: fingerprintRecord.id,
+                    claimToken: claim,
+                    claimExpiresAt: new Date(claimPayload.expiresAt),
+                    claimedAt: new Date(),
+                  },
+                });
+
+                // Award credits to the referred user
+                await prisma.credit.create({
+                  data: {
+                    fingerprintId: fingerprintRecord.id,
+                    amount: referredCredits,
+                    reason: 'referral',
+                    metadata: { 
+                      referrerId: referrerFingerprint.id,
+                      referralCode: claimPayload.referralCode 
+                    },
+                  },
+                });
+
+                // Award credits to the referrer
+                await prisma.credit.create({
+                  data: {
+                    fingerprintId: referrerFingerprint.id,
+                    amount: referralCredits,
+                    reason: 'referral',
+                    metadata: { 
+                      referredId: fingerprintRecord.id 
+                    },
+                  },
+                });
+
+                // Log referral event
+                await prisma.eventLog.create({
+                  data: {
+                    appId: authContext.app.id,
+                    event: 'referral.claimed',
+                    entityType: 'referral',
+                    entityId: referral.id,
+                    metadata: { 
+                      referrerId: referrerFingerprint.id,
+                      referredId: fingerprintRecord.id,
+                      referralCode: claimPayload.referralCode,
+                    },
+                    ipAddress: clientIp,
+                    userAgent: request.headers.get('user-agent'),
+                  },
+                });
+
+                // Re-fetch to include new credits
+                fingerprintRecord = await prisma.fingerprint.findUnique({
+                  where: { id: fingerprintRecord.id },
+                  include: {
+                    credits: true,
+                    usage: true,
+                  },
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Ensure fingerprintRecord is not null (it can't be at this point, but TypeScript needs help)
+    if (!fingerprintRecord) {
+      return errors.serverError('Failed to create or retrieve user');
     }
 
     // Calculate total credits

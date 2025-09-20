@@ -1,0 +1,229 @@
+import { NextRequest, NextFetchEvent, NextResponse } from 'next/server';
+
+interface GrowthKitConfig {
+    apiKey: string;
+    apiUrl?: string;
+    debug?: boolean;
+}
+interface GrowthKitPolicy {
+    referralCredits: number;
+    referredCredits: number;
+    nameClaimCredits: number;
+    emailClaimCredits: number;
+    emailVerifyCredits: number;
+    dailyReferralCap: number;
+    actions: Record<string, {
+        creditsRequired: number;
+    }>;
+}
+interface GrowthKitState {
+    loading: boolean;
+    initialized: boolean;
+    error: Error | null;
+    fingerprint: string | null;
+    credits: number;
+    usage: number;
+    referralCode: string | null;
+    policy: GrowthKitPolicy | null;
+    hasClaimedName: boolean;
+    hasClaimedEmail: boolean;
+    hasVerifiedEmail: boolean;
+    isOnWaitlist: boolean;
+    waitlistPosition: number | null;
+}
+interface GrowthKitActions {
+    refresh: () => Promise<void>;
+    completeAction: (action?: string, metadata?: any) => Promise<boolean>;
+    claimName: (name: string) => Promise<boolean>;
+    claimEmail: (email: string) => Promise<boolean>;
+    verifyEmail: (token: string) => Promise<boolean>;
+    joinWaitlist: (email: string, metadata?: any) => Promise<boolean>;
+    share: (options?: ShareOptions) => Promise<boolean>;
+    getReferralLink: () => string;
+    shouldShowSoftPaywall: () => boolean;
+    canPerformAction: (action?: string) => boolean;
+}
+interface ShareOptions {
+    title?: string;
+    text?: string;
+    url?: string;
+}
+interface APIResponse<T = any> {
+    success: boolean;
+    data?: T;
+    error?: string;
+    message?: string;
+}
+interface MeResponse {
+    fingerprint: string;
+    credits: number;
+    usage: number;
+    referralCode: string;
+    policy: GrowthKitPolicy;
+    hasClaimedName: boolean;
+    hasClaimedEmail: boolean;
+    hasVerifiedEmail: boolean;
+}
+interface CompleteResponse {
+    success: boolean;
+    creditsRemaining: number;
+    creditsConsumed: number;
+}
+interface ClaimResponse {
+    claimed: boolean;
+    creditsAwarded?: number;
+    totalCredits?: number;
+    reason?: string;
+    message?: string;
+}
+interface VerifyResponse {
+    verified: boolean;
+    creditsAwarded?: number;
+    totalCredits?: number;
+    reason?: string;
+    message?: string;
+}
+interface WaitlistResponse {
+    joined: boolean;
+    position?: number;
+    status?: string;
+    reason?: string;
+    message?: string;
+}
+type GrowthKitHook = GrowthKitState & GrowthKitActions;
+
+declare function useGrowthKit(config: GrowthKitConfig): GrowthKitHook;
+
+interface GrowthKitMiddlewareConfig {
+    /**
+     * Your GrowthKit API key
+     */
+    apiKey: string;
+    /**
+     * The GrowthKit API URL
+     * @example "https://growthkit.example.com/api"
+     */
+    apiUrl: string;
+    /**
+     * The referral path prefix (default: "/r")
+     * @example "/refer" would match /refer/ABC123
+     */
+    referralPath?: string;
+    /**
+     * Where to redirect after processing the referral (default: "/")
+     * @example "/welcome" or "/app"
+     */
+    redirectTo?: string;
+    /**
+     * Enable debug logging
+     */
+    debug?: boolean;
+}
+/**
+ * Create a Next.js middleware handler for GrowthKit referral links
+ *
+ * This middleware intercepts referral links, validates them with the GrowthKit
+ * server, and passes the claim token to your app via URL parameters.
+ *
+ * @example
+ * ```ts
+ * // middleware.ts
+ * import { createGrowthKitMiddleware } from '@fenixblack/growthkit';
+ *
+ * export const middleware = createGrowthKitMiddleware({
+ *   apiKey: process.env.GROWTHKIT_API_KEY!,
+ *   apiUrl: process.env.GROWTHKIT_API_URL!
+ * });
+ *
+ * export const config = {
+ *   matcher: '/r/:code*'
+ * };
+ * ```
+ */
+declare function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig): (request: NextRequest, event?: NextFetchEvent) => Promise<NextResponse | Response | null | undefined>;
+/**
+ * Standalone middleware function for simple use cases
+ * Requires GROWTHKIT_API_KEY and GROWTHKIT_API_URL environment variables
+ *
+ * @example
+ * ```ts
+ * // middleware.ts
+ * export { growthKitMiddleware as middleware } from '@fenixblack/growthkit';
+ *
+ * export const config = {
+ *   matcher: '/r/:code*'
+ * };
+ * ```
+ */
+declare function growthKitMiddleware(request: NextRequest, event?: NextFetchEvent): Promise<NextResponse | Response | null | undefined>;
+
+/**
+ * Server-side utilities for GrowthKit
+ * These utilities are meant to be used in API routes and server components
+ */
+
+interface GrowthKitServerConfig {
+    apiKey: string;
+    apiUrl?: string;
+}
+/**
+ * Server-side API client for GrowthKit
+ * Use this in API routes and server components
+ */
+declare class GrowthKitServer {
+    private apiKey;
+    private apiUrl;
+    constructor(config: GrowthKitServerConfig);
+    /**
+     * Get user data by fingerprint
+     */
+    getUser(fingerprint: string): Promise<any>;
+    /**
+     * Complete an action for a user
+     */
+    completeAction(fingerprint: string, action?: string, metadata?: any): Promise<any>;
+    /**
+     * Add email to waitlist
+     */
+    addToWaitlist(email: string, fingerprint?: string, metadata?: any): Promise<any>;
+    /**
+     * Exchange referral code for claim token
+     */
+    exchangeReferralCode(code: string): Promise<any>;
+}
+/**
+ * Extract fingerprint from request headers (if using custom header)
+ */
+declare function getFingerprintFromRequest(request: NextRequest): string | null;
+/**
+ * Extract referral claim from request cookies
+ */
+declare function getReferralClaimFromRequest(request: NextRequest): string | null;
+/**
+ * Create a server instance with environment variables
+ */
+declare function createGrowthKitServer(): GrowthKitServer;
+
+declare function getFingerprint(): Promise<string>;
+declare function clearFingerprintCache(): void;
+
+declare class GrowthKitAPI {
+    private apiKey;
+    private apiUrl;
+    private fingerprint;
+    constructor(apiKey: string, apiUrl?: string);
+    private detectApiUrl;
+    setFingerprint(fingerprint: string): void;
+    private request;
+    getMe(fingerprint: string, claim?: string): Promise<APIResponse<MeResponse>>;
+    completeAction(fingerprint: string, action?: string, metadata?: any): Promise<APIResponse<CompleteResponse>>;
+    claimName(fingerprint: string, name: string): Promise<APIResponse<ClaimResponse>>;
+    claimEmail(fingerprint: string, email: string): Promise<APIResponse<ClaimResponse>>;
+    verifyEmail(fingerprint: string, token: string): Promise<APIResponse<VerifyResponse>>;
+    joinWaitlist(email: string, fingerprint?: string, metadata?: any): Promise<APIResponse<WaitlistResponse>>;
+    trackReferralVisit(claim?: string): Promise<APIResponse<any>>;
+}
+
+declare const VERSION = "0.3.0";
+
+export { APIResponse, ClaimResponse, CompleteResponse, GrowthKitAPI, GrowthKitActions, GrowthKitConfig, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, MeResponse, ShareOptions, VERSION, VerifyResponse, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit };

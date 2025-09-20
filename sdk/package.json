@@ -1,0 +1,45 @@
+{
+  "name": "@fenixblack/growthkit",
+  "version": "0.3.0",
+  "description": "React SDK for GrowthKit - Intelligent waitlist and referral management",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --dts --format esm,cjs --minify",
+    "dev": "tsup src/index.ts --dts --format esm,cjs --watch",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@rajesh896/broprint.js": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "tsup": "^7.2.0",
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fenixblack/growthkit"
+  },
+  "keywords": [
+    "react",
+    "hook",
+    "growthkit",
+    "waitlist",
+    "referral",
+    "growth"
+  ],
+  "author": "FenixBlack.ai",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
