@@ -1,0 +1,230 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Tenant model for future multi-tenant support
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  apps App[]
+
+  @@map("tenants")
+}
+
+// App configuration model
+model App {
+  id              String    @id @default(cuid())
+  tenantId        String?   // Nullable for single-tenant mode initially
+  name            String
+  domain          String
+  corsOrigins     String[]  @default([])
+  redirectUrl     String    // URL to redirect after referral cookie set
+  policyJson      Json      // JSON policy configuration
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  tenant       Tenant?      @relation(fields: [tenantId], references: [id])
+  apiKeys      ApiKey[]
+  fingerprints Fingerprint[]
+  referrals    Referral[]
+  leads        Lead[]
+  waitlist     Waitlist[]
+  eventLogs    EventLog[]
+
+  @@index([tenantId])
+  @@index([domain])
+  @@map("apps")
+}
+
+// API Key model for app authentication
+model ApiKey {
+  id         String    @id @default(cuid())
+  appId      String
+  keyHint    String    // First 8 chars of the unhashed key for identification
+  hashedKey  String    // bcrypt hashed API key
+  scope      String    @default("full") // "full", "read", "write"
+  isActive   Boolean   @default(true)
+  expiresAt  DateTime?
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@index([appId])
+  @@index([keyHint])
+  @@map("api_keys")
+}
+
+// User fingerprint model
+model Fingerprint {
+  id            String   @id @default(cuid())
+  appId         String
+  fingerprint   String   // Browser fingerprint hash
+  referralCode  String?  @unique // User's unique referral code
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  app         App          @relation(fields: [appId], references: [id], onDelete: Cascade)
+  credits     Credit[]
+  usage       Usage[]
+  referrals   Referral[]   @relation("Referrer")
+  referredBy  Referral?    @relation("Referred")
+  leads       Lead[]
+
+  @@unique([appId, fingerprint])
+  @@index([appId])
+  @@index([fingerprint])
+  @@index([referralCode])
+  @@map("fingerprints")
+}
+
+// Credit balance model
+model Credit {
+  id            String      @id @default(cuid())
+  fingerprintId String
+  amount        Int         // Credit amount (positive for gains, negative for usage)
+  reason        String      // "referral", "name_claim", "email_claim", "email_verify", "consumed"
+  metadata      Json?       // Additional metadata
+  createdAt     DateTime    @default(now())
+
+  // Relations
+  fingerprint Fingerprint @relation(fields: [fingerprintId], references: [id], onDelete: Cascade)
+
+  @@index([fingerprintId])
+  @@index([reason])
+  @@index([createdAt])
+  @@map("credits")
+}
+
+// Usage tracking model
+model Usage {
+  id            String      @id @default(cuid())
+  fingerprintId String
+  action        String      // Action identifier from app
+  metadata      Json?       // Additional usage metadata
+  createdAt     DateTime    @default(now())
+
+  // Relations
+  fingerprint Fingerprint @relation(fields: [fingerprintId], references: [id], onDelete: Cascade)
+
+  @@index([fingerprintId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("usage")
+}
+
+// Referral relationship model
+model Referral {
+  id             String      @id @default(cuid())
+  appId          String
+  referrerId     String      // Fingerprint ID of the referrer
+  referredId     String?     @unique // Fingerprint ID of the referred (null until claimed)
+  claimToken     String?     @unique // HMAC token for claiming
+  claimExpiresAt DateTime?   // Token expiration
+  visitCount     Int         @default(0)
+  lastVisitAt    DateTime?
+  claimedAt      DateTime?   // When the referral was claimed
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  // Relations
+  app      App         @relation(fields: [appId], references: [id], onDelete: Cascade)
+  referrer Fingerprint @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred Fingerprint? @relation("Referred", fields: [referredId], references: [id])
+
+  @@index([appId])
+  @@index([referrerId])
+  @@index([referredId])
+  @@index([claimToken])
+  @@map("referrals")
+}
+
+// Lead capture model
+model Lead {
+  id               String       @id @default(cuid())
+  appId            String
+  fingerprintId    String?
+  name             String?
+  email            String?
+  emailVerified    Boolean      @default(false)
+  verifyToken      String?      @unique
+  verifyExpiresAt  DateTime?
+  metadata         Json?        // Additional lead data
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  // Relations
+  app         App          @relation(fields: [appId], references: [id], onDelete: Cascade)
+  fingerprint Fingerprint? @relation(fields: [fingerprintId], references: [id], onDelete: SetNull)
+
+  @@unique([appId, email])
+  @@index([appId])
+  @@index([fingerprintId])
+  @@index([email])
+  @@index([verifyToken])
+  @@map("leads")
+}
+
+// Waitlist model
+model Waitlist {
+  id           String   @id @default(cuid())
+  appId        String
+  email        String
+  status       String   @default("WAITING") // "WAITING", "INVITED", "ACCEPTED"
+  position     Int?     // Queue position
+  invitedAt    DateTime?
+  acceptedAt   DateTime?
+  metadata     Json?    // Additional waitlist data
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@unique([appId, email])
+  @@index([appId])
+  @@index([status])
+  @@index([position])
+  @@map("waitlist")
+}
+
+// Event log for analytics and debugging
+model EventLog {
+  id          String   @id @default(cuid())
+  appId       String
+  event       String   // Event type
+  entityType  String?  // Related entity type
+  entityId    String?  // Related entity ID
+  metadata    Json?    // Event metadata
+  ipAddress   String?  // Request IP
+  userAgent   String?  // Request user agent
+  createdAt   DateTime @default(now())
+
+  // Relations
+  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@index([appId])
+  @@index([event])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("event_logs")
+}
