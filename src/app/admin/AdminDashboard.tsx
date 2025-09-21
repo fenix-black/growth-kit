@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import WaitlistManager from './components/WaitlistManager';
 import EmailTemplateEditor from './components/EmailTemplateEditor';
+import UsdMetricsDashboard from './components/UsdMetricsDashboard';
+import InvitationCodesManager from './components/InvitationCodesManager';
 
 interface App {
   id: string;
@@ -27,6 +29,8 @@ export default function AdminDashboard() {
   const [selectedApp, setSelectedApp] = useState<App | null>(null);
   const [showWaitlistManager, setShowWaitlistManager] = useState(false);
   const [showEmailEditor, setShowEmailEditor] = useState(false);
+  const [showUsdMetrics, setShowUsdMetrics] = useState(false);
+  const [showInvitationCodes, setShowInvitationCodes] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     domain: '',
@@ -129,13 +133,13 @@ export default function AdminDashboard() {
               <div className="space-x-4">
                 <button
                   onClick={() => setShowCreateForm(!showCreateForm)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 cursor-pointer"
                 >
                   Create App
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+                  className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 cursor-pointer"
                 >
                   Logout
                 </button>
@@ -201,14 +205,14 @@ export default function AdminDashboard() {
                   <div className="flex space-x-4">
                     <button
                       type="submit"
-                      className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                      className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 cursor-pointer"
                     >
                       Create App
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowCreateForm(false)}
-                      className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500"
+                      className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500 cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -273,7 +277,7 @@ export default function AdminDashboard() {
                             setSelectedApp(app);
                             setShowWaitlistManager(true);
                           }}
-                          className="text-blue-600 hover:text-blue-900 mr-2"
+                          className="text-blue-600 hover:text-blue-900 mr-2 cursor-pointer"
                         >
                           Waitlist
                         </button>
@@ -282,13 +286,31 @@ export default function AdminDashboard() {
                             setSelectedApp(app);
                             setShowEmailEditor(true);
                           }}
-                          className="text-blue-600 hover:text-blue-900 mr-2"
+                          className="text-blue-600 hover:text-blue-900 mr-2 cursor-pointer"
                         >
                           Emails
                         </button>
                         <button
+                          onClick={() => {
+                            setSelectedApp(app);
+                            setShowUsdMetrics(true);
+                          }}
+                          className="text-green-600 hover:text-green-900 mr-2 cursor-pointer"
+                        >
+                          💵 USD
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedApp(app);
+                            setShowInvitationCodes(true);
+                          }}
+                          className="text-purple-600 hover:text-purple-900 mr-2 cursor-pointer"
+                        >
+                          🎫 Codes
+                        </button>
+                        <button
                           onClick={() => router.push(`/admin/app/${app.id}`)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-blue-600 hover:text-blue-900 cursor-pointer"
                         >
                           Manage
                         </button>
@@ -323,6 +345,56 @@ export default function AdminDashboard() {
             setSelectedApp(null);
           }}
         />
+      )}
+
+      {showUsdMetrics && selectedApp && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">USD Metrics - {selectedApp.name}</h2>
+                <button
+                  onClick={() => {
+                    setShowUsdMetrics(false);
+                    setSelectedApp(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+              <UsdMetricsDashboard
+                appId={selectedApp.id}
+                appName={selectedApp.name}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showInvitationCodes && selectedApp && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Invitation Codes - {selectedApp.name}</h2>
+                <button
+                  onClick={() => {
+                    setShowInvitationCodes(false);
+                    setSelectedApp(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+              <InvitationCodesManager
+                appId={selectedApp.id}
+                appName={selectedApp.name}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
