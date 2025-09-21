@@ -48,6 +48,7 @@ export default function UsdMetricsDashboard({ appId, appName }: UsdMetricsDashbo
   const [groupBy, setGroupBy] = useState('user');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     fetchMetrics();
@@ -82,6 +83,9 @@ export default function UsdMetricsDashboard({ appId, appName }: UsdMetricsDashbo
   };
 
   const exportToCsv = async () => {
+    if (isExporting) return; // Prevent double click
+    setIsExporting(true);
+    
     try {
       const response = await fetch('/api/v1/admin/metrics/usd', {
         method: 'POST',
@@ -103,6 +107,8 @@ export default function UsdMetricsDashboard({ appId, appName }: UsdMetricsDashbo
     } catch (error) {
       console.error('Error exporting data:', error);
       alert('Failed to export data');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -127,8 +133,12 @@ export default function UsdMetricsDashboard({ appId, appName }: UsdMetricsDashbo
     <div className={styles.metricsContainer}>
       <div className={styles.metricsHeader}>
         <h2>💵 USD Value Tracking</h2>
-        <button onClick={exportToCsv} className={styles.exportButton}>
-          📊 Export to CSV
+        <button 
+          onClick={exportToCsv} 
+          disabled={isExporting}
+          className={`${styles.exportButton} ${isExporting ? styles.disabled : ''}`}
+        >
+          {isExporting ? '⏳ Exporting...' : '📊 Export to CSV'}
         </button>
       </div>
 

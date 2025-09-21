@@ -31,6 +31,8 @@ export default function AdminDashboard() {
   const [showEmailEditor, setShowEmailEditor] = useState(false);
   const [showUsdMetrics, setShowUsdMetrics] = useState(false);
   const [showInvitationCodes, setShowInvitationCodes] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [actionInProgress, setActionInProgress] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     domain: '',
@@ -80,6 +82,9 @@ export default function AdminDashboard() {
   const handleCreateApp = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (isSubmitting) return; // Prevent double submission
+    setIsSubmitting(true);
+    
     try {
       const corsOriginsArray = formData.corsOrigins
         .split(',')
@@ -112,6 +117,8 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       alert('Error creating app. Check your policy JSON format.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -205,9 +212,14 @@ export default function AdminDashboard() {
                   <div className="flex space-x-4">
                     <button
                       type="submit"
-                      className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 cursor-pointer"
+                      disabled={isSubmitting}
+                      className={`px-4 py-2 rounded-md text-white cursor-pointer ${
+                        isSubmitting 
+                          ? 'bg-gray-400 cursor-not-allowed' 
+                          : 'bg-green-600 hover:bg-green-700'
+                      }`}
                     >
-                      Create App
+                      {isSubmitting ? 'Creating...' : 'Create App'}
                     </button>
                     <button
                       type="button"
@@ -274,43 +286,74 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
                           onClick={() => {
+                            if (actionInProgress) return;
+                            setActionInProgress('waitlist');
                             setSelectedApp(app);
                             setShowWaitlistManager(true);
+                            setTimeout(() => setActionInProgress(null), 500);
                           }}
-                          className="text-blue-600 hover:text-blue-900 mr-2 cursor-pointer"
+                          disabled={actionInProgress !== null}
+                          className={`mr-2 cursor-pointer ${
+                            actionInProgress ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-900'
+                          }`}
                         >
                           Waitlist
                         </button>
                         <button
                           onClick={() => {
+                            if (actionInProgress) return;
+                            setActionInProgress('emails');
                             setSelectedApp(app);
                             setShowEmailEditor(true);
+                            setTimeout(() => setActionInProgress(null), 500);
                           }}
-                          className="text-blue-600 hover:text-blue-900 mr-2 cursor-pointer"
+                          disabled={actionInProgress !== null}
+                          className={`mr-2 cursor-pointer ${
+                            actionInProgress ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-900'
+                          }`}
                         >
                           Emails
                         </button>
                         <button
                           onClick={() => {
+                            if (actionInProgress) return;
+                            setActionInProgress('usd');
                             setSelectedApp(app);
                             setShowUsdMetrics(true);
+                            setTimeout(() => setActionInProgress(null), 500);
                           }}
-                          className="text-green-600 hover:text-green-900 mr-2 cursor-pointer"
+                          disabled={actionInProgress !== null}
+                          className={`mr-2 cursor-pointer ${
+                            actionInProgress ? 'text-gray-400 cursor-not-allowed' : 'text-green-600 hover:text-green-900'
+                          }`}
                         >
                           💵 USD
                         </button>
                         <button
                           onClick={() => {
+                            if (actionInProgress) return;
+                            setActionInProgress('codes');
                             setSelectedApp(app);
                             setShowInvitationCodes(true);
+                            setTimeout(() => setActionInProgress(null), 500);
                           }}
-                          className="text-purple-600 hover:text-purple-900 mr-2 cursor-pointer"
+                          disabled={actionInProgress !== null}
+                          className={`mr-2 cursor-pointer ${
+                            actionInProgress ? 'text-gray-400 cursor-not-allowed' : 'text-purple-600 hover:text-purple-900'
+                          }`}
                         >
                           🎫 Codes
                         </button>
                         <button
-                          onClick={() => router.push(`/admin/app/${app.id}`)}
-                          className="text-blue-600 hover:text-blue-900 cursor-pointer"
+                          onClick={() => {
+                            if (actionInProgress) return;
+                            setActionInProgress('manage');
+                            router.push(`/admin/app/${app.id}`);
+                          }}
+                          disabled={actionInProgress !== null}
+                          className={`cursor-pointer ${
+                            actionInProgress ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-900'
+                          }`}
                         >
                           Manage
                         </button>

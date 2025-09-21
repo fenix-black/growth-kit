@@ -28,6 +28,8 @@ export default function InvitationCodesManager({ appId, appName }: InvitationCod
   const [filter, setFilter] = useState('all'); // all, used, unused, expired
   const [searchTerm, setSearchTerm] = useState('');
   const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [actionInProgress, setActionInProgress] = useState<string | null>(null);
   const [generateForm, setGenerateForm] = useState({
     email: '',
     expirationDays: 7,
@@ -117,6 +119,9 @@ export default function InvitationCodesManager({ appId, appName }: InvitationCod
   };
 
   const generateCode = async () => {
+    if (isGenerating) return; // Prevent double click
+    setIsGenerating(true);
+    
     try {
       const emails = generateForm.bulkEmails 
         ? generateForm.bulkEmails.split('\n').map(e => e.trim()).filter(e => e)
@@ -167,21 +172,31 @@ export default function InvitationCodesManager({ appId, appName }: InvitationCod
     } catch (error) {
       console.error('Error generating codes:', error);
       alert('Failed to generate invitation codes');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
   const resendInvitation = async (code: InvitationCode) => {
+    if (actionInProgress === code.id) return; // Prevent double click
+    setActionInProgress(code.id);
+    
     try {
       // Trigger email resend
       alert(`Resending invitation to ${code.email}...`);
       // In a real implementation, this would call an API to resend the email
     } catch (error) {
       console.error('Error resending invitation:', error);
+    } finally {
+      setTimeout(() => setActionInProgress(null), 1000);
     }
   };
 
   const revokeCode = async (codeId: string) => {
+    if (actionInProgress === codeId) return; // Prevent double click
     if (!confirm('Are you sure you want to revoke this invitation code?')) return;
+    
+    setActionInProgress(codeId);
     
     try {
       // Update status to expired/revoked
@@ -190,6 +205,8 @@ export default function InvitationCodesManager({ appId, appName }: InvitationCod
       await fetchCodes();
     } catch (error) {
       console.error('Error revoking code:', error);
+    } finally {
+      setTimeout(() => setActionInProgress(null), 1000);
     }
   };
 
@@ -348,17 +365,19 @@ export default function InvitationCodesManager({ appId, appName }: InvitationCod
                       <>
                         <button 
                           onClick={() => resendInvitation(code)}
-                          className={styles.actionButton}
+                          disabled={actionInProgress === code.id}
+                          className={`${styles.actionButton} ${actionInProgress === code.id ? styles.disabled : ''}`}
                           title="Resend invitation email"
                         >
-                          📧
+                          {actionInProgress === code.id ? '⏳' : '📧'}
                         </button>
                         <button 
                           onClick={() => revokeCode(code.id)}
-                          className={styles.actionButton}
+                          disabled={actionInProgress === code.id}
+                          className={`${styles.actionButton} ${actionInProgress === code.id ? styles.disabled : ''}`}
                           title="Revoke code"
                         >
-                          ❌
+                          {actionInProgress === code.id ? '⏳' : '❌'}
                         </button>
                       </>
                     )}
@@ -433,10 +452,18 @@ export default function InvitationCodesManager({ appId, appName }: InvitationCod
             </div>
             
             <div className={styles.modalActions}>
-              <button onClick={generateCode} className={styles.primaryButton}>
-                Generate
+              <button 
+                onClick={generateCode} 
+                disabled={isGenerating}
+                className={`${styles.primaryButton} ${isGenerating ? styles.disabled : ''}`}
+              >
+                {isGenerating ? 'Generating...' : 'Generate'}
               </button>
-              <button onClick={() => setShowGenerateModal(false)} className={styles.cancelButton}>
+              <button 
+                onClick={() => setShowGenerateModal(false)} 
+                disabled={isGenerating}
+                className={styles.cancelButton}
+              >
                 Cancel
               </button>
             </div>
