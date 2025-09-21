@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import WaitlistManager from './components/WaitlistManager';
+import EmailTemplateEditor from './components/EmailTemplateEditor';
 
 interface App {
   id: string;
@@ -22,6 +24,9 @@ export default function AdminDashboard() {
   const [apps, setApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedApp, setSelectedApp] = useState<App | null>(null);
+  const [showWaitlistManager, setShowWaitlistManager] = useState(false);
+  const [showEmailEditor, setShowEmailEditor] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     domain: '',
@@ -258,12 +263,32 @@ export default function AdminDashboard() {
                           Keys: {app._count.apiKeys} | Users: {app._count.fingerprints}
                           <br />
                           Referrals: {app._count.referrals} | Leads: {app._count.leads}
+                          <br />
+                          Waitlist: {app._count.waitlist}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
+                          onClick={() => {
+                            setSelectedApp(app);
+                            setShowWaitlistManager(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900 mr-2"
+                        >
+                          Waitlist
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedApp(app);
+                            setShowEmailEditor(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900 mr-2"
+                        >
+                          Emails
+                        </button>
+                        <button
                           onClick={() => router.push(`/admin/app/${app.id}`)}
-                          className="text-blue-600 hover:text-blue-900 mr-4"
+                          className="text-blue-600 hover:text-blue-900"
                         >
                           Manage
                         </button>
@@ -276,6 +301,29 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+      
+      {showWaitlistManager && selectedApp && (
+        <WaitlistManager
+          appId={selectedApp.id}
+          appName={selectedApp.name}
+          onClose={() => {
+            setShowWaitlistManager(false);
+            setSelectedApp(null);
+            fetchApps(); // Refresh data
+          }}
+        />
+      )}
+      
+      {showEmailEditor && selectedApp && (
+        <EmailTemplateEditor
+          appId={selectedApp.id}
+          appName={selectedApp.name}
+          onClose={() => {
+            setShowEmailEditor(false);
+            setSelectedApp(null);
+          }}
+        />
+      )}
     </div>
   );
 }

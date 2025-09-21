@@ -125,6 +125,61 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PUT(request: NextRequest) {
+  try {
+    // Verify service key
+    if (!verifyServiceKey(request.headers)) {
+      return errors.forbidden();
+    }
+
+    // Parse request body
+    const body = await request.json();
+    const { 
+      id,
+      waitlistEnabled,
+      waitlistMessage,
+      autoInviteEnabled,
+      dailyInviteQuota,
+      inviteTime,
+      masterReferralCode,
+      masterReferralCredits,
+    } = body;
+
+    if (!id) {
+      return errors.badRequest('App ID is required');
+    }
+
+    // Build update data object
+    const updateData: any = {};
+    if (waitlistEnabled !== undefined) updateData.waitlistEnabled = waitlistEnabled;
+    if (waitlistMessage !== undefined) updateData.waitlistMessage = waitlistMessage;
+    if (autoInviteEnabled !== undefined) updateData.autoInviteEnabled = autoInviteEnabled;
+    if (dailyInviteQuota !== undefined) updateData.dailyInviteQuota = dailyInviteQuota;
+    if (inviteTime !== undefined) updateData.inviteTime = inviteTime;
+    if (masterReferralCode !== undefined) updateData.masterReferralCode = masterReferralCode;
+    if (masterReferralCredits !== undefined) updateData.masterReferralCredits = masterReferralCredits;
+
+    // Update app configuration
+    const app = await prisma.app.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return successResponse({
+      success: true,
+      app,
+    });
+  } catch (error: any) {
+    console.error('Error updating app:', error);
+    
+    if (error?.code === 'P2002') {
+      return errors.badRequest('Master referral code already exists for another app');
+    }
+    
+    return errors.serverError();
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Verify service key

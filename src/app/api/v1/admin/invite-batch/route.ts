@@ -12,14 +12,10 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { appId, count = 10 } = body;
+    const { appId, count = 10, waitlistIds } = body;
 
     if (!appId) {
       return errors.badRequest('Missing required field: appId');
-    }
-
-    if (typeof count !== 'number' || count < 1 || count > 1000) {
-      return errors.badRequest('Count must be between 1 and 1000');
     }
 
     // Verify app exists
@@ -31,18 +27,35 @@ export async function POST(request: NextRequest) {
       return errors.notFound();
     }
 
-    // Get next batch of waitlist entries to invite
-    const waitlistEntries = await prisma.waitlist.findMany({
-      where: {
-        appId,
-        status: 'WAITING',
-      },
-      orderBy: [
-        { position: 'asc' },
-        { createdAt: 'asc' },
-      ],
-      take: count,
-    });
+    let waitlistEntries;
+
+    // If specific IDs provided, use those
+    if (waitlistIds && Array.isArray(waitlistIds) && waitlistIds.length > 0) {
+      waitlistEntries = await prisma.waitlist.findMany({
+        where: {
+          id: { in: waitlistIds },
+          appId,
+          status: 'WAITING',
+        },
+      });
+    } else {
+      // Otherwise use count-based selection
+      if (typeof count !== 'number' || count < 1 || count > 1000) {
+        return errors.badRequest('Count must be between 1 and 1000');
+      }
+
+      waitlistEntries = await prisma.waitlist.findMany({
+        where: {
+          appId,
+          status: 'WAITING',
+        },
+        orderBy: [
+          { position: 'asc' },
+          { createdAt: 'asc' },
+        ],
+        take: count,
+      });
+    }
 
     if (waitlistEntries.length === 0) {
       return successResponse({

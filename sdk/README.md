@@ -111,6 +111,136 @@ function App() {
 }
 ```
 
+## Waitlist Gating
+
+GrowthKit includes powerful waitlist management features that allow you to gate access to your application while maintaining viral growth through referrals.
+
+### Using GrowthKitGate Component
+
+The easiest way to add waitlist gating is using the `GrowthKitGate` component:
+
+```tsx
+import { GrowthKitGate } from '@fenixblack/growthkit';
+
+function App() {
+  return (
+    <GrowthKitGate 
+      config={{ apiKey: process.env.NEXT_PUBLIC_GROWTHKIT_API_KEY! }}
+    >
+      {/* Your app content - only shown when access is granted */}
+      <YourMainApp />
+    </GrowthKitGate>
+  );
+}
+```
+
+The component automatically handles:
+- Loading states
+- Error states
+- Waitlist form display
+- Invitation acceptance flow
+
+### Custom Waitlist UI
+
+You can provide custom components for different states:
+
+```tsx
+import { GrowthKitGate, useGrowthKit } from '@fenixblack/growthkit';
+
+function CustomWaitlist() {
+  const gk = useGrowthKit({ apiKey: '...' });
+  
+  return (
+    <div className="waitlist-container">
+      <h2>Join Our Exclusive Waitlist</h2>
+      {gk.waitlistMessage && <p>{gk.waitlistMessage}</p>}
+      
+      <form onSubmit={async (e) => {
+        e.preventDefault();
+        const email = (e.target as any).email.value;
+        await gk.joinWaitlist(email);
+      }}>
+        <input type="email" name="email" required />
+        <button type="submit">Join Waitlist</button>
+      </form>
+      
+      {gk.waitlistPosition && (
+        <p>You're #{gk.waitlistPosition} in line!</p>
+      )}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <GrowthKitGate 
+      config={{ apiKey: '...' }}
+      waitlistComponent={<CustomWaitlist />}
+      loadingComponent={<MyLoadingSpinner />}
+    >
+      <YourMainApp />
+    </GrowthKitGate>
+  );
+}
+```
+
+### Manual Waitlist Management
+
+For more control, use the hook directly:
+
+```tsx
+function App() {
+  const gk = useGrowthKit({ apiKey: '...' });
+  
+  // Check waitlist status
+  if (gk.shouldShowWaitlist) {
+    return <WaitlistForm />;
+  }
+  
+  // Handle invited users
+  if (gk.waitlistStatus === 'invited') {
+    return (
+      <div>
+        <h2>You're Invited!</h2>
+        <button onClick={() => gk.acceptInvitation()}>
+          Accept Invitation
+        </button>
+      </div>
+    );
+  }
+  
+  // Normal app access
+  return <YourMainApp />;
+}
+```
+
+### Waitlist States
+
+- **`none`**: User has access (no waitlist or bypassed via referral)
+- **`waiting`**: User is on the waitlist
+- **`invited`**: User has been invited but hasn't accepted
+- **`accepted`**: User accepted invitation
+
+### Bypassing Waitlist
+
+Users can bypass the waitlist through:
+1. **Referral links** - Coming through a referral link grants instant access
+2. **Master codes** - Special invitation codes from email invites
+3. **Direct invitation** - Admin manually invites specific users
+
+### Waitlist Properties
+
+```ts
+const gk = useGrowthKit({ apiKey: '...' });
+
+// Check if waitlist is enabled for this app
+if (gk.waitlistEnabled) {
+  console.log('Status:', gk.waitlistStatus);
+  console.log('Position:', gk.waitlistPosition);
+  console.log('Should show gate:', gk.shouldShowWaitlist);
+}
+```
+
 ## API Reference
 
 ### useGrowthKit(config)
@@ -177,9 +307,11 @@ const success = await gk.joinWaitlist('john@example.com', {
 ```
 
 ##### acceptInvitation()
-Accept waitlist invitation (only available when status is 'invited').
+Accept a waitlist invitation (only available when status is 'invited').
 ```ts
-const success = await gk.acceptInvitation();
+if (gk.waitlistStatus === 'invited') {
+  const success = await gk.acceptInvitation();
+}
 ```
 
 ##### share(options?)
