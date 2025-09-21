@@ -28,7 +28,7 @@ export default function ActivityFeed({
 
   if (activities.length === 0) {
     return (
-      <div className={cn('text-center py-8 text-gray-500', className)}>
+      <div className={cn('text-center py-8 text-gray-500 dark:text-gray-400', className)}>
         No recent activity
       </div>
     );
@@ -42,7 +42,7 @@ export default function ActivityFeed({
             <div className="relative pb-8">
               {idx !== displayActivities.length - 1 && (
                 <span
-                  className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200"
+                  className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-gray-700"
                   aria-hidden="true"
                 />
               )}
@@ -50,7 +50,7 @@ export default function ActivityFeed({
                 <div>
                   <span
                     className={cn(
-                      'h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white',
+                      'h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-gray-800',
                       activity.color ? activity.color.replace('text-', 'bg-').replace('600', '100') : 'bg-gray-100'
                     )}
                   >
@@ -63,10 +63,10 @@ export default function ActivityFeed({
                 </div>
                 <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                   <div>
-                    <p className="text-sm text-gray-900">{activity.message}</p>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{activity.message}</p>
                   </div>
                   {showTimestamp && (
-                    <div className="whitespace-nowrap text-right text-sm text-gray-500">
+                    <div className="whitespace-nowrap text-right text-sm text-gray-500 dark:text-gray-400">
                       {formatDistanceToNow(activity.timestamp)}
                     </div>
                   )}

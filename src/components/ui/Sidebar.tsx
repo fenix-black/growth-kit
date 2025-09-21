@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { cn } from './utils';
+import ThemeSwitcher from './ThemeSwitcher';
 import { 
   Home, 
   Package, 
@@ -94,7 +95,7 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
       {/* Mobile menu toggle */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white shadow-md hover:bg-gray-50"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white dark:bg-gray-900 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700"
       >
         {mobileOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -110,21 +111,21 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
       {/* Sidebar */}
       <aside 
         className={cn(
-          'fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-40',
+          'fixed left-0 top-0 h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 z-40',
           collapsed ? 'w-20' : 'w-64',
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               {!collapsed && (
-                <h1 className="text-xl font-bold text-gray-900">GrowthKit</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">GrowthKit</h1>
               )}
               <button
                 onClick={() => setCollapsed(!collapsed)}
-                className="hidden lg:block p-1 rounded hover:bg-gray-100"
+                className="hidden lg:block p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
               </button>
@@ -133,15 +134,15 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
 
           {/* Search */}
           {!collapsed && (
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 dark:text-gray-400" size={18} />
                 <input
                   type="text"
                   placeholder="Search apps..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -152,28 +153,19 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
             <ul className="space-y-1">
               {navigationItems.map((item) => (
                 <li key={item.id}>
-                  {item.isSection ? (
-                    <div className={cn(
-                      'flex items-center px-3 py-2 text-sm font-semibold text-gray-500',
+                  <button
+                    onClick={() => handleNavigation(item.href)}
+                    className={cn(
+                      'w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors',
+                      item.active ? 
+                        'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 
+                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
                       collapsed && 'justify-center'
-                    )}>
-                      {collapsed ? <item.icon size={20} /> : item.label}
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => handleNavigation(item.href)}
-                      className={cn(
-                        'w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors',
-                        item.active ? 
-                          'bg-blue-50 text-blue-600' : 
-                          'text-gray-700 hover:bg-gray-100',
-                        collapsed && 'justify-center'
-                      )}
-                    >
-                      <item.icon size={20} />
-                      {!collapsed && <span className="ml-3">{item.label}</span>}
-                    </button>
-                  )}
+                    )}
+                  >
+                    <item.icon size={20} />
+                    {!collapsed && <span className="ml-3">{item.label}</span>}
+                  </button>
                 </li>
               ))}
               
@@ -182,10 +174,10 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
                 <>
                   <li className="mt-4">
                     <div className="flex items-center justify-between px-3 py-2">
-                      <span className="text-xs font-semibold text-gray-500 uppercase">Your Apps</span>
+                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Your Apps</span>
                       <button
                         onClick={onCreateApp}
-                        className="p-1 rounded hover:bg-gray-100"
+                        className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                       >
                         <Plus size={16} />
                       </button>
@@ -198,8 +190,8 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
                         className={cn(
                           'w-full flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors',
                           currentAppId === app.id ? 
-                            'bg-blue-50 text-blue-600' : 
-                            'text-gray-700 hover:bg-gray-100'
+                            'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 
+                            'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                         )}
                       >
                         <div className="flex items-center">
@@ -218,11 +210,14 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-3">
+              <ThemeSwitcher />
+            </div>
             <button
               onClick={onLogout}
               className={cn(
-                'w-full flex items-center px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 transition-colors',
+                'w-full flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors',
                 collapsed && 'justify-center'
               )}
             >

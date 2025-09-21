@@ -423,7 +423,7 @@ export default function AnalyticsDashboard() {
                     outerRadius={120}
                     fill="#8884d8"
                     dataKey="totalRevenue"
-                    label={(entry) => `${entry.action}: ${formatCurrency(entry.totalRevenue)}`}
+                    label={(entry: any) => `${entry.action}: ${formatCurrency(entry.totalRevenue as number)}`}
                   >
                     {usdMetrics.byAction.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />

@@ -92,7 +92,9 @@ export default function DashboardOverview() {
     totalReferrals: 0,
     totalLeads: 0,
     totalWaitlist: 0,
-    totalRevenue: 0,
+    totalUsdSpent: 0,
+    totalCreditsIssued: 0,
+    totalCreditsConsumed: 0,
     growthRate: 0,
     conversionRate: 0
   });

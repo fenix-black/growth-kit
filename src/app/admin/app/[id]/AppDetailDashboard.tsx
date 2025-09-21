@@ -95,8 +95,23 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
       
       if (response.ok) {
         const data = await response.json();
-        setApp(data.data.app);
-        setEditedApp(data.data.app);
+        const appData = data.data.app;
+        setApp(appData);
+        // Ensure all fields have default values to prevent uncontrolled input errors
+        setEditedApp({
+          ...appData,
+          name: appData.name || '',
+          domain: appData.domain || '',
+          redirectUrl: appData.redirectUrl || '',
+          invitationQuota: appData.invitationQuota ?? 10,
+          invitationCronTime: appData.invitationCronTime || '12:00',
+          corsOrigins: appData.corsOrigins || [],
+          policyJson: appData.policyJson || {},
+          isActive: appData.isActive ?? true,
+          waitlistEnabled: appData.waitlistEnabled ?? false,
+          autoApproveWaitlist: appData.autoApproveWaitlist ?? false,
+          trackUsdValue: appData.trackUsdValue ?? false,
+        });
       } else {
         router.push('/admin/apps');
       }
@@ -298,7 +313,21 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                       icon={<X size={20} />}
                       onClick={() => {
                         setIsEditing(false);
-                        setEditedApp(app);
+                        // Reset to original values with defaults
+                        setEditedApp({
+                          ...app,
+                          name: app?.name || '',
+                          domain: app?.domain || '',
+                          redirectUrl: app?.redirectUrl || '',
+                          invitationQuota: app?.invitationQuota ?? 10,
+                          invitationCronTime: app?.invitationCronTime || '12:00',
+                          corsOrigins: app?.corsOrigins || [],
+                          policyJson: app?.policyJson || {},
+                          isActive: app?.isActive ?? true,
+                          waitlistEnabled: app?.waitlistEnabled ?? false,
+                          autoApproveWaitlist: app?.autoApproveWaitlist ?? false,
+                          trackUsdValue: app?.trackUsdValue ?? false,
+                        });
                       }}
                     >
                       Cancel
@@ -308,7 +337,24 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                   <Button
                     variant="primary"
                     icon={<Edit2 size={20} />}
-                    onClick={() => setIsEditing(true)}
+                    onClick={() => {
+                      // Ensure all fields have default values when entering edit mode
+                      setEditedApp({
+                        ...app,
+                        name: app.name || '',
+                        domain: app.domain || '',
+                        redirectUrl: app.redirectUrl || '',
+                        invitationQuota: app.invitationQuota ?? 10,
+                        invitationCronTime: app.invitationCronTime || '12:00',
+                        corsOrigins: app.corsOrigins || [],
+                        policyJson: app.policyJson || {},
+                        isActive: app.isActive ?? true,
+                        waitlistEnabled: app.waitlistEnabled ?? false,
+                        autoApproveWaitlist: app.autoApproveWaitlist ?? false,
+                        trackUsdValue: app.trackUsdValue ?? false,
+                      });
+                      setIsEditing(true);
+                    }}
                   >
                     Edit Settings
                   </Button>
@@ -420,7 +466,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">App Name</label>
                 <input
                   type="text"
-                  value={isEditing ? editedApp.name : app.name}
+                  value={isEditing ? (editedApp.name || '') : (app.name || '')}
                   onChange={(e) => setEditedApp({ ...editedApp, name: e.target.value })}
                   disabled={!isEditing}
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-50"
@@ -430,7 +476,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Domain</label>
                 <input
                   type="text"
-                  value={isEditing ? editedApp.domain : app.domain}
+                  value={isEditing ? (editedApp.domain || '') : (app.domain || '')}
                   onChange={(e) => setEditedApp({ ...editedApp, domain: e.target.value })}
                   disabled={!isEditing}
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-50"
@@ -440,7 +486,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Redirect URL</label>
                 <input
                   type="url"
-                  value={isEditing ? editedApp.redirectUrl : app.redirectUrl}
+                  value={isEditing ? (editedApp.redirectUrl || '') : (app.redirectUrl || '')}
                   onChange={(e) => setEditedApp({ ...editedApp, redirectUrl: e.target.value })}
                   disabled={!isEditing}
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-50"
@@ -527,7 +573,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Daily Invitation Quota</label>
                     <input
                       type="number"
-                      value={isEditing ? editedApp.invitationQuota : app.invitationQuota}
+                      value={isEditing ? (editedApp.invitationQuota ?? 10) : (app.invitationQuota ?? 10)}
                       onChange={(e) => setEditedApp({ ...editedApp, invitationQuota: parseInt(e.target.value) || 0 })}
                       disabled={!isEditing}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-50"
@@ -537,7 +583,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Invitation Time</label>
                     <input
                       type="time"
-                      value={isEditing ? editedApp.invitationCronTime : app.invitationCronTime}
+                      value={isEditing ? (editedApp.invitationCronTime || '12:00') : (app.invitationCronTime || '12:00')}
                       onChange={(e) => setEditedApp({ ...editedApp, invitationCronTime: e.target.value })}
                       disabled={!isEditing}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-50"

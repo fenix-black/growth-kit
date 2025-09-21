@@ -28,19 +28,19 @@ export default function PageHeader({
       {/* Breadcrumbs */}
       {breadcrumbs && breadcrumbs.length > 0 && (
         <nav className="flex mb-4" aria-label="Breadcrumb">
-          <ol className="inline-flex items-center space-x-1 text-sm text-gray-500">
+          <ol className="inline-flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
             {breadcrumbs.map((item, index) => (
               <li key={index} className="inline-flex items-center">
                 {index > 0 && <ChevronRight className="mx-1 h-4 w-4" />}
                 {item.href || item.onClick ? (
                   <button
                     onClick={item.onClick}
-                    className="hover:text-gray-700 transition-colors"
+                    className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                   >
                     {item.label}
                   </button>
                 ) : (
-                  <span className={index === breadcrumbs.length - 1 ? 'text-gray-900 font-medium' : ''}>
+                  <span className={index === breadcrumbs.length - 1 ? 'text-gray-900 dark:text-white font-medium' : ''}>
                     {item.label}
                   </span>
                 )}
@@ -53,9 +53,9 @@ export default function PageHeader({
       {/* Header content */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{title}</h1>
           {description && (
-            <p className="mt-2 text-sm text-gray-600">{description}</p>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{description}</p>
           )}
         </div>
         

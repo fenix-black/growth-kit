@@ -3,6 +3,7 @@
 import React from 'react';
 import { cn } from './utils';
 import Sidebar from './Sidebar';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -28,8 +29,10 @@ export default function DashboardLayout({
   onLogout,
   className
 }: DashboardLayoutProps) {
+  useKeyboardShortcuts();
+  
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar 
         apps={apps}
         currentAppId={currentAppId}
