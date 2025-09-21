@@ -1,0 +1,247 @@
+# Gemini API Response Schemas Guide
+
+A practical guide for using Google's Gemini models with structured JSON outputs via `responseSchema`.
+
+## Quick Setup
+
+```javascript
+import { GoogleGenAI, Type } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+```
+
+## Core Concept: Response Schemas
+
+Response schemas force Gemini to return structured JSON instead of free text. This guarantees predictable outputs you can parse without regex or string manipulation.
+
+## The Golden Rules
+
+### 1. Always Use the Type Enum
+• Import `Type` from `@google/genai`
+• Never use raw strings like `"string"` or `"object"`
+• Always use `Type.STRING`, `Type.OBJECT`, `Type.ARRAY`, etc.
+
+```javascript
+// ❌ Wrong
+{ type: "string" }
+
+// ✅ Correct
+{ type: Type.STRING }
+```
+
+### 2. Structure Your Schema Like Russian Dolls
+
+Each level needs:
+• `type`: What kind of data (using Type enum)
+• `properties`: Object fields (for objects)
+• `items`: Array element structure (for arrays)
+• `description`: Helps Gemini understand what you want
+
+```javascript
+const schema = {
+  type: Type.OBJECT,
+  properties: {
+    results: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          name: { type: Type.STRING, description: "Person's name" },
+          age: { type: Type.NUMBER, description: "Age in years" }
+        }
+      }
+    }
+  }
+}
+```
+
+### 3. Set Response MIME Type to JSON
+
+Always pair `responseSchema` with `responseMimeType: "application/json"`:
+
+```javascript
+config: {
+  responseMimeType: "application/json",
+  responseSchema: yourSchema
+}
+```
+
+## Real-World Example: Holiday Data
+
+Here's a pattern that works reliably:
+
+```javascript
+const HOLIDAY_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    holidays: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          name_en: { 
+            type: Type.STRING, 
+            description: 'Holiday name in English' 
+          },
+          name_es: { 
+            type: Type.STRING, 
+            description: 'Holiday name in Spanish' 
+          },
+          activities: { 
+            type: Type.STRING, 
+            description: 'Traditional activities (e.g., "dancing, fireworks")' 
+          },
+          isPopular: { 
+            type: Type.BOOLEAN, 
+            description: 'Whether widely celebrated' 
+          }
+        }
+      }
+    }
+  }
+};
+
+// Using it:
+const response = await ai.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: "List popular holidays in Mexico",
+  config: {
+    responseMimeType: "application/json",
+    responseSchema: HOLIDAY_SCHEMA
+  }
+});
+
+const data = JSON.parse(response.text);
+// data.holidays is guaranteed to be an array with the exact structure
+```
+
+## Model Selection Tips
+
+• **gemini-2.5-flash**: Fast, cheap, great for structured data extraction
+• **gemini-2.5-pro**: More complex reasoning, better for nuanced schemas
+• **gemini-2.5-flash-image-preview**: When processing images alongside schemas
+
+## Common Patterns That Work
+
+### Pattern 1: Multi-Language Fields
+```javascript
+name_en: { type: Type.STRING, description: 'English version' },
+name_es: { type: Type.STRING, description: 'Spanish version' }
+```
+
+### Pattern 2: Nested Objects
+```javascript
+details: {
+  type: Type.OBJECT,
+  properties: {
+    location: { type: Type.STRING },
+    timeOfDay: { type: Type.STRING }
+  }
+}
+```
+
+### Pattern 3: Required Fields
+```javascript
+// Add at object level, not property level
+required: ["name", "age", "email"]
+```
+
+### Pattern 4: Complex Descriptions Guide Better Output
+```javascript
+outfit: { 
+  type: Type.STRING, 
+  description: 'EXACT clothing including colors, styles, patterns. Be specific (e.g., "red sari with gold trim")' 
+}
+```
+
+## Error Handling
+
+Always wrap in try-catch and parse safely:
+
+```javascript
+try {
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: schema
+    }
+  });
+  
+  const jsonStr = response.text?.trim();
+  if (!jsonStr) {
+    throw new Error("Empty response from Gemini");
+  }
+  
+  return JSON.parse(jsonStr);
+} catch (error) {
+  console.error("Gemini API error:", error);
+  throw new Error("Failed to get structured data");
+}
+```
+
+## Pro Tips
+
+• **Descriptions matter**: The more specific your descriptions, the better the output
+• **Test with simple schemas first**: Start basic, add complexity gradually  
+• **Cache responses**: Gemini calls cost money - cache when possible
+• **Validate critical fields**: Even with schemas, double-check important data
+• **Use arrays for lists**: Even for single items, arrays are more flexible than objects
+
+## Common Gotchas
+
+• Forgetting `Type.` prefix (causes silent failures)
+• Missing `responseMimeType: "application/json"`
+• Not handling empty/null responses
+• Over-nesting schemas (keep it under 3-4 levels deep)
+• Assuming field order (JSON objects are unordered)
+
+## Complete Working Example
+
+```javascript
+import { GoogleGenAI, Type } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+async function getStructuredData() {
+  const schema = {
+    type: Type.OBJECT,
+    properties: {
+      analysis: {
+        type: Type.OBJECT,
+        properties: {
+          sentiment: { 
+            type: Type.STRING, 
+            description: 'positive, negative, or neutral' 
+          },
+          confidence: { 
+            type: Type.NUMBER, 
+            description: 'Confidence score 0-100' 
+          },
+          keywords: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING }
+          }
+        }
+      }
+    }
+  };
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: "Analyze this: The product is amazing but shipping was slow",
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: schema
+    }
+  });
+
+  return JSON.parse(response.text);
+  // Returns: { analysis: { sentiment: "mixed", confidence: 85, keywords: ["product", "shipping"] } }
+}
+```
+
+## Remember
+
+Response schemas turn Gemini from a chatbot into a reliable data API. Use them whenever you need structured output instead of conversational text.
