@@ -35,6 +35,16 @@ model App {
   redirectUrl     String    // URL to redirect after referral cookie set
   policyJson      Json      // JSON policy configuration
   emailTemplates  Json?     // JSON email template configurations
+  
+  // Waitlist configuration
+  waitlistEnabled        Boolean   @default(false)
+  waitlistMessage        String?   // Custom message to show on waitlist form
+  autoInviteEnabled      Boolean   @default(false)
+  dailyInviteQuota       Int       @default(10)
+  inviteTime             String    @default("09:00") // Time to run daily invitations (HH:MM format)
+  masterReferralCode     String?   @unique // Master code for invitation emails
+  masterReferralCredits  Int       @default(10) // Credits to grant for master referral
+  
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -194,6 +204,12 @@ model Waitlist {
   position     Int?     // Queue position
   invitedAt    DateTime?
   acceptedAt   DateTime?
+  
+  // Invitation tracking
+  invitedVia       String?   // "manual", "auto", "master_referral"
+  invitationEmail  String?   // Email address the invitation was sent to
+  convertedAt      DateTime? // When they converted from invitation to active user
+  
   metadata     Json?    // Additional waitlist data
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

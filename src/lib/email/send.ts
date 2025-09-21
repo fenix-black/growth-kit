@@ -25,9 +25,9 @@ export async function sendAppEmail(options: SendAppEmailOptions) {
   
   // Ensure app name and URL are in the data
   const templateData = {
+    ...data,
     appName: app.name,
     appUrl: app.domain,
-    ...data,
   };
   
   // Get the template (custom or default)

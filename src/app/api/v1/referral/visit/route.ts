@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
           appId: authContext.app.id,
           referrerId: referrerFingerprint.id,
           claimToken: claimToken,
-          claimExpiresAt: new Date(claimPayload.exp * 1000),
+          claimExpiresAt: new Date(claimPayload.expiresAt),
           visitCount: 1,
           lastVisitAt: new Date(),
         },

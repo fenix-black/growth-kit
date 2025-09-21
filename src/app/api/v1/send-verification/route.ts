@@ -85,9 +85,8 @@ export async function POST(request: NextRequest) {
     // Create or update lead
     const lead = await prisma.lead.upsert({
       where: {
-        appId_fingerprintId_email: {
+        appId_email: {
           appId: authContext.app.id,
-          fingerprintId: fingerprintRecord.id,
           email: email.toLowerCase(),
         },
       },
@@ -99,7 +98,6 @@ export async function POST(request: NextRequest) {
         verifyToken,
         verifyExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
         emailVerified: false,
-        source: 'api',
       },
       update: {
         name: name || undefined,

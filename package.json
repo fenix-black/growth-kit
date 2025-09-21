@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
+    "@react-email/render": "^1.2.3",
     "@types/bcrypt": "^6.0.0",
     "@upstash/ratelimit": "^2.0.6",
     "@upstash/redis": "^1.35.4",

@@ -40,7 +40,40 @@ export async function POST(request: NextRequest) {
 
     const code = referralCode.toUpperCase();
 
-    // Find fingerprint with this referral code
+    // Check if this is a master referral code for the app
+    if (authContext.app.masterReferralCode === code) {
+      // This is a master referral code - mint special claim token
+      const claimToken = mintClaim(code, undefined, 7 * 24 * 60); // 7 days TTL for master codes
+      
+      // Log event
+      await prisma.eventLog.create({
+        data: {
+          appId: authContext.app.id,
+          event: 'master_referral.exchange',
+          entityType: 'app',
+          entityId: authContext.app.id,
+          metadata: { 
+            referralCode: code, 
+            type: 'master',
+            credits: authContext.app.masterReferralCredits,
+          },
+          ipAddress: clientIp,
+          userAgent: request.headers.get('user-agent'),
+        },
+      });
+
+      // Return master referral claim
+      const response = successResponse({
+        claim: claimToken,
+        type: 'master',
+        credits: authContext.app.masterReferralCredits,
+        expiresIn: 7 * 24 * 60 * 60, // 7 days in seconds
+      });
+
+      return withCorsHeaders(response, origin, authContext.app.corsOrigins);
+    }
+
+    // Find fingerprint with this referral code (regular referral)
     const referrer = await prisma.fingerprint.findUnique({
       where: { referralCode: code },
     });

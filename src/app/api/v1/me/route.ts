@@ -109,34 +109,105 @@ export async function POST(request: NextRequest) {
 
         // Only process if they haven't been referred before
         if (!existingReferral) {
-          // Find the referrer by their referral code
-          const referrerFingerprint = await prisma.fingerprint.findUnique({
-            where: { 
-              referralCode: claimPayload.referralCode 
-            },
-          });
-
-          if (referrerFingerprint && referrerFingerprint.appId === authContext.app.id) {
-            // Prevent self-referral
-            if (referrerFingerprint.id !== fingerprintRecord.id) {
-              const policy = authContext.app.policyJson as any;
-              const referralCredits = policy?.referralCredits || 5;
-              const referredCredits = policy?.referredCredits || 3;
-
-              // Check daily referral cap for the referrer
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              
-              const todaysReferrals = await prisma.referral.count({
-                where: {
-                  referrerId: referrerFingerprint.id,
-                  claimedAt: { gte: today },
+          const app = authContext.app as any; // Temporary cast until migration is run
+          // Check if this is a master referral code
+          if (app.masterReferralCode === claimPayload.referralCode) {
+            // This is a master referral - award master credits without a referrer
+            await prisma.credit.create({
+              data: {
+                fingerprintId: fingerprintRecord.id,
+                amount: app.masterReferralCredits || 10,
+                reason: 'master_referral',
+                metadata: { 
+                  masterCode: claimPayload.referralCode,
+                  type: 'invitation',
                 },
-              });
+              },
+            });
 
-              const dailyCap = policy?.dailyReferralCap || 10;
+            // If user has email, update their waitlist status to invited
+            const lead = await prisma.lead.findFirst({
+              where: {
+                appId: authContext.app.id,
+                fingerprintId: fingerprintRecord.id,
+                emailVerified: true,
+              },
+            });
+
+            if (lead) {
+              await prisma.waitlist.upsert({
+                where: {
+                  appId_email: {
+                    appId: authContext.app.id,
+                    email: lead.email!,
+                  },
+                },
+                create: {
+                  appId: authContext.app.id,
+                  email: lead.email!,
+                  status: 'INVITED',
+                  invitedAt: new Date(),
+                  ...({ invitedVia: 'master_referral' } as any), // Temporary cast until migration is run
+                } as any,
+                update: {
+                  status: 'INVITED',
+                  invitedAt: new Date(),
+                  ...({ invitedVia: 'master_referral' } as any), // Temporary cast until migration is run
+                } as any,
+              });
+            }
+
+            // Log event
+            await prisma.eventLog.create({
+              data: {
+                appId: authContext.app.id,
+                event: 'master_referral.claimed',
+                entityType: 'fingerprint',
+                entityId: fingerprintRecord.id,
+                metadata: { 
+                  masterCode: claimPayload.referralCode,
+                  credits: app.masterReferralCredits,
+                },
+              },
+            });
+
+            // Re-fetch fingerprint to include new credits
+            fingerprintRecord = await prisma.fingerprint.findUnique({
+              where: { id: fingerprintRecord.id },
+              include: {
+                credits: true,
+                usage: true,
+              },
+            });
+          } else {
+            // Regular referral - find the referrer by their referral code
+            const referrerFingerprint = await prisma.fingerprint.findUnique({
+              where: { 
+                referralCode: claimPayload.referralCode 
+              },
+            });
+
+            if (referrerFingerprint && referrerFingerprint.appId === authContext.app.id) {
+              // Prevent self-referral
+              if (referrerFingerprint.id !== fingerprintRecord.id) {
+                const policy = authContext.app.policyJson as any;
+                const referralCredits = policy?.referralCredits || 5;
+                const referredCredits = policy?.referredCredits || 3;
+
+                // Check daily referral cap for the referrer
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
               
-              if (todaysReferrals < dailyCap) {
+                const todaysReferrals = await prisma.referral.count({
+                  where: {
+                    referrerId: referrerFingerprint.id,
+                    claimedAt: { gte: today },
+                  },
+                });
+
+                const dailyCap = policy?.dailyReferralCap || 10;
+                
+                if (todaysReferrals < dailyCap) {
                 // Create referral record
                 const referral = await prisma.referral.create({
                   data: {
@@ -199,6 +270,7 @@ export async function POST(request: NextRequest) {
                     usage: true,
                   },
                 });
+                }
               }
             }
           }
@@ -223,6 +295,64 @@ export async function POST(request: NextRequest) {
     // Get policy from app configuration
     const policy = authContext.app.policyJson as any;
 
+    // Check waitlist status if enabled for this app
+    let waitlistData = null;
+    const appWithWaitlist = authContext.app as any; // Temporary cast until migration is run
+    if (appWithWaitlist.waitlistEnabled) {
+      // Check if user has an email registered
+      const lead = await prisma.lead.findFirst({
+        where: {
+          appId: authContext.app.id,
+          fingerprintId: fingerprintRecord.id,
+          emailVerified: true,
+        },
+        select: {
+          email: true,
+        },
+      });
+
+      if (lead) {
+        // Check waitlist status for this email
+        const waitlistEntry = await prisma.waitlist.findUnique({
+          where: {
+            appId_email: {
+              appId: authContext.app.id,
+              email: lead.email!,
+            },
+          },
+        });
+
+        if (waitlistEntry) {
+          waitlistData = {
+            enabled: true,
+            status: waitlistEntry.status.toLowerCase(), // 'waiting', 'invited', 'accepted'
+            position: waitlistEntry.position,
+            invitedAt: waitlistEntry.invitedAt?.toISOString() || null,
+            acceptedAt: waitlistEntry.acceptedAt?.toISOString() || null,
+            email: lead.email,
+          };
+        } else {
+          // No waitlist entry yet
+          waitlistData = {
+            enabled: true,
+            status: 'none',
+            position: null,
+            requiresWaitlist: true,
+            message: appWithWaitlist.waitlistMessage || 'Join our exclusive waitlist for early access',
+          };
+        }
+      } else {
+        // No email registered yet
+        waitlistData = {
+          enabled: true,
+          status: 'none',
+          position: null,
+          requiresWaitlist: true,
+          message: appWithWaitlist.waitlistMessage || 'Join our exclusive waitlist for early access',
+        };
+      }
+    }
+
     // Build response
     const response = successResponse({
       fingerprint: fingerprintRecord.fingerprint,
@@ -240,6 +370,7 @@ export async function POST(request: NextRequest) {
           default: { creditsRequired: 1 }
         }
       },
+      ...(waitlistData && { waitlist: waitlistData }),
     });
 
     // Apply CORS headers

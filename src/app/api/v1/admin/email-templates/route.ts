@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { Prisma } from '@prisma/client';
 import { verifyServiceKey } from '@/lib/security/auth';
-import { corsMiddleware } from '@/lib/middleware/cors';
-import { errors, success } from '@/lib/utils/response';
+import { withCorsHeaders } from '@/lib/middleware/cors';
+import { errors, successResponse } from '@/lib/utils/response';
 import { getDefaultTemplates, validateTemplate } from '@/lib/email/template-engine';
 import { EmailTemplateConfig, StoredEmailTemplate } from '@/lib/email/templates';
 
@@ -10,9 +11,9 @@ import { EmailTemplateConfig, StoredEmailTemplate } from '@/lib/email/templates'
 export async function GET(request: NextRequest) {
   try {
     // Service key authentication
-    const serviceAuth = verifyServiceKey(request);
-    if (!serviceAuth.success) {
-      return errors.unauthorized(serviceAuth.error);
+    const isAuthorized = verifyServiceKey(request.headers);
+    if (!isAuthorized) {
+      return errors.unauthorized();
     }
 
     const url = new URL(request.url);
@@ -32,20 +33,18 @@ export async function GET(request: NextRequest) {
     });
 
     if (!app) {
-      return errors.notFound('App not found');
+      return errors.notFound();
     }
 
     // Get custom templates or return defaults
     const templates = (app.emailTemplates as EmailTemplateConfig) || getDefaultTemplates();
 
-    return corsMiddleware(
-      success({
-        appId: app.id,
-        appName: app.name,
-        templates,
-        defaults: getDefaultTemplates(),
-      })
-    );
+    return successResponse({
+      appId: app.id,
+      appName: app.name,
+      templates,
+      defaults: getDefaultTemplates(),
+    });
   } catch (error: any) {
     console.error('Failed to get email templates:', error);
     return errors.serverError(error.message);
@@ -56,9 +55,9 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     // Service key authentication
-    const serviceAuth = verifyServiceKey(request);
-    if (!serviceAuth.success) {
-      return errors.unauthorized(serviceAuth.error);
+    const isAuthorized = verifyServiceKey(request.headers);
+    if (!isAuthorized) {
+      return errors.unauthorized();
     }
 
     const body = await request.json();
@@ -100,13 +99,11 @@ export async function PUT(request: NextRequest) {
       }
     });
 
-    return corsMiddleware(
-      success({
-        message: 'Email templates updated successfully',
-        appId: app.id,
-        templates: app.emailTemplates,
-      })
-    );
+    return successResponse({
+      message: 'Email templates updated successfully',
+      appId: app.id,
+      templates: app.emailTemplates,
+    });
   } catch (error: any) {
     console.error('Failed to update email templates:', error);
     return errors.serverError(error.message);
@@ -117,9 +114,9 @@ export async function PUT(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Service key authentication
-    const serviceAuth = verifyServiceKey(request);
-    if (!serviceAuth.success) {
-      return errors.unauthorized(serviceAuth.error);
+    const isAuthorized = verifyServiceKey(request.headers);
+    if (!isAuthorized) {
+      return errors.unauthorized();
     }
 
     const body = await request.json();
@@ -137,12 +134,10 @@ export async function POST(request: NextRequest) {
     const { processStoredTemplate } = await import('@/lib/email/template-engine');
     const processed = processStoredTemplate(template, sampleData);
 
-    return corsMiddleware(
-      success({
-        preview: processed,
-        sampleData,
-      })
-    );
+    return successResponse({
+      preview: processed,
+      sampleData,
+    });
   } catch (error: any) {
     console.error('Failed to preview template:', error);
     return errors.serverError(error.message);
@@ -153,9 +148,9 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Service key authentication
-    const serviceAuth = verifyServiceKey(request);
-    if (!serviceAuth.success) {
-      return errors.unauthorized(serviceAuth.error);
+    const isAuthorized = verifyServiceKey(request.headers);
+    if (!isAuthorized) {
+      return errors.unauthorized();
     }
 
     const url = new URL(request.url);
@@ -169,7 +164,7 @@ export async function DELETE(request: NextRequest) {
     const app = await prisma.app.update({
       where: { id: appId },
       data: {
-        emailTemplates: null,
+        emailTemplates: Prisma.JsonNull,
       },
       select: {
         id: true,
@@ -177,13 +172,11 @@ export async function DELETE(request: NextRequest) {
       }
     });
 
-    return corsMiddleware(
-      success({
-        message: 'Email templates reset to defaults',
-        appId: app.id,
-        appName: app.name,
-      })
-    );
+    return successResponse({
+      message: 'Email templates reset to defaults',
+      appId: app.id,
+      appName: app.name,
+    });
   } catch (error: any) {
     console.error('Failed to reset email templates:', error);
     return errors.serverError(error.message);

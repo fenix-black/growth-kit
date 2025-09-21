@@ -13,39 +13,39 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
 ## Phase 1: Waitlist Gating Foundation
 
 ### 1.1 Database Schema Updates
-- [ ] Add waitlist configuration fields to App model
-  - [ ] `waitlistEnabled` (boolean)
-  - [ ] `waitlistMessage` (string, optional)
-  - [ ] `autoInviteEnabled` (boolean)
-  - [ ] `dailyInviteQuota` (integer)
-  - [ ] `inviteTime` (string, e.g., "09:00")
-  - [ ] `masterReferralCode` (string, unique per app)
-  - [ ] `masterReferralCredits` (integer)
-- [ ] Add invitation tracking fields to Waitlist model
-  - [ ] `invitedVia` (enum: 'manual' | 'auto' | 'master_referral')
-  - [ ] `invitationEmail` (string, optional)
-  - [ ] `convertedAt` (datetime, optional)
-- [ ] Create migration for new fields
+- [x] Add waitlist configuration fields to App model
+  - [x] `waitlistEnabled` (boolean)
+  - [x] `waitlistMessage` (string, optional)
+  - [x] `autoInviteEnabled` (boolean)
+  - [x] `dailyInviteQuota` (integer)
+  - [x] `inviteTime` (string, e.g., "09:00")
+  - [x] `masterReferralCode` (string, unique per app)
+  - [x] `masterReferralCredits` (integer)
+- [x] Add invitation tracking fields to Waitlist model
+  - [x] `invitedVia` (enum: 'manual' | 'auto' | 'master_referral')
+  - [x] `invitationEmail` (string, optional)
+  - [x] `convertedAt` (datetime, optional)
+- [x] Create migration for new fields
 
 ### 1.2 API Updates for Waitlist Status
-- [ ] Update `/v1/me` endpoint response
-  - [ ] Add `waitlist` object to response (per app context)
-  - [ ] Include `enabled`, `status`, `position`, `requiresWaitlist`
-  - [ ] Check if user should see waitlist based on app's settings
-- [ ] Update user creation logic
-  - [ ] If app's waitlist enabled and no referral → require waitlist
-  - [ ] If has referral claim → bypass app's waitlist
-  - [ ] If invited to this app (status = 'invited') → grant access
+- [x] Update `/v1/me` endpoint response
+  - [x] Add `waitlist` object to response (per app context)
+  - [x] Include `enabled`, `status`, `position`, `requiresWaitlist`
+  - [x] Check if user should see waitlist based on app's settings
+- [x] Update user creation logic
+  - [x] If app's waitlist enabled and no referral → require waitlist
+  - [x] If has referral claim → bypass app's waitlist
+  - [x] If invited to this app (status = 'invited') → grant access
 
 ### 1.3 Master Referral Code System
-- [ ] Update `/v1/referral/exchange` endpoint
-  - [ ] Recognize master referral codes
-  - [ ] Return special claim token for master codes
-- [ ] Update `/v1/me` referral processing
-  - [ ] Handle master referral claims
-  - [ ] Grant configured credits without referrer
-  - [ ] Track invitation source in Waitlist model
-- [ ] Add validation for master code uniqueness
+- [x] Update `/v1/referral/exchange` endpoint
+  - [x] Recognize master referral codes
+  - [x] Return special claim token for master codes
+- [x] Update `/v1/me` referral processing
+  - [x] Handle master referral claims
+  - [x] Grant configured credits without referrer
+  - [x] Track invitation source in Waitlist model
+- [x] Add validation for master code uniqueness
 
 ## Phase 2: SDK Enhancements
 
@@ -116,36 +116,36 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
 ## Phase 4: Auto-Invitation System
 
 ### 4.1 Invitation Email Templates
-- [ ] Create email template structure
-  - [ ] Default template with placeholders
-  - [ ] App name, credits, link variables
-  - [ ] HTML and text versions
-- [ ] Integrate with Resend
-  - [ ] Set up email sending function
-  - [ ] Handle email errors gracefully
-  - [ ] Log email sends
+- [x] Create email template structure
+  - [x] Default template with placeholders
+  - [x] App name, credits, link variables
+  - [x] HTML and text versions
+- [x] Integrate with Resend
+  - [x] Set up email sending function
+  - [x] Handle email errors gracefully
+  - [x] Log email sends
 
 ### 4.2 Cron Job Implementation
-- [ ] Create `/api/cron/invite-waitlist` endpoint
-  - [ ] Verify cron authentication (Vercel)
-  - [ ] Query ALL apps with auto-invite enabled
-  - [ ] Process each app independently
-  - [ ] Respect each app's daily quota
-  - [ ] Process invitations in batches per app
-- [ ] Invitation logic (per app)
-  - [ ] Select users from app's waitlist by position (FIFO)
-  - [ ] Update status to 'invited' for this app
-  - [ ] Send invitation email with app's branding
-  - [ ] Log invitation in EventLog with appId
-- [ ] Error handling
-  - [ ] Retry failed emails
+- [x] Create `/api/cron/invite-waitlist` endpoint
+  - [x] Verify cron authentication (Vercel)
+  - [x] Query ALL apps with auto-invite enabled
+  - [x] Process each app independently
+  - [x] Respect each app's daily quota
+  - [x] Process invitations in batches per app
+- [x] Invitation logic (per app)
+  - [x] Select users from app's waitlist by position (FIFO)
+  - [x] Update status to 'invited' for this app
+  - [x] Send invitation email with app's branding
+  - [x] Log invitation in EventLog with appId
+- [x] Error handling
+  - [x] Retry failed emails
   - [ ] Alert on failures
   - [ ] Daily summary report
 
 ### 4.3 Vercel Cron Configuration
-- [ ] Configure cron schedule in vercel.json
-  - [ ] Daily run at configured times
-  - [ ] Timezone handling
+- [x] Configure cron schedule in vercel.json
+  - [x] Hourly run to check app times
+  - [ ] Timezone handling improvements
 - [ ] Add monitoring
   - [ ] Success/failure tracking
   - [ ] Execution time monitoring

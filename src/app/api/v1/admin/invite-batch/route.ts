@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!app) {
-      return errors.notFound('App not found');
+      return errors.notFound();
     }
 
     // Get next batch of waitlist entries to invite
