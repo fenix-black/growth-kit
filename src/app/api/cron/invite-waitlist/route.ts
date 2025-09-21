@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { sendInvitationEmail } from '@/lib/email/send';
 import { errors, successResponse } from '@/lib/utils/response';
+import { generateInvitationCode, calculateCodeExpiration } from '@/lib/utils/invitationCode';
 import crypto from 'crypto';
 
 // This cron job should be called daily at a scheduled time (e.g., 9 AM)
@@ -53,8 +54,35 @@ export async function GET(request: NextRequest) {
 
         for (const waitlistEntry of waitingUsers) {
           try {
-            // Generate invitation link with master referral code
-            const invitationLink = `${app.domain}/r/${app.masterReferralCode}`;
+            // Generate unique invitation code for this user
+            let invitationCode: string;
+            let codeIsUnique = false;
+            let attempts = 0;
+            
+            // Try to generate a unique code (handle rare collisions)
+            while (!codeIsUnique && attempts < 5) {
+              invitationCode = generateInvitationCode();
+              const existingCode = await prisma.waitlist.findFirst({
+                where: {
+                  appId: app.id,
+                  invitationCode: invitationCode,
+                },
+              });
+              if (!existingCode) {
+                codeIsUnique = true;
+              }
+              attempts++;
+            }
+            
+            if (!codeIsUnique) {
+              throw new Error('Failed to generate unique invitation code');
+            }
+            
+            // Calculate expiration date (7 days from now)
+            const codeExpiresAt = calculateCodeExpiration(7);
+            
+            // Generate invitation link with unique code
+            const invitationLink = `${app.domain}/invite?code=${invitationCode!}`;
             
             // Send invitation email
             const emailResult = await sendInvitationEmail(
@@ -62,14 +90,16 @@ export async function GET(request: NextRequest) {
               waitlistEntry.email,
               {
                 invitationLink,
+                invitationCode: invitationCode!,
                 masterCode: app.masterReferralCode!,
                 credits: app.masterReferralCredits,
-                referralLink: invitationLink, // Same as invitation link for master codes
+                referralLink: `${app.domain}/r/${app.masterReferralCode}`,
+                expiresAt: codeExpiresAt,
               }
             );
 
             if (emailResult.success) {
-              // Update waitlist entry to invited
+              // Update waitlist entry to invited with invitation code
               await prisma.waitlist.update({
                 where: { id: waitlistEntry.id },
                 data: {
@@ -77,6 +107,8 @@ export async function GET(request: NextRequest) {
                   invitedAt: new Date(),
                   invitedVia: 'auto',
                   invitationEmail: waitlistEntry.email,
+                  invitationCode: invitationCode!,
+                  codeExpiresAt,
                 },
               });
 
@@ -90,7 +122,9 @@ export async function GET(request: NextRequest) {
                   metadata: {
                     email: waitlistEntry.email,
                     position: waitlistEntry.position,
+                    invitationCode: invitationCode!,
                     masterCode: app.masterReferralCode,
+                    expiresAt: codeExpiresAt,
                   },
                 },
               });
@@ -186,8 +220,35 @@ export async function POST(request: NextRequest) {
 
     for (const waitlistEntry of waitingUsers) {
       try {
-        // Generate invitation link
-        const invitationLink = `${app.domain}/r/${app.masterReferralCode}`;
+        // Generate unique invitation code for this user
+        let invitationCode: string;
+        let codeIsUnique = false;
+        let attempts = 0;
+        
+        // Try to generate a unique code (handle rare collisions)
+        while (!codeIsUnique && attempts < 5) {
+          invitationCode = generateInvitationCode();
+          const existingCode = await prisma.waitlist.findFirst({
+            where: {
+              appId: app.id,
+              invitationCode: invitationCode,
+            },
+          });
+          if (!existingCode) {
+            codeIsUnique = true;
+          }
+          attempts++;
+        }
+        
+        if (!codeIsUnique) {
+          throw new Error('Failed to generate unique invitation code');
+        }
+        
+        // Calculate expiration date (7 days from now)
+        const codeExpiresAt = calculateCodeExpiration(7);
+        
+        // Generate invitation link with unique code
+        const invitationLink = `${app.domain}/invite?code=${invitationCode!}`;
         
         // Send invitation email
         const emailResult = await sendInvitationEmail(
@@ -195,14 +256,16 @@ export async function POST(request: NextRequest) {
           waitlistEntry.email,
           {
             invitationLink,
+            invitationCode: invitationCode!,
             masterCode: app.masterReferralCode,
             credits: app.masterReferralCredits,
-            referralLink: invitationLink,
+            referralLink: `${app.domain}/r/${app.masterReferralCode}`,
+            expiresAt: codeExpiresAt,
           }
         );
 
         if (emailResult.success) {
-          // Update waitlist entry
+          // Update waitlist entry with invitation code
           await prisma.waitlist.update({
             where: { id: waitlistEntry.id },
             data: {
@@ -210,6 +273,8 @@ export async function POST(request: NextRequest) {
               invitedAt: new Date(),
               invitedVia: 'manual',
               invitationEmail: waitlistEntry.email,
+              invitationCode: invitationCode!,
+              codeExpiresAt,
             },
           });
 
@@ -223,7 +288,9 @@ export async function POST(request: NextRequest) {
               metadata: {
                 email: waitlistEntry.email,
                 position: waitlistEntry.position,
+                invitationCode: invitationCode!,
                 masterCode: app.masterReferralCode,
+                expiresAt: codeExpiresAt,
               },
             },
           });

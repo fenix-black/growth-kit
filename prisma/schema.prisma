@@ -45,6 +45,9 @@ model App {
   masterReferralCode     String?   @unique // Master code for invitation emails
   masterReferralCredits  Int       @default(10) // Credits to grant for master referral
   
+  // USD tracking configuration
+  trackUsdValue          Boolean   @default(false) // Whether to track USD values for this app
+  
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -131,6 +134,7 @@ model Usage {
   id            String      @id @default(cuid())
   fingerprintId String
   action        String      // Action identifier from app
+  usdValue      Decimal?    @db.Decimal(10, 2) // USD value of this usage (nullable for backward compatibility)
   metadata      Json?       // Additional usage metadata
   createdAt     DateTime    @default(now())
 
@@ -139,6 +143,7 @@ model Usage {
 
   @@index([fingerprintId])
   @@index([action])
+  @@index([usdValue])
   @@index([createdAt])
   @@map("usage")
 }
@@ -206,9 +211,17 @@ model Waitlist {
   acceptedAt   DateTime?
   
   // Invitation tracking
-  invitedVia       String?   // "manual", "auto", "master_referral"
+  invitedVia       String?   // "manual", "auto", "master_referral", "invitation_code"
   invitationEmail  String?   // Email address the invitation was sent to
   convertedAt      DateTime? // When they converted from invitation to active user
+  
+  // Unique invitation code system
+  invitationCode   String?   // Unique invitation code (e.g., "INV-X8K2M9")
+  fingerprintId    String?   // ID of fingerprint that redeemed the code
+  codeUsedAt       DateTime? // When the code was used
+  codeExpiresAt    DateTime? // When the code expires
+  maxUses          Int       @default(1) // Maximum number of times code can be used
+  useCount         Int       @default(0) // Current use count
   
   metadata     Json?    // Additional waitlist data
   createdAt    DateTime @default(now())
@@ -218,9 +231,12 @@ model Waitlist {
   app App @relation(fields: [appId], references: [id], onDelete: Cascade)
 
   @@unique([appId, email])
+  @@unique([appId, invitationCode])
   @@index([appId])
   @@index([status])
   @@index([position])
+  @@index([invitationCode])
+  @@index([fingerprintId])
   @@map("waitlist")
 }
 

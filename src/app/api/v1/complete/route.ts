@@ -32,10 +32,24 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { fingerprint, action = 'default', claim } = body;
+    const { fingerprint, action = 'default', claim, usdValue } = body;
 
     if (!fingerprint || !isValidFingerprint(fingerprint)) {
       return errors.badRequest('Invalid or missing fingerprint');
+    }
+
+    // Validate USD value if provided
+    let validatedUsdValue: number | undefined;
+    if (usdValue !== undefined && authContext.app.trackUsdValue) {
+      const parsedValue = parseFloat(usdValue);
+      if (isNaN(parsedValue) || parsedValue < 0) {
+        return errors.badRequest('Invalid USD value: must be a positive number');
+      }
+      // Round to 2 decimal places
+      validatedUsdValue = Math.round(parsedValue * 100) / 100;
+      if (validatedUsdValue > 999999.99) {
+        return errors.badRequest('USD value exceeds maximum allowed (999999.99)');
+      }
     }
 
     // Get fingerprint record
@@ -140,11 +154,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Record usage
+    // Record usage with optional USD value
     const usage = await prisma.usage.create({
       data: {
         fingerprintId: fingerprintRecord.id,
         action,
+        usdValue: validatedUsdValue,
         metadata: { timestamp: new Date() },
       },
     });
@@ -179,12 +194,31 @@ export async function POST(request: NextRequest) {
           action, 
           creditsConsumed,
           creditsRequired,
-          hadSufficientCredits: totalCredits >= creditsRequired 
+          hadSufficientCredits: totalCredits >= creditsRequired,
+          usdValue: validatedUsdValue
         },
         ipAddress: clientIp,
         userAgent: request.headers.get('user-agent'),
       },
     });
+
+    // Calculate total USD spent if tracking is enabled
+    let totalUsdSpent = undefined;
+    if (authContext.app.trackUsdValue) {
+      const allUsages = await prisma.usage.findMany({
+        where: {
+          fingerprintId: fingerprintRecord.id,
+          usdValue: { not: null }
+        },
+        select: { usdValue: true }
+      });
+      
+      totalUsdSpent = allUsages.reduce((sum, u) => 
+        sum + (u.usdValue ? parseFloat(u.usdValue.toString()) : 0), 0
+      );
+      // Round to 2 decimal places
+      totalUsdSpent = Math.round(totalUsdSpent * 100) / 100;
+    }
 
     // Build response
     const response = successResponse({
@@ -193,6 +227,8 @@ export async function POST(request: NextRequest) {
       creditsRemaining: Math.max(0, newCreditsBalance),
       creditsRequired,
       hadSufficientCredits: totalCredits >= creditsRequired,
+      ...(validatedUsdValue !== undefined && { usdValue: validatedUsdValue }),
+      ...(totalUsdSpent !== undefined && { totalUsdSpent }),
     });
 
     // Apply CORS headers

@@ -6,6 +6,7 @@ import { checkRateLimit, getClientIp, rateLimits } from '@/lib/middleware/rateLi
 import { withCorsHeaders, handleCorsPreflightResponse } from '@/lib/middleware/cors';
 import { successResponse, errors } from '@/lib/utils/response';
 import { isValidFingerprint } from '@/lib/utils/validation';
+import { isInvitationCode, isCodeExpired } from '@/lib/utils/invitationCode';
 
 export async function OPTIONS(request: NextRequest) {
   const origin = request.headers.get('origin');
@@ -97,21 +98,115 @@ export async function POST(request: NextRequest) {
 
     // Process referral claim if present (works for both new and existing users)
     if (claim) {
-      const claimPayload = verifyClaim(claim);
-      
-      if (claimPayload && claimPayload.referralCode) {
-        // Check if this user has already claimed a referral
-        const existingReferral = await prisma.referral.findFirst({
+      // First check if this is an invitation code (INV-XXXXXX format)
+      if (isInvitationCode(claim)) {
+        // Handle unique invitation code redemption
+        const waitlistEntry = await prisma.waitlist.findFirst({
           where: {
-            referredId: fingerprintRecord.id,
-          },
+            appId: authContext.app.id,
+            invitationCode: claim,
+          } as any, // Temporary cast until TypeScript picks up new schema
         });
 
-        // Only process if they haven't been referred before
-        if (!existingReferral) {
-          const app = authContext.app as any; // Temporary cast until migration is run
-          // Check if this is a master referral code
-          if (app.masterReferralCode === claimPayload.referralCode) {
+        if (waitlistEntry && !isCodeExpired((waitlistEntry as any).codeExpiresAt)) {
+          // Check if code hasn't been used or was used by the same fingerprint
+          if (!(waitlistEntry as any).codeUsedAt || (waitlistEntry as any).fingerprintId === fingerprintRecord!.id) {
+            // Only process if not already used by this fingerprint
+            if (!(waitlistEntry as any).codeUsedAt) {
+              // Redeem the invitation code
+              await prisma.$transaction(async (tx) => {
+                // Update waitlist entry
+                await tx.waitlist.update({
+                  where: { id: waitlistEntry.id },
+                  data: {
+                    status: 'ACCEPTED',
+                    acceptedAt: new Date(),
+                    fingerprintId: fingerprintRecord!.id,
+                    codeUsedAt: new Date(),
+                    useCount: { increment: 1 },
+                  },
+                });
+
+                // Grant invitation credits
+                const creditsToGrant = (authContext.app as any).masterReferralCredits || 10;
+                await tx.credit.create({
+                  data: {
+                    fingerprintId: fingerprintRecord!.id,
+                    amount: creditsToGrant,
+                    reason: 'invitation',
+                    metadata: {
+                      invitationCode: claim,
+                      waitlistId: waitlistEntry.id,
+                    },
+                  },
+                });
+
+                // Create or update lead with email
+                await tx.lead.upsert({
+                  where: {
+                    appId_email: {
+                      appId: authContext.app.id,
+                      email: waitlistEntry.email,
+                    },
+                  },
+                  update: {
+                    fingerprintId: fingerprintRecord!.id,
+                    emailVerified: true,
+                  },
+                  create: {
+                    appId: authContext.app.id,
+                    fingerprintId: fingerprintRecord!.id,
+                    email: waitlistEntry.email,
+                    emailVerified: true,
+                  },
+                });
+
+                // Log event
+                await tx.eventLog.create({
+                  data: {
+                    appId: authContext.app.id,
+                    event: 'invitation.redeemed',
+                    entityType: 'waitlist',
+                    entityId: waitlistEntry.id,
+                    metadata: {
+                      invitationCode: claim,
+                      fingerprintId: fingerprintRecord!.id,
+                      email: waitlistEntry.email,
+                    },
+                    ipAddress: clientIp,
+                    userAgent: request.headers.get('user-agent'),
+                  },
+                });
+              });
+
+              // Re-fetch fingerprint to include new credits
+              fingerprintRecord = await prisma.fingerprint.findUnique({
+                where: { id: fingerprintRecord.id },
+                include: {
+                  credits: true,
+                  usage: true,
+                },
+              });
+            }
+          }
+        }
+      } else {
+        // Process regular referral claim
+        const claimPayload = verifyClaim(claim);
+        
+        if (claimPayload && claimPayload.referralCode) {
+          // Check if this user has already claimed a referral
+          const existingReferral = await prisma.referral.findFirst({
+            where: {
+              referredId: fingerprintRecord.id,
+            },
+          });
+
+          // Only process if they haven't been referred before
+          if (!existingReferral) {
+            const app = authContext.app as any; // Temporary cast until migration is run
+            // Check if this is a master referral code
+            if (app.masterReferralCode === claimPayload.referralCode) {
             // This is a master referral - award master credits without a referrer
             await prisma.credit.create({
               data: {
@@ -223,7 +318,7 @@ export async function POST(request: NextRequest) {
                 // Award credits to the referred user
                 await prisma.credit.create({
                   data: {
-                    fingerprintId: fingerprintRecord.id,
+                    fingerprintId: fingerprintRecord!.id,
                     amount: referredCredits,
                     reason: 'referral',
                     metadata: { 
@@ -272,6 +367,7 @@ export async function POST(request: NextRequest) {
                 });
                 }
               }
+            }
             }
           }
         }
