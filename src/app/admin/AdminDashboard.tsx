@@ -7,6 +7,26 @@ import EmailTemplateEditor from './components/EmailTemplateEditor';
 import UsdMetricsDashboard from './components/UsdMetricsDashboard';
 import InvitationCodesManager from './components/InvitationCodesManager';
 import CronJobMonitor from './components/CronJobMonitor';
+import DashboardLayout from '@/components/ui/DashboardLayout';
+import PageHeader from '@/components/ui/PageHeader';
+import ContentCard from '@/components/ui/ContentCard';
+import StatsCard from '@/components/ui/StatsCard';
+import Button from '@/components/ui/Button';
+import { cn } from '@/components/ui/utils';
+import { 
+  Package, 
+  Users, 
+  Link, 
+  FileText, 
+  Clock, 
+  Plus,
+  Settings,
+  Mail,
+  DollarSign,
+  Ticket,
+  Activity,
+  TrendingUp
+} from 'lucide-react';
 
 interface App {
   id: string;
@@ -34,7 +54,7 @@ export default function AdminDashboard() {
   const [showInvitationCodes, setShowInvitationCodes] = useState(false);
   const [showCronMonitor, setShowCronMonitor] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('grid');
   const [formData, setFormData] = useState({
     name: '',
     domain: '',
@@ -84,7 +104,7 @@ export default function AdminDashboard() {
   const handleCreateApp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isSubmitting) return; // Prevent double submission
+    if (isSubmitting) return;
     setIsSubmitting(true);
     
     try {
@@ -112,6 +132,23 @@ export default function AdminDashboard() {
           alert(`App created! API Key: ${data.data.initialApiKey}\n\nSave this key, it won't be shown again!`);
         }
         setShowCreateForm(false);
+        setFormData({
+          name: '',
+          domain: '',
+          corsOrigins: '',
+          redirectUrl: '',
+          policyJson: JSON.stringify({
+            referralCredits: 5,
+            referredCredits: 3,
+            nameClaimCredits: 2,
+            emailClaimCredits: 2,
+            emailVerifyCredits: 5,
+            dailyReferralCap: 10,
+            actions: {
+              default: { creditsRequired: 1 }
+            }
+          }, null, 2)
+        });
         fetchApps();
       } else {
         const error = await response.json();
@@ -124,6 +161,20 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleAppSelect = (appId: string) => {
+    router.push(`/admin/app/${appId}`);
+  };
+
+  // Calculate aggregate statistics
+  const totalStats = apps.reduce((acc, app) => ({
+    totalUsers: acc.totalUsers + app._count.fingerprints,
+    totalReferrals: acc.totalReferrals + app._count.referrals,
+    totalLeads: acc.totalLeads + app._count.leads,
+    totalWaitlist: acc.totalWaitlist + app._count.waitlist,
+  }), { totalUsers: 0, totalReferrals: 0, totalLeads: 0, totalWaitlist: 0 });
+
+  const activeApps = apps.filter(app => app.isActive).length;
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -133,248 +184,371 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">GrowthKit Admin</h1>
-              <div className="space-x-4">
-                <button
-                  onClick={() => setShowCronMonitor(true)}
-                  className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 cursor-pointer"
-                >
-                  ⏰ Cron Monitor
-                </button>
-                <button
-                  onClick={() => setShowCreateForm(!showCreateForm)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 cursor-pointer"
-                >
-                  Create App
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 cursor-pointer"
-                >
-                  Logout
-                </button>
+    <DashboardLayout
+      apps={apps}
+      onAppSelect={handleAppSelect}
+      onCreateApp={() => setShowCreateForm(true)}
+      onLogout={handleLogout}
+    >
+      <PageHeader 
+        title="Dashboard"
+        description="Overview of your GrowthKit applications and metrics"
+        actions={
+          <div className="flex space-x-3">
+            <Button
+              variant="ghost"
+              icon={<Clock size={20} />}
+              onClick={() => setShowCronMonitor(true)}
+            >
+              Cron Monitor
+            </Button>
+            <Button
+              variant="primary"
+              icon={<Plus size={20} />}
+              onClick={() => setShowCreateForm(true)}
+            >
+              Create App
+            </Button>
+          </div>
+        }
+      />
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatsCard
+          title="Total Apps"
+          value={apps.length}
+          change={activeApps > 0 ? Math.round((activeApps / apps.length) * 100) : 0}
+          changeLabel="active"
+          icon={<Package size={24} />}
+          color="blue"
+        />
+        <StatsCard
+          title="Total Users"
+          value={totalStats.totalUsers.toLocaleString()}
+          icon={<Users size={24} />}
+          color="green"
+        />
+        <StatsCard
+          title="Total Referrals"
+          value={totalStats.totalReferrals.toLocaleString()}
+          icon={<Link size={24} />}
+          color="purple"
+        />
+        <StatsCard
+          title="Waitlist Entries"
+          value={totalStats.totalWaitlist.toLocaleString()}
+          icon={<FileText size={24} />}
+          color="yellow"
+        />
+      </div>
+
+      {/* Create App Form */}
+      {showCreateForm && (
+        <ContentCard 
+          title="Create New App"
+          className="mb-8"
+          actions={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowCreateForm(false)}
+            >
+              Cancel
+            </Button>
+          }
+        >
+          <form onSubmit={handleCreateApp} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Domain</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.domain}
+                  onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
               </div>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                CORS Origins (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={formData.corsOrigins}
+                onChange={(e) => setFormData({ ...formData, corsOrigins: e.target.value })}
+                placeholder="http://localhost:3000, https://example.com"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Redirect URL</label>
+              <input
+                type="url"
+                required
+                value={formData.redirectUrl}
+                onChange={(e) => setFormData({ ...formData, redirectUrl: e.target.value })}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Policy JSON</label>
+              <textarea
+                required
+                value={formData.policyJson}
+                onChange={(e) => setFormData({ ...formData, policyJson: e.target.value })}
+                rows={10}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm font-mono text-xs"
+              />
+            </div>
+            <div className="flex space-x-3">
+              <Button
+                type="submit"
+                variant="success"
+                loading={isSubmitting}
+              >
+                Create App
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowCreateForm(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </ContentCard>
+      )}
 
-            {showCreateForm && (
-              <div className="mb-6 p-4 border rounded-lg bg-gray-50">
-                <h2 className="text-lg font-semibold mb-4">Create New App</h2>
-                <form onSubmit={handleCreateApp} className="space-y-4">
+      {/* Apps List */}
+      <ContentCard 
+        title="Your Applications"
+        description="Manage and monitor all your GrowthKit applications"
+        actions={
+          <div className="flex space-x-2">
+            <Button
+              variant={viewMode === 'grid' ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+            >
+              Grid
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+            >
+              Table
+            </Button>
+          </div>
+        }
+        noPadding={viewMode === 'table'}
+      >
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {apps.map((app) => (
+              <div
+                key={app.id}
+                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleAppSelect(app.id)}
+              >
+                <div className="flex items-start justify-between mb-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    />
+                    <h3 className="text-lg font-semibold text-gray-900">{app.name}</h3>
+                    <p className="text-sm text-gray-500">{app.domain}</p>
+                  </div>
+                  <span
+                    className={cn(
+                      'px-2 py-1 text-xs font-semibold rounded-full',
+                      app.isActive
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    )}
+                  >
+                    {app.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div>
+                    <p className="text-xs text-gray-500">Users</p>
+                    <p className="text-lg font-semibold">{app._count.fingerprints}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Domain</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.domain}
-                      onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    />
+                    <p className="text-xs text-gray-500">Referrals</p>
+                    <p className="text-lg font-semibold">{app._count.referrals}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      CORS Origins (comma-separated)
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.corsOrigins}
-                      onChange={(e) => setFormData({ ...formData, corsOrigins: e.target.value })}
-                      placeholder="http://localhost:3000, https://example.com"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    />
+                    <p className="text-xs text-gray-500">Leads</p>
+                    <p className="text-lg font-semibold">{app._count.leads}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Redirect URL</label>
-                    <input
-                      type="url"
-                      required
-                      value={formData.redirectUrl}
-                      onChange={(e) => setFormData({ ...formData, redirectUrl: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    />
+                    <p className="text-xs text-gray-500">Waitlist</p>
+                    <p className="text-lg font-semibold">{app._count.waitlist}</p>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Policy JSON</label>
-                    <textarea
-                      required
-                      value={formData.policyJson}
-                      onChange={(e) => setFormData({ ...formData, policyJson: e.target.value })}
-                      rows={10}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm font-mono text-xs"
-                    />
-                  </div>
-                  <div className="flex space-x-4">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className={`px-4 py-2 rounded-md text-white cursor-pointer ${
-                        isSubmitting 
-                          ? 'bg-gray-400 cursor-not-allowed' 
-                          : 'bg-green-600 hover:bg-green-700'
-                      }`}
-                    >
-                      {isSubmitting ? 'Creating...' : 'Create App'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowCreateForm(false)}
-                      className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500 cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<Users size={16} />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedApp(app);
+                      setShowWaitlistManager(true);
+                    }}
+                  >
+                    Waitlist
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<Mail size={16} />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedApp(app);
+                      setShowEmailEditor(true);
+                    }}
+                  >
+                    Emails
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<DollarSign size={16} />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedApp(app);
+                      setShowUsdMetrics(true);
+                    }}
+                  >
+                    USD
+                  </Button>
+                </div>
               </div>
-            )}
-
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Domain
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Stats
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {apps.map((app) => (
-                    <tr key={app.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {app.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {app.domain}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            app.isActive
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          {app.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="text-xs">
-                          Keys: {app._count.apiKeys} | Users: {app._count.fingerprints}
-                          <br />
-                          Referrals: {app._count.referrals} | Leads: {app._count.leads}
-                          <br />
-                          Waitlist: {app._count.waitlist}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
+            ))}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-300">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Domain
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Stats
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {apps.map((app) => (
+                  <tr key={app.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {app.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {app.domain}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={cn(
+                          'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                          app.isActive
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        )}
+                      >
+                        {app.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="text-xs">
+                        Keys: {app._count.apiKeys} | Users: {app._count.fingerprints}
+                        <br />
+                        Referrals: {app._count.referrals} | Leads: {app._count.leads}
+                        <br />
+                        Waitlist: {app._count.waitlist}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={<Users size={16} />}
                           onClick={() => {
-                            if (actionInProgress) return;
-                            setActionInProgress('waitlist');
                             setSelectedApp(app);
                             setShowWaitlistManager(true);
-                            setTimeout(() => setActionInProgress(null), 500);
                           }}
-                          disabled={actionInProgress !== null}
-                          className={`mr-2 cursor-pointer ${
-                            actionInProgress ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-900'
-                          }`}
-                        >
-                          Waitlist
-                        </button>
-                        <button
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={<Mail size={16} />}
                           onClick={() => {
-                            if (actionInProgress) return;
-                            setActionInProgress('emails');
                             setSelectedApp(app);
                             setShowEmailEditor(true);
-                            setTimeout(() => setActionInProgress(null), 500);
                           }}
-                          disabled={actionInProgress !== null}
-                          className={`mr-2 cursor-pointer ${
-                            actionInProgress ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-900'
-                          }`}
-                        >
-                          Emails
-                        </button>
-                        <button
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={<DollarSign size={16} />}
                           onClick={() => {
-                            if (actionInProgress) return;
-                            setActionInProgress('usd');
                             setSelectedApp(app);
                             setShowUsdMetrics(true);
-                            setTimeout(() => setActionInProgress(null), 500);
                           }}
-                          disabled={actionInProgress !== null}
-                          className={`mr-2 cursor-pointer ${
-                            actionInProgress ? 'text-gray-400 cursor-not-allowed' : 'text-green-600 hover:text-green-900'
-                          }`}
-                        >
-                          💵 USD
-                        </button>
-                        <button
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={<Ticket size={16} />}
                           onClick={() => {
-                            if (actionInProgress) return;
-                            setActionInProgress('codes');
                             setSelectedApp(app);
                             setShowInvitationCodes(true);
-                            setTimeout(() => setActionInProgress(null), 500);
                           }}
-                          disabled={actionInProgress !== null}
-                          className={`mr-2 cursor-pointer ${
-                            actionInProgress ? 'text-gray-400 cursor-not-allowed' : 'text-purple-600 hover:text-purple-900'
-                          }`}
-                        >
-                          🎫 Codes
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (actionInProgress) return;
-                            setActionInProgress('manage');
-                            router.push(`/admin/app/${app.id}`);
-                          }}
-                          disabled={actionInProgress !== null}
-                          className={`cursor-pointer ${
-                            actionInProgress ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-900'
-                          }`}
-                        >
-                          Manage
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={<Settings size={16} />}
+                          onClick={() => handleAppSelect(app.id)}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
-      </div>
-      
+        )}
+      </ContentCard>
+
+      {/* Modals */}
       {showWaitlistManager && selectedApp && (
         <WaitlistManager
           appId={selectedApp.id}
@@ -382,7 +556,7 @@ export default function AdminDashboard() {
           onClose={() => {
             setShowWaitlistManager(false);
             setSelectedApp(null);
-            fetchApps(); // Refresh data
+            fetchApps();
           }}
         />
       )}
@@ -404,15 +578,16 @@ export default function AdminDashboard() {
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">USD Metrics - {selectedApp.name}</h2>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setShowUsdMetrics(false);
                     setSelectedApp(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   ✕
-                </button>
+                </Button>
               </div>
               <UsdMetricsDashboard
                 appId={selectedApp.id}
@@ -429,15 +604,16 @@ export default function AdminDashboard() {
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Invitation Codes - {selectedApp.name}</h2>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setShowInvitationCodes(false);
                     setSelectedApp(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   ✕
-                </button>
+                </Button>
               </div>
               <InvitationCodesManager
                 appId={selectedApp.id}
@@ -454,18 +630,19 @@ export default function AdminDashboard() {
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Cron Job Monitor - All Apps</h2>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowCronMonitor(false)}
-                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   ✕
-                </button>
+                </Button>
               </div>
               <CronJobMonitor />
             </div>
           </div>
         </div>
       )}
-    </div>
+    </DashboardLayout>
   );
 }
