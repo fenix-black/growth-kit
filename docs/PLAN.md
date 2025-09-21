@@ -364,15 +364,16 @@ This phase transforms the basic waitlist into a viral growth engine with:
   - [ ] Per-app USD analytics
   - [ ] Export capabilities for financial reporting
 
-#### SDK Updates (v0.4.0)
-- [ ] Update `completeAction()` method signature
-  - [ ] Add optional `options` parameter: `{ usdValue?: number }`
-  - [ ] Maintain backward compatibility
-  - [ ] Example: `completeAction('purchase', { usdValue: 9.99 })`
-- [ ] Add USD tracking to hook state
-  - [ ] `totalUsdSpent` field
-  - [ ] `lastUsdTransaction` details
-- [ ] Update TypeScript definitions
+#### SDK Updates (v0.4.0) ✅
+- [x] Update `completeAction()` method signature
+  - [x] Add optional `options` parameter: `{ usdValue?: number }`
+  - [x] Maintain backward compatibility
+  - [x] Example: `completeAction('purchase', { usdValue: 9.99 })`
+- [x] Add USD tracking to hook state
+  - [x] `totalUsdSpent` field
+  - [x] `lastUsdTransaction` details
+- [x] Update TypeScript definitions
+- [x] Update documentation with USD tracking examples
 
 ### 12.2 Unique Invitation Code System
 
@@ -426,16 +427,17 @@ This phase transforms the basic waitlist into a viral growth engine with:
 - [ ] Audit logging for all redemption attempts
 - [ ] Prevent self-invitation abuse
 
-### 12.3 Email Template Updates
+### 12.3 Email Template Updates ✅
 
-- [ ] Update invitation email template
-  - [ ] Include unique invitation code prominently
-  - [ ] Add expiration date if applicable
-  - [ ] Clear redemption instructions
-  - [ ] Direct link with code embedded: `/invite?code=INV-X8K2M9`
-- [ ] Create reminder email template
-  - [ ] For codes expiring soon
-  - [ ] Re-send code functionality
+- [x] Update invitation email template
+  - [x] Include unique invitation code prominently
+  - [x] Add expiration date if applicable
+  - [x] Clear redemption instructions
+  - [x] Direct link with code embedded: `/invite?code=INV-X8K2M9`
+- [x] Create reminder email template
+  - [x] For codes expiring soon (with urgency levels)
+  - [x] Dynamic styling based on days remaining
+  - [x] Clear call-to-action buttons
 
 ### 12.4 Admin Dashboard Enhancements
 

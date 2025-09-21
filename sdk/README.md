@@ -111,6 +111,67 @@ function App() {
 }
 ```
 
+## USD Value Tracking (v0.4.0+)
+
+Track the monetary value of user actions for ROI measurement and financial analytics.
+
+### Basic Usage
+
+```tsx
+function PurchaseButton() {
+  const gk = useGrowthKit({ apiKey: '...' });
+  
+  const handlePurchase = async (productPrice: number) => {
+    // Track both credits and USD value
+    await gk.completeAction('purchase', {
+      usdValue: productPrice,
+      metadata: { product: 'premium-feature' }
+    });
+    
+    // Check total spending
+    console.log('Total spent:', gk.totalUsdSpent);
+    console.log('This purchase:', gk.lastUsdTransaction);
+  };
+  
+  // Only show USD tracking if enabled for this app
+  if (gk.usdTrackingEnabled) {
+    return (
+      <div>
+        <p>Your total spending: ${gk.totalUsdSpent || 0}</p>
+        <button onClick={() => handlePurchase(9.99)}>
+          Buy Premium ($9.99)
+        </button>
+      </div>
+    );
+  }
+  
+  return <button>Buy Premium</button>;
+}
+```
+
+### Backward Compatibility
+
+The `completeAction` method maintains full backward compatibility:
+
+```ts
+// Old signature still works
+await gk.completeAction('action', { any: 'metadata' });
+
+// New signature with USD tracking
+await gk.completeAction('action', { 
+  usdValue: 19.99,
+  metadata: { any: 'metadata' }
+});
+```
+
+### Use Cases
+
+- **Subscription tracking**: Track monthly/yearly subscription values
+- **In-app purchases**: Monitor revenue from premium features
+- **ROI measurement**: Calculate return on referral credits
+- **User lifetime value**: Track total spending per user
+- **Financial reporting**: Export USD metrics for accounting
+
 ## Waitlist Gating
 
 GrowthKit includes powerful waitlist management features that allow you to gate access to your application while maintaining viral growth through referrals.
@@ -271,13 +332,27 @@ The main React hook for integrating GrowthKit.
 - `waitlistPosition`: Position in waitlist queue
 - `waitlistMessage`: Custom waitlist message
 - `shouldShowWaitlist`: Whether to show waitlist UI
+- `totalUsdSpent`: Total USD value spent by user (v0.4.0+)
+- `lastUsdTransaction`: Value of last USD transaction (v0.4.0+)
+- `usdTrackingEnabled`: Whether app has USD tracking enabled (v0.4.0+)
 
 #### Methods
 
-##### completeAction(action?, metadata?)
-Complete an action and consume credits.
+##### completeAction(action?, options?)
+Complete an action and consume credits. Optionally track USD value (v0.4.0+).
+
 ```ts
+// Simple usage (backward compatible)
+await gk.completeAction('generate');
+
+// With metadata (backward compatible)
 await gk.completeAction('generate', { model: 'gpt-4' });
+
+// With USD tracking (v0.4.0+)
+await gk.completeAction('purchase', { 
+  usdValue: 9.99,
+  metadata: { productId: 'pro-plan' }
+});
 ```
 
 ##### claimName(name)

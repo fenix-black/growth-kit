@@ -43,11 +43,20 @@ export interface GrowthKitState {
   waitlistPosition: number | null;
   waitlistMessage?: string;
   shouldShowWaitlist: boolean;
+  // USD tracking (v0.4.0)
+  totalUsdSpent?: number;
+  lastUsdTransaction?: number;
+  usdTrackingEnabled?: boolean;
+}
+
+export interface CompleteActionOptions {
+  usdValue?: number;
+  metadata?: any;
 }
 
 export interface GrowthKitActions {
   refresh: () => Promise<void>;
-  completeAction: (action?: string, metadata?: any) => Promise<boolean>;
+  completeAction: (action?: string, options?: CompleteActionOptions | any) => Promise<boolean>;
   claimName: (name: string) => Promise<boolean>;
   claimEmail: (email: string) => Promise<boolean>;
   verifyEmail: (token: string) => Promise<boolean>;
@@ -82,12 +91,16 @@ export interface MeResponse {
   hasClaimedEmail: boolean;
   hasVerifiedEmail: boolean;
   waitlist?: WaitlistData;
+  totalUsdSpent?: number;
+  usdTrackingEnabled?: boolean;
 }
 
 export interface CompleteResponse {
   success: boolean;
   creditsRemaining: number;
   creditsConsumed: number;
+  usdValue?: number;
+  totalUsdSpent?: number;
 }
 
 export interface ClaimResponse {

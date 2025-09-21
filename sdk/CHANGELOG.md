@@ -3,6 +3,13 @@
 ## [0.4.0] - 2025-09-21
 
 ### Added
+- **USD Value Tracking**
+  - Track monetary value of user actions
+  - New `usdValue` parameter in `completeAction()` method
+  - `totalUsdSpent` and `lastUsdTransaction` state properties
+  - `usdTrackingEnabled` flag to check if app has USD tracking enabled
+  - Backward compatible - maintains support for old method signature
+
 - **Waitlist Gating System**
   - New `GrowthKitGate` component for automatic waitlist management
   - Built-in `WaitlistForm` component with customizable styling
@@ -15,7 +22,13 @@
   - Added `waitlistEnabled`, `waitlistStatus`, `waitlistPosition` properties
   - Added `waitlistMessage` for custom app messages
   - Added `shouldShowWaitlist` computed property for UI logic
+  - Added USD tracking properties for financial analytics
   - Automatic waitlist data parsing from `/v1/me` response
+
+- **completeAction() Method**
+  - Now accepts optional `options` parameter with `usdValue` and `metadata`
+  - Maintains backward compatibility with old signature
+  - Automatically updates USD tracking state when values are returned
 
 ### Components
 - `GrowthKitGate`: Automatic gating component with loading/error states
@@ -23,6 +36,7 @@
 
 ### Documentation
 - Added comprehensive waitlist documentation
+- Added USD tracking examples and documentation
 - Added examples for all waitlist scenarios
 - Updated API reference with new properties and methods
 

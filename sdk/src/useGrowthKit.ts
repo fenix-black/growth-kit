@@ -7,6 +7,7 @@ import type {
   GrowthKitActions,
   GrowthKitHook,
   ShareOptions,
+  CompleteActionOptions,
 } from './types';
 
 const initialState: GrowthKitState = {
@@ -27,6 +28,10 @@ const initialState: GrowthKitState = {
   waitlistPosition: null,
   waitlistMessage: undefined,
   shouldShowWaitlist: false,
+  // USD tracking
+  totalUsdSpent: undefined,
+  lastUsdTransaction: undefined,
+  usdTrackingEnabled: false,
 };
 
 export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
@@ -111,6 +116,9 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
         waitlistPosition,
         waitlistMessage,
         shouldShowWaitlist,
+        // USD tracking
+        totalUsdSpent: data.totalUsdSpent,
+        usdTrackingEnabled: data.usdTrackingEnabled,
       });
 
       if (config.debug) {
@@ -169,6 +177,9 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
           waitlistPosition,
           waitlistMessage,
           shouldShowWaitlist,
+          // USD tracking
+          totalUsdSpent: data.totalUsdSpent,
+          usdTrackingEnabled: data.usdTrackingEnabled,
         }));
       }
     } catch (error) {
@@ -179,14 +190,30 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
   // Complete an action
   const completeAction = useCallback(async (
     action: string = 'default',
-    metadata?: any
+    optionsOrMetadata?: CompleteActionOptions | any
   ): Promise<boolean> => {
     if (!apiRef.current || !state.fingerprint) return false;
+
+    // Handle both old (metadata) and new (options with usdValue) signatures
+    let usdValue: number | undefined;
+    let metadata: any;
+    
+    if (optionsOrMetadata && typeof optionsOrMetadata === 'object') {
+      if ('usdValue' in optionsOrMetadata || 'metadata' in optionsOrMetadata) {
+        // New signature with options
+        usdValue = optionsOrMetadata.usdValue;
+        metadata = optionsOrMetadata.metadata;
+      } else {
+        // Old signature with just metadata
+        metadata = optionsOrMetadata;
+      }
+    }
 
     try {
       const response = await apiRef.current.completeAction(
         state.fingerprint,
         action,
+        usdValue,
         metadata
       );
 
@@ -195,6 +222,13 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
           ...prev,
           credits: response.data!.creditsRemaining,
           usage: prev.usage + 1,
+          // Update USD tracking if present
+          totalUsdSpent: response.data!.totalUsdSpent !== undefined 
+            ? response.data!.totalUsdSpent 
+            : prev.totalUsdSpent,
+          lastUsdTransaction: response.data!.usdValue !== undefined
+            ? response.data!.usdValue
+            : prev.lastUsdTransaction,
         }));
         return true;
       }

@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!waitlistEntry) {
-      return errors.notFound('Invitation code not found');
+      return errors.notFound();
     }
 
     // Check if code has expired

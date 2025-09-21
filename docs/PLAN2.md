@@ -30,11 +30,12 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
   - [x] `invitedVia` (enum: 'manual' | 'auto' | 'master_referral')
   - [x] `invitationEmail` (string, optional)
   - [x] `convertedAt` (datetime, optional)
-- [ ] **[Phase 12]** Add unique invitation code fields to Waitlist model
-  - [ ] `invitationCode` (unique string, e.g., "INV-X8K2M9")
-  - [ ] `fingerprintId` (link to who redeemed the code)
-  - [ ] `codeUsedAt` (timestamp when code was redeemed)
-  - [ ] `codeExpiresAt` (optional expiration date)
+- [x] **[Phase 12]** Add unique invitation code fields to Waitlist model ✅
+  - [x] `invitationCode` (unique string, e.g., "INV-X8K2M9")
+  - [x] `fingerprintId` (link to who redeemed the code)
+  - [x] `codeUsedAt` (timestamp when code was redeemed)
+  - [x] `codeExpiresAt` (optional expiration date)
+  - [x] `maxUses` and `useCount` fields for tracking
 - [x] Create migration for new fields
 
 ### 1.2 API Updates for Waitlist Status
@@ -89,7 +90,7 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
 - [x] Add waitlist examples
 - [x] Document `shouldShowWaitlist` logic
 - [x] Create CHANGELOG entry for v0.3.0 (waitlist support)
-- [ ] **[Phase 12]** Update for v0.4.0 (USD tracking support)
+- [x] **[Phase 12]** Update for v0.4.0 (USD tracking support) ✅
 
 ## Phase 3: Admin Dashboard Updates
 
@@ -133,10 +134,11 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
   - [x] Default template with placeholders
   - [x] App name, credits, link variables
   - [x] HTML and text versions
-- [ ] **[Phase 12]** Update templates for unique invitation codes
-  - [ ] Include unique invitation code prominently
-  - [ ] Add code expiration date
-  - [ ] Direct redemption link with code
+- [x] **[Phase 12]** Update templates for unique invitation codes ✅
+  - [x] Include unique invitation code prominently
+  - [x] Add code expiration date
+  - [x] Direct redemption link with code
+  - [x] Created reminder email template with urgency levels
 - [x] Integrate with Resend
   - [x] Set up email sending function
   - [x] Handle email errors gracefully
@@ -152,9 +154,9 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
 - [x] Invitation logic (per app)
   - [x] Select users from app's waitlist by position (FIFO)
   - [x] Update status to 'invited' for this app
-  - [ ] **[Phase 12]** Generate unique invitation code for each user
+  - [x] **[Phase 12]** Generate unique invitation code for each user ✅
   - [x] Send invitation email with app's branding
-  - [ ] **[Phase 12]** Include unique code in email
+  - [x] **[Phase 12]** Include unique code in email ✅
   - [x] Log invitation in EventLog with appId
 - [x] Error handling
   - [x] Retry failed emails
@@ -178,13 +180,13 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
   - [ ] Conversion rate (invited → active) per app
   - [ ] Time to conversion per app
   - [ ] Credits used by invited users per app
-  - [ ] **[Phase 12]** USD value tracked from invited users
-  - [ ] **[Phase 12]** Invitation code redemption rates
+  - [x] **[Phase 12]** USD value tracked from invited users ✅
+  - [x] **[Phase 12]** Invitation code redemption rates ✅
 - [ ] Compare cohorts within each app
   - [ ] Referred vs invited users in same app
   - [ ] Retention differences per app
   - [ ] Credit usage patterns per app
-  - [ ] **[Phase 12]** USD spend comparison between cohorts
+  - [x] **[Phase 12]** USD spend comparison between cohorts ✅
 
 ### 5.2 Waitlist Analytics
 - [ ] Queue metrics
@@ -251,11 +253,11 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
    - Email templates
    - Waitlist management UI
 
-3. **Security & Analytics** (Integrate with Phase 12)
-   - Unique invitation codes (Phase 12.2)
-   - USD tracking in analytics (Phase 12.1)
-   - Code redemption flow (Phase 12.2)
-   - Enhanced invitation emails with codes
+3. **Security & Analytics** (Integrate with Phase 12) ✅
+   - Unique invitation codes (Phase 12.2) ✅
+   - USD tracking in analytics (Phase 12.1) ✅
+   - Code redemption flow (Phase 12.2) ✅
+   - Enhanced invitation emails with codes ✅
 
 4. **Polish** (Do Last)
    - Analytics dashboard with USD metrics

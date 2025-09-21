@@ -82,6 +82,7 @@ export class GrowthKitAPI {
   async completeAction(
     fingerprint: string,
     action: string = 'default',
+    usdValue?: number,
     metadata?: any
   ): Promise<APIResponse<CompleteResponse>> {
     return this.request<CompleteResponse>('/v1/complete', {
@@ -89,6 +90,7 @@ export class GrowthKitAPI {
       body: JSON.stringify({
         fingerprint,
         action,
+        ...(usdValue !== undefined && { usdValue }),
         metadata,
       }),
     });

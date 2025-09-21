@@ -44,10 +44,17 @@ interface GrowthKitState {
     waitlistPosition: number | null;
     waitlistMessage?: string;
     shouldShowWaitlist: boolean;
+    totalUsdSpent?: number;
+    lastUsdTransaction?: number;
+    usdTrackingEnabled?: boolean;
+}
+interface CompleteActionOptions {
+    usdValue?: number;
+    metadata?: any;
 }
 interface GrowthKitActions {
     refresh: () => Promise<void>;
-    completeAction: (action?: string, metadata?: any) => Promise<boolean>;
+    completeAction: (action?: string, options?: CompleteActionOptions | any) => Promise<boolean>;
     claimName: (name: string) => Promise<boolean>;
     claimEmail: (email: string) => Promise<boolean>;
     verifyEmail: (token: string) => Promise<boolean>;
@@ -79,11 +86,15 @@ interface MeResponse {
     hasClaimedEmail: boolean;
     hasVerifiedEmail: boolean;
     waitlist?: WaitlistData;
+    totalUsdSpent?: number;
+    usdTrackingEnabled?: boolean;
 }
 interface CompleteResponse {
     success: boolean;
     creditsRemaining: number;
     creditsConsumed: number;
+    usdValue?: number;
+    totalUsdSpent?: number;
 }
 interface ClaimResponse {
     claimed: boolean;
@@ -270,7 +281,7 @@ declare class GrowthKitAPI {
     setFingerprint(fingerprint: string): void;
     private request;
     getMe(fingerprint: string, claim?: string): Promise<APIResponse<MeResponse>>;
-    completeAction(fingerprint: string, action?: string, metadata?: any): Promise<APIResponse<CompleteResponse>>;
+    completeAction(fingerprint: string, action?: string, usdValue?: number, metadata?: any): Promise<APIResponse<CompleteResponse>>;
     claimName(fingerprint: string, name: string): Promise<APIResponse<ClaimResponse>>;
     claimEmail(fingerprint: string, email: string): Promise<APIResponse<ClaimResponse>>;
     verifyEmail(fingerprint: string, token: string): Promise<APIResponse<VerifyResponse>>;

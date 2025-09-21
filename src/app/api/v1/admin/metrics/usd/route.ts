@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       });
 
       if (!app) {
-        return errors.notFound('App not found');
+        return errors.notFound();
       }
 
       if (!app.trackUsdValue) {
