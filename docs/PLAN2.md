@@ -3,6 +3,11 @@
 ## Overview
 Transform the waitlist from a simple gate into a viral growth engine with automated invitations, master referral codes, and comprehensive tracking.
 
+**📌 Note**: Phase 12 in [PLAN.md](./PLAN.md) adds critical security and analytics enhancements to this system:
+- Unique invitation codes to prevent sharing abuse
+- USD value tracking for ROI measurement
+- Enhanced security with fingerprint-locked codes
+
 **🔑 Important: All features are PER-APP**
 - Each app has its own independent waitlist
 - Each app has its own configuration and quotas
@@ -25,6 +30,11 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
   - [x] `invitedVia` (enum: 'manual' | 'auto' | 'master_referral')
   - [x] `invitationEmail` (string, optional)
   - [x] `convertedAt` (datetime, optional)
+- [ ] **[Phase 12]** Add unique invitation code fields to Waitlist model
+  - [ ] `invitationCode` (unique string, e.g., "INV-X8K2M9")
+  - [ ] `fingerprintId` (link to who redeemed the code)
+  - [ ] `codeUsedAt` (timestamp when code was redeemed)
+  - [ ] `codeExpiresAt` (optional expiration date)
 - [x] Create migration for new fields
 
 ### 1.2 API Updates for Waitlist Status
@@ -47,38 +57,39 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
   - [x] Track invitation source in Waitlist model
 - [x] Add validation for master code uniqueness
 
-## Phase 2: SDK Enhancements
+## Phase 2: SDK Enhancements ✅ COMPLETED
 
 ### 2.1 Hook Updates
-- [ ] Add waitlist state to `useGrowthKit`
-  - [ ] `waitlistEnabled: boolean`
-  - [ ] `waitlistStatus: 'none' | 'waiting' | 'invited' | 'accepted'`
-  - [ ] `waitlistPosition: number | null`
-  - [ ] `shouldShowWaitlist: boolean` (computed)
-- [ ] Update initialization logic
-  - [ ] Parse waitlist data from `/v1/me` response
-  - [ ] Determine if waitlist gate should show
-- [ ] Add `acceptInvitation()` method
-  - [ ] Updates waitlist status to 'accepted'
-  - [ ] Refreshes user state
+- [x] Add waitlist state to `useGrowthKit`
+  - [x] `waitlistEnabled: boolean`
+  - [x] `waitlistStatus: 'none' | 'waiting' | 'invited' | 'accepted'`
+  - [x] `waitlistPosition: number | null`
+  - [x] `shouldShowWaitlist: boolean` (computed)
+- [x] Update initialization logic
+  - [x] Parse waitlist data from `/v1/me` response
+  - [x] Determine if waitlist gate should show
+- [x] Add `acceptInvitation()` method
+  - [x] Updates waitlist status to 'accepted'
+  - [x] Refreshes user state
 
 ### 2.2 Gate Component (Optional Helper)
-- [ ] Create `GrowthKitGate` component
-  - [ ] Props: `children`, `waitlistComponent`, `loadingComponent`
-  - [ ] Handles loading state
-  - [ ] Shows waitlist when required
-  - [ ] Renders children when access granted
-- [ ] Create default `WaitlistForm` component
-  - [ ] Email input
-  - [ ] Position display
-  - [ ] Customizable styling
-- [ ] Add to SDK exports
+- [x] Create `GrowthKitGate` component
+  - [x] Props: `children`, `waitlistComponent`, `loadingComponent`
+  - [x] Handles loading state
+  - [x] Shows waitlist when required
+  - [x] Renders children when access granted
+- [x] Create default `WaitlistForm` component
+  - [x] Email input
+  - [x] Position display
+  - [x] Customizable styling
+- [x] Add to SDK exports
 
 ### 2.3 SDK Documentation
-- [ ] Document waitlist gating in README
-- [ ] Add waitlist examples
-- [ ] Document `shouldShowWaitlist` logic
-- [ ] Create migration guide for existing apps
+- [x] Document waitlist gating in README
+- [x] Add waitlist examples
+- [x] Document `shouldShowWaitlist` logic
+- [x] Create CHANGELOG entry for v0.3.0 (waitlist support)
+- [ ] **[Phase 12]** Update for v0.4.0 (USD tracking support)
 
 ## Phase 3: Admin Dashboard Updates
 
@@ -112,6 +123,8 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
   - [ ] Track open/click rates (future)
   - [ ] Conversion tracking
   - [ ] Filter by date range
+  - [ ] **[Phase 12]** Show invitation code usage
+  - [ ] **[Phase 12]** Track code redemption status
 
 ## Phase 4: Auto-Invitation System
 
@@ -120,6 +133,10 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
   - [x] Default template with placeholders
   - [x] App name, credits, link variables
   - [x] HTML and text versions
+- [ ] **[Phase 12]** Update templates for unique invitation codes
+  - [ ] Include unique invitation code prominently
+  - [ ] Add code expiration date
+  - [ ] Direct redemption link with code
 - [x] Integrate with Resend
   - [x] Set up email sending function
   - [x] Handle email errors gracefully
@@ -135,7 +152,9 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
 - [x] Invitation logic (per app)
   - [x] Select users from app's waitlist by position (FIFO)
   - [x] Update status to 'invited' for this app
+  - [ ] **[Phase 12]** Generate unique invitation code for each user
   - [x] Send invitation email with app's branding
+  - [ ] **[Phase 12]** Include unique code in email
   - [x] Log invitation in EventLog with appId
 - [x] Error handling
   - [x] Retry failed emails
@@ -159,10 +178,13 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
   - [ ] Conversion rate (invited → active) per app
   - [ ] Time to conversion per app
   - [ ] Credits used by invited users per app
+  - [ ] **[Phase 12]** USD value tracked from invited users
+  - [ ] **[Phase 12]** Invitation code redemption rates
 - [ ] Compare cohorts within each app
   - [ ] Referred vs invited users in same app
   - [ ] Retention differences per app
   - [ ] Credit usage patterns per app
+  - [ ] **[Phase 12]** USD spend comparison between cohorts
 
 ### 5.2 Waitlist Analytics
 - [ ] Queue metrics
@@ -229,8 +251,14 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
    - Email templates
    - Waitlist management UI
 
-3. **Polish** (Do Third)
-   - Analytics dashboard
+3. **Security & Analytics** (Integrate with Phase 12)
+   - Unique invitation codes (Phase 12.2)
+   - USD tracking in analytics (Phase 12.1)
+   - Code redemption flow (Phase 12.2)
+   - Enhanced invitation emails with codes
+
+4. **Polish** (Do Last)
+   - Analytics dashboard with USD metrics
    - Gate component
    - Documentation
    - Testing
@@ -249,6 +277,9 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
 - **Cron timing**: Single daily batch initially (can enhance later)
 - **Email provider**: Resend (already configured)
 - **Gate logic**: Client-side in hook (not middleware)
+- **[Phase 12] Unique invitation codes**: 8-char codes with "INV-" prefix, one-time use
+- **[Phase 12] Code security**: Fingerprint-locked after first use, 7-day expiration
+- **[Phase 12] USD tracking**: Optional per-app, stored in Usage model
 
 ## Data Isolation & Multi-Tenancy
 
@@ -289,3 +320,5 @@ INVITATION_FROM_NAME=YourApp Team
 - Waitlist position is preserved even after invitation
 - System tracks conversion to measure invitation effectiveness
 - Future: Could add "invite friends to skip the line" feature
+- **[Phase 12 Enhancement]**: Unique invitation codes prevent sharing and improve security
+- **[Phase 12 Enhancement]**: USD tracking enables ROI measurement for viral features

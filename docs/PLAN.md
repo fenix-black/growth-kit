@@ -48,13 +48,16 @@
 
 ### 🚧 Remaining Tasks
 
-**SDK Publishing:**
-- [ ] Publish @fenixblack/growthkit to npm registry (v0.3.0 ready!)
-
 **SDK Enhancements (Phase 11):**
 - [ ] Add waitlist state to SDK hook
 - [ ] Create GrowthKitGate component
 - [ ] Update SDK documentation for waitlist
+
+**Phase 12: USD Tracking & Secure Invitations (NEW):**
+- [ ] Add USD value tracking to usage records
+- [ ] Implement unique invitation codes system
+- [ ] Update SDK for USD tracking support
+- [ ] Secure invitation code redemption flow
 
 **Admin Dashboard (Phase 11):**
 - [ ] Waitlist configuration UI
@@ -69,6 +72,8 @@
 **Analytics & Monitoring:**
 - [ ] Waitlist analytics dashboard
 - [ ] Invitation conversion tracking
+- [ ] USD spending analytics
+- [ ] Invitation code usage tracking
 - [ ] Cron job monitoring
 
 **Environment Setup:**
@@ -333,6 +338,205 @@ This phase transforms the basic waitlist into a viral growth engine with:
 
 **Estimated Timeline:** 6 days (see PLAN2.md for detailed breakdown)
 
+## Phase 12: USD Tracking & Secure Invitations
+
+### 12.1 USD Value Tracking
+
+#### Database Updates
+- [ ] Add `usdValue` field to Usage model
+  - [ ] Type: Decimal/Float (nullable)
+  - [ ] Default: null (for backward compatibility)
+  - [ ] Index for aggregation queries
+- [ ] Add `trackUsdValue` boolean to App model
+  - [ ] Default: false
+  - [ ] Allows per-app configuration
+- [ ] Create migration for schema changes
+
+#### API Updates
+- [ ] Update POST /v1/complete endpoint
+  - [ ] Accept optional `usdValue` parameter
+  - [ ] Validate USD value (positive number, max 2 decimal places)
+  - [ ] Store in Usage record if app has USD tracking enabled
+  - [ ] Return USD spent in response
+- [ ] Create GET /v1/admin/metrics/usd endpoint
+  - [ ] Aggregate USD spent by user
+  - [ ] Time-based filtering (daily, weekly, monthly)
+  - [ ] Per-app USD analytics
+  - [ ] Export capabilities for financial reporting
+
+#### SDK Updates (v0.4.0)
+- [ ] Update `completeAction()` method signature
+  - [ ] Add optional `options` parameter: `{ usdValue?: number }`
+  - [ ] Maintain backward compatibility
+  - [ ] Example: `completeAction('purchase', { usdValue: 9.99 })`
+- [ ] Add USD tracking to hook state
+  - [ ] `totalUsdSpent` field
+  - [ ] `lastUsdTransaction` details
+- [ ] Update TypeScript definitions
+
+### 12.2 Unique Invitation Code System
+
+#### Database Updates
+- [ ] Update Waitlist model
+  - [ ] Add `invitationCode` field (unique, indexed)
+  - [ ] Add `fingerprintId` field (link to who redeemed)
+  - [ ] Add `codeUsedAt` timestamp
+  - [ ] Add `codeExpiresAt` timestamp (optional expiration)
+  - [ ] Add `maxUses` field (default: 1, for future flexibility)
+  - [ ] Add `useCount` field (track redemptions)
+- [ ] Create compound unique index on [appId, invitationCode]
+- [ ] Migration for schema changes
+
+#### Code Generation & Management
+- [ ] Create invitation code generator utility
+  - [ ] Use nanoid or similar for short, unique codes (e.g., "INV-X8K2M9")
+  - [ ] Configurable length and format
+  - [ ] Ensure uniqueness per app
+- [ ] Update invitation sending logic
+  - [ ] Generate unique code when status changes to INVITED
+  - [ ] Store code in Waitlist record
+  - [ ] Include code in invitation email
+
+#### Redemption Flow
+- [ ] Create POST /v1/waitlist/redeem endpoint
+  - [ ] Validate invitation code exists and is unused
+  - [ ] Check expiration if set
+  - [ ] Link fingerprint to waitlist entry
+  - [ ] Mark code as used (set codeUsedAt)
+  - [ ] Update waitlist status to ACCEPTED
+  - [ ] Grant configured credits
+  - [ ] Return success with user state
+- [ ] Update GET /r/:code logic
+  - [ ] Check if code is an invitation code format
+  - [ ] Handle invitation codes differently from referral codes
+  - [ ] Redirect to app with special invitation claim
+- [ ] Update POST /v1/me endpoint
+  - [ ] Check for invitation code in claim
+  - [ ] Process invitation redemption
+  - [ ] Prevent multiple redemptions
+
+#### Security Measures
+- [ ] Implement rate limiting on redemption endpoint
+- [ ] Add fingerprint verification
+  - [ ] Store fingerprint on first code use
+  - [ ] Reject if different fingerprint tries to use same code
+- [ ] Add code expiration logic
+  - [ ] Default: 7 days from invitation
+  - [ ] Configurable per app
+- [ ] Audit logging for all redemption attempts
+- [ ] Prevent self-invitation abuse
+
+### 12.3 Email Template Updates
+
+- [ ] Update invitation email template
+  - [ ] Include unique invitation code prominently
+  - [ ] Add expiration date if applicable
+  - [ ] Clear redemption instructions
+  - [ ] Direct link with code embedded: `/invite?code=INV-X8K2M9`
+- [ ] Create reminder email template
+  - [ ] For codes expiring soon
+  - [ ] Re-send code functionality
+
+### 12.4 Admin Dashboard Enhancements
+
+#### USD Analytics Dashboard
+- [ ] Create USD metrics page
+  - [ ] Total revenue per period
+  - [ ] Average transaction value
+  - [ ] User lifetime value (LTV)
+  - [ ] Conversion funnel with USD values
+- [ ] Export functionality
+  - [ ] CSV export for accounting
+  - [ ] Date range selection
+  - [ ] Per-app filtering
+
+#### Invitation Code Management
+- [ ] Invitation codes listing
+  - [ ] Show all codes with status
+  - [ ] Filter by used/unused/expired
+  - [ ] Search by code or email
+- [ ] Manual code generation
+  - [ ] Generate codes for specific users
+  - [ ] Set custom expiration
+  - [ ] Bulk generation option
+- [ ] Code analytics
+  - [ ] Redemption rate
+  - [ ] Time to redemption
+  - [ ] Geographic distribution
+
+### 12.5 Testing & Validation
+
+- [ ] Unit tests
+  - [ ] USD value validation
+  - [ ] Code generation uniqueness
+  - [ ] Redemption flow edge cases
+- [ ] Integration tests
+  - [ ] End-to-end invitation flow
+  - [ ] USD tracking with credits
+  - [ ] Security validation
+- [ ] Load testing
+  - [ ] Code generation at scale
+  - [ ] Concurrent redemption attempts
+
+### 12.6 Documentation
+
+- [ ] API documentation updates
+  - [ ] New endpoints documentation
+  - [ ] Updated parameter descriptions
+  - [ ] Example requests/responses
+- [ ] SDK documentation
+  - [ ] USD tracking examples
+  - [ ] Migration guide to v0.4.0
+- [ ] Admin guide
+  - [ ] Setting up USD tracking
+  - [ ] Managing invitation codes
+  - [ ] Analytics interpretation
+
+### 12.7 Migration & Rollout
+
+- [ ] Migration strategy
+  - [ ] Backward compatibility for existing waitlist entries
+  - [ ] Generate codes for already invited users
+  - [ ] Default USD tracking to disabled
+- [ ] Feature flags
+  - [ ] Enable USD tracking per app
+  - [ ] Enable unique codes per app
+  - [ ] Gradual rollout capability
+- [ ] Monitoring
+  - [ ] Track adoption rates
+  - [ ] Error monitoring
+  - [ ] Performance impact assessment
+
+### Estimated Timeline for Phase 12
+
+- **12.1 USD Value Tracking**: 1.5 days
+  - Database & API updates: 0.5 day
+  - SDK updates: 0.5 day
+  - Admin dashboard: 0.5 day
+
+- **12.2 Unique Invitation Codes**: 2.5 days
+  - Database & code generation: 0.5 day
+  - Redemption flow & security: 1 day
+  - Email updates & testing: 1 day
+
+- **12.3-12.7 Testing, Documentation & Rollout**: 1 day
+
+**Total: ~5 days for complete implementation**
+
+### Implementation Benefits
+
+1. **USD Tracking Benefits:**
+   - ROI measurement for credits/referrals
+   - Financial reporting capabilities
+   - User lifetime value (LTV) tracking
+   - Better pricing decisions
+
+2. **Unique Invitation Code Benefits:**
+   - Prevents invitation sharing abuse
+   - Better tracking of invitation sources
+   - Improved security and user verification
+   - Detailed analytics on invitation effectiveness
+
 ---
 
 ## Implementation Notes
@@ -344,12 +548,20 @@ This phase transforms the basic waitlist into a viral growth engine with:
 4. Phase 8 for production deployment
 5. Phase 9-10 for polish and maintenance
 6. **Phase 11 (Enhanced Waitlist) after core system is stable and deployed**
+7. **Phase 12 (USD Tracking & Secure Invitations) - High priority security & analytics enhancements**
 
 ### Key Decisions Made
 - [x] Use bcrypt for API key hashing (better Vercel compatibility, simpler deployment)
 - [x] Use Resend as email provider (RESEND_API_KEY configured)
 - [ ] Use Free Redis provider tier (Upstash free tier initially)
 - [ ] Determine if multi-tenant support is needed initially: basic
+
+### Phase 12 Technical Decisions
+- **USD Tracking**: Optional per-app feature, stored as decimal with 2 decimal places
+- **Invitation Codes**: Use nanoid for generation, 8-character codes with "INV-" prefix
+- **Code Security**: One-time use by default, fingerprint-locked after first use
+- **Code Expiration**: Default 7 days, configurable per app
+- **Backward Compatibility**: All new features are optional and won't break existing integrations
 
 ### Simplifications for MVP
 - Keep Tenant model but make tenantId nullable initially (single-tenant mode)

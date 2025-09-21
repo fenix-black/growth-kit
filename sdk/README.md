@@ -136,8 +136,11 @@ The main React hook for integrating GrowthKit.
 - `hasClaimedName`: Whether name reward was claimed
 - `hasClaimedEmail`: Whether email reward was claimed
 - `hasVerifiedEmail`: Whether email was verified
-- `isOnWaitlist`: Whether user joined the waitlist
+- `waitlistEnabled`: Whether waitlist is enabled for app
+- `waitlistStatus`: Current waitlist status ('none' | 'waiting' | 'invited' | 'accepted')
 - `waitlistPosition`: Position in waitlist queue
+- `waitlistMessage`: Custom waitlist message
+- `shouldShowWaitlist`: Whether to show waitlist UI
 
 #### Methods
 
@@ -171,6 +174,12 @@ Join the waitlist.
 const success = await gk.joinWaitlist('john@example.com', {
   source: 'landing-page'
 });
+```
+
+##### acceptInvitation()
+Accept waitlist invitation (only available when status is 'invited').
+```ts
+const success = await gk.acceptInvitation();
 ```
 
 ##### share(options?)
@@ -210,6 +219,109 @@ Manually refresh user data.
 ```ts
 await gk.refresh();
 ```
+
+## Waitlist Gating (New in v0.4.0)
+
+### Automatic Waitlist Management
+
+When configured in your GrowthKit dashboard, the SDK automatically handles waitlist gating:
+
+```tsx
+import { GrowthKitGate } from '@fenixblack/growthkit';
+
+function App() {
+  return (
+    <GrowthKitGate config={{ apiKey: 'your-api-key' }}>
+      <YourMainApp />
+    </GrowthKitGate>
+  );
+}
+```
+
+The `GrowthKitGate` component automatically:
+- Shows loading state while initializing
+- Displays waitlist form if app requires it
+- Shows invitation prompt for invited users
+- Renders your app when access is granted
+
+### Waitlist State
+
+The hook exposes waitlist state for custom implementations:
+
+```tsx
+function CustomWaitlist() {
+  const gk = useGrowthKit({ apiKey: 'your-api-key' });
+  
+  if (gk.shouldShowWaitlist) {
+    return (
+      <div>
+        <h2>{gk.waitlistMessage}</h2>
+        <button onClick={() => gk.joinWaitlist('user@email.com')}>
+          Join Waitlist
+        </button>
+      </div>
+    );
+  }
+  
+  if (gk.waitlistStatus === 'invited') {
+    return (
+      <div>
+        <h2>You're invited!</h2>
+        <button onClick={() => gk.acceptInvitation()}>
+          Accept Invitation
+        </button>
+      </div>
+    );
+  }
+  
+  if (gk.waitlistStatus === 'waiting') {
+    return <div>You're #{gk.waitlistPosition} on the waitlist</div>;
+  }
+  
+  return <YourApp />;
+}
+```
+
+### Custom Waitlist Component
+
+Use the built-in `WaitlistForm` or create your own:
+
+```tsx
+import { WaitlistForm } from '@fenixblack/growthkit';
+
+function CustomGate() {
+  const gk = useGrowthKit({ apiKey: 'your-api-key' });
+  
+  if (gk.shouldShowWaitlist) {
+    return (
+      <WaitlistForm 
+        growthKit={gk}
+        message="Join our exclusive beta!"
+        onSuccess={(position) => {
+          console.log(`Joined at position ${position}`);
+        }}
+      />
+    );
+  }
+  
+  return <YourApp />;
+}
+```
+
+### Waitlist Properties
+
+- `waitlistEnabled`: Whether waitlist is enabled for this app
+- `waitlistStatus`: Current status ('none' | 'waiting' | 'invited' | 'accepted')
+- `waitlistPosition`: User's position in queue
+- `waitlistMessage`: Custom message from app configuration
+- `shouldShowWaitlist`: Computed flag for showing waitlist UI
+
+### Master Referral Codes
+
+Users who receive invitation emails get special master referral codes that:
+- Bypass the waitlist automatically
+- Grant bonus credits configured in your dashboard
+- Track invitation source for analytics
 
 ## Next.js Middleware Integration
 

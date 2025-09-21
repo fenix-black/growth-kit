@@ -14,6 +14,17 @@ export interface GrowthKitPolicy {
   actions: Record<string, { creditsRequired: number }>;
 }
 
+export interface WaitlistData {
+  enabled: boolean;
+  status: 'none' | 'waiting' | 'invited' | 'accepted';
+  position: number | null;
+  requiresWaitlist?: boolean;
+  message?: string;
+  invitedAt?: string;
+  acceptedAt?: string;
+  email?: string;
+}
+
 export interface GrowthKitState {
   loading: boolean;
   initialized: boolean;
@@ -26,8 +37,12 @@ export interface GrowthKitState {
   hasClaimedName: boolean;
   hasClaimedEmail: boolean;
   hasVerifiedEmail: boolean;
-  isOnWaitlist: boolean;
+  // Waitlist state
+  waitlistEnabled: boolean;
+  waitlistStatus: 'none' | 'waiting' | 'invited' | 'accepted';
   waitlistPosition: number | null;
+  waitlistMessage?: string;
+  shouldShowWaitlist: boolean;
 }
 
 export interface GrowthKitActions {
@@ -37,6 +52,7 @@ export interface GrowthKitActions {
   claimEmail: (email: string) => Promise<boolean>;
   verifyEmail: (token: string) => Promise<boolean>;
   joinWaitlist: (email: string, metadata?: any) => Promise<boolean>;
+  acceptInvitation: () => Promise<boolean>;
   share: (options?: ShareOptions) => Promise<boolean>;
   getReferralLink: () => string;
   shouldShowSoftPaywall: () => boolean;
@@ -65,6 +81,7 @@ export interface MeResponse {
   hasClaimedName: boolean;
   hasClaimedEmail: boolean;
   hasVerifiedEmail: boolean;
+  waitlist?: WaitlistData;
 }
 
 export interface CompleteResponse {

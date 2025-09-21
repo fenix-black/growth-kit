@@ -1,3 +1,4 @@
+import React, { ReactNode } from 'react';
 import { NextRequest, NextFetchEvent, NextResponse } from 'next/server';
 
 interface GrowthKitConfig {
@@ -16,6 +17,16 @@ interface GrowthKitPolicy {
         creditsRequired: number;
     }>;
 }
+interface WaitlistData {
+    enabled: boolean;
+    status: 'none' | 'waiting' | 'invited' | 'accepted';
+    position: number | null;
+    requiresWaitlist?: boolean;
+    message?: string;
+    invitedAt?: string;
+    acceptedAt?: string;
+    email?: string;
+}
 interface GrowthKitState {
     loading: boolean;
     initialized: boolean;
@@ -28,8 +39,11 @@ interface GrowthKitState {
     hasClaimedName: boolean;
     hasClaimedEmail: boolean;
     hasVerifiedEmail: boolean;
-    isOnWaitlist: boolean;
+    waitlistEnabled: boolean;
+    waitlistStatus: 'none' | 'waiting' | 'invited' | 'accepted';
     waitlistPosition: number | null;
+    waitlistMessage?: string;
+    shouldShowWaitlist: boolean;
 }
 interface GrowthKitActions {
     refresh: () => Promise<void>;
@@ -38,6 +52,7 @@ interface GrowthKitActions {
     claimEmail: (email: string) => Promise<boolean>;
     verifyEmail: (token: string) => Promise<boolean>;
     joinWaitlist: (email: string, metadata?: any) => Promise<boolean>;
+    acceptInvitation: () => Promise<boolean>;
     share: (options?: ShareOptions) => Promise<boolean>;
     getReferralLink: () => string;
     shouldShowSoftPaywall: () => boolean;
@@ -63,6 +78,7 @@ interface MeResponse {
     hasClaimedName: boolean;
     hasClaimedEmail: boolean;
     hasVerifiedEmail: boolean;
+    waitlist?: WaitlistData;
 }
 interface CompleteResponse {
     success: boolean;
@@ -93,6 +109,44 @@ interface WaitlistResponse {
 type GrowthKitHook = GrowthKitState & GrowthKitActions;
 
 declare function useGrowthKit(config: GrowthKitConfig): GrowthKitHook;
+
+interface GrowthKitGateProps {
+    config: GrowthKitConfig;
+    children: ReactNode;
+    waitlistComponent?: ReactNode;
+    loadingComponent?: ReactNode;
+}
+/**
+ * GrowthKitGate component - Gates content behind waitlist when enabled
+ *
+ * @example
+ * ```tsx
+ * <GrowthKitGate config={{ apiKey: 'your-api-key' }}>
+ *   <YourApp />
+ * </GrowthKitGate>
+ * ```
+ */
+declare function GrowthKitGate({ config, children, waitlistComponent, loadingComponent, }: GrowthKitGateProps): React.JSX.Element;
+
+interface WaitlistFormProps {
+    growthKit: GrowthKitHook;
+    message?: string;
+    onSuccess?: (position: number) => void;
+    className?: string;
+    style?: React.CSSProperties;
+}
+/**
+ * Default waitlist form component
+ *
+ * @example
+ * ```tsx
+ * <WaitlistForm
+ *   growthKit={useGrowthKit(config)}
+ *   message="Join our exclusive waitlist!"
+ * />
+ * ```
+ */
+declare function WaitlistForm({ growthKit, message, onSuccess, className, style }: WaitlistFormProps): React.JSX.Element;
 
 interface GrowthKitMiddlewareConfig {
     /**
@@ -224,6 +278,6 @@ declare class GrowthKitAPI {
     trackReferralVisit(claim?: string): Promise<APIResponse<any>>;
 }
 
-declare const VERSION = "0.3.0";
+declare const VERSION = "0.4.0";
 
-export { APIResponse, ClaimResponse, CompleteResponse, GrowthKitAPI, GrowthKitActions, GrowthKitConfig, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, MeResponse, ShareOptions, VERSION, VerifyResponse, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit };
+export { APIResponse, ClaimResponse, CompleteResponse, GrowthKitAPI, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitGateProps, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, MeResponse, ShareOptions, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit };

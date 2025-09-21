@@ -21,8 +21,12 @@ const initialState: GrowthKitState = {
   hasClaimedName: false,
   hasClaimedEmail: false,
   hasVerifiedEmail: false,
-  isOnWaitlist: false,
+  // Waitlist state
+  waitlistEnabled: false,
+  waitlistStatus: 'none',
   waitlistPosition: null,
+  waitlistMessage: undefined,
+  shouldShowWaitlist: false,
 };
 
 export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
@@ -77,6 +81,18 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
         window.history.replaceState({}, '', cleanUrl.toString());
       }
 
+      // Parse waitlist data
+      const waitlistData = data.waitlist;
+      const waitlistEnabled = waitlistData?.enabled || false;
+      const waitlistStatus = waitlistData?.status || 'none';
+      const waitlistPosition = waitlistData?.position || null;
+      const waitlistMessage = waitlistData?.message;
+      
+      // Determine if waitlist gate should show
+      const shouldShowWaitlist = waitlistEnabled && 
+        waitlistStatus === 'none' && 
+        waitlistData?.requiresWaitlist === true;
+
       setState({
         loading: false,
         initialized: true,
@@ -89,8 +105,12 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
         hasClaimedName: data.hasClaimedName,
         hasClaimedEmail: data.hasClaimedEmail,
         hasVerifiedEmail: data.hasVerifiedEmail,
-        isOnWaitlist: false,
-        waitlistPosition: null,
+        // Waitlist state
+        waitlistEnabled,
+        waitlistStatus,
+        waitlistPosition,
+        waitlistMessage,
+        shouldShowWaitlist,
       });
 
       if (config.debug) {
@@ -122,13 +142,33 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
       const response = await apiRef.current.getMe(state.fingerprint);
       
       if (response.success && response.data) {
+        const data = response.data;
+        
+        // Parse waitlist data
+        const waitlistData = data.waitlist;
+        const waitlistEnabled = waitlistData?.enabled || false;
+        const waitlistStatus = waitlistData?.status || 'none';
+        const waitlistPosition = waitlistData?.position || null;
+        const waitlistMessage = waitlistData?.message;
+        
+        // Determine if waitlist gate should show
+        const shouldShowWaitlist = waitlistEnabled && 
+          waitlistStatus === 'none' && 
+          waitlistData?.requiresWaitlist === true;
+        
         setState(prev => ({
           ...prev,
-          credits: response.data!.credits,
-          usage: response.data!.usage,
-          hasClaimedName: response.data!.hasClaimedName,
-          hasClaimedEmail: response.data!.hasClaimedEmail,
-          hasVerifiedEmail: response.data!.hasVerifiedEmail,
+          credits: data.credits,
+          usage: data.usage,
+          hasClaimedName: data.hasClaimedName,
+          hasClaimedEmail: data.hasClaimedEmail,
+          hasVerifiedEmail: data.hasVerifiedEmail,
+          // Waitlist state
+          waitlistEnabled,
+          waitlistStatus,
+          waitlistPosition,
+          waitlistMessage,
+          shouldShowWaitlist,
         }));
       }
     } catch (error) {
@@ -242,7 +282,7 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
     email: string,
     metadata?: any
   ): Promise<boolean> => {
-    if (!apiRef.current || state.isOnWaitlist) return false;
+    if (!apiRef.current || state.waitlistStatus === 'waiting') return false;
 
     try {
       const response = await apiRef.current.joinWaitlist(
@@ -254,7 +294,7 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
       if (response.success && response.data?.joined) {
         setState(prev => ({
           ...prev,
-          isOnWaitlist: true,
+          waitlistStatus: 'waiting',
           waitlistPosition: response.data!.position || null,
         }));
         return true;
@@ -264,7 +304,7 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
       console.error('Join waitlist failed:', error);
       return false;
     }
-  }, [state.fingerprint, state.isOnWaitlist]);
+  }, [state.fingerprint, state.waitlistStatus]);
 
   // Share functionality
   const share = useCallback(async (options?: ShareOptions): Promise<boolean> => {
@@ -327,6 +367,39 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
     return state.credits >= creditsRequired;
   }, [state.credits, state.policy]);
 
+  // Accept waitlist invitation
+  const acceptInvitation = useCallback(async (): Promise<boolean> => {
+    if (!apiRef.current || !state.fingerprint) return false;
+    
+    // Only allow if status is 'invited'
+    if (state.waitlistStatus !== 'invited') {
+      if (config.debug) {
+        console.log('Cannot accept invitation - status is not invited:', state.waitlistStatus);
+      }
+      return false;
+    }
+
+    try {
+      // For now, accepting invitation just means joining/completing registration
+      // The actual status update happens server-side when user takes actions
+      setState(prev => ({
+        ...prev,
+        waitlistStatus: 'accepted',
+        shouldShowWaitlist: false,
+      }));
+      
+      // Refresh to get latest state from server
+      await refresh();
+      
+      return true;
+    } catch (error) {
+      if (config.debug) {
+        console.error('Accept invitation failed:', error);
+      }
+      return false;
+    }
+  }, [state.fingerprint, state.waitlistStatus, config.debug, refresh]);
+
   // Combine state and actions
   const actions: GrowthKitActions = {
     refresh,
@@ -335,6 +408,7 @@ export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
     claimEmail,
     verifyEmail,
     joinWaitlist,
+    acceptInvitation,
     share,
     getReferralLink,
     shouldShowSoftPaywall,

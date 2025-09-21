@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.4.0] - 2025-09-21
+
+### Added
+- **Waitlist Gating System**
+  - New `GrowthKitGate` component for automatic waitlist management
+  - Built-in `WaitlistForm` component with customizable styling
+  - Waitlist state management in `useGrowthKit` hook
+  - `acceptInvitation()` method for invited users
+  - Master referral code support for invitation emails
+
+### Enhanced
+- **Hook State**
+  - Added `waitlistEnabled`, `waitlistStatus`, `waitlistPosition` properties
+  - Added `waitlistMessage` for custom app messages
+  - Added `shouldShowWaitlist` computed property for UI logic
+  - Automatic waitlist data parsing from `/v1/me` response
+
+### Components
+- `GrowthKitGate`: Automatic gating component with loading/error states
+- `WaitlistForm`: Fully-featured waitlist form with position tracking
+
+### Documentation
+- Added comprehensive waitlist documentation
+- Added examples for all waitlist scenarios
+- Updated API reference with new properties and methods
+
 ## [0.3.0] - 2024-09-20
 
 ### Breaking Changes

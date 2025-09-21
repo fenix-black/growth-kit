@@ -15,7 +15,18 @@ export type {
   ClaimResponse,
   VerifyResponse,
   WaitlistResponse,
+  WaitlistData,
 } from './types';
+
+// Component exports
+export {
+  GrowthKitGate,
+  WaitlistForm,
+} from './components';
+export type {
+  GrowthKitGateProps,
+  WaitlistFormProps,
+} from './components';
 
 // Middleware exports for Next.js
 export {
@@ -40,4 +51,4 @@ export { getFingerprint, clearFingerprintCache } from './fingerprint';
 export { GrowthKitAPI } from './api';
 
 // Version
-export const VERSION = '0.3.0';
+export const VERSION = '0.4.0';
