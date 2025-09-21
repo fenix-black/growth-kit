@@ -94,6 +94,8 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
 
 ## Phase 3: Admin Dashboard Updates
 
+**Note:** For comprehensive dashboard UI/UX improvements, see [DASHBOARD-PLAN.md](./DASHBOARD-PLAN.md)
+
 ### 3.1 Waitlist Configuration UI ✅
 - [x] Create waitlist settings section in app management
   - [x] Toggle for waitlist enabled

@@ -2,6 +2,14 @@
 
 A comprehensive referral and growth management service for mini-apps. Provides user fingerprinting, referral tracking, credit systems, lead capture, and waitlist management.
 
+## 📚 Documentation
+
+- [Implementation Plan](./docs/PLAN.md) - Overall project roadmap and completed features
+- [Dashboard UI/UX Plan](./docs/DASHBOARD-PLAN.md) - Admin interface improvement roadmap
+- [API Documentation](./docs/API.md) - Complete API endpoint reference
+- [SDK Documentation](./sdk/README.md) - Client SDK integration guide
+- [Enhanced Waitlist System](./docs/PLAN2.md) - Auto-invitation and waitlist features
+
 ## Features
 
 - 🔐 **API Key Authentication** - Secure app-level authentication

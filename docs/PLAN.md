@@ -60,9 +60,15 @@
 - [ ] Secure invitation code redemption flow
 
 **Admin Dashboard (Phase 11):**
-- [x] Waitlist configuration UI ✅
-- [x] Waitlist management interface ✅
-- [x] Email template editor ✅
+- [x] Waitlist configuration UI ✅ (Basic implementation)
+- [x] Waitlist management interface ✅ (Basic implementation)
+- [x] Email template editor ✅ (Basic implementation)
+- [ ] **UI/UX Overhaul** - See [DASHBOARD-PLAN.md](./DASHBOARD-PLAN.md) for comprehensive improvements:
+  - [ ] Modern navigation system with sidebar
+  - [ ] Enhanced data visualizations and charts
+  - [ ] Improved form UX with wizards
+  - [ ] Mobile responsive design
+  - [ ] Dark mode support
 
 **Phase 8-9:** ✅
 - [x] Deployment configuration (vercel.json)
