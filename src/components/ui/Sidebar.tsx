@@ -17,7 +17,8 @@ import {
   LogOut,
   Plus,
   Search,
-  BarChart3
+  BarChart3,
+  Activity
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -51,16 +52,15 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
       id: 'dashboard', 
       label: 'Dashboard', 
       icon: Home, 
-      href: '/admin',
-      active: pathname === '/admin'
+      href: '/admin/dashboard',
+      active: pathname === '/admin/dashboard' || pathname === '/admin'
     },
     { 
-      id: 'apps', 
-      label: 'Apps', 
+      id: 'apps-list', 
+      label: 'Applications', 
       icon: Package, 
-      href: '#',
-      active: false,
-      isSection: true
+      href: '/admin/apps',
+      active: pathname.startsWith('/admin/apps')
     },
     { 
       id: 'cron', 
