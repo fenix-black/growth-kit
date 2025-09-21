@@ -113,6 +113,8 @@ export default function DashboardOverview() {
 
   const fetchDashboardData = async () => {
     setRefreshing(true);
+    let totalStats = { totalUsers: 0, totalReferrals: 0, totalLeads: 0, totalWaitlist: 0 };
+    
     try {
       // Fetch apps
       const appsResponse = await fetch('/api/v1/admin/app', {
@@ -128,7 +130,7 @@ export default function DashboardOverview() {
         
         // Calculate metrics
         const activeApps = appsList.filter((app: App) => app.isActive).length;
-        const totalStats = appsList.reduce((acc: any, app: App) => ({
+        totalStats = appsList.reduce((acc: any, app: App) => ({
           totalUsers: acc.totalUsers + app._count.fingerprints,
           totalReferrals: acc.totalReferrals + app._count.referrals,
           totalLeads: acc.totalLeads + app._count.leads,

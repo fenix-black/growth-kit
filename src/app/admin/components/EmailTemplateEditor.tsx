@@ -17,10 +17,11 @@ interface EmailTemplates {
 interface EmailTemplateEditorProps {
   appId: string;
   appName: string;
-  onClose: () => void;
+  onClose?: () => void;
+  embedded?: boolean;
 }
 
-export default function EmailTemplateEditor({ appId, appName, onClose }: EmailTemplateEditorProps) {
+export default function EmailTemplateEditor({ appId, appName, onClose, embedded = false }: EmailTemplateEditorProps) {
   const [activeTemplate, setActiveTemplate] = useState<keyof EmailTemplates>('invitation');
   const [templates, setTemplates] = useState<EmailTemplates>({});
   const [loading, setLoading] = useState(true);
@@ -173,24 +174,25 @@ export default function EmailTemplateEditor({ appId, appName, onClose }: EmailTe
 
   const currentTemplate = templates[activeTemplate] || getDefaultTemplate(activeTemplate);
 
-  return (
-    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Email Templates - {appName}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-500"
-            >
-              <span className="text-2xl">&times;</span>
-            </button>
+  const content = (
+    <div className={embedded ? "" : "bg-white rounded-lg shadow-xl max-w-6xl w-full overflow-hidden"}>
+        {!embedded && (
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Email Templates - {appName}
+              </h2>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <span className="text-2xl">&times;</span>
+              </button>
+            </div>
           </div>
-          
-          <div className="mt-4 border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
+        )}
+        <div className={embedded ? "border-b border-gray-200" : "px-6 py-4 border-b border-gray-200"}>
+          <nav className="-mb-px flex space-x-8">
               <button
                 onClick={() => setActiveTemplate('invitation')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
@@ -222,7 +224,6 @@ export default function EmailTemplateEditor({ appId, appName, onClose }: EmailTe
                 Waitlist Confirmation
               </button>
             </nav>
-          </div>
         </div>
 
         <div className="overflow-y-auto p-6" style={{ maxHeight: 'calc(90vh - 200px)' }}>
@@ -307,7 +308,16 @@ export default function EmailTemplateEditor({ appId, appName, onClose }: EmailTe
             </button>
           </div>
         </div>
-      </div>
+    </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+      {content}
     </div>
   );
 }

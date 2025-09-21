@@ -100,17 +100,17 @@ This plan addresses the current limitations of the admin dashboard interface, fo
   - [ ] Bulk export
 
 ### 3.2 App Detail View
-- [ ] Dedicated app dashboard page
-  - [ ] App overview with all settings
-  - [ ] Tabbed interface for different sections
-    - [ ] Overview tab
-    - [ ] Waitlist tab
-    - [ ] Analytics tab
-    - [ ] Settings tab
-    - [ ] API Keys tab
-- [ ] Inline editing for settings
-- [ ] Visual policy editor
-- [ ] API key management with copy buttons
+- [x] Dedicated app dashboard page
+  - [x] App overview with all settings
+  - [x] Tabbed interface for different sections
+    - [x] Overview tab
+    - [x] Waitlist tab
+    - [x] Analytics tab
+    - [x] Settings tab
+    - [x] API Keys tab
+- [x] Inline editing for settings
+- [x] Visual policy editor
+- [x] API key management with copy buttons
 
 ### 3.3 App Creation Wizard
 - [x] Multi-step form with progress indicator
@@ -123,17 +123,19 @@ This plan addresses the current limitations of the admin dashboard interface, fo
 - [ ] Save draft functionality
 - [x] Template selection for common configs
 
-## Phase 4: Waitlist Management UI (2 days)
+## Phase 4: Waitlist Management UI (2 days) ⛔
 
 ### 4.1 Enhanced Waitlist View
+- [x] Embedded waitlist in app detail view
+- [x] Tabbed interface for waitlist management
 - [ ] Kanban board view for waitlist stages
   - [ ] Drag & drop between stages
   - [ ] Visual position indicators
   - [ ] Color coding by wait time
 - [ ] Timeline view showing invitation flow
-- [ ] Batch operations toolbar
-  - [ ] Invite selected users
-  - [ ] Move to position
+- [x] Batch operations toolbar
+  - [x] Invite selected users
+  - [x] Move to position
   - [ ] Add tags/notes
 
 ### 4.2 Invitation Management
@@ -147,13 +149,15 @@ This plan addresses the current limitations of the admin dashboard interface, fo
   - [ ] Time-to-redemption histogram
 
 ### 4.3 Email Template Designer
+- [x] Email template editor embedded in app view
+- [x] Template management for different email types
 - [ ] Visual email editor with live preview
   - [ ] Drag-and-drop blocks
-  - [ ] Variable insertion helper
+  - [x] Variable insertion helper
   - [ ] Mobile/desktop preview toggle
 - [ ] Template gallery
 - [ ] A/B testing setup
-- [ ] Send test email functionality
+- [x] Send test email functionality
 
 ## Phase 5: Analytics & Monitoring (2 days) ✅
 
