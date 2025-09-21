@@ -217,7 +217,7 @@ This plan addresses the current limitations of the admin dashboard interface, fo
 - [ ] Image optimization
 
 ### 6.4 User Preferences
-- [x] Dark mode toggle
+- [x] Dark mode toggle (fully working with Tailwind v4)
 - [x] Theme persistence across sessions
 - [ ] Customizable dashboard layout
 - [ ] Notification preferences

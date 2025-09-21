@@ -30,10 +30,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       setResolvedTheme(systemTheme);
-      root.classList.toggle('dark', systemTheme === 'dark');
+      if (systemTheme === 'dark') {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    } else if (theme === 'dark') {
+      setResolvedTheme('dark');
+      root.classList.add('dark');
     } else {
-      setResolvedTheme(theme);
-      root.classList.toggle('dark', theme === 'dark');
+      setResolvedTheme('light');
+      root.classList.remove('dark');
     }
   }, [theme]);
 
@@ -49,7 +56,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const handleChange = (e: MediaQueryListEvent) => {
         const systemTheme = e.matches ? 'dark' : 'light';
         setResolvedTheme(systemTheme);
-        document.documentElement.classList.toggle('dark', systemTheme === 'dark');
+        if (systemTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
       };
 
       mediaQuery.addEventListener('change', handleChange);

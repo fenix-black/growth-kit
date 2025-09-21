@@ -57,10 +57,10 @@ export default function ThemeSwitcher() {
 
       {isOpen && (
         <div className={cn(
-          'absolute right-0 mt-2 w-40 rounded-md shadow-lg',
+          'absolute bottom-full mb-2 left-0 w-40 rounded-md shadow-lg',
           'bg-white dark:bg-gray-800',
           'border border-gray-200 dark:border-gray-700',
-          'z-50'
+          'z-[100]'
         )}>
           <div className="py-1">
             {options.map((option) => (

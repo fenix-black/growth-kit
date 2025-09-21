@@ -10,11 +10,9 @@
   --foreground: #ededed;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -29,6 +27,24 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Manual dark mode utilities for Tailwind v4 */
+.dark .dark\:bg-gray-900 { background-color: rgb(17 24 39) !important; }
+.dark .dark\:bg-gray-800 { background-color: rgb(31 41 55) !important; }
+.dark .dark\:bg-gray-700 { background-color: rgb(55 65 81) !important; }
+.dark .dark\:bg-blue-900\/20 { background-color: rgb(30 58 138 / 0.2) !important; }
+.dark .dark\:text-white { color: rgb(255 255 255) !important; }
+.dark .dark\:text-gray-100 { color: rgb(243 244 246) !important; }
+.dark .dark\:text-gray-300 { color: rgb(209 213 219) !important; }
+.dark .dark\:text-gray-400 { color: rgb(156 163 175) !important; }
+.dark .dark\:text-gray-500 { color: rgb(107 114 128) !important; }
+.dark .dark\:text-blue-400 { color: rgb(96 165 250) !important; }
+.dark .dark\:border-gray-700 { border-color: rgb(55 65 81) !important; }
+.dark .dark\:border-gray-600 { border-color: rgb(75 85 99) !important; }
+.dark .dark\:hover\:bg-gray-800:hover { background-color: rgb(31 41 55) !important; }
+.dark .dark\:hover\:bg-gray-700:hover { background-color: rgb(55 65 81) !important; }
+.dark .dark\:hover\:text-gray-300:hover { color: rgb(209 213 219) !important; }
+.dark .dark\:ring-gray-800 { --tw-ring-color: rgb(31 41 55) !important; }
 
 /* Custom animations for landing page */
 @keyframes blob {

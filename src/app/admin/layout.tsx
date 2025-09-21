@@ -1,4 +1,5 @@
 import ClientWrapper from './ClientWrapper';
+import ThemeScript from './ThemeScript';
 
 export default function AdminLayout({
   children,
@@ -6,8 +7,11 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClientWrapper>
-      {children}
-    </ClientWrapper>
+    <>
+      <ThemeScript />
+      <ClientWrapper>
+        {children}
+      </ClientWrapper>
+    </>
   );
 }
