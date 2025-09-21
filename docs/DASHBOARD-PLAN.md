@@ -204,10 +204,12 @@ This plan addresses the current limitations of the admin dashboard interface, fo
 - [ ] High contrast mode
 - [ ] Screen reader optimization
 
-### 6.3 Performance
+### 6.3 Performance & Bug Fixes
 - [x] Fixed uncontrolled input errors in App Settings
 - [x] Fixed database field mapping issues (autoInviteEnabled, dailyInviteQuota, inviteTime)
 - [x] Fixed Next.js 15+ dynamic params handling
+- [x] Fixed API key display showing [object Object] - now shows key in modal with copy functionality
+- [x] Added API key name field for better management
 - [ ] Lazy loading for heavy components
 - [ ] Virtual scrolling for large lists
 - [ ] Optimistic UI updates

@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { appId, scope = 'full', expiresIn } = body;
+    const { appId, name = 'API Key', scope = 'full', expiresIn } = body;
 
     if (!appId) {
       return errors.badRequest('Missing required field: appId');
@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
     const apiKey = await prisma.apiKey.create({
       data: {
         appId,
+        name,
         keyHint: hint,
         hashedKey,
         scope,
@@ -96,6 +97,7 @@ export async function GET(request: NextRequest) {
       where: { appId },
       select: {
         id: true,
+        name: true,
         keyHint: true,
         scope: true,
         isActive: true,

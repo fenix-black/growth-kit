@@ -52,11 +52,13 @@ interface AppDetails {
   };
   apiKeys?: Array<{
     id: string;
-    key: string;
     name: string;
+    keyHint: string;
+    scope: string;
     createdAt: string;
     lastUsedAt?: string;
     isActive: boolean;
+    expiresAt?: string;
   }>;
 }
 
@@ -79,6 +81,8 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
   const [isSaving, setIsSaving] = useState(false);
   const [showCopySuccess, setShowCopySuccess] = useState<string | null>(null);
   const [editedApp, setEditedApp] = useState<Partial<AppDetails>>({});
+  const [newApiKey, setNewApiKey] = useState<string | null>(null);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
 
   useEffect(() => {
     fetchAppDetails();
@@ -202,12 +206,6 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
     }
   };
 
-  const handleCopyApiKey = (key: string, keyId: string) => {
-    navigator.clipboard.writeText(key);
-    setShowCopySuccess(keyId);
-    setTimeout(() => setShowCopySuccess(null), 2000);
-  };
-
   const handleCreateApiKey = async () => {
     const name = prompt('Enter a name for the new API key:');
     if (!name) return;
@@ -224,7 +222,10 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
 
       if (response.ok) {
         const data = await response.json();
-        alert(`API Key created: ${data.data.apiKey}\n\nSave this key, it won't be shown again!`);
+        // The API key is in data.data.apiKey.key
+        const apiKeyValue = data.data.apiKey.key;
+        setNewApiKey(apiKeyValue);
+        setShowApiKeyModal(true);
         fetchAppDetails();
       } else {
         const error = await response.json();
@@ -678,27 +679,19 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           {app.apiKeys && app.apiKeys.length > 0 ? (
             <div className="space-y-3">
               {app.apiKeys.map((apiKey) => (
-                <div key={apiKey.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div key={apiKey.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{apiKey.name}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{apiKey.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Created: {new Date(apiKey.createdAt).toLocaleDateString()}
                       {apiKey.lastUsedAt && ` | Last used: ${new Date(apiKey.lastUsedAt).toLocaleDateString()}`}
+                      {apiKey.expiresAt && ` | Expires: ${new Date(apiKey.expiresAt).toLocaleDateString()}`}
                     </p>
                     <div className="flex items-center mt-2 space-x-2">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        {apiKey.key.substring(0, 20)}...
+                      <code className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-2 py-1 rounded font-mono">
+                        {apiKey.keyHint}****
                       </code>
-                      <button
-                        onClick={() => handleCopyApiKey(apiKey.key, apiKey.id)}
-                        className="text-gray-500 hover:text-gray-700"
-                      >
-                        {showCopySuccess === apiKey.id ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </button>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Key hint (full key hidden)</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -741,6 +734,47 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           embedded={true}
           onClose={() => setActiveTab('overview')}
         />
+      )}
+
+      {/* API Key Modal */}
+      {showApiKeyModal && newApiKey && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+              API Key Created Successfully
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Save this key now. It won't be shown again!
+            </p>
+            <div className="bg-gray-100 dark:bg-gray-700 rounded p-4 mb-4">
+              <code className="text-sm text-gray-900 dark:text-gray-100 break-all font-mono">
+                {newApiKey}
+              </code>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  navigator.clipboard.writeText(newApiKey);
+                  setShowCopySuccess('modal');
+                  setTimeout(() => setShowCopySuccess(null), 2000);
+                }}
+                icon={showCopySuccess === 'modal' ? <CheckCircle className="h-5 w-5 text-green-600" /> : <Copy className="h-5 w-5" />}
+              >
+                {showCopySuccess === 'modal' ? 'Copied!' : 'Copy to Clipboard'}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setShowApiKeyModal(false);
+                  setNewApiKey(null);
+                }}
+              >
+                Done
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </DashboardLayout>
   );

@@ -70,6 +70,7 @@ model App {
 model ApiKey {
   id         String    @id @default(cuid())
   appId      String
+  name       String    @default("API Key") // User-friendly name for the API key
   keyHint    String    // First 8 chars of the unhashed key for identification
   hashedKey  String    // bcrypt hashed API key
   scope      String    @default("full") // "full", "read", "write"
