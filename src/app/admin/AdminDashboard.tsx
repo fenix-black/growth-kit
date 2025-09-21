@@ -6,6 +6,7 @@ import WaitlistManager from './components/WaitlistManager';
 import EmailTemplateEditor from './components/EmailTemplateEditor';
 import UsdMetricsDashboard from './components/UsdMetricsDashboard';
 import InvitationCodesManager from './components/InvitationCodesManager';
+import CronJobMonitor from './components/CronJobMonitor';
 
 interface App {
   id: string;
@@ -31,6 +32,7 @@ export default function AdminDashboard() {
   const [showEmailEditor, setShowEmailEditor] = useState(false);
   const [showUsdMetrics, setShowUsdMetrics] = useState(false);
   const [showInvitationCodes, setShowInvitationCodes] = useState(false);
+  const [showCronMonitor, setShowCronMonitor] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -138,6 +140,12 @@ export default function AdminDashboard() {
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold text-gray-900">GrowthKit Admin</h1>
               <div className="space-x-4">
+                <button
+                  onClick={() => setShowCronMonitor(true)}
+                  className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 cursor-pointer"
+                >
+                  ⏰ Cron Monitor
+                </button>
                 <button
                   onClick={() => setShowCreateForm(!showCreateForm)}
                   className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 cursor-pointer"
@@ -435,6 +443,25 @@ export default function AdminDashboard() {
                 appId={selectedApp.id}
                 appName={selectedApp.name}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCronMonitor && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Cron Job Monitor - All Apps</h2>
+                <button
+                  onClick={() => setShowCronMonitor(false)}
+                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+              <CronJobMonitor />
             </div>
           </div>
         </div>
