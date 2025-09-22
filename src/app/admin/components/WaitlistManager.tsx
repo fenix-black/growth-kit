@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import InvitationTracker from './InvitationTracker';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface WaitlistEntry {
   id: string;
@@ -41,6 +42,7 @@ interface WaitlistManagerProps {
 }
 
 export default function WaitlistManager({ appId, appName, onClose, embedded = false }: WaitlistManagerProps) {
+  const focusTrapRef = useFocusTrap(!embedded);
   const [activeTab, setActiveTab] = useState<'entries' | 'settings' | 'invitations'>('entries');
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
@@ -267,7 +269,9 @@ export default function WaitlistManager({ appId, appName, onClose, embedded = fa
   }
 
   const content = (
-    <div className={embedded ? "" : "bg-white rounded-lg shadow-xl max-w-6xl w-full overflow-hidden"}>
+    <div 
+      ref={!embedded ? focusTrapRef : undefined}
+      className={embedded ? "" : "bg-white rounded-lg shadow-xl max-w-6xl w-full overflow-hidden"}>
         {!embedded && (
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
@@ -635,9 +639,10 @@ export default function WaitlistManager({ appId, appName, onClose, embedded = fa
   );
 
   // Invitation Preview Modal
+  const invitationModalRef = useFocusTrap(showInviteModal);
   const invitationModal = showInviteModal && invitePreview && (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-[60]">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full overflow-hidden">
+      <div ref={invitationModalRef} className="bg-white rounded-lg shadow-xl max-w-2xl w-full overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">Invitation Preview</h3>

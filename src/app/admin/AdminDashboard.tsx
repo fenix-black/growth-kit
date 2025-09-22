@@ -8,7 +8,6 @@ const WaitlistManager = lazy(() => import('./components/WaitlistManager'));
 const EmailTemplateEditor = lazy(() => import('./components/EmailTemplateEditor'));
 const UsdMetricsDashboard = lazy(() => import('./components/UsdMetricsDashboard'));
 const InvitationCodesManager = lazy(() => import('./components/InvitationCodesManager'));
-const CronJobMonitor = lazy(() => import('./components/CronJobMonitor'));
 import DashboardLayout from '@/components/ui/DashboardLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
@@ -54,7 +53,6 @@ export default function AdminDashboard() {
   const [showEmailEditor, setShowEmailEditor] = useState(false);
   const [showUsdMetrics, setShowUsdMetrics] = useState(false);
   const [showInvitationCodes, setShowInvitationCodes] = useState(false);
-  const [showCronMonitor, setShowCronMonitor] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('grid');
   const [formData, setFormData] = useState({
@@ -200,7 +198,7 @@ export default function AdminDashboard() {
             <Button
               variant="ghost"
               icon={<Clock size={20} />}
-              onClick={() => setShowCronMonitor(true)}
+              onClick={() => router.push('/admin/cron')}
             >
               Cron Monitor
             </Button>
@@ -642,27 +640,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {showCronMonitor && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Cron Job Monitor - All Apps</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowCronMonitor(false)}
-                >
-                  ✕
-                </Button>
-              </div>
-              <Suspense fallback={<div className="text-center py-4">Loading cron monitor...</div>}>
-                <CronJobMonitor />
-              </Suspense>
-            </div>
-          </div>
-        </div>
-      )}
     </DashboardLayout>
   );
 }
