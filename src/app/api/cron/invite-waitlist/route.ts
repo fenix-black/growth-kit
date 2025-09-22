@@ -33,8 +33,10 @@ export async function GET(request: NextRequest) {
     });
 
     const results = [];
+    let totalInvited = 0;
 
     for (const app of appsToProcess) {
+      const startTime = Date.now();
       try {
         // Get the next batch of waiting users for this app
         const waitingUsers = await prisma.waitlist.findMany({
@@ -144,6 +146,27 @@ export async function GET(request: NextRequest) {
           }
         }
 
+        const duration = Date.now() - startTime;
+        totalInvited += invitedCount;
+        
+        // Log cron execution event
+        await prisma.eventLog.create({
+          data: {
+            appId: app.id,
+            event: 'cron.invite_waitlist',
+            entityType: 'cron',
+            metadata: {
+              appName: app.name,
+              invitedCount,
+              totalProcessed: waitingUsers.length,
+              errors: errors.length > 0 ? errors.map(e => e.error) : [],
+              dailyQuota: app.dailyInviteQuota,
+              duration,
+              status: errors.length === 0 ? 'success' : invitedCount > 0 ? 'partial' : 'failed',
+            },
+          },
+        });
+        
         results.push({
           appId: app.id,
           appName: app.name,
@@ -152,6 +175,26 @@ export async function GET(request: NextRequest) {
           errors: errors.length > 0 ? errors : undefined,
         });
       } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        // Log failed cron execution
+        await prisma.eventLog.create({
+          data: {
+            appId: app.id,
+            event: 'cron.invite_waitlist',
+            entityType: 'cron',
+            metadata: {
+              appName: app.name,
+              invitedCount: 0,
+              totalProcessed: 0,
+              errors: [error.message],
+              dailyQuota: app.dailyInviteQuota,
+              duration,
+              status: 'failed',
+            },
+          },
+        });
+        
         results.push({
           appId: app.id,
           appName: app.name,
@@ -164,6 +207,7 @@ export async function GET(request: NextRequest) {
     return successResponse({
       processed: appsToProcess.length,
       time: currentTime,
+      totalInvited,
       results,
     });
   } catch (error: any) {

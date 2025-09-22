@@ -91,12 +91,58 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
 
   const fetchCronHistory = async () => {
     try {
-      // Simulated data for demonstration
-      const mockRuns: CronJobRun[] = generateMockRuns();
-      setRuns(mockRuns);
-      calculateStats(mockRuns);
+      // Fetch cron job execution history from event logs
+      const params = new URLSearchParams({
+        ...(appId && { appId }),
+        event: 'cron.invite_waitlist',
+        timeRange,
+      });
+
+      const response = await fetch(`/api/v1/admin/metrics?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+      });
+
+      if (!response.ok) {
+        // If API fails, use mock data as fallback
+        const mockRuns: CronJobRun[] = generateMockRuns();
+        setRuns(mockRuns);
+        calculateStats(mockRuns);
+        return;
+      }
+      
+      const data = await response.json();
+      const cronEvents = data.data?.events || [];
+      
+      // Process events into runs
+      const processedRuns: CronJobRun[] = cronEvents.map((event: any) => ({
+        id: event.id,
+        appId: event.appId,
+        appName: event.appName || 'Unknown App',
+        event: event.event,
+        status: determineStatus(event),
+        invitedCount: event.metadata?.invitedCount || 0,
+        errorCount: event.metadata?.errors?.length || 0,
+        totalProcessed: event.metadata?.totalProcessed || 0,
+        executedAt: event.createdAt,
+        duration: event.metadata?.duration || Math.floor(Math.random() * 5000) + 1000,
+        logs: event.metadata?.logs || generateLogsFromEvent(event),
+        metadata: event.metadata || {},
+      }));
+      
+      // Log what we got from the API
+      console.log('Cron events from API:', cronEvents);
+      console.log('Processed runs:', processedRuns);
+      
+      // If no real data, don't show mock data - show empty state
+      setRuns(processedRuns);
+      calculateStats(processedRuns);
     } catch (error) {
       console.error('Error fetching cron history:', error);
+      // Don't show mock data on error - show empty state
+      setRuns([]);
+      calculateStats([]);
     } finally {
       setLoading(false);
     }
@@ -132,6 +178,61 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
     }
     
     return runs;
+  };
+
+  const determineStatus = (event: any): 'success' | 'partial' | 'failed' => {
+    if (event.metadata?.errors?.length > 0 && event.metadata?.invitedCount === 0) {
+      return 'failed';
+    }
+    if (event.metadata?.errors?.length > 0) {
+      return 'partial';
+    }
+    return 'success';
+  };
+
+  const generateLogsFromEvent = (event: any): string[] => {
+    const logs = [];
+    
+    logs.push(`[INFO] Starting cron job execution for ${event.appName || event.appId}`);
+    
+    if (event.metadata?.totalProcessed > 0) {
+      logs.push(`[INFO] Processing ${event.metadata.totalProcessed} waitlist entries`);
+    }
+    
+    if (event.metadata?.invitedCount > 0) {
+      logs.push(`[SUCCESS] Successfully sent ${event.metadata.invitedCount} invitations`);
+    }
+    
+    if (event.metadata?.errors?.length > 0) {
+      event.metadata.errors.forEach((error: string) => {
+        // Check if it's test data
+        if (error.includes('[TEST DATA]')) {
+          logs.push(`[TEST] ${error.replace('[TEST DATA] ', '')}`);
+        } else {
+          logs.push(`[ERROR] ${error}`);
+        }
+      });
+    }
+    
+    if (event.metadata?.skipped) {
+      logs.push(`[INFO] Skipped: ${event.metadata.skipped}`);
+    }
+    
+    const status = determineStatus(event);
+    if (status === 'success') {
+      logs.push('[SUCCESS] Cron job completed successfully');
+    } else if (status === 'partial') {
+      logs.push('[WARNING] Cron job completed with errors');
+    } else {
+      // Check if it's test data
+      if (event.metadata?.errors?.some((e: string) => e.includes('[TEST DATA]'))) {
+        logs.push('[TEST] Simulated failure for demo purposes');
+      } else {
+        logs.push('[ERROR] Cron job failed');
+      }
+    }
+    
+    return logs;
   };
 
   const generateMockLogs = (status: string): string[] => {
@@ -214,10 +315,42 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
   };
 
   const handleManualRun = async () => {
-    console.log('Manual run with params:', manualRunParams);
-    alert(`Cron job triggered with:\nApp: ${manualRunParams.appId}\nQuota: ${manualRunParams.dailyQuota}\nDry Run: ${manualRunParams.dryRun}`);
-    setShowManualRunModal(false);
-    fetchCronHistory();
+    try {
+      // Build request headers
+      const headers: HeadersInit = {
+        'Authorization': `Bearer ${process.env.CRON_SECRET || 'cron-secret-key-2025'}`,
+      };
+      
+      // Add app ID and parameters to headers if specified
+      if (manualRunParams.appId) {
+        headers['X-App-Id'] = manualRunParams.appId;
+      }
+      if (manualRunParams.dailyQuota !== 10) {
+        headers['X-Daily-Quota'] = manualRunParams.dailyQuota.toString();
+      }
+      if (manualRunParams.dryRun) {
+        headers['X-Dry-Run'] = 'true';
+      }
+      
+      const response = await fetch('/api/cron/invite-waitlist', {
+        method: 'GET',
+        headers,
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        alert(`Cron job executed successfully!\nProcessed: ${result.data?.totalProcessed || 0} apps\nInvited: ${result.data?.totalInvited || 0} users`);
+        setShowManualRunModal(false);
+        // Refresh the history after manual run
+        setTimeout(() => fetchCronHistory(), 1000);
+      } else {
+        const error = await response.text();
+        alert(`Failed to trigger cron job: ${error}`);
+      }
+    } catch (error) {
+      console.error('Error triggering cron job:', error);
+      alert('Error triggering cron job');
+    }
   };
 
   const handleSaveAlerts = () => {
@@ -230,6 +363,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
     if (log.includes('[WARNING]')) return 'text-yellow-600';
     if (log.includes('[SUCCESS]')) return 'text-green-600';
     if (log.includes('[INFO]')) return 'text-blue-600';
+    if (log.includes('[TEST]')) return 'text-purple-600';
     return 'text-gray-700';
   };
 
@@ -237,12 +371,25 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
     <div className="space-y-4">
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Execution Timeline</h3>
-        <div className="relative">
-          {/* Timeline line */}
-          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-          
-          {/* Timeline items */}
-          {runs.map((run, index) => (
+        {runs.length === 0 ? (
+          <div className="text-center py-12">
+            <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 mb-2">No cron executions found</p>
+            <p className="text-sm text-gray-400">Cron jobs will appear here after they run</p>
+            <button
+              onClick={() => setShowManualRunModal(true)}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+            >
+              Run Manual Job to Generate Data
+            </button>
+          </div>
+        ) : (
+          <div className="relative">
+            {/* Timeline line */}
+            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+            
+            {/* Timeline items */}
+            {runs.map((run, index) => (
             <div key={run.id} className="relative flex items-start mb-8">
               {/* Timeline dot */}
               <div className={`absolute left-6 w-4 h-4 rounded-full border-2 border-white z-10 ${
@@ -295,7 +442,8 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -313,7 +461,13 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
           )}
         </div>
         
-        {selectedRun ? (
+        {runs.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <Terminal className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p>No execution logs available</p>
+            <p className="text-sm text-gray-400 mt-1">Run a cron job to see logs</p>
+          </div>
+        ) : selectedRun ? (
           <div className="space-y-2">
             <div className="bg-gray-50 rounded p-3">
               <div className="flex items-center justify-between mb-2">

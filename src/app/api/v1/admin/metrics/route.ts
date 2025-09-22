@@ -10,12 +10,72 @@ export async function GET(request: NextRequest) {
       return errors.forbidden();
     }
 
-    // Get app ID from query params (optional)
+    // Get query params
     const { searchParams } = new URL(request.url);
     const appId = searchParams.get('appId');
+    const event = searchParams.get('event');
+    const timeRange = searchParams.get('timeRange');
 
     // Base filter
     const appFilter = appId ? { appId } : {};
+    
+    // If requesting specific event logs (like cron jobs)
+    if (event) {
+      // Calculate date range
+      let dateFilter = {};
+      if (timeRange) {
+        const now = new Date();
+        let startDate: Date;
+        
+        switch (timeRange) {
+          case '24h':
+            startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            break;
+          case '7d':
+            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            break;
+          case '30d':
+            startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            break;
+          default:
+            startDate = new Date(0); // All time
+        }
+        
+        dateFilter = { createdAt: { gte: startDate } };
+      }
+      
+      // Fetch event logs
+      const events = await prisma.eventLog.findMany({
+        where: {
+          ...appFilter,
+          event,
+          ...dateFilter,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+        include: {
+          app: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+      
+      // Format events for cron job monitor
+      const formattedEvents = events.map(e => ({
+        id: e.id,
+        appId: e.appId,
+        appName: e.app?.name || 'Unknown App',
+        event: e.event,
+        metadata: e.metadata || {},
+        createdAt: e.createdAt.toISOString(),
+      }));
+      
+      return successResponse({
+        events: formattedEvents,
+      });
+    }
 
     // Get overall metrics
     const [
@@ -74,7 +134,9 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
         take: 100,
         select: {
+          id: true,
           event: true,
+          metadata: true,
           createdAt: true,
         },
       }),
