@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/ui/DashboardLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-
-// Lazy load the cron monitor component
-const CronJobMonitor = lazy(() => import('../components/CronJobMonitorEnhanced'));
+import CronJobMonitor from '../components/CronJobMonitorEnhanced';
+// import CronJobMonitor from '../components/CronJobMonitorSimple';
 
 interface App {
   id: string;
@@ -28,15 +27,16 @@ export default function CronDashboardPage() {
 
   const fetchApps = async () => {
     try {
-      const response = await fetch('/api/v1/admin/app', {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
+      // Use the secure proxy endpoint
+      const response = await fetch('/api/admin/proxy/apps');
       
       if (response.ok) {
         const data = await response.json();
-        setApps(data.data.apps || []);
+        setApps(data.data?.apps || []);
+      } else if (response.status === 401) {
+        // User not authenticated, redirect to login
+        router.push('/admin/login');
+        return;
       }
     } catch (error) {
       console.error('Error fetching apps:', error);
@@ -84,15 +84,7 @@ export default function CronDashboardPage() {
       />
 
       <div className="mt-6">
-        <Suspense 
-          fallback={
-            <div className="flex items-center justify-center py-12">
-              <div className="text-gray-500">Loading cron job monitor...</div>
-            </div>
-          }
-        >
-          <CronJobMonitor />
-        </Suspense>
+        <CronJobMonitor />
       </div>
     </DashboardLayout>
   );

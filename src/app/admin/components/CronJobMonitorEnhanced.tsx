@@ -65,6 +65,7 @@ interface CronJobMonitorProps {
 }
 
 export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonitorProps) {
+  
   const [activeTab, setActiveTab] = useState<'timeline' | 'logs' | 'metrics' | 'alerts'>('timeline');
   const [runs, setRuns] = useState<CronJobRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<CronJobRun | null>(null);
@@ -85,6 +86,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
     dailyQuota: 10,
     dryRun: false,
   });
+  const [isRunning, setIsRunning] = useState(false);
   const [alertConfig, setAlertConfig] = useState<AlertConfig>({
     enabled: false,
     failureThreshold: 3,
@@ -98,22 +100,34 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
     return () => clearInterval(interval);
   }, [appId, timeRange]);
 
+  // Also fetch apps when modal opens
+  useEffect(() => {
+    if (showManualRunModal && apps.length === 0) {
+      fetchApps();
+    }
+  }, [showManualRunModal]);
+
   const fetchApps = async () => {
     try {
-      const response = await fetch('/api/v1/admin/app', {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
+      // Use secure proxy endpoint that checks admin session
+      const response = await fetch('/api/admin/proxy/apps');
       
       if (response.ok) {
         const data = await response.json();
         const allApps = data.data?.apps || [];
-        // Filter to show apps with auto-invite enabled or all apps
         setApps(allApps);
+      } else {
+        console.error('Failed to fetch apps:', response.status, response.statusText);
+        // If unauthorized, the user needs to login again
+        if (response.status === 401) {
+          // Set empty apps array so component doesn't break
+          setApps([]);
+        }
       }
     } catch (error) {
       console.error('Error fetching apps:', error);
+      // Set empty apps array so component doesn't break
+      setApps([]);
     }
   };
 
@@ -126,17 +140,15 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
         timeRange,
       });
 
-      const response = await fetch(`/api/v1/admin/metrics?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
+      // Use secure proxy endpoint
+      const response = await fetch(`/api/admin/proxy/metrics?${params}`);
 
       if (!response.ok) {
-        // If API fails, use mock data as fallback
-        const mockRuns: CronJobRun[] = generateMockRuns();
-        setRuns(mockRuns);
-        calculateStats(mockRuns);
+        console.error('Failed to fetch cron history:', response.status);
+        // Don't show mock data, just show empty state
+        setRuns([]);
+        calculateStats([]);
+        setLoading(false);
         return;
       }
       
@@ -160,8 +172,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
       }));
       
       // Log what we got from the API
-      console.log('Cron events from API:', cronEvents);
-      console.log('Processed runs:', processedRuns);
+      // Process events and update state
       
       // If no real data, don't show mock data - show empty state
       setRuns(processedRuns);
@@ -343,49 +354,61 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
   };
 
   const handleManualRun = async () => {
+    setIsRunning(true);
+    
     try {
-      // Build request headers
+      // Prepare headers for manual cron trigger
       const headers: HeadersInit = {
-        'Authorization': `Bearer ${process.env.CRON_SECRET || 'cron-secret-key-2025'}`,
+        'Content-Type': 'application/json',
       };
       
-      // Add app ID and parameters to headers if specified
-      if (manualRunParams.appId && manualRunParams.appId !== 'all') {
+      if (manualRunParams.appId !== 'all') {
         headers['X-App-Id'] = manualRunParams.appId;
       }
-      if (manualRunParams.dailyQuota !== 10) {
-        headers['X-Daily-Quota'] = manualRunParams.dailyQuota.toString();
-      }
-      if (manualRunParams.dryRun) {
-        headers['X-Dry-Run'] = 'true';
-      }
+      headers['X-Daily-Quota'] = String(manualRunParams.dailyQuota);
+      headers['X-Dry-Run'] = String(manualRunParams.dryRun);
       
-      const response = await fetch('/api/cron/invite-waitlist', {
-        method: 'GET',
+      // Use secure proxy endpoint for manual cron trigger
+      const response = await fetch('/api/admin/proxy/cron', {
+        method: 'POST',
         headers,
       });
       
       if (response.ok) {
         const result = await response.json();
+        
         const appName = manualRunParams.appId === 'all' 
           ? 'All Apps' 
           : apps.find(a => a.id === manualRunParams.appId)?.name || 'Selected App';
-        alert(`Cron job executed successfully!\nApp: ${appName}\nProcessed: ${result.data?.totalProcessed || 0} apps\nInvited: ${result.data?.totalInvited || 0} users`);
+        
+        // Show result message
+        const message = `Cron job executed successfully!\nApp: ${appName}\nProcessed: ${result.data?.totalProcessed || result.totalProcessed || 0} entries\nInvited: ${result.data?.totalInvited || result.totalInvited || 0} users${manualRunParams.dryRun ? '\n(Dry run - no actual invites sent)' : ''}`;
+        alert(message);
+        
         setShowManualRunModal(false);
         // Refresh the history after manual run
         setTimeout(() => fetchCronHistory(), 1000);
       } else {
-        const error = await response.text();
-        alert(`Failed to trigger cron job: ${error}`);
+        const errorText = await response.text();
+        
+        // Try to parse as JSON first
+        try {
+          const errorJson = JSON.parse(errorText);
+          alert(`Failed to trigger cron job: ${errorJson.error || errorJson.message || errorText}`);
+        } catch {
+          alert(`Failed to trigger cron job: ${errorText}`);
+        }
       }
     } catch (error) {
       console.error('Error triggering cron job:', error);
-      alert('Error triggering cron job');
+      alert(`Error triggering cron job: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsRunning(false);
     }
   };
 
   const handleSaveAlerts = () => {
-    console.log('Saving alert configuration:', alertConfig);
+    // Save alert configuration
     alert('Alert configuration saved!');
   };
 
@@ -678,7 +701,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Loading cron job monitor...</div>
+        <div className="text-gray-500">Loading cron data... (loading={String(loading)})</div>
       </div>
     );
   }
@@ -789,9 +812,25 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
 
       {/* Manual Run Modal */}
       {showManualRunModal && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <div 
+          className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowManualRunModal(false);
+            }
+          }}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-lg font-medium text-gray-900 mb-4">Manual Cron Run</h3>
+            
+            {isRunning && (
+              <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md text-sm">
+                Processing... Please wait while the cron job executes.
+              </div>
+            )}
             
             <div className="space-y-4">
               <div>
@@ -871,10 +910,16 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleManualRun}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                disabled={isRunning}
+                className={`px-4 py-2 text-white rounded-md ${
+                  isRunning 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                }`}
               >
-                Run Now
+                {isRunning ? 'Running...' : 'Run Now'}
               </button>
             </div>
           </div>
