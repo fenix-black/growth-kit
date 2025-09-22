@@ -114,3 +114,42 @@ export async function POST(request: NextRequest) {
     return errors.serverError();
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    // Get auth token
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return errors.unauthorized();
+    }
+
+    const token = authHeader.substring(7);
+    const expectedToken = process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025';
+    
+    if (token !== expectedToken) {
+      return errors.forbidden();
+    }
+
+    const body = await request.json();
+    const { appId, entryId, metadata } = body;
+
+    if (!appId || !entryId) {
+      return errors.badRequest('appId and entryId are required');
+    }
+
+    // Update waitlist entry metadata
+    const entry = await prisma.waitlist.update({
+      where: {
+        id: entryId,
+      },
+      data: {
+        metadata: metadata || {},
+      },
+    });
+
+    return successResponse({ entry });
+  } catch (error) {
+    console.error('Error updating waitlist entry:', error);
+    return errors.serverError();
+  }
+}

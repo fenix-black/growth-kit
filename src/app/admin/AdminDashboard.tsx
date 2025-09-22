@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import WaitlistManager from './components/WaitlistManager';
-import EmailTemplateEditor from './components/EmailTemplateEditor';
-import UsdMetricsDashboard from './components/UsdMetricsDashboard';
-import InvitationCodesManager from './components/InvitationCodesManager';
-import CronJobMonitor from './components/CronJobMonitor';
+
+// Lazy load heavy components
+const WaitlistManager = lazy(() => import('./components/WaitlistManager'));
+const EmailTemplateEditor = lazy(() => import('./components/EmailTemplateEditor'));
+const UsdMetricsDashboard = lazy(() => import('./components/UsdMetricsDashboard'));
+const InvitationCodesManager = lazy(() => import('./components/InvitationCodesManager'));
+const CronJobMonitor = lazy(() => import('./components/CronJobMonitor'));
 import DashboardLayout from '@/components/ui/DashboardLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
@@ -550,26 +552,38 @@ export default function AdminDashboard() {
 
       {/* Modals */}
       {showWaitlistManager && selectedApp && (
-        <WaitlistManager
-          appId={selectedApp.id}
-          appName={selectedApp.name}
-          onClose={() => {
-            setShowWaitlistManager(false);
-            setSelectedApp(null);
-            fetchApps();
-          }}
-        />
+        <Suspense fallback={
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+            <div className="text-white">Loading Waitlist Manager...</div>
+          </div>
+        }>
+          <WaitlistManager
+            appId={selectedApp.id}
+            appName={selectedApp.name}
+            onClose={() => {
+              setShowWaitlistManager(false);
+              setSelectedApp(null);
+              fetchApps();
+            }}
+          />
+        </Suspense>
       )}
       
       {showEmailEditor && selectedApp && (
-        <EmailTemplateEditor
-          appId={selectedApp.id}
-          appName={selectedApp.name}
-          onClose={() => {
-            setShowEmailEditor(false);
-            setSelectedApp(null);
-          }}
-        />
+        <Suspense fallback={
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+            <div className="text-white">Loading Email Template Editor...</div>
+          </div>
+        }>
+          <EmailTemplateEditor
+            appId={selectedApp.id}
+            appName={selectedApp.name}
+            onClose={() => {
+              setShowEmailEditor(false);
+              setSelectedApp(null);
+            }}
+          />
+        </Suspense>
       )}
 
       {showUsdMetrics && selectedApp && (
@@ -589,10 +603,12 @@ export default function AdminDashboard() {
                   ✕
                 </Button>
               </div>
-              <UsdMetricsDashboard
-                appId={selectedApp.id}
-                appName={selectedApp.name}
-              />
+              <Suspense fallback={<div className="text-center py-4">Loading metrics...</div>}>
+                <UsdMetricsDashboard
+                  appId={selectedApp.id}
+                  appName={selectedApp.name}
+                />
+              </Suspense>
             </div>
           </div>
         </div>
@@ -615,10 +631,12 @@ export default function AdminDashboard() {
                   ✕
                 </Button>
               </div>
-              <InvitationCodesManager
-                appId={selectedApp.id}
-                appName={selectedApp.name}
-              />
+              <Suspense fallback={<div className="text-center py-4">Loading invitation codes...</div>}>
+                <InvitationCodesManager
+                  appId={selectedApp.id}
+                  appName={selectedApp.name}
+                />
+              </Suspense>
             </div>
           </div>
         </div>
@@ -638,7 +656,9 @@ export default function AdminDashboard() {
                   ✕
                 </Button>
               </div>
-              <CronJobMonitor />
+              <Suspense fallback={<div className="text-center py-4">Loading cron monitor...</div>}>
+                <CronJobMonitor />
+              </Suspense>
             </div>
           </div>
         </div>

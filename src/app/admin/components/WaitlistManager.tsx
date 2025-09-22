@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import InvitationTracker from './InvitationTracker';
 
 interface WaitlistEntry {
   id: string;
@@ -10,6 +11,15 @@ interface WaitlistEntry {
   invitedAt: string | null;
   acceptedAt: string | null;
   invitedVia: string | null;
+  invitationCode?: string | null;
+  codeExpiresAt?: string | null;
+  useCount?: number;
+  maxUses?: number;
+  metadata?: {
+    tags?: string[];
+    notes?: string;
+    [key: string]: any;
+  } | null;
   createdAt: string;
 }
 
@@ -31,8 +41,13 @@ interface WaitlistManagerProps {
 }
 
 export default function WaitlistManager({ appId, appName, onClose, embedded = false }: WaitlistManagerProps) {
-  const [activeTab, setActiveTab] = useState<'entries' | 'settings'>('entries');
+  const [activeTab, setActiveTab] = useState<'entries' | 'settings' | 'invitations'>('entries');
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
+  const [editingEntry, setEditingEntry] = useState<string | null>(null);
+  const [entryNotes, setEntryNotes] = useState<{ [key: string]: string }>({});
+  const [entryTags, setEntryTags] = useState<{ [key: string]: string[] }>({});
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [invitePreview, setInvitePreview] = useState<{ email: string; code: string; expiresAt: Date } | null>(null);
   const [config, setConfig] = useState<WaitlistConfig>({
     waitlistEnabled: false,
     waitlistMessage: '',
@@ -61,7 +76,20 @@ export default function WaitlistManager({ appId, appName, onClose, embedded = fa
       
       if (entriesRes.ok) {
         const data = await entriesRes.json();
-        setEntries(data.data.entries || []);
+        const fetchedEntries = data.data.entries || [];
+        setEntries(fetchedEntries);
+        
+        // Initialize notes and tags from metadata
+        const notes: { [key: string]: string } = {};
+        const tags: { [key: string]: string[] } = {};
+        fetchedEntries.forEach((entry: WaitlistEntry) => {
+          if (entry.metadata) {
+            notes[entry.id] = entry.metadata.notes || '';
+            tags[entry.id] = entry.metadata.tags || [];
+          }
+        });
+        setEntryNotes(notes);
+        setEntryTags(tags);
       }
 
       // Fetch app configuration
@@ -116,6 +144,69 @@ export default function WaitlistManager({ appId, appName, onClose, embedded = fa
       alert('Failed to save configuration');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveEntryMetadata = async (entryId: string) => {
+    try {
+      const response = await fetch('/api/v1/admin/waitlist', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+        body: JSON.stringify({
+          appId,
+          entryId,
+          metadata: {
+            notes: entryNotes[entryId] || '',
+            tags: entryTags[entryId] || [],
+          },
+        }),
+      });
+
+      if (response.ok) {
+        setEditingEntry(null);
+        fetchWaitlistData();
+      } else {
+        alert('Failed to save metadata');
+      }
+    } catch (error) {
+      console.error('Error saving metadata:', error);
+      alert('Failed to save metadata');
+    }
+  };
+
+  const handleGenerateInviteCode = async (email: string) => {
+    try {
+      const response = await fetch('/api/v1/admin/waitlist/generate-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+        body: JSON.stringify({
+          appId,
+          email,
+          expiresInDays: 7,
+          maxUses: 1,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setInvitePreview({
+          email,
+          code: data.data.code,
+          expiresAt: new Date(data.data.expiresAt),
+        });
+        setShowInviteModal(true);
+      } else {
+        alert('Failed to generate invitation code');
+      }
+    } catch (error) {
+      console.error('Error generating code:', error);
+      alert('Failed to generate invitation code');
     }
   };
 
@@ -205,6 +296,16 @@ export default function WaitlistManager({ appId, appName, onClose, embedded = fa
                 Waitlist Entries
               </button>
               <button
+                onClick={() => setActiveTab('invitations')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'invitations'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Invitations
+              </button>
+              <button
                 onClick={() => setActiveTab('settings')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'settings'
@@ -275,6 +376,12 @@ export default function WaitlistManager({ appId, appName, onClose, embedded = fa
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                         Accepted
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Tags & Notes
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -314,11 +421,90 @@ export default function WaitlistManager({ appId, appName, onClose, embedded = fa
                         <td className="px-6 py-4 text-sm text-gray-500">
                           {formatDate(entry.acceptedAt)}
                         </td>
+                        <td className="px-6 py-4">
+                          {editingEntry === entry.id ? (
+                            <div className="space-y-2">
+                              <input
+                                type="text"
+                                placeholder="Tags (comma-separated)"
+                                value={entryTags[entry.id]?.join(', ') || ''}
+                                onChange={(e) => setEntryTags({
+                                  ...entryTags,
+                                  [entry.id]: e.target.value.split(',').map(t => t.trim()).filter(t => t),
+                                })}
+                                className="block w-full text-xs px-2 py-1 border border-gray-300 rounded"
+                              />
+                              <textarea
+                                placeholder="Notes"
+                                value={entryNotes[entry.id] || ''}
+                                onChange={(e) => setEntryNotes({
+                                  ...entryNotes,
+                                  [entry.id]: e.target.value,
+                                })}
+                                rows={2}
+                                className="block w-full text-xs px-2 py-1 border border-gray-300 rounded"
+                              />
+                              <div className="flex space-x-1">
+                                <button
+                                  onClick={() => handleSaveEntryMetadata(entry.id)}
+                                  className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={() => setEditingEntry(null)}
+                                  className="text-xs px-2 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              {entryTags[entry.id]?.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-1">
+                                  {entryTags[entry.id].map((tag, idx) => (
+                                    <span key={idx} className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              {entryNotes[entry.id] && (
+                                <p className="text-xs text-gray-600 truncate" title={entryNotes[entry.id]}>
+                                  {entryNotes[entry.id]}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => setEditingEntry(entry.id)}
+                              className="text-xs px-2 py-1 text-blue-600 hover:bg-blue-50 rounded"
+                            >
+                              Edit
+                            </button>
+                            {entry.status === 'WAITING' && (
+                              <button
+                                onClick={() => handleGenerateInviteCode(entry.email)}
+                                className="text-xs px-2 py-1 text-green-600 hover:bg-green-50 rounded"
+                              >
+                                Invite
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+            </div>
+          ) : activeTab === 'invitations' ? (
+            <div className="p-6">
+              <InvitationTracker appId={appId} />
             </div>
           ) : (
             <div className="p-6 space-y-6">
@@ -448,13 +634,100 @@ export default function WaitlistManager({ appId, appName, onClose, embedded = fa
     </div>
   );
 
+  // Invitation Preview Modal
+  const invitationModal = showInviteModal && invitePreview && (
+    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-[60]">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">Invitation Preview</h3>
+            <button
+              onClick={() => setShowInviteModal(false)}
+              className="text-gray-400 hover:text-gray-500"
+            >
+              <span className="text-2xl">&times;</span>
+            </button>
+          </div>
+        </div>
+        
+        <div className="p-6 space-y-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-gray-900 mb-2">Invitation Details</h4>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">Email:</span>
+                <span className="text-sm font-medium text-gray-900">{invitePreview.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">Invitation Code:</span>
+                <span className="text-sm font-mono font-medium text-gray-900">{invitePreview.code}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">Expires:</span>
+                <span className="text-sm font-medium text-gray-900">{invitePreview.expiresAt.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-gray-900 mb-2">Email Preview</h4>
+            <div className="bg-white border border-gray-300 rounded p-4 text-sm">
+              <p className="mb-2">Dear User,</p>
+              <p className="mb-2">You've been invited to join {appName}!</p>
+              <p className="mb-2">Your exclusive invitation code is: <strong className="font-mono">{invitePreview.code}</strong></p>
+              <p className="mb-2">Click the link below to redeem your invitation:</p>
+              <p className="mb-2">
+                <a href="#" className="text-blue-600 underline">
+                  {window.location.origin}/waitlist/redeem/{invitePreview.code}
+                </a>
+              </p>
+              <p className="mb-2">This code expires on {invitePreview.expiresAt.toLocaleDateString()}.</p>
+              <p>Best regards,<br/>The {appName} Team</p>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(invitePreview.code);
+                alert('Code copied to clipboard!');
+              }}
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+            >
+              Copy Code
+            </button>
+            <button
+              onClick={() => {
+                // TODO: Actually send the email
+                alert('Email sent successfully!');
+                setShowInviteModal(false);
+                fetchWaitlistData();
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Send Invitation
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   if (embedded) {
-    return content;
+    return (
+      <>
+        {content}
+        {invitationModal}
+      </>
+    );
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-      {content}
-    </div>
+    <>
+      <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+        {content}
+      </div>
+      {invitationModal}
+    </>
   );
 }

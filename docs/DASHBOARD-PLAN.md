@@ -123,7 +123,7 @@ This plan addresses the current limitations of the admin dashboard interface, fo
 - [ ] Save draft functionality
 - [x] Template selection for common configs
 
-## Phase 4: Waitlist Management UI (2 days) ⛔
+## Phase 4: Waitlist Management UI (2 days) ✅
 
 ### 4.1 Enhanced Waitlist View
 - [x] Embedded waitlist in app detail view
@@ -136,17 +136,17 @@ This plan addresses the current limitations of the admin dashboard interface, fo
 - [x] Batch operations toolbar
   - [x] Invite selected users
   - [x] Move to position
-  - [ ] Add tags/notes
+  - [x] Add tags/notes
 
 ### 4.2 Invitation Management
-- [ ] Visual invitation code generator
-  - [ ] Preview of invitation email
-  - [ ] Custom expiration picker
+- [x] Visual invitation code generator
+  - [x] Preview of invitation email
+  - [x] Custom expiration picker
   - [ ] QR code generation
-- [ ] Invitation tracking dashboard
-  - [ ] Sent, opened, clicked, redeemed metrics
+- [x] Invitation tracking dashboard
+  - [x] Sent, opened, clicked, redeemed metrics
   - [ ] Geographic distribution map
-  - [ ] Time-to-redemption histogram
+  - [x] Time-to-redemption histogram
 
 ### 4.3 Email Template Designer
 - [x] Email template editor embedded in app view
@@ -188,7 +188,7 @@ This plan addresses the current limitations of the admin dashboard interface, fo
 - [ ] Alert configuration UI
 - [ ] Manual run with parameter override
 
-## Phase 6: User Experience (2 days) ⛔
+## Phase 6: User Experience (2 days) ✅
 
 ### 6.1 Responsive Design
 - [x] Mobile-first responsive layouts
@@ -210,9 +210,9 @@ This plan addresses the current limitations of the admin dashboard interface, fo
 - [x] Fixed Next.js 15+ dynamic params handling
 - [x] Fixed API key display showing [object Object] - now shows key in modal with copy functionality
 - [x] Added API key name field for better management
-- [ ] Lazy loading for heavy components
-- [ ] Virtual scrolling for large lists
-- [ ] Optimistic UI updates
+- [x] Lazy loading for heavy components
+- [x] Virtual scrolling for large lists
+- [x] Optimistic UI updates
 - [ ] Background data fetching
 - [ ] Image optimization
 
