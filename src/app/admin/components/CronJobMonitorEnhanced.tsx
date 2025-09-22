@@ -52,6 +52,13 @@ interface AlertConfig {
   slackWebhook?: string;
 }
 
+interface App {
+  id: string;
+  name: string;
+  autoInviteEnabled: boolean;
+  dailyInviteQuota: number;
+}
+
 interface CronJobMonitorProps {
   appId?: string;
   onClose?: () => void;
@@ -61,6 +68,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
   const [activeTab, setActiveTab] = useState<'timeline' | 'logs' | 'metrics' | 'alerts'>('timeline');
   const [runs, setRuns] = useState<CronJobRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<CronJobRun | null>(null);
+  const [apps, setApps] = useState<App[]>([]);
   const [stats, setStats] = useState<CronJobStats>({
     totalRuns: 0,
     successfulRuns: 0,
@@ -73,7 +81,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
   const [timeRange, setTimeRange] = useState('7d');
   const [showManualRunModal, setShowManualRunModal] = useState(false);
   const [manualRunParams, setManualRunParams] = useState({
-    appId: appId || '',
+    appId: appId || 'all',
     dailyQuota: 10,
     dryRun: false,
   });
@@ -85,9 +93,29 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
 
   useEffect(() => {
     fetchCronHistory();
+    fetchApps();
     const interval = setInterval(fetchCronHistory, 30000);
     return () => clearInterval(interval);
   }, [appId, timeRange]);
+
+  const fetchApps = async () => {
+    try {
+      const response = await fetch('/api/v1/admin/app', {
+        headers: {
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const allApps = data.data?.apps || [];
+        // Filter to show apps with auto-invite enabled or all apps
+        setApps(allApps);
+      }
+    } catch (error) {
+      console.error('Error fetching apps:', error);
+    }
+  };
 
   const fetchCronHistory = async () => {
     try {
@@ -322,7 +350,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
       };
       
       // Add app ID and parameters to headers if specified
-      if (manualRunParams.appId) {
+      if (manualRunParams.appId && manualRunParams.appId !== 'all') {
         headers['X-App-Id'] = manualRunParams.appId;
       }
       if (manualRunParams.dailyQuota !== 10) {
@@ -339,7 +367,10 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
       
       if (response.ok) {
         const result = await response.json();
-        alert(`Cron job executed successfully!\nProcessed: ${result.data?.totalProcessed || 0} apps\nInvited: ${result.data?.totalInvited || 0} users`);
+        const appName = manualRunParams.appId === 'all' 
+          ? 'All Apps' 
+          : apps.find(a => a.id === manualRunParams.appId)?.name || 'Selected App';
+        alert(`Cron job executed successfully!\nApp: ${appName}\nProcessed: ${result.data?.totalProcessed || 0} apps\nInvited: ${result.data?.totalInvited || 0} users`);
         setShowManualRunModal(false);
         // Refresh the history after manual run
         setTimeout(() => fetchCronHistory(), 1000);
@@ -765,15 +796,38 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  App ID
+                  Select App
                 </label>
-                <input
-                  type="text"
+                <select
                   value={manualRunParams.appId}
-                  onChange={(e) => setManualRunParams({ ...manualRunParams, appId: e.target.value })}
-                  placeholder="Leave empty to run for all apps"
+                  onChange={(e) => {
+                    const selectedApp = apps.find(a => a.id === e.target.value);
+                    setManualRunParams({ 
+                      ...manualRunParams, 
+                      appId: e.target.value,
+                      dailyQuota: selectedApp?.dailyInviteQuota || 10
+                    });
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
+                >
+                  <option value="all">All Apps with Auto-Invite Enabled</option>
+                  {apps.length === 0 ? (
+                    <option disabled>Loading apps...</option>
+                  ) : (
+                    apps.map(app => (
+                      <option key={app.id} value={app.id}>
+                        {app.name} {app.autoInviteEnabled ? '✓' : '(auto-invite disabled)'}
+                      </option>
+                    ))
+                  )}
+                </select>
+                {manualRunParams.appId !== 'all' && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    {apps.find(a => a.id === manualRunParams.appId)?.autoInviteEnabled 
+                      ? 'Auto-invite is enabled for this app'
+                      : '⚠️ Auto-invite is disabled for this app'}
+                  </p>
+                )}
               </div>
               
               <div>
@@ -788,6 +842,11 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
                   max="100"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
+                {manualRunParams.appId !== 'all' && apps.find(a => a.id === manualRunParams.appId) && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Default quota for this app: {apps.find(a => a.id === manualRunParams.appId)?.dailyInviteQuota}
+                  </p>
+                )}
               </div>
               
               <div className="flex items-center">
