@@ -432,7 +432,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
             <p className="text-sm text-gray-400">Cron jobs will appear here after they run</p>
             <button
               onClick={() => setShowManualRunModal(true)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 cursor-pointer"
+              className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
             >
               Run Manual Job to Generate Data
             </button>
@@ -508,7 +508,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-900">Execution Logs</h3>
           {selectedRun && (
-            <button className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 cursor-pointer">
+            <button className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900">
               <Download className="w-4 h-4" />
               <span>Export Logs</span>
             </button>
@@ -688,7 +688,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
           <div className="flex justify-end">
             <button
               onClick={handleSaveAlerts}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               Save Alert Configuration
             </button>
@@ -725,7 +725,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
             </select>
             <button
               onClick={() => setShowManualRunModal(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               <Play className="w-4 h-4" />
               <span>Manual Run</span>
@@ -733,7 +733,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
             {onClose && (
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-500 cursor-pointer"
+                className="text-gray-400 hover:text-gray-500"
               >
                 ✕
               </button>
@@ -788,7 +788,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
               <button
                 key={id}
                 onClick={() => setActiveTab(id as any)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 cursor-pointer ${
+                className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
                   activeTab === id
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -905,7 +905,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
             <div className="mt-6 flex justify-end space-x-3">
               <button
                 onClick={() => setShowManualRunModal(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 cursor-pointer"
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
               >
                 Cancel
               </button>

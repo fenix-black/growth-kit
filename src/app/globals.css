@@ -28,6 +28,42 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Fix cursor for interactive elements in Tailwind v4 */
+button,
+[role="button"],
+[type="button"],
+[type="submit"],
+[type="reset"],
+a,
+select,
+[onclick] {
+  cursor: pointer;
+}
+
+/* Ensure disabled elements show proper cursor */
+button:disabled,
+[role="button"]:disabled,
+[type="button"]:disabled,
+[type="submit"]:disabled,
+[type="reset"]:disabled,
+select:disabled,
+.disabled,
+.cursor-not-allowed {
+  cursor: not-allowed !important;
+}
+
+/* Text inputs should show text cursor */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+textarea {
+  cursor: text;
+}
+
 /* Manual dark mode utilities for Tailwind v4 */
 .dark .dark\:bg-gray-900 { background-color: rgb(17 24 39) !important; }
 .dark .dark\:bg-gray-800 { background-color: rgb(31 41 55) !important; }
