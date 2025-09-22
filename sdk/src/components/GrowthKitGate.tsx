@@ -151,3 +151,4 @@ export function GrowthKitGate({
   // Show children (main app content)
   return <>{children}</>;
 }
+
