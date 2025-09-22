@@ -111,7 +111,7 @@ function App() {
 }
 ```
 
-## USD Value Tracking (v0.4.0+)
+## USD Value Tracking (v0.0.4+)
 
 Track the monetary value of user actions for ROI measurement and financial analytics.
 
@@ -332,14 +332,14 @@ The main React hook for integrating GrowthKit.
 - `waitlistPosition`: Position in waitlist queue
 - `waitlistMessage`: Custom waitlist message
 - `shouldShowWaitlist`: Whether to show waitlist UI
-- `totalUsdSpent`: Total USD value spent by user (v0.4.0+)
-- `lastUsdTransaction`: Value of last USD transaction (v0.4.0+)
-- `usdTrackingEnabled`: Whether app has USD tracking enabled (v0.4.0+)
+- `totalUsdSpent`: Total USD value spent by user (v0.0.4+)
+- `lastUsdTransaction`: Value of last USD transaction (v0.0.4+)
+- `usdTrackingEnabled`: Whether app has USD tracking enabled (v0.0.4+)
 
 #### Methods
 
 ##### completeAction(action?, options?)
-Complete an action and consume credits. Optionally track USD value (v0.4.0+).
+Complete an action and consume credits. Optionally track USD value (v0.0.4+).
 
 ```ts
 // Simple usage (backward compatible)
@@ -348,7 +348,7 @@ await gk.completeAction('generate');
 // With metadata (backward compatible)
 await gk.completeAction('generate', { model: 'gpt-4' });
 
-// With USD tracking (v0.4.0+)
+// With USD tracking (v0.0.4+)
 await gk.completeAction('purchase', { 
   usdValue: 9.99,
   metadata: { productId: 'pro-plan' }
@@ -427,7 +427,7 @@ Manually refresh user data.
 await gk.refresh();
 ```
 
-## Waitlist Gating (New in v0.4.0)
+## Waitlist Gating (New in v0.0.4)
 
 ### Automatic Waitlist Management
 

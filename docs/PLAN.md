@@ -370,7 +370,7 @@ This phase transforms the basic waitlist into a viral growth engine with:
   - [ ] Per-app USD analytics
   - [ ] Export capabilities for financial reporting
 
-#### SDK Updates (v0.4.0) ✅
+#### SDK Updates (v0.0.4) ✅
 - [x] Update `completeAction()` method signature
   - [x] Add optional `options` parameter: `{ usdValue?: number }`
   - [x] Maintain backward compatibility
@@ -494,7 +494,7 @@ This phase transforms the basic waitlist into a viral growth engine with:
   - [ ] Example requests/responses
 - [ ] SDK documentation
   - [ ] USD tracking examples
-  - [ ] Migration guide to v0.4.0
+  - [ ] Migration guide to v0.0.4
 - [ ] Admin guide
   - [ ] Setting up USD tracking
   - [ ] Managing invitation codes

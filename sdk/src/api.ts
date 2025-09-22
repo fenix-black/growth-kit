@@ -26,7 +26,7 @@ export class GrowthKitAPI {
       }
     }
     // Default to production URL (update this when deployed)
-    return 'https://growthkit.fenixblack.ai/api';
+    return 'https://growth.fenixblack.ai/api';
   }
 
   setFingerprint(fingerprint: string) {

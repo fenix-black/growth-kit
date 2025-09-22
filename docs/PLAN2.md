@@ -90,7 +90,7 @@ Transform the waitlist from a simple gate into a viral growth engine with automa
 - [x] Add waitlist examples
 - [x] Document `shouldShowWaitlist` logic
 - [x] Create CHANGELOG entry for v0.3.0 (waitlist support)
-- [x] **[Phase 12]** Update for v0.4.0 (USD tracking support) ✅
+- [x] **[Phase 12]** Update for v0.0.4 (USD tracking support) ✅
 
 ## Phase 3: Admin Dashboard Updates
 

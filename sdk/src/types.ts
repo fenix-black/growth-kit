@@ -43,7 +43,7 @@ export interface GrowthKitState {
   waitlistPosition: number | null;
   waitlistMessage?: string;
   shouldShowWaitlist: boolean;
-  // USD tracking (v0.4.0)
+  // USD tracking (v0.0.4)
   totalUsdSpent?: number;
   lastUsdTransaction?: number;
   usdTrackingEnabled?: boolean;

@@ -51,4 +51,4 @@ export { getFingerprint, clearFingerprintCache } from './fingerprint';
 export { GrowthKitAPI } from './api';
 
 // Version
-export const VERSION = '0.4.0';
+export const VERSION = '0.0.4';

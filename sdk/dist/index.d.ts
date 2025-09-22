@@ -289,6 +289,6 @@ declare class GrowthKitAPI {
     trackReferralVisit(claim?: string): Promise<APIResponse<any>>;
 }
 
-declare const VERSION = "0.4.0";
+declare const VERSION = "0.0.4";
 
 export { APIResponse, ClaimResponse, CompleteResponse, GrowthKitAPI, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitGateProps, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, MeResponse, ShareOptions, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit };

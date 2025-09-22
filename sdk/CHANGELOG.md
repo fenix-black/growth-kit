@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.0] - 2025-09-21
+## [0.0.4] - 2025-09-21
 
 ### Added
 - **USD Value Tracking**
@@ -40,7 +40,7 @@
 - Added examples for all waitlist scenarios
 - Updated API reference with new properties and methods
 
-## [0.3.0] - 2024-09-20
+## [0.0.3] - 2025-09-20
 
 ### Breaking Changes
 - **Removed cookie-based referral tracking** - Now uses URL parameters
@@ -63,22 +63,22 @@
 
 1. Update environment variables:
 ```env
-# Old (v0.2.0)
+# Old (v0.0.2)
 GROWTHKIT_SERVICE_URL=https://your-service.com
 
-# New (v0.3.0)
+# New (v0.0.3)
 GROWTHKIT_API_KEY=gk_your_api_key
 GROWTHKIT_API_URL=https://your-service.com/api
 ```
 
 2. Update middleware configuration:
 ```ts
-// Old (v0.2.0)
+// Old (v0.0.2)
 export const middleware = createGrowthKitMiddleware({
   serviceUrl: process.env.GROWTHKIT_SERVICE_URL!
 });
 
-// New (v0.3.0)
+// New (v0.0.3)
 export const middleware = createGrowthKitMiddleware({
   apiKey: process.env.GROWTHKIT_API_KEY!,
   apiUrl: process.env.GROWTHKIT_API_URL!
@@ -90,14 +90,14 @@ export const middleware = createGrowthKitMiddleware({
 - `getReferralClaim()`
 - `clearReferralClaim()`
 
-## [0.2.0] - 2024-09-20
+## [0.0.2] - 2025-09-20
 
 ### Added
 - Next.js middleware support for referral link handling
 - Server-side utilities for API routes
 - TypeScript definitions for all new features
 
-## [0.1.0] - 2024-09-20
+## [0.0.1] - 2025-09-20
 
 ### Initial Release
 - `useGrowthKit` React hook
