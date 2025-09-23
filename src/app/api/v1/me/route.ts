@@ -10,7 +10,14 @@ import { isInvitationCode, isCodeExpired } from '@/lib/utils/invitationCode';
 
 export async function OPTIONS(request: NextRequest) {
   const origin = request.headers.get('origin');
-  const corsOrigins = process.env.CORS_ALLOWLIST?.split(',') || [];
+  
+  // Try to get app context to use its CORS origins
+  const authContext = await verifyAppAuth(request.headers);
+  
+  // Use app's CORS origins if available, otherwise fall back to env variable
+  const corsOrigins = authContext?.app.corsOrigins || 
+    process.env.CORS_ALLOWLIST?.split(',') || [];
+    
   return handleCorsPreflightResponse(origin, corsOrigins);
 }
 
