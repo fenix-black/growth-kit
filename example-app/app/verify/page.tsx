@@ -80,7 +80,7 @@ function VerifyContent() {
 export default function VerifyEmailPage() {
   const config = {
     apiKey: process.env.NEXT_PUBLIC_GROWTHKIT_API_KEY || '',
-    apiUrl: process.env.NEXT_PUBLIC_GROWTHKIT_API_URL,
+    apiUrl: `${process.env.NEXT_PUBLIC_GROWTHKIT_SERVER_URL || 'https://growth.fenixblack.ai'}/api`,
     debug: process.env.NODE_ENV === 'development',
   };
 
