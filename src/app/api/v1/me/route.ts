@@ -113,9 +113,9 @@ export async function POST(request: NextRequest) {
           if (!(waitlistEntry as any).codeUsedAt || (waitlistEntry as any).fingerprintId === fingerprintRecord!.id) {
             // Only process if not already used by this fingerprint
             if (!(waitlistEntry as any).codeUsedAt) {
-              // Redeem the invitation code
+              // Accept the invitation (but don't grant credits here - will be done later)
               await prisma.$transaction(async (tx) => {
-                // Update waitlist entry
+                // Update waitlist entry to ACCEPTED
                 await tx.waitlist.update({
                   where: { id: waitlistEntry.id },
                   data: {
@@ -124,20 +124,6 @@ export async function POST(request: NextRequest) {
                     fingerprintId: fingerprintRecord!.id,
                     codeUsedAt: new Date(),
                     useCount: { increment: 1 },
-                  },
-                });
-
-                // Grant invitation credits
-                const creditsToGrant = (authContext.app as any).masterReferralCredits || 10;
-                await tx.credit.create({
-                  data: {
-                    fingerprintId: fingerprintRecord!.id,
-                    amount: creditsToGrant,
-                    reason: 'invitation',
-                    metadata: {
-                      invitationCode: claim,
-                      waitlistId: waitlistEntry.id,
-                    },
                   },
                 });
 
