@@ -45,10 +45,10 @@ function MainApp() {
   const handleShare = async () => {
     const success = await share();
     
-    if (!success) {
-      // Fallback to copying
-      await navigator.clipboard.writeText(getReferralLink());
-      toast.success('Referral link copied!');
+    if (success) {
+      toast.success('Shared successfully!');
+    } else {
+      toast.success('Referral message copied to clipboard!');
     }
   };
 

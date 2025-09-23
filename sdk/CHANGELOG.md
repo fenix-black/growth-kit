@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.1.8] - 2025-09-23
+
+### Fixed
+- **React Hooks Closure Issue**: Fixed referral code being null in share function
+  - Moved getReferralLink definition before share function to avoid reference errors
+  - Added state.referralCode to share function's dependency array
+  - Ensures share function always has the latest referral code value
+  - Fixes the issue where sharing would fail despite having a valid referral code
+
+## [0.1.7] - 2025-09-23
+
+### Fixed
+- **Referral Code Share Protection**: Added check to prevent sharing when no referral code is available
+- **Debug Logging**: Added debug logs for troubleshooting referral code issues
+  - Logs API response and referral code when received
+  - Logs referral link generation in share function
+  - Helps identify when/why referral code might be missing
+
+## [0.1.6] - 2025-09-23
+
+### Fixed
+- **Share Link Missing**: Fixed issue where the referral link was missing from shared content
+  - Reverted to using separate title, text, and URL fields for native share API
+  - Ensures compatibility across all platforms and apps
+  - URL is passed separately to ensure it's always included
+  - Fallback methods still combine text and link
+
+## [0.1.5] - 2025-09-23
+
+### Fixed
+- **Share Message Duplication**: Fixed duplicate URLs in shared content
+  - Combined title and text into single message
+  - Native share API now only receives text field to prevent URL extraction
+  - Cleaner output: "Check out this app! Join me and get free credits! [referral-link]"
+  - Removed redundant fallback in example app
+
 ## [0.1.4] - 2025-09-23
 
 ### Fixed

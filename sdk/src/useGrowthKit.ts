@@ -101,6 +101,12 @@ export function useGrowthKit(): GrowthKitHook {
         (waitlistStatus === 'none' || waitlistStatus === 'waiting') && 
         waitlistData?.requiresWaitlist === true;
 
+      // Debug logging
+      if (config.debug) {
+        console.log('[GrowthKit] API Response:', data);
+        console.log('[GrowthKit] Referral Code:', data.referralCode);
+      }
+      
       setState({
         loading: false,
         initialized: true,
@@ -344,44 +350,6 @@ export function useGrowthKit(): GrowthKitHook {
     }
   }, [state.fingerprint, state.waitlistStatus]);
 
-  // Share functionality
-  const share = useCallback(async (options?: ShareOptions): Promise<boolean> => {
-    const referralLink = getReferralLink();
-    const shareText = options?.text || `Join me and get free credits! ${referralLink}`;
-    
-    const shareData = {
-      title: options?.title || 'Check out this app!',
-      text: shareText,
-      // Don't include URL separately as it's already in the text
-    };
-
-    try {
-      // Use native share API if available
-      if (navigator.share) {
-        await navigator.share(shareData);
-        return true;
-      }
-
-      // Fallback to clipboard - just copy the text with the link
-      await navigator.clipboard.writeText(shareText);
-      
-      // Show some feedback (you might want to use a toast library)
-      if (config.debug) {
-        console.log('Copied to clipboard:', shareText);
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Share failed:', error);
-      
-      // Last fallback: open a new window with pre-filled tweet
-      const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareData.text)}`;
-      window.open(tweetUrl, '_blank');
-      
-      return false;
-    }
-  }, [config.debug]);
-
   // Get referral link
   const getReferralLink = useCallback((): string => {
     if (!state.referralCode) return '';
@@ -390,6 +358,58 @@ export function useGrowthKit(): GrowthKitHook {
     const baseUrl = window.location.origin;
     return `${baseUrl}/r/${state.referralCode}`;
   }, [state.referralCode]);
+
+  // Share functionality
+  const share = useCallback(async (options?: ShareOptions): Promise<boolean> => {
+    const referralLink = getReferralLink();
+    
+    if (config.debug) {
+      console.log('[GrowthKit] Share - Referral Code:', state.referralCode);
+      console.log('[GrowthKit] Share - Referral Link:', referralLink);
+    }
+    
+    // If no referral code, can't share
+    if (!referralLink) {
+      console.warn('[GrowthKit] No referral code available to share');
+      return false;
+    }
+    
+    const shareTitle = options?.title || 'Check out this app!';
+    const shareText = options?.text || 'Join me and get free credits!';
+    
+    try {
+      // Use native share API if available
+      if (navigator.share) {
+        // Include both text and URL but keep them separate to avoid duplication
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: referralLink,
+        });
+        return true;
+      }
+
+      // Fallback to clipboard - copy the full message with link
+      const fullMessage = `${shareText} ${referralLink}`;
+      await navigator.clipboard.writeText(fullMessage);
+      
+      // Show some feedback (you might want to use a toast library)
+      if (config.debug) {
+        console.log('Copied to clipboard:', fullMessage);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Share failed:', error);
+      
+      // Last fallback: open a new window with pre-filled tweet
+      const tweetText = `${shareText} ${referralLink}`;
+      const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+      window.open(tweetUrl, '_blank');
+      
+      return false;
+    }
+  }, [config.debug, state.referralCode, getReferralLink]);
 
   // Check if soft paywall should be shown
   const shouldShowSoftPaywall = useCallback((): boolean => {
