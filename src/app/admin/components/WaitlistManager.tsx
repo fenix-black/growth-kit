@@ -686,7 +686,7 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
               <p className="mb-2">Click the link below to redeem your invitation:</p>
               <p className="mb-2">
                 <a href="#" className="text-blue-600 underline">
-                  {appDomain || 'https://your-app.com'}/invite/{invitePreview.code}
+                  {appDomain ? `https://${appDomain}` : 'https://your-app.com'}/invite/{invitePreview.code}
                 </a>
               </p>
               <p className="mb-2">This code expires on {invitePreview.expiresAt.toLocaleDateString()}.</p>
