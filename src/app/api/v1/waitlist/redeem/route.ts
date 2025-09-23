@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyAppAuth } from '@/lib/security/auth';
-import { checkRateLimit, getClientIp, rateLimits } from '@/lib/middleware/rateLimit';
+import { checkRateLimit, getClientIp, rateLimits } from '@/lib/middleware/rateLimitSafe';
 import { withCorsHeaders } from '@/lib/middleware/cors';
-import { handleOptionsRequest } from '@/lib/middleware/corsOptions';
+import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { successResponse, errors } from '@/lib/utils/response';
-import { isValidFingerprint } from '@/lib/utils/validation';
+import { corsErrors } from '@/lib/utils/corsResponse';import { isValidFingerprint } from '@/lib/utils/validation';
 import { isInvitationCode, isCodeExpired } from '@/lib/utils/invitationCode';
 
 export async function OPTIONS(request: NextRequest) {
-  return handleOptionsRequest(request);
+  return handleSimpleOptions(request);
 }
 
 export async function POST(request: NextRequest) {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     // Verify API key authentication
     const authContext = await verifyAppAuth(request.headers);
     if (!authContext) {
-      return errors.unauthorized();
+      return corsErrors.unauthorized(origin);
     }
 
     // Rate limiting by IP
