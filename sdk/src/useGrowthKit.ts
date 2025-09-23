@@ -385,10 +385,10 @@ export function useGrowthKit(): GrowthKitHook {
   const getReferralLink = useCallback((): string => {
     if (!state.referralCode) return '';
     
-    // Use current domain if no apiUrl specified
-    const baseUrl = config.apiUrl || window.location.origin;
+    // Always use the app's domain for referral links, not the API URL
+    const baseUrl = window.location.origin;
     return `${baseUrl}/r/${state.referralCode}`;
-  }, [state.referralCode, config.apiUrl]);
+  }, [state.referralCode]);
 
   // Check if soft paywall should be shown
   const shouldShowSoftPaywall = useCallback((): boolean => {

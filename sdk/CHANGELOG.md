@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3] - 2025-09-23
+
+### Fixed
+- **Referral Link Generation**: Fixed referral links to use app domain instead of API server URL
+  - Links now correctly use `window.location.origin` (e.g., `https://restore.fenixblack.ai/r/CODE`)
+  - Previously incorrectly used GrowthKit API URL (`https://growth.fenixblack.ai/api/r/CODE`)
+
 ## [0.1.0] - 2025-09-23
 
 ### Added
