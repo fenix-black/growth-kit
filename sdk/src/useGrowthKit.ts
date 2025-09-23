@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { GrowthKitAPI } from './api';
 import { getFingerprint } from './fingerprint';
+import { useGrowthKitConfig } from './components/GrowthKitProvider';
 import type {
   GrowthKitConfig,
   GrowthKitState,
@@ -34,7 +35,8 @@ const initialState: GrowthKitState = {
   usdTrackingEnabled: false,
 };
 
-export function useGrowthKit(config: GrowthKitConfig): GrowthKitHook {
+export function useGrowthKit(): GrowthKitHook {
+  const config = useGrowthKitConfig();
   const [state, setState] = useState<GrowthKitState>(initialState);
   const apiRef = useRef<GrowthKitAPI | null>(null);
   const initRef = useRef(false);

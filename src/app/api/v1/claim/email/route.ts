@@ -128,7 +128,8 @@ export async function POST(request: NextRequest) {
 
     // Award initial credits for email claim
     const policy = authContext.app.policyJson as any;
-    const emailCredits = policy?.emailClaimCredits || 2;
+    const app = authContext.app as any;
+    const emailCredits = app.creditsForEmail || 1;
 
     await prisma.credit.create({
       data: {

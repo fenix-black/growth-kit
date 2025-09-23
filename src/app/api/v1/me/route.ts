@@ -379,14 +379,71 @@ export async function POST(request: NextRequest) {
       return errors.serverError('Failed to create or retrieve user');
     }
 
+    // Process daily credit grants for non-waitlist apps
+    const app = authContext.app as any; // Using any until migration is run
+    if (!app.waitlistEnabled && app.initialCreditsPerDay > 0) {
+      const now = new Date();
+      const lastGrant = fingerprintRecord.lastDailyGrant;
+      
+      // Check if this is first visit or a new day
+      const isFirstVisit = !lastGrant;
+      const daysSinceGrant = lastGrant ? 
+        Math.floor((now.getTime() - lastGrant.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+      
+      if (isFirstVisit || daysSinceGrant >= 1) {
+        // Grant daily credits
+        await prisma.credit.create({
+          data: {
+            fingerprintId: fingerprintRecord.id,
+            amount: app.initialCreditsPerDay,
+            reason: 'daily_grant',
+            metadata: { 
+              grantDate: now.toISOString(),
+              isFirstGrant: isFirstVisit 
+            }
+          }
+        });
+        
+        // Update last grant timestamp and activity
+        await prisma.fingerprint.update({
+          where: { id: fingerprintRecord.id },
+          data: { 
+            lastDailyGrant: now,
+            lastActiveAt: now 
+          }
+        });
+
+        // Re-fetch fingerprint to include new credits
+        fingerprintRecord = await prisma.fingerprint.findUnique({
+          where: { id: fingerprintRecord.id },
+          include: {
+            credits: true,
+            usage: true,
+          },
+        });
+      } else {
+        // Just update activity timestamp
+        await prisma.fingerprint.update({
+          where: { id: fingerprintRecord.id },
+          data: { lastActiveAt: now }
+        });
+      }
+    } else {
+      // Update activity timestamp for waitlist apps too
+      await prisma.fingerprint.update({
+        where: { id: fingerprintRecord.id },
+        data: { lastActiveAt: new Date() }
+      });
+    }
+
     // Calculate total credits
-    const totalCredits = fingerprintRecord.credits.reduce(
+    const totalCredits = fingerprintRecord?.credits.reduce(
       (sum, credit) => sum + credit.amount,
       0
-    );
+    ) || 0;
 
     // Count usage
-    const usageCount = fingerprintRecord.usage.length;
+    const usageCount = fingerprintRecord?.usage.length || 0;
 
     // Get policy from app configuration
     const policy = authContext.app.policyJson as any;
@@ -399,7 +456,7 @@ export async function POST(request: NextRequest) {
       const lead = await prisma.lead.findFirst({
         where: {
           appId: authContext.app.id,
-          fingerprintId: fingerprintRecord.id,
+          fingerprintId: fingerprintRecord!.id,
           emailVerified: true,
         },
         select: {
@@ -451,8 +508,8 @@ export async function POST(request: NextRequest) {
 
     // Build response
     const response = successResponse({
-      fingerprint: fingerprintRecord.fingerprint,
-      referralCode: fingerprintRecord.referralCode,
+      fingerprint: fingerprintRecord!.fingerprint,
+      referralCode: fingerprintRecord!.referralCode,
       credits: totalCredits,
       usage: usageCount,
       policy: policy || {

@@ -8,9 +8,11 @@
     "start": "next start -p 3001"
   },
   "dependencies": {
+    "@growthkit/sdk": "file:../sdk",
     "next": "15.5.3",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "react-hot-toast": "^2.4.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

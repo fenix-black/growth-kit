@@ -1,8 +1,9 @@
+'use client';
+
 import React, { useState, FormEvent } from 'react';
-import { GrowthKitHook } from '../types';
+import { useGrowthKit } from '../useGrowthKit';
 
 export interface WaitlistFormProps {
-  growthKit: GrowthKitHook;
   message?: string;
   onSuccess?: (position: number) => void;
   className?: string;
@@ -14,19 +15,16 @@ export interface WaitlistFormProps {
  * 
  * @example
  * ```tsx
- * <WaitlistForm 
- *   growthKit={useGrowthKit(config)}
- *   message="Join our exclusive waitlist!"
- * />
+ * <WaitlistForm message="Join our exclusive waitlist!" />
  * ```
  */
 export function WaitlistForm({ 
-  growthKit, 
   message,
   onSuccess,
   className,
   style 
 }: WaitlistFormProps) {
+  const growthKit = useGrowthKit();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [position, setPosition] = useState<number | null>(null);

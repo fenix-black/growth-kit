@@ -20,25 +20,30 @@ model Tenant {
 }
 
 model App {
-  id                    String        @id @default(cuid())
-  tenantId              String?
-  name                  String
-  domain                String
-  corsOrigins           String[]      @default([])
-  redirectUrl           String
-  policyJson            Json
-  emailTemplates        Json?
-  isActive              Boolean       @default(true)
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
-  autoInviteEnabled     Boolean       @default(false)
-  dailyInviteQuota      Int           @default(10)
-  inviteTime            String        @default("09:00")
-  masterReferralCode    String?       @unique
-  masterReferralCredits Int           @default(10)
-  waitlistEnabled       Boolean       @default(false)
-  waitlistMessage       String?
-  trackUsdValue         Boolean       @default(false)
+  id                          String        @id @default(cuid())
+  tenantId                    String?
+  name                        String
+  domain                      String
+  corsOrigins                 String[]      @default([])
+  redirectUrl                 String
+  policyJson                  Json
+  emailTemplates              Json?
+  isActive                    Boolean       @default(true)
+  createdAt                   DateTime      @default(now())
+  updatedAt                   DateTime      @updatedAt
+  autoInviteEnabled           Boolean       @default(false)
+  dailyInviteQuota            Int           @default(10)
+  inviteTime                  String        @default("09:00")
+  masterReferralCode          String?       @unique
+  masterReferralCredits       Int           @default(10)
+  waitlistEnabled             Boolean       @default(false)
+  waitlistMessage             String?
+  trackUsdValue               Boolean       @default(false)
+  initialCreditsPerDay        Int           @default(3)
+  creditsForName              Int           @default(1)
+  creditsForEmail             Int           @default(1)
+  creditsForEmailVerification Int           @default(1)
+  maxCreditBalance            Int?
   apiKeys               ApiKey[]
   tenant                Tenant?       @relation(fields: [tenantId], references: [id])
   eventLogs             EventLog[]
@@ -72,12 +77,14 @@ model ApiKey {
 }
 
 model Fingerprint {
-  id           String     @id @default(cuid())
-  appId        String
-  fingerprint  String
-  referralCode String?    @unique
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id             String     @id @default(cuid())
+  appId          String
+  fingerprint    String
+  referralCode   String?    @unique
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  lastDailyGrant DateTime?
+  lastActiveAt   DateTime?
   credits      Credit[]
   app          App        @relation(fields: [appId], references: [id], onDelete: Cascade)
   leads        Lead[]

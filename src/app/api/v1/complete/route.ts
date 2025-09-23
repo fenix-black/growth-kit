@@ -163,11 +163,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Check if credits should be consumed
+    // Check if user has sufficient credits
+    if (creditsRequired > 0 && totalCredits < creditsRequired) {
+      // Insufficient credits - return error
+      return withCorsHeaders(
+        errors.badRequest(`Insufficient credits. Required: ${creditsRequired}, Available: ${totalCredits}`),
+        origin,
+        authContext.app.corsOrigins
+      );
+    }
+
+    // Consume credits if required
     let creditsConsumed = false;
     let newCreditsBalance = totalCredits;
 
-    if (creditsRequired > 0 && totalCredits >= creditsRequired) {
+    if (creditsRequired > 0) {
       // Consume credits
       await prisma.credit.create({
         data: {

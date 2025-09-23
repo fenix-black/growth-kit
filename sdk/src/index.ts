@@ -20,11 +20,12 @@ export type {
 
 // Component exports
 export {
+  GrowthKitProvider,
   GrowthKitGate,
   WaitlistForm,
+  CreditExhaustionModal,
 } from './components';
 export type {
-  GrowthKitGateProps,
   WaitlistFormProps,
 } from './components';
 

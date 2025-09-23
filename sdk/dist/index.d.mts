@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { NextRequest, NextFetchEvent } from 'next/server';
 
 interface GrowthKitConfig {
@@ -119,28 +119,26 @@ interface WaitlistResponse {
 }
 type GrowthKitHook = GrowthKitState & GrowthKitActions;
 
-declare function useGrowthKit(config: GrowthKitConfig): GrowthKitHook;
+declare function useGrowthKit(): GrowthKitHook;
+
+interface GrowthKitProviderProps {
+    children: React.ReactNode;
+    config: GrowthKitConfig;
+}
+declare function GrowthKitProvider({ children, config }: GrowthKitProviderProps): React.JSX.Element;
 
 interface GrowthKitGateProps {
-    config: GrowthKitConfig;
-    children: ReactNode;
-    waitlistComponent?: ReactNode;
-    loadingComponent?: ReactNode;
+    children: React.ReactNode;
+    loadingComponent?: React.ReactNode;
 }
-/**
- * GrowthKitGate component - Gates content behind waitlist when enabled
- *
- * @example
- * ```tsx
- * <GrowthKitGate config={{ apiKey: 'your-api-key' }}>
- *   <YourApp />
- * </GrowthKitGate>
- * ```
- */
-declare function GrowthKitGate({ config, children, waitlistComponent, loadingComponent, }: GrowthKitGateProps): React.JSX.Element;
+declare function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps): React.JSX.Element;
+
+interface CreditExhaustionModalProps {
+    onClose: () => void;
+}
+declare function CreditExhaustionModal({ onClose }: CreditExhaustionModalProps): React.JSX.Element;
 
 interface WaitlistFormProps {
-    growthKit: GrowthKitHook;
     message?: string;
     onSuccess?: (position: number) => void;
     className?: string;
@@ -151,13 +149,10 @@ interface WaitlistFormProps {
  *
  * @example
  * ```tsx
- * <WaitlistForm
- *   growthKit={useGrowthKit(config)}
- *   message="Join our exclusive waitlist!"
- * />
+ * <WaitlistForm message="Join our exclusive waitlist!" />
  * ```
  */
-declare function WaitlistForm({ growthKit, message, onSuccess, className, style }: WaitlistFormProps): React.JSX.Element;
+declare function WaitlistForm({ message, onSuccess, className, style }: WaitlistFormProps): React.JSX.Element;
 
 interface GrowthKitMiddlewareConfig {
     apiKey: string;
@@ -238,4 +233,4 @@ declare class GrowthKitAPI {
 
 declare const VERSION = "0.0.4";
 
-export { APIResponse, ClaimResponse, CompleteResponse, GrowthKitAPI, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitGateProps, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, MeResponse, ShareOptions, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit };
+export { APIResponse, ClaimResponse, CompleteResponse, CreditExhaustionModal, GrowthKitAPI, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, MeResponse, ShareOptions, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit };

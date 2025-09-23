@@ -95,8 +95,8 @@ export async function POST(request: NextRequest) {
     });
 
     // Award credits for name claim
-    const policy = authContext.app.policyJson as any;
-    const nameCredits = policy?.nameClaimCredits || 2;
+    const app = authContext.app as any;
+    const nameCredits = app.creditsForName || 1;
 
     await prisma.credit.create({
       data: {

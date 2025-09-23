@@ -1,85 +1,243 @@
 'use client';
 
-import { useGrowthKit } from '@fenixblack/growthkit';
+import { GrowthKitProvider, GrowthKitGate, useGrowthKit } from '@growthkit/sdk';
+import { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 
-export default function Home() {
-  const growthKit = useGrowthKit({
-    apiKey: process.env.NEXT_PUBLIC_GROWTHKIT_API_KEY || 'your-api-key-here',
-    apiUrl: `${process.env.NEXT_PUBLIC_GROWTHKIT_SERVER_URL || 'https://growth.fenixblack.ai'}/api`
-  });
+// Main App Component (wrapped by GrowthKitGate)
+function MainApp() {
+  const { credits, completeAction, loading, refresh, getReferralLink, share } = useGrowthKit();
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  const handleUseFeature = async () => {
+    setIsProcessing(true);
+    const success = await completeAction('generate');
+    setIsProcessing(false);
+    
+    if (success) {
+      toast.success('Feature used! -1 credit');
+    } else {
+      toast.error('Not enough credits');
+    }
+  };
+
+  const handleShare = async () => {
+    const success = await share({
+      title: 'Check out this app!',
+      text: `Join me and get free credits! ${getReferralLink()}`
+    });
+    
+    if (!success) {
+      // Fallback to copying
+      await navigator.clipboard.writeText(getReferralLink());
+      toast.success('Referral link copied!');
+    }
+  };
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-4xl font-bold mb-8">GrowthKit SDK Test Suite</h1>
-      
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Current User Status</h2>
-        {growthKit.loading ? (
-          <p className="text-gray-600">Loading user data...</p>
-        ) : growthKit.initialized ? (
-          <div className="space-y-2">
-            <p><strong>Fingerprint:</strong> {growthKit.fingerprint?.slice(0, 8)}...</p>
-            <p><strong>Email Claimed:</strong> {growthKit.hasClaimedEmail ? 'Yes' : 'No'}</p>
-            <p><strong>Name Claimed:</strong> {growthKit.hasClaimedName ? 'Yes' : 'No'}</p>
-            <p><strong>Email Verified:</strong> {growthKit.hasVerifiedEmail ? 'Yes' : 'No'}</p>
-            <p><strong>Credits:</strong> {growthKit.credits || 0}</p>
-            <p><strong>Referral Code:</strong> {growthKit.referralCode || 'Not set'}</p>
-          </div>
-        ) : (
-          <p className="text-gray-600">No user data available</p>
+    <div style={styles.container}>
+      {/* Header */}
+      <div style={styles.header}>
+        <h1 style={styles.title}>Example App</h1>
+        <div style={styles.creditsDisplay}>
+          <span>Credits: {credits}</span>
+          <button 
+            onClick={refresh} 
+            style={styles.refreshButton}
+            disabled={loading}
+            aria-label="Refresh credits"
+          >
+            ↻
+          </button>
+        </div>
+      </div>
+
+      {/* Marketing Message */}
+      <div style={styles.hero}>
+        <h2 style={styles.heroTitle}>Welcome to Example App</h2>
+        <p style={styles.heroText}>Each action uses 1 credit. You get 3 free credits daily!</p>
+        <p style={styles.heroSubtext}>Visit daily to claim your credits</p>
+      </div>
+
+      {/* Main Action */}
+      <div style={styles.actionArea}>
+        <button 
+          onClick={handleUseFeature}
+          disabled={credits < 1 || isProcessing}
+          style={{
+            ...styles.primaryButton,
+            ...(credits < 1 || isProcessing ? styles.disabledButton : {})
+          }}
+        >
+          {isProcessing ? 'Processing...' : 'Use Feature (1 credit)'}
+        </button>
+        
+        {credits === 0 && (
+          <p style={styles.warning}>
+            Out of credits! Complete tasks in the modal to earn more.
+          </p>
         )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white border rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-3">Waitlist Test</h3>
-          <p className="text-gray-600 mb-4">
-            Test the waitlist functionality including joining with invitation codes
-          </p>
-          <a 
-            href="/waitlist" 
-            className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Test Waitlist →
-          </a>
-        </div>
-
-        <div className="bg-white border rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-3">Protected Dashboard</h3>
-          <p className="text-gray-600 mb-4">
-            Test GrowthKitGate component for protecting content
-          </p>
-          <a 
-            href="/dashboard" 
-            className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            Access Dashboard →
-          </a>
-        </div>
-
-        <div className="bg-white border rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-3">Referral System</h3>
-          <p className="text-gray-600 mb-4">
-            Test referral link generation and tracking
-          </p>
-          <a 
-            href="/referral" 
-            className="inline-block bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-          >
-            Test Referrals →
-          </a>
-        </div>
-
-        <div className="bg-white border rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-3">API Configuration</h3>
-          <p className="text-gray-600 mb-4">
-            Server URL: {process.env.NEXT_PUBLIC_GROWTHKIT_SERVER_URL}
-          </p>
-          <p className="text-xs text-gray-500">
-            Make sure to set GROWTHKIT_API_KEY in your environment
-          </p>
-        </div>
+      {/* Referral Section */}
+      <div style={styles.referralSection}>
+        <h3 style={styles.sectionTitle}>Share & Earn Credits</h3>
+        <p style={styles.sectionText}>
+          Invite friends and earn 3 credits for each referral!
+        </p>
+        <button 
+          onClick={handleShare}
+          style={styles.secondaryButton}
+        >
+          Share Referral Link
+        </button>
       </div>
     </div>
   );
 }
+
+// Main Page Component
+export default function HomePage() {
+  const config = {
+    apiKey: process.env.NEXT_PUBLIC_GROWTHKIT_API_KEY || '',
+    apiUrl: process.env.NEXT_PUBLIC_GROWTHKIT_API_URL,
+    debug: process.env.NODE_ENV === 'development',
+  };
+
+  return (
+    <GrowthKitProvider config={config}>
+      <GrowthKitGate>
+        <MainApp />
+      </GrowthKitGate>
+      <Toaster 
+        position="bottom-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+        }}
+      />
+    </GrowthKitProvider>
+  );
+}
+
+// Styles
+const styles: Record<string, React.CSSProperties> = {
+  container: {
+    maxWidth: '600px',
+    margin: '0 auto',
+    padding: '2rem',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+    minHeight: '100vh',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '3rem',
+    paddingBottom: '1rem',
+    borderBottom: '2px solid #e0e0e0',
+  },
+  title: {
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    color: '#333',
+    margin: 0,
+  },
+  creditsDisplay: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    background: '#f0f0f0',
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
+    fontWeight: 'bold',
+    fontSize: '1.1rem',
+  },
+  refreshButton: {
+    background: 'none',
+    border: 'none',
+    fontSize: '1.2rem',
+    cursor: 'pointer',
+    padding: '0.25rem',
+    borderRadius: '4px',
+    transition: 'background 0.2s',
+  },
+  hero: {
+    textAlign: 'center',
+    marginBottom: '3rem',
+    padding: '2rem',
+    background: 'linear-gradient(135deg, #667eea10 0%, #764ba210 100%)',
+    borderRadius: '12px',
+  },
+  heroTitle: {
+    fontSize: '1.75rem',
+    color: '#333',
+    marginBottom: '0.5rem',
+  },
+  heroText: {
+    fontSize: '1.125rem',
+    color: '#666',
+    marginBottom: '0.5rem',
+  },
+  heroSubtext: {
+    fontSize: '1rem',
+    color: '#999',
+    fontStyle: 'italic',
+  },
+  actionArea: {
+    marginBottom: '3rem',
+    textAlign: 'center',
+  },
+  primaryButton: {
+    background: '#0070f3',
+    color: 'white',
+    padding: '1rem 2rem',
+    fontSize: '1.2rem',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontWeight: '600',
+    transition: 'all 0.2s',
+    boxShadow: '0 4px 14px 0 rgba(0,118,255,0.39)',
+  },
+  disabledButton: {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+    boxShadow: 'none',
+  },
+  warning: {
+    marginTop: '1rem',
+    color: '#e74c3c',
+    fontSize: '0.95rem',
+    fontWeight: '500',
+  },
+  referralSection: {
+    textAlign: 'center',
+    padding: '2rem',
+    background: '#f9f9f9',
+    borderRadius: '12px',
+  },
+  sectionTitle: {
+    fontSize: '1.25rem',
+    color: '#333',
+    marginBottom: '0.5rem',
+  },
+  sectionText: {
+    color: '#666',
+    marginBottom: '1.5rem',
+  },
+  secondaryButton: {
+    background: '#fff',
+    color: '#0070f3',
+    padding: '0.75rem 1.5rem',
+    fontSize: '1rem',
+    border: '2px solid #0070f3',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontWeight: '600',
+    transition: 'all 0.2s',
+  },
+};
