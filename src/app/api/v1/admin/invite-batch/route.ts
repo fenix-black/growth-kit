@@ -2,6 +2,8 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyServiceKey } from '@/lib/security/auth';
 import { successResponse, errors } from '@/lib/utils/response';
+import { sendInvitationEmail } from '@/lib/email/send';
+import { generateInvitationCode } from '@/lib/utils/invitationCode';
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,19 +66,42 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Update status to INVITED for all entries
+    // Update status to INVITED and generate invitation codes
     const invitedAt = new Date();
-    const inviteIds = waitlistEntries.map(entry => entry.id);
+    const codeExpiresAt = new Date();
+    codeExpiresAt.setDate(codeExpiresAt.getDate() + 7); // 7 days expiry
     
-    await prisma.waitlist.updateMany({
-      where: {
-        id: { in: inviteIds },
-      },
-      data: {
-        status: 'INVITED',
-        invitedAt,
-      },
-    });
+    // Update each entry with invitation code
+    for (const entry of waitlistEntries) {
+      const invitationCode = generateInvitationCode();
+      
+      await prisma.waitlist.update({
+        where: { id: entry.id },
+        data: {
+          status: 'INVITED',
+          invitedAt,
+          invitationCode,
+          codeExpiresAt,
+          maxUses: 1,
+        } as any, // Using any for new fields
+      });
+      
+      // Send invitation email with the code
+      try {
+        await sendInvitationEmail(app, entry.email, {
+          invitationCode,
+          invitationUrl: app.domain ? 
+            `https://${app.domain}/invite/${invitationCode}` : 
+            `https://your-app.com/invite/${invitationCode}`,
+          expiryDate: codeExpiresAt.toLocaleDateString(),
+        });
+        
+        console.log(`Invitation email sent to ${entry.email} with code ${invitationCode}`);
+      } catch (emailError) {
+        console.error(`Failed to send invitation email to ${entry.email}:`, emailError);
+        // Continue with other invitations even if one fails
+      }
+    }
 
     // Log events for each invitation
     const eventLogs = waitlistEntries.map(entry => ({
@@ -87,18 +112,13 @@ export async function POST(request: NextRequest) {
       metadata: {
         email: entry.email,
         position: entry.position,
+        emailSent: true,
       },
     }));
 
     await prisma.eventLog.createMany({
       data: eventLogs,
     });
-
-    // TODO: Send invitation emails via Resend
-    // This is a stub for now - will be implemented when email integration is added
-    // for (const entry of waitlistEntries) {
-    //   await sendInvitationEmail(entry.email, app.name);
-    // }
 
     return successResponse({
       invited: waitlistEntries.length,
