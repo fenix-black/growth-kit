@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { NextRequest, NextFetchEvent, NextResponse } from 'next/server';
+import { NextRequest, NextFetchEvent } from 'next/server';
 
 interface GrowthKitConfig {
     apiKey: string;
@@ -160,67 +160,14 @@ interface WaitlistFormProps {
 declare function WaitlistForm({ growthKit, message, onSuccess, className, style }: WaitlistFormProps): React.JSX.Element;
 
 interface GrowthKitMiddlewareConfig {
-    /**
-     * Your GrowthKit API key
-     */
     apiKey: string;
-    /**
-     * The GrowthKit API URL
-     * @example "https://growthkit.example.com/api"
-     */
     apiUrl: string;
-    /**
-     * The referral path prefix (default: "/r")
-     * @example "/refer" would match /refer/ABC123
-     */
     referralPath?: string;
-    /**
-     * Where to redirect after processing the referral (default: "/")
-     * @example "/welcome" or "/app"
-     */
     redirectTo?: string;
-    /**
-     * Enable debug logging
-     */
     debug?: boolean;
 }
-/**
- * Create a Next.js middleware handler for GrowthKit referral links
- *
- * This middleware intercepts referral links, validates them with the GrowthKit
- * server, and passes the claim token to your app via URL parameters.
- *
- * @example
- * ```ts
- * // middleware.ts
- * import { createGrowthKitMiddleware } from '@fenixblack/growthkit';
- *
- * export const middleware = createGrowthKitMiddleware({
- *   apiKey: process.env.GROWTHKIT_API_KEY!,
- *   apiUrl: process.env.GROWTHKIT_API_URL!
- * });
- *
- * export const config = {
- *   matcher: '/r/:code*'
- * };
- * ```
- */
-declare function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig): (request: NextRequest, event?: NextFetchEvent) => Promise<NextResponse | Response | null | undefined>;
-/**
- * Standalone middleware function for simple use cases
- * Requires GROWTHKIT_API_KEY and GROWTHKIT_API_URL environment variables
- *
- * @example
- * ```ts
- * // middleware.ts
- * export { growthKitMiddleware as middleware } from '@fenixblack/growthkit';
- *
- * export const config = {
- *   matcher: '/r/:code*'
- * };
- * ```
- */
-declare function growthKitMiddleware(request: NextRequest, event?: NextFetchEvent): Promise<NextResponse | Response | null | undefined>;
+declare function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig): (request: NextRequest, event?: NextFetchEvent) => Promise<any>;
+declare function growthKitMiddleware(request: NextRequest, event?: NextFetchEvent): Promise<any>;
 
 /**
  * Server-side utilities for GrowthKit

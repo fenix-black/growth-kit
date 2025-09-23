@@ -1,57 +1,17 @@
+// This file is Edge Runtime compatible - no React imports
 import type { NextRequest, NextFetchEvent } from 'next/server';
-import { NextResponse } from 'next/server';
+
+// We need to use dynamic imports to avoid importing Next.js at module evaluation time
+let NextResponse: any;
 
 export interface GrowthKitMiddlewareConfig {
-  /**
-   * Your GrowthKit API key
-   */
   apiKey: string;
-  
-  /**
-   * The GrowthKit API URL
-   * @example "https://growthkit.example.com/api"
-   */
   apiUrl: string;
-  
-  /**
-   * The referral path prefix (default: "/r")
-   * @example "/refer" would match /refer/ABC123
-   */
   referralPath?: string;
-  
-  /**
-   * Where to redirect after processing the referral (default: "/")
-   * @example "/welcome" or "/app"
-   */
   redirectTo?: string;
-  
-  /**
-   * Enable debug logging
-   */
   debug?: boolean;
 }
 
-/**
- * Create a Next.js middleware handler for GrowthKit referral links
- * 
- * This middleware intercepts referral links, validates them with the GrowthKit
- * server, and passes the claim token to your app via URL parameters.
- * 
- * @example
- * ```ts
- * // middleware.ts
- * import { createGrowthKitMiddleware } from '@fenixblack/growthkit';
- * 
- * export const middleware = createGrowthKitMiddleware({
- *   apiKey: process.env.GROWTHKIT_API_KEY!,
- *   apiUrl: process.env.GROWTHKIT_API_URL!
- * });
- * 
- * export const config = {
- *   matcher: '/r/:code*'
- * };
- * ```
- */
 export function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig) {
   const referralPath = config.referralPath || '/r';
   const redirectTo = config.redirectTo || '/';
@@ -59,7 +19,13 @@ export function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig) {
   return async function growthKitMiddleware(
     request: NextRequest,
     event?: NextFetchEvent
-  ): Promise<NextResponse | Response | null | undefined> {
+  ): Promise<any> {
+    // Dynamically import NextResponse to avoid module evaluation issues
+    if (!NextResponse) {
+      const nextServer = await import('next/server');
+      NextResponse = nextServer.NextResponse;
+    }
+    
     const pathname = request.nextUrl.pathname;
     
     // Check if this is a referral link
@@ -131,29 +97,19 @@ export function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig) {
   };
 }
 
-/**
- * Standalone middleware function for simple use cases
- * Requires GROWTHKIT_API_KEY and GROWTHKIT_API_URL environment variables
- * 
- * @example
- * ```ts
- * // middleware.ts
- * export { growthKitMiddleware as middleware } from '@fenixblack/growthkit';
- * 
- * export const config = {
- *   matcher: '/r/:code*'
- * };
- * ```
- */
 export async function growthKitMiddleware(
   request: NextRequest,
   event?: NextFetchEvent
-): Promise<NextResponse | Response | null | undefined> {
+): Promise<any> {
   const apiKey = process.env.GROWTHKIT_API_KEY;
   const apiUrl = process.env.GROWTHKIT_API_URL;
   
   if (!apiKey || !apiUrl) {
     console.error('[GrowthKit] GROWTHKIT_API_KEY and GROWTHKIT_API_URL environment variables are required');
+    if (!NextResponse) {
+      const nextServer = await import('next/server');
+      NextResponse = nextServer.NextResponse;
+    }
     return NextResponse.next();
   }
   

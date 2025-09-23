@@ -1,4 +1,6 @@
-import { createGrowthKitMiddleware } from '@fenixblack/growthkit';
+// Import middleware from the Edge Runtime-compatible entry point
+// In production, this would be: '@fenixblack/growthkit/middleware'
+import { createGrowthKitMiddleware } from '@fenixblack/growthkit/middleware';
 
 export const middleware = createGrowthKitMiddleware({
   apiKey: process.env.GROWTHKIT_API_KEY!,
@@ -9,14 +11,5 @@ export const middleware = createGrowthKitMiddleware({
 });
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: '/r/:path*',
 };

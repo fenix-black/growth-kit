@@ -3,14 +3,31 @@
   "version": "0.0.5",
   "description": "React SDK for GrowthKit - Intelligent waitlist and referral management",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./middleware": {
+      "import": "./dist/middleware.mjs",
+      "require": "./dist/middleware.js", 
+      "types": "./dist/middleware.d.ts"
+    },
+    "./server": {
+      "import": "./dist/server.mjs",
+      "require": "./dist/server.js",
+      "types": "./dist/server.d.ts"
+    }
+  },
   "scripts": {
-    "build": "tsup src/index.ts --dts --format esm,cjs --minify",
-    "dev": "tsup src/index.ts --dts --format esm,cjs --watch",
+    "build": "npm run clean && tsup",
+    "dev": "tsup --watch",
     "clean": "rm -rf dist"
   },
   "peerDependencies": {

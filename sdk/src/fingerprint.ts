@@ -9,21 +9,66 @@ export async function getFingerprint(): Promise<string> {
     return cachedFingerprint;
   }
 
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined') {
+    // Return a placeholder during SSR that will be replaced on client
+    return 'ssr_placeholder_' + Math.random().toString(36).substring(7);
+  }
+
   try {
+    // Wait for the browser environment to be fully ready
+    if (document.readyState !== 'complete') {
+      await new Promise((resolve) => {
+        if (document.readyState === 'complete') {
+          resolve(undefined);
+        } else {
+          window.addEventListener('load', resolve, { once: true });
+        }
+      });
+    }
+
     // Get browser fingerprint using broprint.js
-    const fingerprint = await getCurrentBrowserFingerPrint();
+    const fingerprintResult: any = await getCurrentBrowserFingerPrint();
     
-    if (!fingerprint || typeof fingerprint !== 'string') {
-      throw new Error('Invalid fingerprint generated');
+    console.log('[GrowthKit] Fingerprint result type:', typeof fingerprintResult);
+    
+    let fingerprint: string;
+    
+    // Handle different possible return formats from broprint.js
+    if (fingerprintResult && typeof fingerprintResult === 'object') {
+      // The library might return an object with the fingerprint as a property
+      if ('hash' in fingerprintResult) {
+        fingerprint = String(fingerprintResult.hash);
+      } else if ('fingerprint' in fingerprintResult) {
+        fingerprint = String(fingerprintResult.fingerprint);
+      } else if ('id' in fingerprintResult) {
+        fingerprint = String(fingerprintResult.id);
+      } else {
+        // If it's an object but we don't know the structure, stringify it
+        fingerprint = JSON.stringify(fingerprintResult);
+      }
+    } else if (fingerprintResult && typeof fingerprintResult === 'string') {
+      fingerprint = fingerprintResult;
+    } else if (fingerprintResult && typeof fingerprintResult === 'number') {
+      fingerprint = fingerprintResult.toString();
+    } else {
+      // If the result is not valid, throw an error to trigger fallback
+      throw new Error(`Invalid fingerprint type: ${typeof fingerprintResult}`);
+    }
+    
+    if (!fingerprint || fingerprint.length === 0) {
+      throw new Error('Empty fingerprint generated');
     }
 
     // Cache the fingerprint for the session
     cachedFingerprint = fingerprint;
     
+    console.log('[GrowthKit] Fingerprint generated successfully:', fingerprint.substring(0, 10) + '...');
+    
     return fingerprint;
   } catch (error) {
     // Fallback to a simple fingerprint if broprint.js fails
-    console.warn('Fingerprint generation failed, using fallback:', error);
+    console.warn('[GrowthKit] Fingerprint generation failed, using fallback:', error);
     
     // Generate a fallback fingerprint using available browser properties
     const fallback = generateFallbackFingerprint();
