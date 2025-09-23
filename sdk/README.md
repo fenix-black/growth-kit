@@ -34,7 +34,7 @@ import { GrowthKitServer, createGrowthKitServer } from '@fenixblack/growthkit/se
 
 ## Complete Setup (3 Steps)
 
-### 1. Add Middleware (handles referral links)
+### 1. Add Middleware (handles referral links & email verification)
 
 Create `middleware.ts` in your Next.js root:
 
@@ -50,9 +50,13 @@ export const middleware = createGrowthKitMiddleware({
 });
 
 export const config = {
-  matcher: '/r/:code*'
+  matcher: ['/r/:code*', '/verify']  // Handles both referral and email verification
 };
 ```
+
+The middleware automatically:
+- **Referral links**: `/r/ABC123` → exchanges code for claim token → redirects to `/?ref=token`
+- **Email verification**: `/verify?token=xyz` → verifies email → redirects to `/?verified=true`
 
 ### 2. Set Environment Variables
 
@@ -85,12 +89,28 @@ function App() {
 
 ```tsx
 import { useGrowthKit } from '@fenixblack/growthkit';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 function App() {
   const gk = useGrowthKit({
     apiKey: 'your-api-key',
     apiUrl: 'https://growth.fenixblack.ai/api', // Optional
   });
+
+  // Handle email verification redirects from middleware
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (params.get('verified') === 'true') {
+      toast.success('Email verified! +1 credit earned');
+      gk.refresh(); // Refresh credits
+      window.history.replaceState({}, '', '/');
+    } else if (params.get('verified') === 'false') {
+      toast.error('Verification failed');
+      window.history.replaceState({}, '', '/');
+    }
+  }, [gk]);
 
   // The hook automatically:
   // 1. Generates a browser fingerprint

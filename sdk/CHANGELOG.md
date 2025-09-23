@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.0.7] - 2025-09-23
+
+### Added
+- **Email Verification via Middleware**
+  - Email verification now handled consistently through middleware
+  - Intercepts `/verify` routes and processes verification tokens
+  - Redirects with query parameters for success/failure feedback
+  - Removes need for separate verification page in client apps
+
+### Enhanced
+- **Middleware Consistency**
+  - Both referral links and email verification now use the same middleware pattern
+  - Simplified client implementation - no special pages needed
+  - Query parameter feedback for both flows
+
+### Fixed
+- Architectural consistency between referral and verification flows
+
 ## [0.0.4] - 2025-09-21
 
 ### Added

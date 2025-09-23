@@ -28,6 +28,62 @@ export function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig) {
     
     const pathname = request.nextUrl.pathname;
     
+    // Handle email verification
+    if (pathname === '/verify') {
+      const token = request.nextUrl.searchParams.get('token');
+      
+      if (!token) {
+        if (config.debug) {
+          console.warn('[GrowthKit] No verification token found');
+        }
+        const redirectUrl = new URL(redirectTo, request.url);
+        redirectUrl.searchParams.set('verified', 'false');
+        redirectUrl.searchParams.set('error', 'missing-token');
+        return NextResponse.redirect(redirectUrl);
+      }
+      
+      if (config.debug) {
+        console.log('[GrowthKit] Processing verification token');
+      }
+      
+      try {
+        // Verify the email token via GrowthKit API
+        const verifyResponse = await fetch(`${config.apiUrl}/v1/verify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.apiKey}`,
+          },
+          body: JSON.stringify({ token }),
+        });
+        
+        const redirectUrl = new URL(redirectTo, request.url);
+        
+        if (verifyResponse.ok) {
+          if (config.debug) {
+            console.log('[GrowthKit] Email verified successfully');
+          }
+          redirectUrl.searchParams.set('verified', 'true');
+        } else {
+          if (config.debug) {
+            console.error('[GrowthKit] Email verification failed:', verifyResponse.status);
+          }
+          redirectUrl.searchParams.set('verified', 'false');
+        }
+        
+        return NextResponse.redirect(redirectUrl);
+        
+      } catch (error) {
+        if (config.debug) {
+          console.error('[GrowthKit] Error verifying email:', error);
+        }
+        const redirectUrl = new URL(redirectTo, request.url);
+        redirectUrl.searchParams.set('verified', 'false');
+        redirectUrl.searchParams.set('error', 'verification-failed');
+        return NextResponse.redirect(redirectUrl);
+      }
+    }
+    
     // Check if this is a referral link
     if (!pathname.startsWith(referralPath + '/')) {
       return NextResponse.next();

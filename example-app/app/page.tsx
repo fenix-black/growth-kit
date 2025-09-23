@@ -1,13 +1,34 @@
 'use client';
 
 import { GrowthKitProvider, GrowthKitGate, useGrowthKit } from '@growthkit/sdk';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
 // Main App Component (wrapped by GrowthKitGate)
 function MainApp() {
   const { credits, completeAction, loading, refresh, getReferralLink, share } = useGrowthKit();
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Handle email verification feedback from middleware redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (params.get('verified') === 'true') {
+      toast.success('Email verified successfully! +1 credit earned');
+      refresh(); // Refresh credits to show the new balance
+      // Clean up URL
+      window.history.replaceState({}, '', '/');
+    } else if (params.get('verified') === 'false') {
+      const error = params.get('error');
+      if (error === 'missing-token') {
+        toast.error('No verification token provided');
+      } else {
+        toast.error('Verification failed. The token may be invalid or expired.');
+      }
+      // Clean up URL
+      window.history.replaceState({}, '', '/');
+    }
+  }, [refresh]);
   
   const handleUseFeature = async () => {
     setIsProcessing(true);

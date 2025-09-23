@@ -10,5 +10,5 @@ export const middleware = createGrowthKitMiddleware({
 });
 
 export const config = {
-  matcher: '/r/:path*',
+  matcher: ['/r/:path*', '/verify'],
 };
