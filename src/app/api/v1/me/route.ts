@@ -379,9 +379,44 @@ export async function POST(request: NextRequest) {
       return errors.serverError('Failed to create or retrieve user');
     }
 
-    // Process daily credit grants for non-waitlist apps
+    // Process daily credit grants
     const app = authContext.app as any; // Using any until migration is run
-    if (!app.waitlistEnabled && app.initialCreditsPerDay > 0) {
+    
+    // Determine if user should receive credits
+    let shouldGrantCredits = false;
+    
+    if (!app.waitlistEnabled) {
+      // No waitlist - everyone gets credits
+      shouldGrantCredits = true;
+    } else if (app.waitlistEnabled) {
+      // Check if user is invited or accepted
+      const lead = await prisma.lead.findFirst({
+        where: {
+          appId: authContext.app.id,
+          fingerprintId: fingerprintRecord!.id,
+        },
+        select: { email: true },
+      });
+      
+      if (lead) {
+        const waitlistEntry = await prisma.waitlist.findUnique({
+          where: {
+            appId_email: {
+              appId: authContext.app.id,
+              email: lead.email!,
+            },
+          },
+          select: { status: true },
+        });
+        
+        // Grant credits if invited or accepted
+        if (waitlistEntry && (waitlistEntry.status === 'INVITED' || waitlistEntry.status === 'ACCEPTED')) {
+          shouldGrantCredits = true;
+        }
+      }
+    }
+    
+    if (shouldGrantCredits && app.initialCreditsPerDay > 0) {
       const now = new Date();
       const lastGrant = fingerprintRecord.lastDailyGrant;
       
@@ -429,7 +464,7 @@ export async function POST(request: NextRequest) {
         });
       }
     } else {
-      // Update activity timestamp for waitlist apps too
+      // Update activity timestamp for users without credit grants
       await prisma.fingerprint.update({
         where: { id: fingerprintRecord.id },
         data: { lastActiveAt: new Date() }
@@ -485,6 +520,8 @@ export async function POST(request: NextRequest) {
             acceptedAt: waitlistEntry.acceptedAt?.toISOString() || null,
             email: lead.email,
             emailVerified: lead.emailVerified,
+            // App requires waitlist membership - SDK will handle access based on status
+            requiresWaitlist: true,
           };
         } else {
           // No waitlist entry yet

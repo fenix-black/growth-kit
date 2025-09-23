@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.9] - 2025-09-23
+
+### Fixed
+- **React Hooks Order Violation**: Fixed hooks order error in GrowthKitGate component
+  - Moved useEffect hook before conditional returns to comply with React's rules of hooks
+  - Prevents "change in the order of Hooks" error
+
 ## [0.0.8] - 2025-09-23
 
 ### Fixed

@@ -21,6 +21,14 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
   
   const [showCreditModal, setShowCreditModal] = useState(false);
 
+  // Show credit exhaustion modal when needed
+  // Must be before any conditional returns to follow React's rules of hooks
+  useEffect(() => {
+    if (credits === 0 && !loading && !waitlistEnabled) {
+      setShowCreditModal(true);
+    }
+  }, [credits, loading, waitlistEnabled]);
+
   // Show loading state
   if (loading || !initialized) {
     return (
@@ -43,13 +51,6 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
   if (shouldShowWaitlist) {
     return <WaitlistForm />;
   }
-
-  // Show credit exhaustion modal when needed
-  useEffect(() => {
-    if (credits === 0 && !loading && !waitlistEnabled) {
-      setShowCreditModal(true);
-    }
-  }, [credits, loading, waitlistEnabled]);
 
   return (
     <>
