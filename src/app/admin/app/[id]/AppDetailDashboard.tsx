@@ -651,6 +651,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
         <WaitlistManager
           appId={appId}
           appName={app.name}
+          appDomain={app.domain}
           embedded={true}
           onClose={() => setActiveTab('overview')}
         />

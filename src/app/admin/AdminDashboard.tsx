@@ -558,6 +558,7 @@ export default function AdminDashboard() {
           <WaitlistManager
             appId={selectedApp.id}
             appName={selectedApp.name}
+            appDomain={selectedApp.domain}
             onClose={() => {
               setShowWaitlistManager(false);
               setSelectedApp(null);
