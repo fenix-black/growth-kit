@@ -23,6 +23,8 @@ export interface SendAppEmailOptions {
 export async function sendAppEmail(options: SendAppEmailOptions) {
   const { app, to, templateType, data, from, replyTo } = options;
   
+  console.log(`📨 Preparing to send ${templateType} email for app ${app.name} to ${to}`);
+  
   // Ensure app name and URL are in the data
   const templateData = {
     ...data,
@@ -33,15 +35,31 @@ export async function sendAppEmail(options: SendAppEmailOptions) {
   // Get the template (custom or default)
   const template = getEmailTemplate(app, templateType, templateData);
   
+  const fromAddress = from || `${app.name} <noreply@waitlist.fenixblack.ai>`;
+  
+  console.log('📮 Email details:', {
+    templateType,
+    from: fromAddress,
+    to,
+    subject: template.subject,
+    appName: app.name,
+  });
+  
   // Send the email with retry
   const result = await sendEmailWithRetry({
     to,
     subject: template.subject,
     html: template.html,
     text: template.text,
-    from: from || `${app.name} <noreply@waitlist.fenixblack.ai>`,
+    from: fromAddress,
     replyTo,
   });
+  
+  if (result.success) {
+    console.log(`✅ ${templateType} email sent successfully to ${to}`);
+  } else {
+    console.error(`❌ Failed to send ${templateType} email to ${to}:`, result.error);
+  }
   
   return result;
 }
@@ -86,10 +104,22 @@ export async function sendWaitlistConfirmationEmail(
   to: string,
   data: Omit<WaitlistConfirmationData, 'appName' | 'appUrl'>
 ) {
-  return sendAppEmail({
+  console.log('📬 sendWaitlistConfirmationEmail called:', {
+    appId: app.id,
+    appName: app.name,
+    appDomain: app.domain,
+    to,
+    position: data.position,
+  });
+  
+  const result = await sendAppEmail({
     app,
     to,
     templateType: 'waitlist_confirmation',
     data: data as WaitlistConfirmationData,
   });
+  
+  console.log('📬 sendWaitlistConfirmationEmail result:', result);
+  
+  return result;
 }

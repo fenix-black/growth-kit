@@ -39,9 +39,19 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
     return { success: false, error: 'Email service not configured' };
   }
 
+  const fromAddress = options.from || process.env.EMAIL_FROM || 'GrowthKit <noreply@waitlist.fenixblack.ai>';
+  
+  console.log('📧 Attempting to send email:', {
+    from: fromAddress,
+    to: options.to,
+    subject: options.subject,
+    hasHtml: !!options.html,
+    hasText: !!options.text,
+  });
+
   try {
     const { data, error } = await resend.emails.send({
-      from: options.from || process.env.EMAIL_FROM || 'GrowthKit <noreply@waitlist.fenixblack.ai>',
+      from: fromAddress,
       to: Array.isArray(options.to) ? options.to : [options.to],
       subject: options.subject,
       html: options.html,
@@ -50,13 +60,19 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
     });
 
     if (error) {
-      console.error('Failed to send email:', error);
+      console.error('❌ Resend API returned error:', error);
       return { success: false, error: error.message };
     }
 
+    console.log('✅ Email sent successfully:', {
+      id: data?.id,
+      from: fromAddress,
+      to: options.to,
+    });
+    
     return { success: true, data };
   } catch (error: any) {
-    console.error('Error sending email:', error);
+    console.error('❌ Exception sending email:', error);
     return { success: false, error: error.message || 'Failed to send email' };
   }
 }

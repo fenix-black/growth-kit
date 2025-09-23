@@ -5,7 +5,9 @@ import { checkRateLimit, getClientIp, rateLimits } from '@/lib/middleware/rateLi
 import { withCorsHeaders } from '@/lib/middleware/cors';
 import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { successResponse, errors } from '@/lib/utils/response';
-import { corsErrors } from '@/lib/utils/corsResponse';import { isValidEmail, isValidFingerprint } from '@/lib/utils/validation';
+import { corsErrors } from '@/lib/utils/corsResponse';
+import { isValidEmail, isValidFingerprint } from '@/lib/utils/validation';
+import { sendWaitlistConfirmationEmail } from '@/lib/email/send';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -125,6 +127,48 @@ export async function POST(request: NextRequest) {
         userAgent: request.headers.get('user-agent'),
       },
     });
+
+    // Send confirmation email
+    console.log('🔄 Attempting to send waitlist confirmation email:', {
+      to: normalizedEmail,
+      appName: authContext.app.name,
+      appDomain: authContext.app.domain,
+      position: waitlistEntry.position,
+    });
+    
+    try {
+      const emailResult = await sendWaitlistConfirmationEmail(
+        authContext.app,
+        normalizedEmail,
+        {
+          position: waitlistEntry.position,
+          estimatedWait: '', // You can calculate this based on your invite rate
+        }
+      );
+      
+      if (emailResult.success) {
+        console.log(`✅ Waitlist confirmation email sent to ${normalizedEmail}`, emailResult.data);
+      } else {
+        console.error(`❌ Waitlist email failed for ${normalizedEmail}:`, emailResult.error);
+      }
+    } catch (emailError) {
+      // Log error but don't fail the request
+      console.error('❌ Exception sending waitlist confirmation email:', emailError);
+      // Optionally log to event log
+      await prisma.eventLog.create({
+        data: {
+          appId: authContext.app.id,
+          event: 'email.failed',
+          entityType: 'waitlist',
+          entityId: waitlistEntry.id,
+          metadata: { 
+            email: normalizedEmail,
+            error: emailError instanceof Error ? emailError.message : 'Unknown error',
+            type: 'waitlist_confirmation',
+          },
+        },
+      });
+    }
 
     // Build response
     const response = successResponse({
