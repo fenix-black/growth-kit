@@ -50,6 +50,9 @@ export default function WaitlistManager({ appId, appName, onClose, embedded = fa
   const [entryTags, setEntryTags] = useState<{ [key: string]: string[] }>({});
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [invitePreview, setInvitePreview] = useState<{ email: string; code: string; expiresAt: Date } | null>(null);
+  
+  // Modal focus trap - must be called before any returns
+  const invitationModalRef = useFocusTrap(showInviteModal);
   const [config, setConfig] = useState<WaitlistConfig>({
     waitlistEnabled: false,
     waitlistMessage: '',
@@ -639,7 +642,6 @@ export default function WaitlistManager({ appId, appName, onClose, embedded = fa
   );
 
   // Invitation Preview Modal
-  const invitationModalRef = useFocusTrap(showInviteModal);
   const invitationModal = showInviteModal && invitePreview && (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-[60]">
       <div ref={invitationModalRef} className="bg-white rounded-lg shadow-xl max-w-2xl w-full overflow-hidden">
