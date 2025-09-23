@@ -89,13 +89,16 @@ export async function POST(request: NextRequest) {
       // Send invitation email with the code
       try {
         const appWithMaster = app as any; // Cast to access new fields
+        const policy = app.policyJson as any;
+        const invitationCredits = policy?.invitationCredits || app.initialCreditsPerDay || 3;
+        
         await sendInvitationEmail(app, entry.email, {
           invitationCode,
           invitationLink: app.domain ? 
             `https://${app.domain}/invite/${invitationCode}` : 
             `https://your-app.com/invite/${invitationCode}`,
           masterCode: appWithMaster.masterReferralCode || '',
-          credits: appWithMaster.masterReferralCredits || 10,
+          credits: invitationCredits,
           expiresAt: codeExpiresAt,
           referralLink: app.domain ? 
             `https://${app.domain}/r/${invitationCode}` : 
