@@ -27,21 +27,8 @@ export default function FingerprintTest() {
         console.log('- typeof navigator:', typeof navigator);
         console.log('- document.readyState:', document.readyState);
         
-        // Try to import and use broprint directly
-        const { getCurrentBrowserFingerPrint } = await import('@rajesh896/broprint.js');
-        
-        console.log('Calling broprint.js directly...');
-        const rawResult = await getCurrentBrowserFingerPrint();
-        
-        console.log('Raw broprint result:', rawResult);
-        console.log('Type of result:', typeof rawResult);
-        console.log('Result is null?', rawResult === null);
-        console.log('Result is undefined?', rawResult === undefined);
-        
-        if (rawResult && typeof rawResult === 'object') {
-          console.log('Result is an object. Keys:', Object.keys(rawResult));
-          console.log('Full object:', JSON.stringify(rawResult, null, 2));
-        }
+        // The SDK now handles broprint.js internally
+        console.log('SDK is handling fingerprint generation...');
         
         setDebugInfo({
           browserEnv: {
@@ -50,20 +37,18 @@ export default function FingerprintTest() {
             hasNavigator: typeof navigator !== 'undefined',
             documentState: document.readyState,
           },
-          rawBroprintResult: rawResult,
-          rawBroprintType: typeof rawResult,
-          rawBroprintKeys: rawResult && typeof rawResult === 'object' ? Object.keys(rawResult) : null,
           growthKitState: {
             loading: growthKit.loading,
             initialized: growthKit.initialized,
             error: growthKit.error?.message,
             fingerprint: growthKit.fingerprint,
-          }
+          },
+          note: 'The SDK now handles fingerprint generation internally'
         });
         
       } catch (error) {
         console.error('Error during fingerprint test:', error);
-        setDebugInfo(prev => ({
+        setDebugInfo((prev: any) => ({
           ...prev,
           error: error instanceof Error ? error.message : String(error),
           errorStack: error instanceof Error ? error.stack : null
