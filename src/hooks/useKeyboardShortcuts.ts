@@ -48,9 +48,15 @@ export function useKeyboardShortcuts() {
   const router = useRouter();
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    // Safety check for event.key
+    if (!event.key) return;
+    
     const isCmd = event.metaKey || event.ctrlKey;
     
     shortcuts.forEach(shortcut => {
+      // Safety check for shortcut.key
+      if (!shortcut.key) return;
+      
       const matchesKey = event.key.toLowerCase() === shortcut.key.toLowerCase();
       const matchesModifiers = 
         (!shortcut.ctrlOrCmd || isCmd) &&
