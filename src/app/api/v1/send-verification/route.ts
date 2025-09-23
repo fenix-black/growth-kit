@@ -3,14 +3,14 @@ import { prisma } from '@/lib/db';
 import { verifyAppAuth } from '@/lib/security/auth';
 import { checkRateLimit, getClientIp, rateLimits } from '@/lib/middleware/rateLimit';
 import { withCorsHeaders } from '@/lib/middleware/cors';
-import { handleOptionsRequest } from '@/lib/middleware/corsOptions';
+import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { successResponse, errors } from '@/lib/utils/response';
 import { isValidFingerprint, isValidEmail } from '@/lib/utils/validation';
 import { sendVerificationEmail } from '@/lib/email/send';
 import crypto from 'crypto';
 
 export async function OPTIONS(request: NextRequest) {
-  return handleOptionsRequest(request);
+  return handleSimpleOptions(request);
 }
 
 export async function POST(request: NextRequest) {

@@ -4,13 +4,13 @@ import { verifyAppAuth } from '@/lib/security/auth';
 import { generateReferralCode, verifyClaim } from '@/lib/security/hmac';
 import { checkRateLimit, getClientIp, rateLimits } from '@/lib/middleware/rateLimit';
 import { withCorsHeaders } from '@/lib/middleware/cors';
-import { handleOptionsRequest } from '@/lib/middleware/corsOptions';
+import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { successResponse, errors } from '@/lib/utils/response';
 import { isValidFingerprint } from '@/lib/utils/validation';
 import { isInvitationCode, isCodeExpired } from '@/lib/utils/invitationCode';
 
 export async function OPTIONS(request: NextRequest) {
-  return handleOptionsRequest(request);
+  return handleSimpleOptions(request);
 }
 
 export async function POST(request: NextRequest) {
