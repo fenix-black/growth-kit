@@ -3,22 +3,14 @@ import { prisma } from '@/lib/db';
 import { verifyAppAuth } from '@/lib/security/auth';
 import { generateReferralCode, verifyClaim } from '@/lib/security/hmac';
 import { checkRateLimit, getClientIp, rateLimits } from '@/lib/middleware/rateLimit';
-import { withCorsHeaders, handleCorsPreflightResponse } from '@/lib/middleware/cors';
+import { withCorsHeaders } from '@/lib/middleware/cors';
+import { handleOptionsRequest } from '@/lib/middleware/corsOptions';
 import { successResponse, errors } from '@/lib/utils/response';
 import { isValidFingerprint } from '@/lib/utils/validation';
 import { isInvitationCode, isCodeExpired } from '@/lib/utils/invitationCode';
 
 export async function OPTIONS(request: NextRequest) {
-  const origin = request.headers.get('origin');
-  
-  // Try to get app context to use its CORS origins
-  const authContext = await verifyAppAuth(request.headers);
-  
-  // Use app's CORS origins if available, otherwise fall back to env variable
-  const corsOrigins = authContext?.app.corsOrigins || 
-    process.env.CORS_ALLOWLIST?.split(',') || [];
-    
-  return handleCorsPreflightResponse(origin, corsOrigins);
+  return handleOptionsRequest(request);
 }
 
 export async function POST(request: NextRequest) {
