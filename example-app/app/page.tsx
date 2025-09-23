@@ -43,10 +43,7 @@ function MainApp() {
   };
 
   const handleShare = async () => {
-    const success = await share({
-      title: 'Check out this app!',
-      text: `Join me and get free credits! ${getReferralLink()}`
-    });
+    const success = await share();
     
     if (!success) {
       // Fallback to copying

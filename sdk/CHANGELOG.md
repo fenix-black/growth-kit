@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.4] - 2025-09-23
+
+### Fixed
+- **Share Message**: Removed duplicate URL from share message
+  - Share message now only includes the referral link, not a separate app URL
+  - Prevents redundant URLs in shared content
+  - Cleaner message: "Join me and get free credits! [referral-link]"
+
 ## [0.1.3] - 2025-09-23
 
 ### Fixed

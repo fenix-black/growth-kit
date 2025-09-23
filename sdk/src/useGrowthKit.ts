@@ -347,10 +347,12 @@ export function useGrowthKit(): GrowthKitHook {
   // Share functionality
   const share = useCallback(async (options?: ShareOptions): Promise<boolean> => {
     const referralLink = getReferralLink();
+    const shareText = options?.text || `Join me and get free credits! ${referralLink}`;
+    
     const shareData = {
-      title: options?.title || 'Check this out!',
-      text: options?.text || `Join me and get free credits! ${referralLink}`,
-      url: options?.url || referralLink,
+      title: options?.title || 'Check out this app!',
+      text: shareText,
+      // Don't include URL separately as it's already in the text
     };
 
     try {
@@ -360,8 +362,7 @@ export function useGrowthKit(): GrowthKitHook {
         return true;
       }
 
-      // Fallback to clipboard
-      const shareText = `${shareData.text}\n${shareData.url}`;
+      // Fallback to clipboard - just copy the text with the link
       await navigator.clipboard.writeText(shareText);
       
       // Show some feedback (you might want to use a toast library)
