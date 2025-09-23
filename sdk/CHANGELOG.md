@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.8] - 2025-09-23
+
+### Fixed
+- **Waitlist Position Display**: Users already on the waitlist now correctly see their position instead of being blocked
+  - Updated `shouldShowWaitlist` logic to include 'waiting' status
+  - WaitlistForm component already handled position display, just needed to be shown
+
 ## [0.0.7] - 2025-09-23
 
 ### Added

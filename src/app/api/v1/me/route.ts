@@ -452,15 +452,16 @@ export async function POST(request: NextRequest) {
     let waitlistData = null;
     const appWithWaitlist = authContext.app as any; // Temporary cast until migration is run
     if (appWithWaitlist.waitlistEnabled) {
-      // Check if user has an email registered
+      // Check if user has an email registered (verified or unverified)
       const lead = await prisma.lead.findFirst({
         where: {
           appId: authContext.app.id,
           fingerprintId: fingerprintRecord!.id,
-          emailVerified: true,
+          // Remove emailVerified requirement to check waitlist status for all emails
         },
         select: {
           email: true,
+          emailVerified: true,
         },
       });
 
@@ -483,6 +484,7 @@ export async function POST(request: NextRequest) {
             invitedAt: waitlistEntry.invitedAt?.toISOString() || null,
             acceptedAt: waitlistEntry.acceptedAt?.toISOString() || null,
             email: lead.email,
+            emailVerified: lead.emailVerified,
           };
         } else {
           // No waitlist entry yet

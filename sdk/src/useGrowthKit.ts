@@ -96,8 +96,9 @@ export function useGrowthKit(): GrowthKitHook {
       const waitlistMessage = waitlistData?.message;
       
       // Determine if waitlist gate should show
+      // Show for both 'none' (to join) and 'waiting' (to see position)
       const shouldShowWaitlist = waitlistEnabled && 
-        waitlistStatus === 'none' && 
+        (waitlistStatus === 'none' || waitlistStatus === 'waiting') && 
         waitlistData?.requiresWaitlist === true;
 
       setState({
@@ -162,8 +163,9 @@ export function useGrowthKit(): GrowthKitHook {
         const waitlistMessage = waitlistData?.message;
         
         // Determine if waitlist gate should show
+        // Show for both 'none' (to join) and 'waiting' (to see position)
         const shouldShowWaitlist = waitlistEnabled && 
-          waitlistStatus === 'none' && 
+          (waitlistStatus === 'none' || waitlistStatus === 'waiting') && 
           waitlistData?.requiresWaitlist === true;
         
         setState(prev => ({
