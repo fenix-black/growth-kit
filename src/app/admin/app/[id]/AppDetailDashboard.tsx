@@ -80,7 +80,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showCopySuccess, setShowCopySuccess] = useState<string | null>(null);
-  const [editedApp, setEditedApp] = useState<Partial<AppDetails>>({});
+  const [editedApp, setEditedApp] = useState<Partial<AppDetails> & { corsOriginsText?: string }>({});
   const [newApiKey, setNewApiKey] = useState<string | null>(null);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
 
@@ -147,6 +147,11 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
   const handleSaveSettings = async () => {
     setIsSaving(true);
     try {
+      // Process corsOriginsText into array if it exists
+      const corsOrigins = typeof editedApp.corsOriginsText !== 'undefined' 
+        ? editedApp.corsOriginsText.split(',').map(s => s.trim()).filter(Boolean)
+        : editedApp.corsOrigins;
+
       const response = await fetch(`/api/v1/admin/app/${appId}`, {
         method: 'PUT',
         headers: {
@@ -157,7 +162,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           name: editedApp.name,
           domain: editedApp.domain,
           isActive: editedApp.isActive,
-          corsOrigins: editedApp.corsOrigins,
+          corsOrigins: corsOrigins,
           redirectUrl: editedApp.redirectUrl,
           policyJson: editedApp.policyJson,
           waitlistEnabled: editedApp.waitlistEnabled,
@@ -171,6 +176,8 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
       if (response.ok) {
         await fetchAppDetails();
         setIsEditing(false);
+        // Clear the temporary text field
+        setEditedApp(prev => ({ ...prev, corsOriginsText: undefined }));
       } else {
         const error = await response.json();
         alert(`Error: ${error.message}`);
@@ -322,7 +329,8 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                           redirectUrl: app?.redirectUrl || '',
                           invitationQuota: app?.invitationQuota ?? 10,
                           invitationCronTime: app?.invitationCronTime || '12:00',
-                          corsOrigins: app?.corsOrigins || [],
+                          corsOrigins: Array.isArray(app?.corsOrigins) ? app?.corsOrigins : (app?.corsOrigins ? [app?.corsOrigins] : []),
+                          corsOriginsText: undefined, // Clear temporary text field
                           policyJson: app?.policyJson || {},
                           isActive: app?.isActive ?? true,
                           waitlistEnabled: app?.waitlistEnabled ?? false,
@@ -347,7 +355,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                         redirectUrl: app.redirectUrl || '',
                         invitationQuota: app.invitationQuota ?? 10,
                         invitationCronTime: app.invitationCronTime || '12:00',
-                        corsOrigins: app.corsOrigins || [],
+                        corsOrigins: Array.isArray(app.corsOrigins) ? app.corsOrigins : (app.corsOrigins ? [app.corsOrigins] : []),
                         policyJson: app.policyJson || {},
                         isActive: app.isActive ?? true,
                         waitlistEnabled: app.waitlistEnabled ?? false,
@@ -515,10 +523,12 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
             <div className="space-y-2">
               {isEditing ? (
                 <textarea
-                  value={editedApp.corsOrigins?.join(', ')}
+                  value={typeof editedApp.corsOriginsText !== 'undefined' 
+                    ? editedApp.corsOriginsText 
+                    : (Array.isArray(editedApp.corsOrigins) ? editedApp.corsOrigins.join(', ') : '')}
                   onChange={(e) => setEditedApp({ 
                     ...editedApp, 
-                    corsOrigins: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                    corsOriginsText: e.target.value
                   })}
                   rows={4}
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
@@ -526,7 +536,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                 />
               ) : (
                 <div className="space-y-1">
-                  {app.corsOrigins.map((origin, idx) => (
+                  {(Array.isArray(app.corsOrigins) ? app.corsOrigins : [app.corsOrigins]).filter(Boolean).map((origin, idx) => (
                     <div key={idx} className="px-3 py-2 bg-gray-50 rounded text-sm">
                       {origin}
                     </div>
