@@ -99,12 +99,18 @@ export async function POST(request: NextRequest) {
 
     // Send invitation email
     try {
+      const appWithMaster = app as any; // Cast to access new fields
       await sendInvitationEmail(app, email, {
         invitationCode: code,
-        invitationUrl: app.domain ? 
+        invitationLink: app.domain ? 
           `https://${app.domain}/invite/${code}` : 
           `https://your-app.com/invite/${code}`,
-        expiryDate: expiresAt.toLocaleDateString(),
+        masterCode: appWithMaster.masterReferralCode || '',
+        credits: appWithMaster.masterReferralCredits || 10,
+        expiresAt: expiresAt,
+        referralLink: app.domain ? 
+          `https://${app.domain}/r/${code}` : 
+          `https://your-app.com/r/${code}`,
       });
       
       console.log(`Invitation email sent to ${email} with code ${code}`);
