@@ -84,6 +84,32 @@ export function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig) {
       }
     }
     
+    // Check if this is an invitation link
+    if (pathname.startsWith('/invite/')) {
+      const inviteCode = pathname.slice('/invite/'.length).split('/')[0];
+      
+      if (!inviteCode) {
+        if (config.debug) {
+          console.warn('[GrowthKit] No invitation code found in path:', pathname);
+        }
+        return NextResponse.redirect(new URL(redirectTo, request.url));
+      }
+      
+      if (config.debug) {
+        console.log('[GrowthKit] Processing invitation code:', inviteCode);
+      }
+      
+      // Redirect with invitation code as ref parameter (same as referral flow)
+      const redirectUrl = new URL(redirectTo, request.url);
+      redirectUrl.searchParams.set('ref', inviteCode);
+      
+      if (config.debug) {
+        console.log('[GrowthKit] Redirecting with invitation code to:', redirectUrl.toString());
+      }
+      
+      return NextResponse.redirect(redirectUrl);
+    }
+    
     // Check if this is a referral link
     if (!pathname.startsWith(referralPath + '/')) {
       return NextResponse.next();

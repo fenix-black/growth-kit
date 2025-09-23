@@ -405,6 +405,7 @@ export default function AppsListing() {
         <WaitlistManager
           appId={selectedApp.id}
           appName={selectedApp.name}
+          appDomain={selectedApp.domain}
           onClose={() => {
             setShowWaitlistManager(false);
             setSelectedApp(null);

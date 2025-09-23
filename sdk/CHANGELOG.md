@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.0] - 2025-09-23
+
+### Added
+- **Invitation Code Handling via Middleware**
+  - Middleware now intercepts `/invite/*` paths for invitation codes
+  - Automatically handles invitation redemption like referral links
+  - Transparent to client applications - just add `/invite/:path*` to matcher
+  - Invitation codes (INV-XXXXXX) are processed and grant appropriate credits
+
 ## [0.0.9] - 2025-09-23
 
 ### Fixed

@@ -50,13 +50,14 @@ export const middleware = createGrowthKitMiddleware({
 });
 
 export const config = {
-  matcher: ['/r/:code*', '/verify']  // Handles both referral and email verification
+  matcher: ['/r/:code*', '/verify', '/invite/:code*']  // Handles referral, verification, and invitations
 };
 ```
 
 The middleware automatically:
 - **Referral links**: `/r/ABC123` → exchanges code for claim token → redirects to `/?ref=token`
 - **Email verification**: `/verify?token=xyz` → verifies email → redirects to `/?verified=true`
+- **Invitation codes**: `/invite/INV-XXXXXX` → redirects with code → grants invitation credits
 
 ### 2. Set Environment Variables
 

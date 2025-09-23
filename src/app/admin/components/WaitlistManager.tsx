@@ -37,11 +37,12 @@ interface WaitlistConfig {
 interface WaitlistManagerProps {
   appId: string;
   appName: string;
+  appDomain?: string;
   onClose?: () => void;
   embedded?: boolean;
 }
 
-export default function WaitlistManager({ appId, appName, onClose, embedded = false }: WaitlistManagerProps) {
+export default function WaitlistManager({ appId, appName, appDomain, onClose, embedded = false }: WaitlistManagerProps) {
   const focusTrapRef = useFocusTrap(!embedded);
   const [activeTab, setActiveTab] = useState<'entries' | 'settings' | 'invitations'>('entries');
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
@@ -685,7 +686,7 @@ export default function WaitlistManager({ appId, appName, onClose, embedded = fa
               <p className="mb-2">Click the link below to redeem your invitation:</p>
               <p className="mb-2">
                 <a href="#" className="text-blue-600 underline">
-                  {window.location.origin}/waitlist/redeem/{invitePreview.code}
+                  {appDomain || 'https://your-app.com'}/invite/{invitePreview.code}
                 </a>
               </p>
               <p className="mb-2">This code expires on {invitePreview.expiresAt.toLocaleDateString()}.</p>
