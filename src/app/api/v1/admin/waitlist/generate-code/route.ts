@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { successResponse, errors } from '@/lib/utils/response';
 import { generateInvitationCode } from '@/lib/utils/invitationCode';
+import { sendInvitationEmail } from '@/lib/email/send';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,6 +24,15 @@ export async function POST(request: NextRequest) {
 
     if (!appId || !email) {
       return errors.badRequest('appId and email are required');
+    }
+    
+    // Get app details for email sending
+    const app = await prisma.app.findUnique({
+      where: { id: appId },
+    });
+    
+    if (!app) {
+      return errors.notFound();
     }
 
     // Check if email is already on waitlist
@@ -87,6 +97,22 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Send invitation email
+    try {
+      await sendInvitationEmail(app, email, {
+        invitationCode: code,
+        invitationUrl: app.domain ? 
+          `https://${app.domain}/invite/${code}` : 
+          `https://your-app.com/invite/${code}`,
+        expiryDate: expiresAt.toLocaleDateString(),
+      });
+      
+      console.log(`Invitation email sent to ${email} with code ${code}`);
+    } catch (emailError) {
+      console.error(`Failed to send invitation email to ${email}:`, emailError);
+      // Continue even if email fails - the invitation is still valid
+    }
+
     // Log the invitation
     await prisma.eventLog.create({
       data: {
@@ -99,6 +125,7 @@ export async function POST(request: NextRequest) {
           code,
           expiresAt,
           maxUses,
+          emailSent: true,
         },
       },
     });

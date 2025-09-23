@@ -1,6 +1,6 @@
 {
   "name": "@fenixblack/growthkit",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "React SDK for GrowthKit - Intelligent waitlist and referral management",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -44,7 +44,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/fenixblack/growthkit"
+    "url": "https://github.com/fenix-black/growth-kit"
   },
   "keywords": [
     "react",
