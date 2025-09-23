@@ -39,7 +39,7 @@ export async function sendAppEmail(options: SendAppEmailOptions) {
     subject: template.subject,
     html: template.html,
     text: template.text,
-    from: from || `${app.name} <noreply@${new URL(app.domain).hostname}>`,
+    from: from || `${app.name} <noreply@waitlist.fenixblack.ai>`,
     replyTo,
   });
   

@@ -1,6 +1,17 @@
 import { Resend } from 'resend';
+import { emailConfig } from './config';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
+// Log email configuration on startup
+if (process.env.NODE_ENV !== 'production') {
+  const advice = emailConfig.getConfigAdvice();
+  if (advice.length > 0) {
+    console.log('\n📧 Email Configuration:');
+    advice.forEach(line => console.log(line));
+    console.log('');
+  }
+}
 
 export interface EmailOptions {
   to: string | string[];
@@ -30,7 +41,7 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
 
   try {
     const { data, error } = await resend.emails.send({
-      from: options.from || process.env.EMAIL_FROM || 'GrowthKit <noreply@growthkit.app>',
+      from: options.from || process.env.EMAIL_FROM || 'GrowthKit <noreply@waitlist.fenixblack.ai>',
       to: Array.isArray(options.to) ? options.to : [options.to],
       subject: options.subject,
       html: options.html,
