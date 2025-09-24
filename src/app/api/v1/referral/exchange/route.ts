@@ -76,9 +76,17 @@ export async function POST(request: NextRequest) {
     const referrer = await prisma.fingerprint.findUnique({
       where: { referralCode: code },
     });
-
-    if (!referrer || referrer.appId !== authContext.app.id) {
-      return errors.badRequest('Invalid referral code');
+    
+    console.log(`[Referral Exchange] Code: ${code}, Referrer found: ${!!referrer}, App match: ${referrer?.appId === authContext.app.id}`);
+    
+    if (!referrer) {
+      console.log(`[Referral Exchange] ❌ Referral code ${code} not found in database`);
+      return errors.badRequest('Referral code not found');
+    }
+    
+    if (referrer.appId !== authContext.app.id) {
+      console.log(`[Referral Exchange] ❌ Referral code ${code} belongs to different app. Expected: ${authContext.app.id}, Got: ${referrer.appId}`);
+      return errors.badRequest('Invalid referral code for this app');
     }
 
     // Mint a short-lived claim token

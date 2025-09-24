@@ -137,7 +137,7 @@ export function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${config.apiKey}`,
         },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ referralCode: code }),
       });
       
       if (!exchangeResponse.ok) {

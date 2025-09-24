@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.9] - 2025-09-24
+
+### Fixed
+- **Referral Code Exchange Bug**: Fixed middleware sending wrong field name to exchange endpoint
+  - Middleware was sending `{ code }` instead of `{ referralCode }`
+  - This caused 400 errors when trying to use referral links
+  - Referral links now work correctly for crediting both referrer and referred users
+
 ## [0.1.8] - 2025-09-23
 
 ### Fixed
