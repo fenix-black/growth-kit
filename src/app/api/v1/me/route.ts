@@ -98,11 +98,8 @@ export async function POST(request: NextRequest) {
 
     // Process referral claim if present (works for both new and existing users)
     if (claim) {
-      console.log(`🔍 Processing claim: ${claim}`);
-      
       // First check if this is an invitation code (INV-XXXXXX format)
       if (isInvitationCode(claim)) {
-        console.log(`📨 Claim is an invitation code`);
         // Handle unique invitation code redemption
         const waitlistEntry = await prisma.waitlist.findFirst({
           where: {
@@ -181,25 +178,18 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // Process regular referral claim
-        console.log(`🔄 Processing regular referral claim`);
         const claimPayload = verifyClaim(claim);
-        console.log(`📦 Claim payload:`, claimPayload);
         
         if (claimPayload && claimPayload.referralCode) {
-          console.log(`✅ Valid claim with referral code: ${claimPayload.referralCode}`);
-          
           // Check if this user has already claimed a referral
           const existingReferral = await prisma.referral.findFirst({
             where: {
               referredId: fingerprintRecord.id,
             },
           });
-          
-          console.log(`🔍 Existing referral check: ${existingReferral ? 'Found' : 'Not found'}`);
 
           // Only process if they haven't been referred before
           if (!existingReferral) {
-            console.log(`🚀 Processing new referral for fingerprint: ${fingerprintRecord.id}`);
             const app = authContext.app as any; // Temporary cast until migration is run
             // Check if this is a master referral code
             if (app.masterReferralCode === claimPayload.referralCode) {
@@ -272,21 +262,15 @@ export async function POST(request: NextRequest) {
             });
           } else {
             // Regular referral - find the referrer by their referral code
-            console.log(`🔎 Looking for referrer with code: ${claimPayload.referralCode}`);
             const referrerFingerprint = await prisma.fingerprint.findUnique({
               where: { 
                 referralCode: claimPayload.referralCode 
               },
             });
-            
-            console.log(`👤 Referrer found: ${referrerFingerprint ? `Yes (ID: ${referrerFingerprint.id})` : 'No'}`);
 
             if (referrerFingerprint && referrerFingerprint.appId === authContext.app.id) {
-              console.log(`✅ Referrer is from same app`);
-              
               // Prevent self-referral
               if (referrerFingerprint.id !== fingerprintRecord.id) {
-                console.log(`✅ Not a self-referral, processing credits...`);
                 const policy = authContext.app.policyJson as any;
                 const referralCredits = policy?.referralCredits || 5;
                 const referredCredits = policy?.referredCredits || 3;
@@ -387,6 +371,12 @@ export async function POST(request: NextRequest) {
     // Determine if user should receive credits
     let shouldGrantCredits = false;
     
+    // Check if user was just referred - they should always get initial credits
+    const wasJustReferred = fingerprintRecord!.credits.some(c => 
+      c.reason === 'referral' && 
+      new Date().getTime() - new Date(c.createdAt).getTime() < 60000 // Within last minute
+    );
+    
     if (!app.waitlistEnabled) {
       // No waitlist - everyone gets credits
       shouldGrantCredits = true;
@@ -415,6 +405,11 @@ export async function POST(request: NextRequest) {
         if (waitlistEntry && (waitlistEntry.status === 'INVITED' || waitlistEntry.status === 'ACCEPTED')) {
           shouldGrantCredits = true;
         }
+      }
+      
+      // IMPORTANT: Referred users should always get initial credits as an incentive
+      if (wasJustReferred) {
+        shouldGrantCredits = true;
       }
     }
     

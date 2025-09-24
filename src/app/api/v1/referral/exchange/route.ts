@@ -77,15 +77,11 @@ export async function POST(request: NextRequest) {
       where: { referralCode: code },
     });
     
-    console.log(`[Referral Exchange] Code: ${code}, Referrer found: ${!!referrer}, App match: ${referrer?.appId === authContext.app.id}`);
-    
     if (!referrer) {
-      console.log(`[Referral Exchange] ❌ Referral code ${code} not found in database`);
       return errors.badRequest('Referral code not found');
     }
     
     if (referrer.appId !== authContext.app.id) {
-      console.log(`[Referral Exchange] ❌ Referral code ${code} belongs to different app. Expected: ${authContext.app.id}, Got: ${referrer.appId}`);
       return errors.badRequest('Invalid referral code for this app');
     }
 
