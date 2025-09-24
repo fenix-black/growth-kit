@@ -418,53 +418,27 @@ export async function POST(request: NextRequest) {
       const lastGrant = fingerprintRecord.lastDailyGrant;
       const policy = authContext.app.policyJson as any;
       
-      // Determine credits amount based on context
-      let creditsToGrant = app.initialCreditsPerDay || 3;
-      let creditReason = 'daily_grant';
-      
-      // For invited users, use invitation credits if available
-      const appWithWaitlist = authContext.app as any;
-      if (appWithWaitlist.waitlistEnabled) {
-        // Get the lead to find the user's email
-        const lead = await prisma.lead.findFirst({
-          where: {
-            appId: authContext.app.id,
-            fingerprintId: fingerprintRecord.id,
-          },
-          select: { email: true },
-        });
-        
-        if (lead) {
-          const waitlistEntry = await prisma.waitlist.findUnique({
-            where: {
-              appId_email: {
-                appId: authContext.app.id,
-                email: lead.email!,
-              },
-            },
-          });
-          
-          if (waitlistEntry && (waitlistEntry.status === 'INVITED' || waitlistEntry.status === 'ACCEPTED')) {
-            // Check if they already got invitation credits
-            const hasInvitationCredits = fingerprintRecord.credits.some(c => 
-              c.reason === 'invitation_grant'
-            );
-            
-            if (!hasInvitationCredits) {
-              // First time accepting invitation - use invitation credits
-              creditsToGrant = policy?.invitationCredits || app.initialCreditsPerDay || 3;
-              creditReason = 'invitation_grant';
-            }
-          }
-        }
-      }
-      
-      // Check if this is first visit or a new day (for daily credits)
+      // Check if this is the user's first visit ever
       const isFirstVisit = !lastGrant;
       const daysSinceGrant = lastGrant ? 
         Math.floor((now.getTime() - lastGrant.getTime()) / (1000 * 60 * 60 * 24)) : 0;
       
-      if (creditReason === 'invitation_grant' || isFirstVisit || daysSinceGrant >= 1) {
+      // Determine what kind of credits to grant
+      let creditsToGrant = 0;
+      let creditReason = '';
+      
+      if (isFirstVisit) {
+        // First-time visit - grant invitation/initial credits
+        // All new users get invitation_grant on their first visit
+        creditsToGrant = policy?.invitationCredits || app.initialCreditsPerDay || 5;
+        creditReason = 'invitation_grant';
+      } else if (daysSinceGrant >= 1) {
+        // Returning user on a new day - grant daily credits
+        creditsToGrant = app.initialCreditsPerDay || 3;
+        creditReason = 'daily_grant';
+      }
+      
+      if (creditsToGrant > 0) {
         // Grant credits
         await prisma.credit.create({
           data: {

@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.11] - 2025-09-24
+
+### Changed
+- **Credit Granting Logic Refactor**: Simplified and clarified credit granting behavior
+  - First-time users always receive `invitation_grant` (5 credits) on registration day
+  - Referred users receive `invitation_grant` (5) + `referral` bonus (3) = 8 credits total
+  - Daily grants (`daily_grant`) only given on subsequent days, not on registration day
+  - This provides clearer semantics: invitation_grant for joining, daily_grant for returning
+
+## [0.1.10] - 2025-09-24
+
+### Fixed
+- **Credit Double-Granting Bug**: Fixed referred users incorrectly receiving invitation credits
+  - Referred users were getting 11 credits (3 referral + 3 daily + 5 invitation) instead of 8
+  - Now correctly receive 8 credits total: 5 initial credits + 3 referral bonus
+  - Prevents invitation credits from being granted to users who were referred
+  - Referred users get a boosted initial credit amount (5 instead of 3) as an extra incentive
+
 ## [0.1.9] - 2025-09-24
 
 ### Fixed
