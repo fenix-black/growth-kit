@@ -1,6 +1,6 @@
 'use client';
 
-import { GrowthKitProvider, GrowthKitGate, useGrowthKit } from '@growthkit/sdk';
+import { GrowthKitProvider, GrowthKitGate, useGrowthKit, CreditExhaustionModal } from '@growthkit/sdk';
 import { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -8,6 +8,7 @@ import toast, { Toaster } from 'react-hot-toast';
 function MainApp() {
   const { credits, completeAction, loading, refresh, getReferralLink, share, policy } = useGrowthKit();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showTestModal, setShowTestModal] = useState(false);
   
   // Handle email verification feedback from middleware redirect
   useEffect(() => {
@@ -67,6 +68,13 @@ function MainApp() {
           >
             ↻
           </button>
+          <button 
+            onClick={() => setShowTestModal(true)} 
+            style={{...styles.refreshButton, ...styles.testButton}}
+            aria-label="Test credit modal"
+          >
+            🎯
+          </button>
         </div>
       </div>
 
@@ -110,6 +118,14 @@ function MainApp() {
           Share Referral Link
         </button>
       </div>
+
+      {/* Test Modal */}
+      {showTestModal && (
+        <CreditExhaustionModal 
+          onClose={() => setShowTestModal(false)} 
+          forceOpen={true}
+        />
+      )}
     </div>
   );
 }
@@ -182,6 +198,16 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '0.25rem',
     borderRadius: '4px',
     transition: 'background 0.2s',
+  },
+  testButton: {
+    background: '#f0f0f0',
+    border: '1px solid #ccc',
+    fontSize: '1rem',
+    cursor: 'pointer',
+    padding: '0.25rem 0.5rem',
+    borderRadius: '4px',
+    transition: 'all 0.2s',
+    marginLeft: '0.25rem',
   },
   hero: {
     textAlign: 'center',

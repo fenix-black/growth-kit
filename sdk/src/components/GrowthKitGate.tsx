@@ -26,6 +26,8 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
   useEffect(() => {
     if (credits === 0 && !loading && !waitlistEnabled) {
       setShowCreditModal(true);
+    } else if (credits > 0) {
+      setShowCreditModal(false);
     }
   }, [credits, loading, waitlistEnabled]);
 

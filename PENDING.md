@@ -1,7 +1,7 @@
 now let's continue thinking about the customization approach; I think it should be similar to the tab like the one we have for 'email templates' but within the app 'settings', what do you think ?
 
 pending:
-- test without waitlist enabled
+- test without waitlist enabled - working OK
 - test claiming name, email, verifying email
 - test spending with dollars
 

@@ -5,9 +5,10 @@ import { useGrowthKit } from '../useGrowthKit';
 
 interface CreditExhaustionModalProps {
   onClose: () => void;
+  forceOpen?: boolean; // When true, disables auto-close behavior for testing
 }
 
-export function CreditExhaustionModal({ onClose }: CreditExhaustionModalProps) {
+export function CreditExhaustionModal({ onClose, forceOpen = false }: CreditExhaustionModalProps) {
   const { 
     claimName, 
     claimEmail, 
@@ -16,7 +17,8 @@ export function CreditExhaustionModal({ onClose }: CreditExhaustionModalProps) {
     hasClaimedName,
     hasClaimedEmail,
     hasVerifiedEmail,
-    credits
+    credits,
+    policy
   } = useGrowthKit();
   
   const [activeTab, setActiveTab] = useState(
@@ -26,17 +28,36 @@ export function CreditExhaustionModal({ onClose }: CreditExhaustionModalProps) {
   );
   const [loading, setLoading] = useState(false);
 
-  // Auto-close if credits are restored
+  // Auto-close if credits are restored (unless forceOpen is true)
   useEffect(() => {
-    if (credits > 0) {
+    if (credits > 0 && !forceOpen) {
       onClose();
     }
-  }, [credits, onClose]);
+  }, [credits, onClose, forceOpen]);
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
+
+  // Handle click outside to close modal
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   return (
-    <div style={styles.overlay}>
+    <div style={styles.overlay} onClick={handleOverlayClick}>
       <div style={styles.modal}>
-        <h2 style={styles.title}>Out of Credits!</h2>
+        <h2 style={styles.title}>{forceOpen ? 'Credit Earning Options' : 'Out of Credits!'}</h2>
         <p style={styles.subtitle}>Complete tasks below to earn more credits:</p>
 
         <div style={styles.tabs}>
@@ -45,7 +66,7 @@ export function CreditExhaustionModal({ onClose }: CreditExhaustionModalProps) {
               style={{...styles.tab, ...(activeTab === 'name' ? styles.activeTab : {})}}
               onClick={() => setActiveTab('name')}
             >
-              Name (+1)
+              Name (+{policy?.nameClaimCredits || 2})
             </button>
           )}
           {!hasClaimedEmail && (
@@ -53,7 +74,7 @@ export function CreditExhaustionModal({ onClose }: CreditExhaustionModalProps) {
               style={{...styles.tab, ...(activeTab === 'email' ? styles.activeTab : {})}}
               onClick={() => setActiveTab('email')}
             >
-              Email (+1)
+              Email (+{policy?.emailClaimCredits || 2})
             </button>
           )}
           {hasClaimedEmail && !hasVerifiedEmail && (
@@ -61,7 +82,7 @@ export function CreditExhaustionModal({ onClose }: CreditExhaustionModalProps) {
               style={{...styles.tab, ...(activeTab === 'verify' ? styles.activeTab : {})}}
               onClick={() => setActiveTab('verify')}
             >
-              Verify (+1)
+              Verify (+{policy?.emailVerifyCredits || 5})
             </button>
           )}
           <button 
@@ -74,25 +95,30 @@ export function CreditExhaustionModal({ onClose }: CreditExhaustionModalProps) {
 
         <div style={styles.content}>
           {activeTab === 'name' && !hasClaimedName && (
-            <NameTab onClaim={claimName} loading={loading} setLoading={setLoading} />
+            <NameTab onClaim={claimName} loading={loading} setLoading={setLoading} credits={policy?.nameClaimCredits || 2} />
           )}
           {activeTab === 'email' && !hasClaimedEmail && (
-            <EmailTab onClaim={claimEmail} loading={loading} setLoading={setLoading} />
+            <EmailTab onClaim={claimEmail} loading={loading} setLoading={setLoading} credits={policy?.emailClaimCredits || 2} />
           )}
           {activeTab === 'verify' && hasClaimedEmail && !hasVerifiedEmail && (
-            <VerifyTab />
+            <VerifyTab credits={policy?.emailVerifyCredits || 5} />
           )}
           {activeTab === 'share' && (
-            <ShareTab referralLink={getReferralLink()} onShare={share} />
+            <ShareTab referralLink={getReferralLink()} onShare={share} referralCredits={policy?.referralCredits || 5} />
           )}
         </div>
 
         <div style={styles.footer}>
           <p>Current credits: {credits}</p>
-          {credits > 0 && (
+          {credits > 0 && !forceOpen && (
             <button onClick={onClose} style={styles.primaryButton}>
               Continue
             </button>
+          )}
+          {forceOpen && (
+            <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>
+              Press ESC or click outside to close
+            </p>
           )}
         </div>
       </div>
@@ -101,7 +127,7 @@ export function CreditExhaustionModal({ onClose }: CreditExhaustionModalProps) {
 }
 
 // Tab Components
-function NameTab({ onClaim, loading, setLoading }: any) {
+function NameTab({ onClaim, loading, setLoading, credits }: any) {
   const [name, setName] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -116,7 +142,7 @@ function NameTab({ onClaim, loading, setLoading }: any) {
   return (
     <form onSubmit={handleSubmit}>
       <h3>Enter Your Name</h3>
-      <p>Earn 1 credit by telling us your name</p>
+      <p>Earn {credits} credits by telling us your name</p>
       <input 
         type="text"
         value={name}
@@ -130,13 +156,13 @@ function NameTab({ onClaim, loading, setLoading }: any) {
         disabled={loading || !name.trim()}
         style={styles.primaryButton}
       >
-        {loading ? 'Claiming...' : 'Claim 1 Credit'}
+        {loading ? 'Claiming...' : `Claim ${credits} Credits`}
       </button>
     </form>
   );
 }
 
-function EmailTab({ onClaim, loading, setLoading }: any) {
+function EmailTab({ onClaim, loading, setLoading, credits }: any) {
   const [email, setEmail] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,7 +177,7 @@ function EmailTab({ onClaim, loading, setLoading }: any) {
   return (
     <form onSubmit={handleSubmit}>
       <h3>Enter Your Email</h3>
-      <p>Earn 1 credit + unlock email verification bonus</p>
+      <p>Earn {credits} credits + unlock email verification bonus</p>
       <input 
         type="email"
         value={email}
@@ -165,25 +191,25 @@ function EmailTab({ onClaim, loading, setLoading }: any) {
         disabled={loading || !email.trim()}
         style={styles.primaryButton}
       >
-        {loading ? 'Claiming...' : 'Claim 1 Credit'}
+        {loading ? 'Claiming...' : `Claim ${credits} Credits`}
       </button>
     </form>
   );
 }
 
-function VerifyTab() {
+function VerifyTab({ credits }: any) {
   return (
     <div>
       <h3>Verify Your Email</h3>
       <p>Check your inbox for a verification email</p>
       <p style={{ marginTop: 20, fontSize: 14, color: '#666' }}>
-        Click the verification link in the email to earn 1 additional credit
+        Click the verification link in the email to earn {credits} additional credits
       </p>
     </div>
   );
 }
 
-function ShareTab({ referralLink, onShare }: any) {
+function ShareTab({ referralLink, onShare, referralCredits }: any) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -224,7 +250,7 @@ function ShareTab({ referralLink, onShare }: any) {
       )}
       
       <p style={{ marginTop: 20, fontSize: 14, color: '#666' }}>
-        You'll earn 3 credits per referral
+        You'll earn {referralCredits} credits per referral
       </p>
     </div>
   );
@@ -276,7 +302,9 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#666',
     fontSize: '14px',
     fontWeight: '500',
-    borderBottom: '2px solid transparent',
+    borderBottomWidth: '2px',
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'transparent',
     marginBottom: '-2px',
   },
   activeTab: {

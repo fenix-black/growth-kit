@@ -135,8 +135,9 @@ declare function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProp
 
 interface CreditExhaustionModalProps {
     onClose: () => void;
+    forceOpen?: boolean;
 }
-declare function CreditExhaustionModal({ onClose }: CreditExhaustionModalProps): React.JSX.Element;
+declare function CreditExhaustionModal({ onClose, forceOpen }: CreditExhaustionModalProps): React.JSX.Element;
 
 interface WaitlistFormProps {
     message?: string;

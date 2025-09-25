@@ -92,8 +92,8 @@ export async function POST(request: NextRequest) {
     });
 
     // Award verification credits
-    const app = authContext.app as any;
-    const verifyCredits = app.creditsForEmailVerification || 1;
+    const policy = authContext.app.policyJson as any;
+    const verifyCredits = policy?.emailVerifyCredits || 5;
 
     await prisma.credit.create({
       data: {
