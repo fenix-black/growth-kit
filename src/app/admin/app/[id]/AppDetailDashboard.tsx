@@ -8,6 +8,7 @@ import ContentCard from '@/components/ui/ContentCard';
 import Button from '@/components/ui/Button';
 import WaitlistManager from '../../components/WaitlistManager';
 import EmailTemplateEditor from '../../components/EmailTemplateEditor';
+import UsersLeadsManager from '../../components/UsersLeadsManager';
 import { cn } from '@/components/ui/utils';
 import { 
   Settings,
@@ -65,6 +66,7 @@ interface AppDetails {
 const tabs = [
   { id: 'overview', name: 'Overview', icon: FileText },
   { id: 'settings', name: 'Settings', icon: Settings },
+  { id: 'users-leads', name: 'Users & Leads', icon: Users },
   { id: 'waitlist', name: 'Waitlist', icon: Users },
   { id: 'analytics', name: 'Analytics', icon: BarChart3 },
   { id: 'api-keys', name: 'API Keys', icon: Key },
@@ -691,6 +693,16 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
             </div>
           </ContentCard>
         </div>
+      )}
+
+      {activeTab === 'users-leads' && (
+        <UsersLeadsManager
+          appId={appId}
+          appName={app.name}
+          appDomain={app.domain}
+          embedded={true}
+          onClose={() => setActiveTab('overview')}
+        />
       )}
 
       {activeTab === 'waitlist' && (
