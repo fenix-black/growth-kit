@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { GrowthKitConfig } from '../types';
+import { GrowthKitStateProvider } from './GrowthKitStateProvider';
 
 const GrowthKitContext = createContext<{ config: GrowthKitConfig } | undefined>(undefined);
 
@@ -13,7 +14,9 @@ interface GrowthKitProviderProps {
 export function GrowthKitProvider({ children, config }: GrowthKitProviderProps) {
   return (
     <GrowthKitContext.Provider value={{ config }}>
-      {children}
+      <GrowthKitStateProvider>
+        {children}
+      </GrowthKitStateProvider>
     </GrowthKitContext.Provider>
   );
 }

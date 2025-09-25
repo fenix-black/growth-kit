@@ -28,6 +28,7 @@ export {
 } from './components';
 export type {
   WaitlistFormProps,
+  CreditExhaustionModalRef,
   GrowthKitAccountWidgetRef,
 } from './components';
 

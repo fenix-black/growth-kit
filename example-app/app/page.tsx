@@ -1,60 +1,36 @@
 'use client';
 
 import { GrowthKitAccountWidget, useGrowthKit } from '@growthkit/sdk';
-import { useState, useEffect, useRef } from 'react';
-import toast, { Toaster } from 'react-hot-toast';
+import { useState, useRef, useEffect } from 'react';
 import type { GrowthKitAccountWidgetRef } from '@growthkit/sdk';
 
-// Main App Component (now wrapped by GrowthKitAccountWidget)
-function MainApp() {
-  const { credits, completeAction, loading, getReferralLink, share, policy } = useGrowthKit();
+// Main App Component (now completely GrowthKit-agnostic)
+function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<GrowthKitAccountWidgetRef | null> }) {
+  const { credits, completeAction, policy } = useGrowthKit();
   const [isProcessing, setIsProcessing] = useState(false);
-  const accountWidgetRef = useRef<GrowthKitAccountWidgetRef>(null);
   
-  // Handle email verification feedback from middleware redirect
+  // Monitor credit changes
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    
-    if (params.get('verified') === 'true') {
-      toast.success('Email verified successfully! +5 credits earned');
-      accountWidgetRef.current?.refresh(); // Refresh via widget ref
-      // Clean up URL
-      window.history.replaceState({}, '', '/');
-    } else if (params.get('verified') === 'false') {
-      const error = params.get('error');
-      if (error === 'missing-token') {
-        toast.error('No verification token provided');
-      } else {
-        toast.error('Verification failed. The token may be invalid or expired.');
-      }
-      // Clean up URL
-      window.history.replaceState({}, '', '/');
-    }
-  }, []);
+    console.log('Credits updated:', credits);
+  }, [credits]);
   
   const handleUseFeature = async () => {
+    console.log('Credits before action:', credits);
     setIsProcessing(true);
     const success = await completeAction('generate');
     setIsProcessing(false);
     
     if (success) {
-      toast.success('Feature used! -1 credit');
+      // Note: The credits value here is still the old value due to React's closure
+      // The widget will update automatically when the context updates
+      console.log('Feature used successfully!');
     } else {
-      toast.error('Not enough credits');
-    }
-  };
-
-  const handleShare = async () => {
-    const success = await share();
-    
-    if (success) {
-      toast.success('Shared successfully!');
-    } else {
-      toast.success('Referral message copied to clipboard!');
+      console.log('Not enough credits');
     }
   };
 
   const handleTestEarnCredits = () => {
+    console.log('Button clicked, widget ref:', accountWidgetRef.current);
     accountWidgetRef.current?.openEarnCreditsModal();
   };
 
@@ -96,7 +72,7 @@ function MainApp() {
         
         {credits === 0 && (
           <p style={styles.warning}>
-            Out of credits! Use the account widget to earn more.
+            Out of credits! The account widget will help you earn more.
           </p>
         )}
       </div>
@@ -108,10 +84,10 @@ function MainApp() {
           Invite friends and earn {policy?.referralCredits || 5} credits for each referral!
         </p>
         <button 
-          onClick={handleShare}
+          onClick={() => accountWidgetRef.current?.openEarnCreditsModal()}
           style={styles.secondaryButton}
         >
-          Share Referral Link
+          Open Earn Credits Modal
         </button>
       </div>
 
@@ -159,19 +135,8 @@ export default function HomePage() {
           console.log('Profile updated:', profile);
         }}
       >
-        <MainApp />
+        <MainApp accountWidgetRef={accountWidgetRef} />
       </GrowthKitAccountWidget>
-      
-      <Toaster 
-        position="bottom-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
-        }}
-      />
     </>
   );
 }

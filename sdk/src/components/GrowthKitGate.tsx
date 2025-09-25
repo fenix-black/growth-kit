@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useGrowthKit } from '../useGrowthKit';
 import { WaitlistForm } from './WaitlistForm';
 import { CreditExhaustionModal } from './CreditExhaustionModal';
+import type { CreditExhaustionModalRef } from './CreditExhaustionModal';
 
 interface GrowthKitGateProps {
   children: React.ReactNode;
@@ -19,15 +20,13 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
     waitlistEnabled 
   } = useGrowthKit();
   
-  const [showCreditModal, setShowCreditModal] = useState(false);
+  const creditModalRef = useRef<CreditExhaustionModalRef>(null);
 
   // Show credit exhaustion modal when needed
   // Must be before any conditional returns to follow React's rules of hooks
   useEffect(() => {
     if (credits === 0 && !loading && !waitlistEnabled) {
-      setShowCreditModal(true);
-    } else if (credits > 0) {
-      setShowCreditModal(false);
+      creditModalRef.current?.open();
     }
   }, [credits, loading, waitlistEnabled]);
 
@@ -57,11 +56,7 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
   return (
     <>
       {children}
-      {showCreditModal && (
-        <CreditExhaustionModal 
-          onClose={() => setShowCreditModal(false)} 
-        />
-      )}
+      <CreditExhaustionModal ref={creditModalRef} />
     </>
   );
 }

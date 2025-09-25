@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { GrowthKitAPI } from './api';
 import { getFingerprint } from './fingerprint';
 import { useGrowthKitConfig } from './components/GrowthKitProvider';
+import { useGrowthKitState } from './components/GrowthKitStateProvider';
 import type {
   GrowthKitConfig,
   GrowthKitState,
@@ -11,34 +12,11 @@ import type {
   CompleteActionOptions,
 } from './types';
 
-const initialState: GrowthKitState = {
-  loading: true,
-  initialized: false,
-  error: null,
-  fingerprint: null,
-  credits: 0,
-  usage: 0,
-  referralCode: null,
-  policy: null,
-  hasClaimedName: false,
-  hasClaimedEmail: false,
-  hasVerifiedEmail: false,
-  // Waitlist state
-  waitlistEnabled: false,
-  waitlistStatus: 'none',
-  waitlistPosition: null,
-  waitlistMessage: undefined,
-  shouldShowWaitlist: false,
-  // USD tracking
-  totalUsdSpent: undefined,
-  lastUsdTransaction: undefined,
-  usdTrackingEnabled: false,
-};
+// Initial state is now managed in GrowthKitStateProvider
 
 export function useGrowthKit(): GrowthKitHook {
   const config = useGrowthKitConfig();
-  const [state, setState] = useState<GrowthKitState>(initialState);
-  const apiRef = useRef<GrowthKitAPI | null>(null);
+  const { state, setState, apiRef } = useGrowthKitState();
   const initRef = useRef(false);
 
   // Initialize API client
@@ -228,18 +206,9 @@ export function useGrowthKit(): GrowthKitHook {
       );
 
       if (response.success && response.data) {
-        setState(prev => ({
-          ...prev,
-          credits: response.data!.creditsRemaining,
-          usage: prev.usage + 1,
-          // Update USD tracking if present
-          totalUsdSpent: response.data!.totalUsdSpent !== undefined 
-            ? response.data!.totalUsdSpent 
-            : prev.totalUsdSpent,
-          lastUsdTransaction: response.data!.usdValue !== undefined
-            ? response.data!.usdValue
-            : prev.lastUsdTransaction,
-        }));
+        // Refresh from server to get the latest state for all components
+        await refresh();
+        
         return true;
       }
       return false;

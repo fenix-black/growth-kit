@@ -127,6 +127,23 @@ interface GrowthKitProviderProps {
 }
 declare function GrowthKitProvider({ children, config }: GrowthKitProviderProps): React.JSX.Element;
 
+declare class GrowthKitAPI {
+    private apiKey;
+    private apiUrl;
+    private fingerprint;
+    constructor(apiKey: string, apiUrl?: string);
+    private detectApiUrl;
+    setFingerprint(fingerprint: string): void;
+    private request;
+    getMe(fingerprint: string, claim?: string): Promise<APIResponse<MeResponse>>;
+    completeAction(fingerprint: string, action?: string, usdValue?: number, metadata?: any): Promise<APIResponse<CompleteResponse>>;
+    claimName(fingerprint: string, name: string): Promise<APIResponse<ClaimResponse>>;
+    claimEmail(fingerprint: string, email: string): Promise<APIResponse<ClaimResponse>>;
+    verifyEmail(fingerprint: string, token: string): Promise<APIResponse<VerifyResponse>>;
+    joinWaitlist(email: string, fingerprint?: string, metadata?: any): Promise<APIResponse<WaitlistResponse>>;
+    trackReferralVisit(claim?: string): Promise<APIResponse<any>>;
+}
+
 interface GrowthKitGateProps {
     children: React.ReactNode;
     loadingComponent?: React.ReactNode;
@@ -134,10 +151,13 @@ interface GrowthKitGateProps {
 declare function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps): React.JSX.Element;
 
 interface CreditExhaustionModalProps {
-    onClose: () => void;
-    forceOpen?: boolean;
 }
-declare function CreditExhaustionModal({ onClose, forceOpen }: CreditExhaustionModalProps): React.JSX.Element;
+interface CreditExhaustionModalRef {
+    open: () => void;
+    close: () => void;
+    isOpen: () => boolean;
+}
+declare const CreditExhaustionModal: React.ForwardRefExoticComponent<CreditExhaustionModalProps & React.RefAttributes<CreditExhaustionModalRef>>;
 
 interface WaitlistFormProps {
     message?: string;
@@ -246,23 +266,6 @@ declare function createGrowthKitServer(): GrowthKitServer;
 declare function getFingerprint(): Promise<string>;
 declare function clearFingerprintCache(): void;
 
-declare class GrowthKitAPI {
-    private apiKey;
-    private apiUrl;
-    private fingerprint;
-    constructor(apiKey: string, apiUrl?: string);
-    private detectApiUrl;
-    setFingerprint(fingerprint: string): void;
-    private request;
-    getMe(fingerprint: string, claim?: string): Promise<APIResponse<MeResponse>>;
-    completeAction(fingerprint: string, action?: string, usdValue?: number, metadata?: any): Promise<APIResponse<CompleteResponse>>;
-    claimName(fingerprint: string, name: string): Promise<APIResponse<ClaimResponse>>;
-    claimEmail(fingerprint: string, email: string): Promise<APIResponse<ClaimResponse>>;
-    verifyEmail(fingerprint: string, token: string): Promise<APIResponse<VerifyResponse>>;
-    joinWaitlist(email: string, fingerprint?: string, metadata?: any): Promise<APIResponse<WaitlistResponse>>;
-    trackReferralVisit(claim?: string): Promise<APIResponse<any>>;
-}
-
 declare const VERSION = "0.0.4";
 
-export { APIResponse, ClaimResponse, CompleteResponse, CreditExhaustionModal, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, MeResponse, ShareOptions, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit };
+export { APIResponse, ClaimResponse, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, MeResponse, ShareOptions, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit };

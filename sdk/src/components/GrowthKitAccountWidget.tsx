@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import { GrowthKitProvider } from './GrowthKitProvider';
 import { useGrowthKit } from '../useGrowthKit';
 import { WaitlistForm } from './WaitlistForm';
 import { CreditExhaustionModal } from './CreditExhaustionModal';
+import type { CreditExhaustionModalRef } from './CreditExhaustionModal';
 import type { GrowthKitConfig } from '../types';
 
 interface GrowthKitAccountWidgetProps {
@@ -60,9 +61,10 @@ const AccountWidgetInternal = forwardRef<
     refresh,
   } = useGrowthKit();
 
-  const [showCreditModal, setShowCreditModal] = useState(false);
+  const creditModalRef = useRef<CreditExhaustionModalRef>(null);
   const [showProfileExpanded, setShowProfileExpanded] = useState(false);
   const [prevCredits, setPrevCredits] = useState(credits);
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
   // Track credits changes
   useEffect(() => {
@@ -84,13 +86,44 @@ const AccountWidgetInternal = forwardRef<
   // Auto-open credit modal when needed
   useEffect(() => {
     if (autoOpenCreditModal && credits === 0 && !loading && !waitlistEnabled) {
-      setShowCreditModal(true);
+      creditModalRef.current?.open();
     }
   }, [credits, loading, waitlistEnabled, autoOpenCreditModal]);
 
+  // Handle email verification feedback from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (params.get('verified') === 'true') {
+      showNotification('Email verified successfully! +5 credits earned', 'success');
+      refresh();
+      cleanupUrl();
+    } else if (params.get('verified') === 'false') {
+      const error = params.get('error');
+      const message = error === 'missing-token' 
+        ? 'No verification token provided'
+        : 'Verification failed. The token may be invalid or expired.';
+      showNotification(message, 'error');
+      cleanupUrl();
+    }
+  }, [refresh]);
+
+  // Show notification helper
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 4000);
+  };
+
+  // Clean up URL parameters
+  const cleanupUrl = () => {
+    if (typeof window !== 'undefined' && window.history?.replaceState) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  };
+
   // Expose imperative API
   useImperativeHandle(ref, () => ({
-    openEarnCreditsModal: () => setShowCreditModal(true),
+    openEarnCreditsModal: () => creditModalRef.current?.open(),
     refresh,
     getCurrentBalance: () => credits,
     getProfile: () => ({
@@ -194,7 +227,7 @@ const AccountWidgetInternal = forwardRef<
             style={{ ...styles.earnButton, backgroundColor: themeColors.primary }}
             onClick={(e) => {
               e.stopPropagation();
-              setShowCreditModal(true);
+              creditModalRef.current?.open();
             }}
           >
             Earn Credits
@@ -247,7 +280,7 @@ const AccountWidgetInternal = forwardRef<
             style={{ ...styles.expandedEarnButton, backgroundColor: themeColors.primary }}
             onClick={(e) => {
               e.stopPropagation();
-              setShowCreditModal(true);
+              creditModalRef.current?.open();
               setShowProfileExpanded(false);
             }}
           >
@@ -273,10 +306,23 @@ const AccountWidgetInternal = forwardRef<
       {children}
 
       {/* Credit modal */}
-      {showCreditModal && (
-        <CreditExhaustionModal 
-          onClose={() => setShowCreditModal(false)} 
-        />
+      <CreditExhaustionModal ref={creditModalRef} />
+
+      {/* Internal notifications */}
+      {notification && (
+        <div style={{
+          ...getPositionStyles(position === 'inline' ? 'top-right' : position),
+          ...getNotificationStyles(themeColors, notification.type),
+          ...(position === 'inline' ? { position: 'absolute', top: '-60px' } : { marginTop: '10px' })
+        }}>
+          <span>{notification.message}</span>
+          <button 
+            onClick={() => setNotification(null)}
+            style={styles.notificationClose}
+          >
+            ×
+          </button>
+        </div>
       )}
     </>
   );
@@ -370,6 +416,21 @@ function getWidgetStyles(themeColors: any, compact: boolean): React.CSSPropertie
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     transition: 'all 0.2s ease',
     minWidth: compact ? 'auto' : '180px',
+  };
+}
+
+function getNotificationStyles(themeColors: any, type: 'success' | 'error'): React.CSSProperties {
+  return {
+    backgroundColor: type === 'success' ? '#10b981' : '#ef4444',
+    color: 'white',
+    padding: '8px 12px',
+    borderRadius: '8px',
+    fontSize: '14px',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    zIndex: 1002,
   };
 }
 
@@ -498,6 +559,19 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: '500',
     cursor: 'pointer',
     transition: 'all 0.2s',
+  },
+  notificationClose: {
+    background: 'rgba(255, 255, 255, 0.2)',
+    border: 'none',
+    color: 'white',
+    width: '20px',
+    height: '20px',
+    borderRadius: '50%',
+    cursor: 'pointer',
+    fontSize: '14px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 };
 

@@ -1,14 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useGrowthKit } from '../useGrowthKit';
 
 interface CreditExhaustionModalProps {
-  onClose: () => void;
-  forceOpen?: boolean; // When true, disables auto-close behavior for testing
+  // No props needed - modal manages its own state
 }
 
-export function CreditExhaustionModal({ onClose, forceOpen = false }: CreditExhaustionModalProps) {
+export interface CreditExhaustionModalRef {
+  open: () => void;
+  close: () => void;
+  isOpen: () => boolean;
+}
+
+export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, CreditExhaustionModalProps>((props, ref) => {
   const { 
     claimName, 
     claimEmail, 
@@ -21,6 +26,7 @@ export function CreditExhaustionModal({ onClose, forceOpen = false }: CreditExha
     policy
   } = useGrowthKit();
   
+  const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(
     !hasClaimedName ? 'name' : 
     !hasClaimedEmail ? 'email' : 
@@ -28,36 +34,43 @@ export function CreditExhaustionModal({ onClose, forceOpen = false }: CreditExha
   );
   const [loading, setLoading] = useState(false);
 
-  // Auto-close if credits are restored (unless forceOpen is true)
-  useEffect(() => {
-    if (credits > 0 && !forceOpen) {
-      onClose();
-    }
-  }, [credits, onClose, forceOpen]);
+  // Expose imperative API
+  useImperativeHandle(ref, () => ({
+    open: () => setIsOpen(true),
+    close: () => setIsOpen(false),
+    isOpen: () => isOpen,
+  }));
 
   // Handle ESC key to close modal
   useEffect(() => {
+    if (!isOpen) return;
+    
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        setIsOpen(false);
       }
     };
 
     document.addEventListener('keydown', handleEsc);
     return () => document.removeEventListener('keydown', handleEsc);
-  }, [onClose]);
+  }, [isOpen]);
 
   // Handle click outside to close modal
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      setIsOpen(false);
     }
   };
+
+  // Don't render if not open
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div style={styles.overlay} onClick={handleOverlayClick}>
       <div style={styles.modal}>
-        <h2 style={styles.title}>{forceOpen ? 'Credit Earning Options' : 'Out of Credits!'}</h2>
+        <h2 style={styles.title}>Earn Credits</h2>
         <p style={styles.subtitle}>Complete tasks below to earn more credits:</p>
 
         <div style={styles.tabs}>
@@ -110,21 +123,16 @@ export function CreditExhaustionModal({ onClose, forceOpen = false }: CreditExha
 
         <div style={styles.footer}>
           <p>Current credits: {credits}</p>
-          {credits > 0 && !forceOpen && (
-            <button onClick={onClose} style={styles.primaryButton}>
-              Continue
-            </button>
-          )}
-          {forceOpen && (
-            <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>
-              Press ESC or click outside to close
-            </p>
-          )}
+          <button onClick={() => setIsOpen(false)} style={styles.primaryButton}>
+            Done
+          </button>
         </div>
       </div>
     </div>
   );
-}
+});
+
+CreditExhaustionModal.displayName = 'CreditExhaustionModal';
 
 // Tab Components
 function NameTab({ onClaim, loading, setLoading, credits }: any) {
