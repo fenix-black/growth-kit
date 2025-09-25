@@ -129,6 +129,7 @@ export async function POST(request: NextRequest) {
     // Build response
     const response = successResponse({
       claimed: true,
+      name: sanitizedName,
       creditsAwarded: nameCredits,
       totalCredits: credits._sum.amount || 0,
     });

@@ -55,6 +55,8 @@ const AccountWidgetInternal = forwardRef<
     credits,
     shouldShowWaitlist,
     waitlistEnabled,
+    name,
+    email,
     hasClaimedName,
     hasClaimedEmail,
     hasVerifiedEmail,
@@ -77,11 +79,11 @@ const AccountWidgetInternal = forwardRef<
   // Track profile changes
   useEffect(() => {
     onProfileChange?.({
-      name: hasClaimedName ? 'Claimed' : undefined,
-      email: hasClaimedEmail ? 'Claimed' : undefined,
+      name: name || undefined,
+      email: email || undefined,
       verified: hasVerifiedEmail,
     });
-  }, [hasClaimedName, hasClaimedEmail, hasVerifiedEmail, onProfileChange]);
+  }, [name, email, hasVerifiedEmail, onProfileChange]);
 
   // Auto-open credit modal when needed
   useEffect(() => {
@@ -127,8 +129,8 @@ const AccountWidgetInternal = forwardRef<
     refresh,
     getCurrentBalance: () => credits,
     getProfile: () => ({
-      name: hasClaimedName ? 'Claimed' : undefined,
-      email: hasClaimedEmail ? 'Claimed' : undefined,
+      name: name || undefined,
+      email: email || undefined,
       verified: hasVerifiedEmail,
     }),
   }));
@@ -207,8 +209,8 @@ const AccountWidgetInternal = forwardRef<
         {(showName || showEmail) && (
           <div style={styles.profileSection}>
             <span style={styles.profileIcon}>👤</span>
-            {showName && hasClaimedName && (
-              <span style={{ ...styles.profileText, color: themeColors.textSecondary }}>User</span>
+            {showName && name && (
+              <span style={{ ...styles.profileText, color: themeColors.textSecondary }}>{name}</span>
             )}
             {showEmail && hasClaimedEmail && (
               <>
@@ -250,7 +252,7 @@ const AccountWidgetInternal = forwardRef<
               <div style={styles.expandedRow}>
                 <span style={{ ...styles.expandedLabel, color: themeColors.textSecondary }}>Name:</span>
                 <span style={{ ...styles.expandedValue, color: themeColors.text }}>
-                  {hasClaimedName ? 'Claimed' : 'Not set'}
+                  {name || 'Not set'}
                 </span>
               </div>
             )}
@@ -259,9 +261,9 @@ const AccountWidgetInternal = forwardRef<
               <div style={styles.expandedRow}>
                 <span style={{ ...styles.expandedLabel, color: themeColors.textSecondary }}>Email:</span>
                 <span style={{ ...styles.expandedValue, color: themeColors.text }}>
-                  {hasClaimedEmail ? (
+                  {email ? (
                     <span style={styles.expandedEmailStatus}>
-                      Set {hasVerifiedEmail && <span style={styles.verifiedBadge}>✅</span>}
+                      {email} {hasVerifiedEmail && <span style={styles.verifiedBadge}>✅</span>}
                     </span>
                   ) : (
                     'Not set'

@@ -36,6 +36,8 @@ interface GrowthKitState {
     usage: number;
     referralCode: string | null;
     policy: GrowthKitPolicy | null;
+    name: string | null;
+    email: string | null;
     hasClaimedName: boolean;
     hasClaimedEmail: boolean;
     hasVerifiedEmail: boolean;
@@ -82,6 +84,8 @@ interface MeResponse {
     usage: number;
     referralCode: string;
     policy: GrowthKitPolicy;
+    name: string | null;
+    email: string | null;
     hasClaimedName: boolean;
     hasClaimedEmail: boolean;
     hasVerifiedEmail: boolean;
@@ -98,10 +102,13 @@ interface CompleteResponse {
 }
 interface ClaimResponse {
     claimed: boolean;
+    name?: string;
+    email?: string;
     creditsAwarded?: number;
     totalCredits?: number;
     reason?: string;
     message?: string;
+    verificationSent?: boolean;
 }
 interface VerifyResponse {
     verified: boolean;

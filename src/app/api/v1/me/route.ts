@@ -399,7 +399,11 @@ export async function POST(request: NextRequest) {
           appId: authContext.app.id,
           fingerprintId: fingerprintRecord!.id,
         },
-        select: { email: true },
+        select: { 
+          name: true,
+          email: true,
+          emailVerified: true,
+        },
       });
       
       if (lead) {
@@ -575,12 +579,31 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Get user profile data
+    const userLead = await prisma.lead.findFirst({
+      where: {
+        appId: authContext.app.id,
+        fingerprintId: fingerprintRecord!.id,
+      },
+      select: {
+        name: true,
+        email: true,
+        emailVerified: true,
+      },
+    });
+
     // Build response
     const response = successResponse({
       fingerprint: fingerprintRecord!.fingerprint,
       referralCode: fingerprintRecord!.referralCode,
       credits: totalCredits,
       usage: usageCount,
+      // User profile data
+      name: userLead?.name || null,
+      email: userLead?.email || null,
+      hasClaimedName: !!userLead?.name,
+      hasClaimedEmail: !!userLead?.email,
+      hasVerifiedEmail: userLead?.emailVerified || false,
       policy: policy || {
         referralCredits: 5,
         referredCredits: 3,

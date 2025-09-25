@@ -34,6 +34,9 @@ export interface GrowthKitState {
   usage: number;
   referralCode: string | null;
   policy: GrowthKitPolicy | null;
+  // User profile
+  name: string | null;
+  email: string | null;
   hasClaimedName: boolean;
   hasClaimedEmail: boolean;
   hasVerifiedEmail: boolean;
@@ -87,6 +90,8 @@ export interface MeResponse {
   usage: number;
   referralCode: string;
   policy: GrowthKitPolicy;
+  name: string | null;
+  email: string | null;
   hasClaimedName: boolean;
   hasClaimedEmail: boolean;
   hasVerifiedEmail: boolean;
@@ -105,10 +110,13 @@ export interface CompleteResponse {
 
 export interface ClaimResponse {
   claimed: boolean;
+  name?: string;
+  email?: string;
   creditsAwarded?: number;
   totalCredits?: number;
   reason?: string;
   message?: string;
+  verificationSent?: boolean;
 }
 
 export interface VerifyResponse {

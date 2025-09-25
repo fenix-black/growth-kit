@@ -80,11 +80,12 @@ export async function POST(request: NextRequest) {
     if (existingLead) {
       // If already verified, don't send new verification
       if (existingLead.emailVerified) {
-        return successResponse({
-          claimed: false,
-          reason: 'already_verified',
-          message: 'Email already verified for this fingerprint',
-        });
+      return successResponse({
+        claimed: false,
+        email: existingLead.email,
+        reason: 'already_verified',
+        message: 'Email already verified for this fingerprint',
+      });
       }
 
       // Resend verification if not verified
@@ -121,6 +122,7 @@ export async function POST(request: NextRequest) {
 
       return successResponse({
         claimed: true,
+        email: email,
         verificationSent: true,
         message: 'Verification email resent',
         totalCredits: credits._sum.amount || 0,
@@ -184,6 +186,7 @@ export async function POST(request: NextRequest) {
 
         return successResponse({
           claimed: true,
+          email: email,
           verificationSent: true,
           message: 'Email changed. Verification sent to new email.',
           totalCredits: credits._sum.amount || 0,
@@ -227,6 +230,7 @@ export async function POST(request: NextRequest) {
 
         return successResponse({
           claimed: true,
+          email: email,
           verificationSent: true,
           message: 'Email change requested. Verify new email to complete the change.',
           totalCredits: credits._sum.amount || 0,
@@ -311,6 +315,7 @@ export async function POST(request: NextRequest) {
     // Build response
     const response = successResponse({
       claimed: true,
+      email: email,
       verificationSent: true,
       creditsAwarded: emailCredits,
       totalCredits: credits._sum.amount || 0,

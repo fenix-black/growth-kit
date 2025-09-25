@@ -94,6 +94,8 @@ export function useGrowthKit(): GrowthKitHook {
         usage: data.usage,
         referralCode: data.referralCode,
         policy: data.policy,
+        name: data.name || null,
+        email: data.email || null,
         hasClaimedName: data.hasClaimedName,
         hasClaimedEmail: data.hasClaimedEmail,
         hasVerifiedEmail: data.hasVerifiedEmail,
@@ -156,6 +158,8 @@ export function useGrowthKit(): GrowthKitHook {
           ...prev,
           credits: data.credits,
           usage: data.usage,
+          name: data.name || null,
+          email: data.email || null,
           hasClaimedName: data.hasClaimedName,
           hasClaimedEmail: data.hasClaimedEmail,
           hasVerifiedEmail: data.hasVerifiedEmail,
@@ -231,6 +235,7 @@ export function useGrowthKit(): GrowthKitHook {
         setState(prev => ({
           ...prev,
           credits: response.data!.totalCredits || prev.credits,
+          name: response.data!.name || prev.name,
           hasClaimedName: true,
         }));
         return true;
@@ -255,6 +260,7 @@ export function useGrowthKit(): GrowthKitHook {
         setState(prev => ({
           ...prev,
           credits: response.data!.totalCredits || prev.credits,
+          email: response.data!.email || prev.email,
           hasClaimedEmail: true,
         }));
         return true;
