@@ -31,20 +31,19 @@ export function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig) {
     // Handle email verification
     if (pathname === '/verify') {
       const token = request.nextUrl.searchParams.get('token');
-      const email = request.nextUrl.searchParams.get('email');
       
-      if (!token || !email) {
+      if (!token) {
         if (config.debug) {
-          console.warn('[GrowthKit] Missing verification token or email');
+          console.warn('[GrowthKit] Missing verification token');
         }
         const redirectUrl = new URL(redirectTo, request.url);
         redirectUrl.searchParams.set('verified', 'false');
-        redirectUrl.searchParams.set('error', 'missing-params');
+        redirectUrl.searchParams.set('error', 'missing-token');
         return NextResponse.redirect(redirectUrl);
       }
       
       if (config.debug) {
-        console.log('[GrowthKit] Processing email verification for:', email);
+        console.log('[GrowthKit] Processing email verification with token');
       }
       
       try {
