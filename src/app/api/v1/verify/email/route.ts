@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (!lead) {
+    if (!lead || !lead.fingerprintId) {
       return errors.badRequest('Invalid verification token');
     }
 
