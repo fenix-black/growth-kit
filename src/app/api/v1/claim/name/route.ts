@@ -76,23 +76,31 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create or update lead record
-    const lead = await prisma.lead.upsert({
+    // Find existing lead by fingerprintId
+    const existingLeadToUpdate = await prisma.lead.findFirst({
       where: {
-        appId_email: {
-          appId: authContext.app.id,
-          email: '',
-        },
-      },
-      create: {
         appId: authContext.app.id,
         fingerprintId: fingerprintRecord.id,
-        name: sanitizedName,
-      },
-      update: {
-        name: sanitizedName,
       },
     });
+
+    let lead;
+    if (existingLeadToUpdate) {
+      // Update existing lead
+      lead = await prisma.lead.update({
+        where: { id: existingLeadToUpdate.id },
+        data: { name: sanitizedName },
+      });
+    } else {
+      // Create new lead if none exists
+      lead = await prisma.lead.create({
+        data: {
+          appId: authContext.app.id,
+          fingerprintId: fingerprintRecord.id,
+          name: sanitizedName,
+        },
+      });
+    }
 
     // Award credits for name claim
     const policy = authContext.app.policyJson as any;
