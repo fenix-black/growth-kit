@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyAppAuth } from '@/lib/security/auth';
 import { generateVerificationToken } from '@/lib/security/hmac';
-import { checkRateLimit, getClientIp, rateLimits } from '@/lib/middleware/rateLimitSafe';
+import { checkRateLimit, getClientIp } from '@/lib/middleware/rateLimitSafe';
 import { withCorsHeaders } from '@/lib/middleware/cors';
 import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { successResponse, errors } from '@/lib/utils/response';
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     // Rate limiting
     const clientIp = getClientIp(request.headers);
-    const rateLimitCheck = await checkRateLimit(clientIp, rateLimits.sensitive);
+    const rateLimitCheck = await checkRateLimit(clientIp, 'sensitive');
     if (!rateLimitCheck.success) {
       return rateLimitCheck.response!;
     }
