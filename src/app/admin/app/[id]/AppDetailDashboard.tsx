@@ -83,6 +83,9 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
   const [editedApp, setEditedApp] = useState<Partial<AppDetails> & { corsOriginsText?: string }>({});
   const [newApiKey, setNewApiKey] = useState<string | null>(null);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  // JSON editing state
+  const [policyJsonText, setPolicyJsonText] = useState<string>('');
+  const [policyJsonError, setPolicyJsonError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAppDetails();
@@ -116,6 +119,9 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           autoApproveWaitlist: appData.autoApproveWaitlist ?? false,
           trackUsdValue: appData.trackUsdValue ?? false,
         });
+        // Initialize JSON text state
+        setPolicyJsonText(JSON.stringify(appData.policyJson || {}, null, 2));
+        setPolicyJsonError(null);
       } else {
         router.push('/admin/apps');
       }
@@ -147,6 +153,17 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
   const handleSaveSettings = async () => {
     setIsSaving(true);
     try {
+      // Validate JSON before saving
+      let policyJson = editedApp.policyJson;
+      try {
+        policyJson = JSON.parse(policyJsonText);
+        setPolicyJsonError(null);
+      } catch (error) {
+        setPolicyJsonError('Invalid JSON format. Please fix the syntax before saving.');
+        setIsSaving(false);
+        return;
+      }
+
       // Process corsOriginsText into array if it exists
       const corsOrigins = typeof editedApp.corsOriginsText !== 'undefined' 
         ? editedApp.corsOriginsText.split(',').map(s => s.trim()).filter(Boolean)
@@ -164,7 +181,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           isActive: editedApp.isActive,
           corsOrigins: corsOrigins,
           redirectUrl: editedApp.redirectUrl,
-          policyJson: editedApp.policyJson,
+          policyJson: policyJson,
           waitlistEnabled: editedApp.waitlistEnabled,
           autoApproveWaitlist: editedApp.autoApproveWaitlist,
           invitationQuota: editedApp.invitationQuota,
@@ -337,6 +354,9 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                           autoApproveWaitlist: app?.autoApproveWaitlist ?? false,
                           trackUsdValue: app?.trackUsdValue ?? false,
                         });
+                        // Reset JSON text state
+                        setPolicyJsonText(JSON.stringify(app?.policyJson || {}, null, 2));
+                        setPolicyJsonError(null);
                       }}
                     >
                       Cancel
@@ -362,6 +382,9 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                         autoApproveWaitlist: app.autoApproveWaitlist ?? false,
                         trackUsdValue: app.trackUsdValue ?? false,
                       });
+                      // Initialize JSON text state for editing
+                      setPolicyJsonText(JSON.stringify(app.policyJson || {}, null, 2));
+                      setPolicyJsonError(null);
                       setIsEditing(true);
                     }}
                   >
@@ -629,20 +652,43 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           </ContentCard>
 
           <ContentCard title="Credit Policy JSON" className="col-span-2">
-            <textarea
-              value={isEditing ? JSON.stringify(editedApp.policyJson, null, 2) : JSON.stringify(app.policyJson, null, 2)}
-              onChange={(e) => {
-                try {
-                  const parsed = JSON.parse(e.target.value);
-                  setEditedApp({ ...editedApp, policyJson: parsed });
-                } catch (error) {
-                  // Invalid JSON, just update the text
-                }
-              }}
-              disabled={!isEditing}
-              rows={15}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm font-mono text-xs disabled:bg-gray-50"
-            />
+            <div className="space-y-2">
+              <textarea
+                value={isEditing ? policyJsonText : JSON.stringify(app.policyJson, null, 2)}
+                onChange={(e) => {
+                  if (!isEditing) return;
+                  
+                  const text = e.target.value;
+                  setPolicyJsonText(text);
+                  
+                  // Try to parse JSON and update state if valid
+                  try {
+                    const parsed = JSON.parse(text);
+                    setEditedApp({ ...editedApp, policyJson: parsed });
+                    setPolicyJsonError(null);
+                  } catch (error) {
+                    // Show error but still allow editing
+                    setPolicyJsonError('Invalid JSON syntax');
+                  }
+                }}
+                disabled={!isEditing}
+                rows={15}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm font-mono text-xs disabled:bg-gray-50"
+                placeholder="Enter valid JSON for the credit policy..."
+              />
+              {isEditing && policyJsonError && (
+                <div className="flex items-center space-x-2 text-red-600 text-sm">
+                  <AlertCircle size={16} />
+                  <span>{policyJsonError}</span>
+                </div>
+              )}
+              {isEditing && !policyJsonError && policyJsonText && (
+                <div className="flex items-center space-x-2 text-green-600 text-sm">
+                  <CheckCircle size={16} />
+                  <span>Valid JSON format</span>
+                </div>
+              )}
+            </div>
           </ContentCard>
         </div>
       )}
