@@ -16,8 +16,7 @@ import type {
 
 export function useGrowthKit(): GrowthKitHook {
   const config = useGrowthKitConfig();
-  const { state, setState, apiRef } = useGrowthKitState();
-  const initRef = useRef(false);
+  const { state, setState, apiRef, initRef } = useGrowthKitState();
   const configRef = useRef(config);
   configRef.current = config;
 

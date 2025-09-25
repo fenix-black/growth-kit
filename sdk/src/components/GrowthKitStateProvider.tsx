@@ -33,6 +33,7 @@ interface GrowthKitStateContextValue {
   state: GrowthKitState;
   setState: React.Dispatch<React.SetStateAction<GrowthKitState>>;
   apiRef: React.MutableRefObject<GrowthKitAPI | null>;
+  initRef: React.MutableRefObject<boolean>;
 }
 
 const GrowthKitStateContext = createContext<GrowthKitStateContextValue | undefined>(undefined);
@@ -40,9 +41,10 @@ const GrowthKitStateContext = createContext<GrowthKitStateContextValue | undefin
 export function GrowthKitStateProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<GrowthKitState>(initialState);
   const apiRef = useRef<GrowthKitAPI | null>(null);
+  const initRef = useRef<boolean>(false);
 
   return (
-    <GrowthKitStateContext.Provider value={{ state, setState, apiRef }}>
+    <GrowthKitStateContext.Provider value={{ state, setState, apiRef, initRef }}>
       {children}
     </GrowthKitStateContext.Provider>
   );
