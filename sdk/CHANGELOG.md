@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.13] - 2025-09-25
+
+### Fixed
+- **Multiple Initialization Bug**: Fixed critical issue causing repeated API calls during initialization
+  - Moved initialization tracking to shared state provider level
+  - Ensures only one initialization occurs even with multiple hook instances
+  - Eliminates initialization loops that were causing 30+ API calls
+  
+- **Lead Data Consistency**: Fixed name claim endpoint to use fingerprintId for matching
+  - Previously created duplicate lead records with separate name/email data
+  - Now correctly updates existing lead record with name when claimed
+  - Ensures `/v1/me` returns complete profile data (both name and email)
+
+### Changed
+- **Initialization Architecture**: Refactored to use shared `initRef` in state provider
+  - All `useGrowthKit` hook instances now share the same initialization state
+  - Prevents race conditions between multiple components
+  - More efficient and reliable initialization process
+
 ## [0.1.12] - 2025-09-25
 
 ### Added
