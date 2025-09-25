@@ -18,6 +18,8 @@ export function useGrowthKit(): GrowthKitHook {
   const config = useGrowthKitConfig();
   const { state, setState, apiRef } = useGrowthKitState();
   const initRef = useRef(false);
+  const configRef = useRef(config);
+  configRef.current = config;
 
   // Initialize API client
   useEffect(() => {
@@ -80,7 +82,7 @@ export function useGrowthKit(): GrowthKitHook {
         waitlistData?.requiresWaitlist === true;
 
       // Debug logging
-      if (config.debug) {
+      if (configRef.current.debug) {
         console.log('[GrowthKit] API Response:', data);
         console.log('[GrowthKit] Referral Code:', data.referralCode);
       }
@@ -110,7 +112,7 @@ export function useGrowthKit(): GrowthKitHook {
         usdTrackingEnabled: data.usdTrackingEnabled,
       });
 
-      if (config.debug) {
+      if (configRef.current.debug) {
         console.log('GrowthKit initialized:', data);
       }
     } catch (error) {
@@ -120,16 +122,16 @@ export function useGrowthKit(): GrowthKitHook {
         error: error instanceof Error ? error : new Error('Unknown error'),
       }));
       
-      if (config.debug) {
+      if (configRef.current.debug) {
         console.error('GrowthKit initialization error:', error);
       }
     }
-  }, [config.debug]);
+  }, []); // No deps to avoid re-creation
 
   // Initialize on mount
   useEffect(() => {
     initialize();
-  }, [initialize]);
+  }, []); // Empty deps to run only once on mount
 
   // Refresh user data
   const refresh = useCallback(async () => {
