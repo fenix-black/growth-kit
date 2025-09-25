@@ -113,14 +113,46 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Mark email as verified
-    await prisma.lead.update({
-      where: { id: lead.id },
-      data: {
+    // Check if this fingerprint has other verified emails that should be replaced
+    const otherVerifiedEmails = await prisma.lead.findMany({
+      where: {
+        appId: authContext.app.id,
+        fingerprintId: fingerprintRecord.id,
         emailVerified: true,
-        verifyToken: null,
-        verifyExpiresAt: null,
+        id: { not: lead.id },
       },
+    });
+
+    // Use transaction to handle email replacement atomically
+    await prisma.$transaction(async (tx) => {
+      // Mark email as verified
+      await tx.lead.update({
+        where: { id: lead.id },
+        data: {
+          emailVerified: true,
+          verifyToken: null,
+          verifyExpiresAt: null,
+        },
+      });
+
+      // If user had other verified emails, invalidate them (keeping only the newest verified one)
+      if (otherVerifiedEmails.length > 0) {
+        await tx.lead.updateMany({
+          where: {
+            appId: authContext.app.id,
+            fingerprintId: fingerprintRecord.id,
+            emailVerified: true,
+            id: { not: lead.id },
+          },
+          data: {
+            emailVerified: false,
+            verifyToken: null,
+            verifyExpiresAt: null,
+          },
+        });
+
+        console.log(`📧 Replaced ${otherVerifiedEmails.length} previous verified email(s) for fingerprint ${fingerprintRecord.id}`);
+      }
     });
 
     // Award verification credits

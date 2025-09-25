@@ -68,6 +68,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Check if this fingerprint has claimed any other email
+    const existingEmailLead = await prisma.lead.findFirst({
+      where: {
+        appId: authContext.app.id,
+        fingerprintId: fingerprintRecord.id,
+        email: { not: normalizedEmail },
+      },
+    });
+
     if (existingLead) {
       // If already verified, don't send new verification
       if (existingLead.emailVerified) {
@@ -118,7 +127,114 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Check if email is already used by another fingerprint
+    // Handle email change scenario
+    if (existingEmailLead) {
+      // This fingerprint is trying to change their email
+      
+      // Check if new email is already used by another fingerprint
+      const emailInUse = await prisma.lead.findFirst({
+        where: {
+          appId: authContext.app.id,
+          email: normalizedEmail,
+          fingerprintId: { not: fingerprintRecord.id },
+        },
+      });
+
+      if (emailInUse) {
+        return errors.badRequest('Email already associated with another user');
+      }
+
+      // Email change logic:
+      // - If previous email was NOT verified: replace it immediately
+      // - If previous email was verified: create new lead but don't award credits
+      
+      if (!existingEmailLead.emailVerified) {
+        // Replace unverified email immediately
+        const verifyToken = generateVerificationToken();
+        const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+        await prisma.lead.update({
+          where: { id: existingEmailLead.id },
+          data: {
+            email: normalizedEmail,
+            verifyToken,
+            verifyExpiresAt,
+            emailVerified: false,
+          },
+        });
+
+        // Send verification email for new email
+        const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}&email=${encodeURIComponent(normalizedEmail)}`;
+        
+        try {
+          await sendVerificationEmail(authContext.app, normalizedEmail, {
+            link: verificationLink,
+            name: existingEmailLead.name || undefined,
+          });
+          console.log('✅ Email change verification sent to:', normalizedEmail);
+        } catch (emailError) {
+          console.error('❌ Failed to send verification email:', emailError);
+        }
+
+        // Calculate current credit balance (no new credits awarded)
+        const credits = await prisma.credit.aggregate({
+          where: { fingerprintId: fingerprintRecord.id },
+          _sum: { amount: true },
+        });
+
+        return successResponse({
+          claimed: true,
+          verificationSent: true,
+          message: 'Email changed. Verification sent to new email.',
+          totalCredits: credits._sum.amount || 0,
+        });
+      } else {
+        // Previous email was verified, create new lead for email change verification
+        // This will be handled after verification in the verify endpoint
+        const verifyToken = generateVerificationToken();
+        const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+        const newLead = await prisma.lead.create({
+          data: {
+            appId: authContext.app.id,
+            fingerprintId: fingerprintRecord.id,
+            email: normalizedEmail,
+            emailVerified: false,
+            verifyToken,
+            verifyExpiresAt,
+            name: existingEmailLead.name, // Keep existing name
+          },
+        });
+
+        // Send verification email
+        const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}&email=${encodeURIComponent(normalizedEmail)}`;
+        
+        try {
+          await sendVerificationEmail(authContext.app, normalizedEmail, {
+            link: verificationLink,
+            name: existingEmailLead.name || undefined,
+          });
+          console.log('✅ Email change verification sent to:', normalizedEmail);
+        } catch (emailError) {
+          console.error('❌ Failed to send verification email:', emailError);
+        }
+
+        // Calculate current credit balance (no new credits awarded)
+        const credits = await prisma.credit.aggregate({
+          where: { fingerprintId: fingerprintRecord.id },
+          _sum: { amount: true },
+        });
+
+        return successResponse({
+          claimed: true,
+          verificationSent: true,
+          message: 'Email change requested. Verify new email to complete the change.',
+          totalCredits: credits._sum.amount || 0,
+        });
+      }
+    }
+
+    // Check if email is already used by another fingerprint (for new users)
     const emailInUse = await prisma.lead.findFirst({
       where: {
         appId: authContext.app.id,
