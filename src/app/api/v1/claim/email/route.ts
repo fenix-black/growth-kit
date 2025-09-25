@@ -248,14 +248,26 @@ export async function POST(request: NextRequest) {
       return errors.badRequest('Email already associated with another user');
     }
 
-    // Create new lead record with email
+    // Find existing lead - it should already exist from /v1/me
+    const lead = await prisma.lead.findFirst({
+      where: {
+        appId: authContext.app.id,
+        fingerprintId: fingerprintRecord.id,
+      },
+    });
+
+    if (!lead) {
+      return errors.badRequest('No lead record found. Call /v1/me first to initialize.');
+    }
+
+    // Generate verification token
     const verifyToken = generateVerificationToken();
     const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    const lead = await prisma.lead.create({
+    // Update existing lead with email
+    await prisma.lead.update({
+      where: { id: lead.id },
       data: {
-        appId: authContext.app.id,
-        fingerprintId: fingerprintRecord.id,
         email: normalizedEmail,
         emailVerified: false,
         verifyToken,

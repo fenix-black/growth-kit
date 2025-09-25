@@ -76,31 +76,23 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Find existing lead by fingerprintId
-    const existingLeadToUpdate = await prisma.lead.findFirst({
+    // Find existing lead - it should already exist from /v1/me
+    const lead = await prisma.lead.findFirst({
       where: {
         appId: authContext.app.id,
         fingerprintId: fingerprintRecord.id,
       },
     });
 
-    let lead;
-    if (existingLeadToUpdate) {
-      // Update existing lead
-      lead = await prisma.lead.update({
-        where: { id: existingLeadToUpdate.id },
-        data: { name: sanitizedName },
-      });
-    } else {
-      // Create new lead if none exists
-      lead = await prisma.lead.create({
-        data: {
-          appId: authContext.app.id,
-          fingerprintId: fingerprintRecord.id,
-          name: sanitizedName,
-        },
-      });
+    if (!lead) {
+      return errors.badRequest('No lead record found. Call /v1/me first to initialize.');
     }
+
+    // Update existing lead with name
+    await prisma.lead.update({
+      where: { id: lead.id },
+      data: { name: sanitizedName },
+    });
 
     // Award credits for name claim
     const policy = authContext.app.policyJson as any;

@@ -579,8 +579,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Get user profile data
-    const userLead = await prisma.lead.findFirst({
+    // Get or create user lead record
+    let userLead = await prisma.lead.findFirst({
       where: {
         appId: authContext.app.id,
         fingerprintId: fingerprintRecord!.id,
@@ -591,6 +591,21 @@ export async function POST(request: NextRequest) {
         emailVerified: true,
       },
     });
+
+    // Create lead if it doesn't exist
+    if (!userLead) {
+      const newLead = await prisma.lead.create({
+        data: {
+          appId: authContext.app.id,
+          fingerprintId: fingerprintRecord!.id,
+        },
+      });
+      userLead = {
+        name: null,
+        email: null,
+        emailVerified: false,
+      };
+    }
 
     // Build response
     const response = successResponse({
