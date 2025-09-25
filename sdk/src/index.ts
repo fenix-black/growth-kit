@@ -24,9 +24,11 @@ export {
   GrowthKitGate,
   WaitlistForm,
   CreditExhaustionModal,
+  GrowthKitAccountWidget,
 } from './components';
 export type {
   WaitlistFormProps,
+  GrowthKitAccountWidgetRef,
 } from './components';
 
 // Middleware exports for Next.js

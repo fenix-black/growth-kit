@@ -1,22 +1,23 @@
 'use client';
 
-import { GrowthKitProvider, GrowthKitGate, useGrowthKit, CreditExhaustionModal } from '@growthkit/sdk';
-import { useState, useEffect } from 'react';
+import { GrowthKitAccountWidget, useGrowthKit } from '@growthkit/sdk';
+import { useState, useEffect, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import type { GrowthKitAccountWidgetRef } from '@growthkit/sdk';
 
-// Main App Component (wrapped by GrowthKitGate)
+// Main App Component (now wrapped by GrowthKitAccountWidget)
 function MainApp() {
-  const { credits, completeAction, loading, refresh, getReferralLink, share, policy } = useGrowthKit();
+  const { credits, completeAction, loading, getReferralLink, share, policy } = useGrowthKit();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showTestModal, setShowTestModal] = useState(false);
+  const accountWidgetRef = useRef<GrowthKitAccountWidgetRef>(null);
   
   // Handle email verification feedback from middleware redirect
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     
     if (params.get('verified') === 'true') {
-      toast.success('Email verified successfully! +1 credit earned');
-      refresh(); // Refresh credits to show the new balance
+      toast.success('Email verified successfully! +5 credits earned');
+      accountWidgetRef.current?.refresh(); // Refresh via widget ref
       // Clean up URL
       window.history.replaceState({}, '', '/');
     } else if (params.get('verified') === 'false') {
@@ -29,7 +30,7 @@ function MainApp() {
       // Clean up URL
       window.history.replaceState({}, '', '/');
     }
-  }, [refresh]);
+  }, []);
   
   const handleUseFeature = async () => {
     setIsProcessing(true);
@@ -53,27 +54,22 @@ function MainApp() {
     }
   };
 
+  const handleTestEarnCredits = () => {
+    accountWidgetRef.current?.openEarnCreditsModal();
+  };
+
   return (
     <div style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
         <h1 style={styles.title}>Example App</h1>
-        <div style={styles.creditsDisplay}>
-          <span>Credits: {credits}</span>
+        <div style={styles.headerActions}>
           <button 
-            onClick={refresh} 
-            style={styles.refreshButton}
-            disabled={loading}
-            aria-label="Refresh credits"
+            onClick={handleTestEarnCredits}
+            style={styles.testButton}
+            aria-label="Open earn credits modal"
           >
-            ↻
-          </button>
-          <button 
-            onClick={() => setShowTestModal(true)} 
-            style={{...styles.refreshButton, ...styles.testButton}}
-            aria-label="Test credit modal"
-          >
-            🎯
+            🎯 Manage Account
           </button>
         </div>
       </div>
@@ -81,8 +77,8 @@ function MainApp() {
       {/* Marketing Message */}
       <div style={styles.hero}>
         <h2 style={styles.heroTitle}>Welcome to Example App</h2>
-        <p style={styles.heroText}>Each action uses 1 credit. You get 3 free credits daily!</p>
-        <p style={styles.heroSubtext}>Visit daily to claim your credits</p>
+        <p style={styles.heroText}>Each action uses 1 credit. Earn credits through various actions!</p>
+        <p style={styles.heroSubtext}>Check your account widget to see your balance and earn more credits</p>
       </div>
 
       {/* Main Action */}
@@ -100,7 +96,7 @@ function MainApp() {
         
         {credits === 0 && (
           <p style={styles.warning}>
-            Out of credits! Complete tasks in the modal to earn more.
+            Out of credits! Use the account widget to earn more.
           </p>
         )}
       </div>
@@ -119,18 +115,27 @@ function MainApp() {
         </button>
       </div>
 
-      {/* Test Modal */}
-      {showTestModal && (
-        <CreditExhaustionModal 
-          onClose={() => setShowTestModal(false)} 
-          forceOpen={true}
-        />
-      )}
+      {/* Developer Info */}
+      <div style={styles.devInfo}>
+        <h4 style={styles.devTitle}>🎯 GrowthKit Account Widget</h4>
+        <p style={styles.devText}>
+          Notice the account widget in the top-right corner! It shows your:
+        </p>
+        <ul style={styles.devList}>
+          <li>Current credits balance</li>
+          <li>Profile completion status</li>
+          <li>Easy access to earn more credits</li>
+          <li>Automatic flow management (waitlist, credit exhaustion)</li>
+        </ul>
+        <p style={styles.devText}>
+          This widget is part of the GrowthKit SDK and can be easily integrated into any app.
+        </p>
+      </div>
     </div>
   );
 }
 
-// Main Page Component
+// Main Page Component - Now uses the new all-in-one widget
 export default function HomePage() {
   const config = {
     apiKey: process.env.NEXT_PUBLIC_GROWTHKIT_API_KEY || '',
@@ -138,11 +143,25 @@ export default function HomePage() {
     debug: process.env.NODE_ENV === 'development',
   };
 
+  const accountWidgetRef = useRef<GrowthKitAccountWidgetRef>(null);
+
   return (
-    <GrowthKitProvider config={config}>
-      <GrowthKitGate>
+    <>
+      <GrowthKitAccountWidget 
+        config={config}
+        ref={accountWidgetRef}
+        position="top-right"
+        theme="auto"
+        onCreditsChange={(credits: number) => {
+          console.log('Credits updated:', credits);
+        }}
+        onProfileChange={(profile: { name?: string; email?: string; verified?: boolean }) => {
+          console.log('Profile updated:', profile);
+        }}
+      >
         <MainApp />
-      </GrowthKitGate>
+      </GrowthKitAccountWidget>
+      
       <Toaster 
         position="bottom-right"
         toastOptions={{
@@ -153,7 +172,7 @@ export default function HomePage() {
           },
         }}
       />
-    </GrowthKitProvider>
+    </>
   );
 }
 
@@ -180,34 +199,20 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#333',
     margin: 0,
   },
-  creditsDisplay: {
+  headerActions: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    background: '#f0f0f0',
-    padding: '0.5rem 1rem',
-    borderRadius: '8px',
-    fontWeight: 'bold',
-    fontSize: '1.1rem',
-  },
-  refreshButton: {
-    background: 'none',
-    border: 'none',
-    fontSize: '1.2rem',
-    cursor: 'pointer',
-    padding: '0.25rem',
-    borderRadius: '4px',
-    transition: 'background 0.2s',
   },
   testButton: {
     background: '#f0f0f0',
     border: '1px solid #ccc',
-    fontSize: '1rem',
+    fontSize: '0.9rem',
     cursor: 'pointer',
-    padding: '0.25rem 0.5rem',
-    borderRadius: '4px',
+    padding: '0.5rem 1rem',
+    borderRadius: '6px',
     transition: 'all 0.2s',
-    marginLeft: '0.25rem',
+    fontWeight: '500',
   },
   hero: {
     textAlign: 'center',
@@ -263,6 +268,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '2rem',
     background: '#f9f9f9',
     borderRadius: '12px',
+    marginBottom: '3rem',
   },
   sectionTitle: {
     fontSize: '1.25rem',
@@ -283,5 +289,27 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     fontWeight: '600',
     transition: 'all 0.2s',
+  },
+  devInfo: {
+    background: '#f8f9fa',
+    border: '1px solid #e9ecef',
+    borderRadius: '8px',
+    padding: '1.5rem',
+    marginTop: '2rem',
+  },
+  devTitle: {
+    margin: '0 0 1rem 0',
+    color: '#495057',
+    fontSize: '1.1rem',
+  },
+  devText: {
+    color: '#6c757d',
+    marginBottom: '1rem',
+    lineHeight: '1.5',
+  },
+  devList: {
+    color: '#6c757d',
+    marginLeft: '1.5rem',
+    marginBottom: '1rem',
   },
 };

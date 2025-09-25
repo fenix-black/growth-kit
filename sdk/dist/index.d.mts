@@ -155,6 +155,37 @@ interface WaitlistFormProps {
  */
 declare function WaitlistForm({ message, onSuccess, className, style }: WaitlistFormProps): React.JSX.Element;
 
+interface GrowthKitAccountWidgetProps {
+    config: GrowthKitConfig;
+    children: React.ReactNode;
+    position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'inline';
+    theme?: 'light' | 'dark' | 'minimal' | 'auto';
+    compact?: boolean;
+    showName?: boolean;
+    showEmail?: boolean;
+    showCredits?: boolean;
+    autoOpenCreditModal?: boolean;
+    onCreditsChange?: (credits: number) => void;
+    onProfileChange?: (profile: {
+        name?: string;
+        email?: string;
+        verified?: boolean;
+    }) => void;
+    className?: string;
+    style?: React.CSSProperties;
+}
+interface GrowthKitAccountWidgetRef {
+    openEarnCreditsModal: () => void;
+    refresh: () => Promise<void>;
+    getCurrentBalance: () => number;
+    getProfile: () => {
+        name?: string;
+        email?: string;
+        verified?: boolean;
+    };
+}
+declare const GrowthKitAccountWidget: React.ForwardRefExoticComponent<GrowthKitAccountWidgetProps & React.RefAttributes<GrowthKitAccountWidgetRef>>;
+
 interface GrowthKitMiddlewareConfig {
     apiKey: string;
     apiUrl: string;
@@ -234,4 +265,4 @@ declare class GrowthKitAPI {
 
 declare const VERSION = "0.0.4";
 
-export { APIResponse, ClaimResponse, CompleteResponse, CreditExhaustionModal, GrowthKitAPI, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, MeResponse, ShareOptions, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit };
+export { APIResponse, ClaimResponse, CompleteResponse, CreditExhaustionModal, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, MeResponse, ShareOptions, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit };
