@@ -141,3 +141,97 @@ export async function GET(
     return errors.serverError();
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string; fingerprintId: string }> }
+) {
+  try {
+    // Verify service key
+    if (!verifyServiceKey(request.headers)) {
+      return errors.forbidden();
+    }
+
+    const { id: appId, fingerprintId } = await params;
+
+    // Verify fingerprint exists and belongs to app
+    const fingerprint = await prisma.fingerprint.findFirst({
+      where: {
+        id: fingerprintId,
+        appId,
+      },
+      include: {
+        _count: {
+          select: {
+            leads: true,
+            credits: true,
+            usage: true,
+            referrals: true,
+          },
+        },
+      },
+    });
+
+    if (!fingerprint) {
+      return errors.notFound();
+    }
+
+    // Delete all related data in a transaction
+    const deleted = await prisma.$transaction(async (tx) => {
+      // Delete referrals where this user is the referrer
+      await tx.referral.deleteMany({
+        where: { referrerId: fingerprintId },
+      });
+
+      // Delete referral where this user was referred
+      await tx.referral.deleteMany({
+        where: { referredId: fingerprintId },
+      });
+
+      // Delete usage records
+      await tx.usage.deleteMany({
+        where: { fingerprintId },
+      });
+
+      // Delete credits
+      await tx.credit.deleteMany({
+        where: { fingerprintId },
+      });
+
+      // Delete leads
+      await tx.lead.deleteMany({
+        where: { fingerprintId },
+      });
+
+      // Finally, delete the fingerprint
+      const deletedFingerprint = await tx.fingerprint.delete({
+        where: { id: fingerprintId },
+      });
+
+      return deletedFingerprint;
+    });
+
+    // Log the deletion
+    await prisma.eventLog.create({
+      data: {
+        appId,
+        event: 'admin.user_deleted',
+        entityType: 'fingerprint',
+        entityId: fingerprintId,
+        metadata: {
+          fingerprintId: deleted.fingerprint,
+          deletedCounts: fingerprint._count,
+        },
+      },
+    });
+
+    return successResponse({
+      deleted: true,
+      fingerprintId: deleted.fingerprint,
+      deletedCounts: fingerprint._count,
+    });
+  } catch (error) {
+    console.error('Error in /v1/admin/app/[id]/users/[fingerprintId] DELETE:', error);
+    return errors.serverError();
+  }
+}

@@ -16,7 +16,9 @@ import {
   Plus,
   Download,
   Filter,
-  ArrowUpDown
+  ArrowUpDown,
+  Trash2,
+  User
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { cn } from '@/components/ui/utils';
@@ -107,6 +109,7 @@ export default function UsersLeadsManager({
   const [showFilters, setShowFilters] = useState(false);
   const [creditAdjustment, setCreditAdjustment] = useState({ amount: 0, reason: '' });
   const [adjustingCredits, setAdjustingCredits] = useState(false);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   // Filters
   const [minCredits, setMinCredits] = useState('');
@@ -217,6 +220,66 @@ export default function UsersLeadsManager({
       setSortBy(field);
       setSortOrder('desc');
     }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This will permanently delete all their data including leads, credits, and referrals.')) {
+      return;
+    }
+
+    try {
+      setDeletingUserId(userId);
+      const response = await fetch(
+        `/api/v1/admin/app/${appId}/users/${userId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Close detail modal if open
+        if (selectedUser?.id === userId) {
+          setSelectedUser(null);
+        }
+        // Refresh user list
+        fetchUsers();
+      }
+    } catch (error) {
+      // Handle error
+    } finally {
+      setDeletingUserId(null);
+    }
+  };
+
+  const formatLastActive = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    // For today, show relative time
+    if (diffDays === 0) {
+      if (diffHours === 0) {
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        if (diffMinutes < 1) return 'Just now';
+        return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+      }
+      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    }
+
+    // For other days, show readable date and time
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
   };
 
   const exportToCSV = () => {
@@ -394,14 +457,29 @@ export default function UsersLeadsManager({
                 users.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-4 py-4">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {user.name || 'Anonymous'}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {user.email || 'No email'}
-                        </div>
-                        <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      <div className="space-y-1">
+                        {user.name && (
+                          <div className="flex items-center space-x-1">
+                            <User size={14} className="text-gray-400" />
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              {user.name}
+                            </span>
+                          </div>
+                        )}
+                        {user.email && (
+                          <div className="flex items-center space-x-1 group">
+                            <div className="relative">
+                              <Mail size={14} className="text-gray-400" />
+                              <div className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                {user.email}
+                              </div>
+                            </div>
+                            {user.emailVerified && (
+                              <CheckCircle size={14} className="text-green-500" />
+                            )}
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-400 dark:text-gray-500">
                           {user.fingerprintId.substring(0, 8)}...
                         </div>
                       </div>
@@ -427,18 +505,30 @@ export default function UsersLeadsManager({
                     </td>
                     <td className="px-4 py-4">
                       <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(user.lastActiveAt).toLocaleDateString()}
+                        {formatLastActive(user.lastActiveAt)}
                       </div>
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        icon={<Eye size={16} />}
-                        onClick={() => fetchUserDetails(user.id)}
-                      >
-                        View
-                      </Button>
+                      <div className="flex items-center justify-end space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={<Eye size={16} />}
+                          onClick={() => fetchUserDetails(user.id)}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={<Trash2 size={16} />}
+                          onClick={() => handleDeleteUser(user.id)}
+                          loading={deletingUserId === user.id}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))
