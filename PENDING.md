@@ -5,7 +5,7 @@ pending:
 - test claiming name, email, verifying email - in progress:
     - some issues: 23:19hrs 24-oct-25
         - the credits are assigned only after email is verified - FIXED
-        - verification link has token and email, and this should be handled internally, since when we arrive to the page we have the fingerprint to make the match.
+        - verification link has token and email, and this should be just the token, since when we arrive to the page we have the fingerprint to make the match. - FIXED
         - we need an admin UI page to see the users with their details and referrals.
         
 - test spending with dollars

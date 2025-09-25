@@ -34,12 +34,39 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
   );
   const [loading, setLoading] = useState(false);
 
+  // Helper function to get available tabs
+  const getAvailableTabs = () => {
+    const tabs = [];
+    if (!hasClaimedName) tabs.push('name');
+    if (!hasClaimedEmail) tabs.push('email');
+    if (hasClaimedEmail && !hasVerifiedEmail) tabs.push('verify');
+    tabs.push('share'); // Always available
+    return tabs;
+  };
+
+  // Helper function to get next available tab
+  const getNextAvailableTab = (currentTab: string) => {
+    const availableTabs = getAvailableTabs();
+    const currentIndex = availableTabs.indexOf(currentTab);
+    
+    // If current tab is still available, keep it
+    if (currentIndex !== -1) return currentTab;
+    
+    // Otherwise return the first available tab
+    return availableTabs[0] || 'share';
+  };
+
   // Expose imperative API
   useImperativeHandle(ref, () => ({
     open: () => setIsOpen(true),
     close: () => setIsOpen(false),
     isOpen: () => isOpen,
   }));
+
+  // Update active tab when claims change
+  useEffect(() => {
+    setActiveTab(getNextAvailableTab(activeTab));
+  }, [hasClaimedName, hasClaimedEmail, hasVerifiedEmail]);
 
   // Handle ESC key to close modal
   useEffect(() => {
@@ -108,10 +135,22 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
 
         <div style={styles.content}>
           {activeTab === 'name' && !hasClaimedName && (
-            <NameTab onClaim={claimName} loading={loading} setLoading={setLoading} credits={policy?.nameClaimCredits || 2} />
+            <NameTab 
+              onClaim={claimName} 
+              loading={loading} 
+              setLoading={setLoading} 
+              credits={policy?.nameClaimCredits || 2}
+              onSuccess={() => setActiveTab(getNextAvailableTab('name'))}
+            />
           )}
           {activeTab === 'email' && !hasClaimedEmail && (
-            <EmailTab onClaim={claimEmail} loading={loading} setLoading={setLoading} credits={policy?.emailClaimCredits || 2} />
+            <EmailTab 
+              onClaim={claimEmail} 
+              loading={loading} 
+              setLoading={setLoading} 
+              credits={policy?.emailClaimCredits || 2}
+              onSuccess={() => setActiveTab(getNextAvailableTab('email'))}
+            />
           )}
           {activeTab === 'verify' && hasClaimedEmail && !hasVerifiedEmail && (
             <VerifyTab credits={policy?.emailVerifyCredits || 5} />
@@ -135,7 +174,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
 CreditExhaustionModal.displayName = 'CreditExhaustionModal';
 
 // Tab Components
-function NameTab({ onClaim, loading, setLoading, credits }: any) {
+function NameTab({ onClaim, loading, setLoading, credits, onSuccess }: any) {
   const [name, setName] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -145,6 +184,10 @@ function NameTab({ onClaim, loading, setLoading, credits }: any) {
     setLoading(true);
     const success = await onClaim(name);
     setLoading(false);
+    
+    if (success) {
+      onSuccess();
+    }
   };
 
   return (
@@ -170,7 +213,7 @@ function NameTab({ onClaim, loading, setLoading, credits }: any) {
   );
 }
 
-function EmailTab({ onClaim, loading, setLoading, credits }: any) {
+function EmailTab({ onClaim, loading, setLoading, credits, onSuccess }: any) {
   const [email, setEmail] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -180,6 +223,10 @@ function EmailTab({ onClaim, loading, setLoading, credits }: any) {
     setLoading(true);
     const success = await onClaim(email);
     setLoading(false);
+    
+    if (success) {
+      onSuccess();
+    }
   };
 
   return (
