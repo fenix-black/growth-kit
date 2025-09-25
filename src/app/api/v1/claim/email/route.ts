@@ -104,10 +104,17 @@ export async function POST(request: NextRequest) {
         // Don't fail the request if email sending fails
       }
 
+      // Calculate current credit balance
+      const credits = await prisma.credit.aggregate({
+        where: { fingerprintId: fingerprintRecord.id },
+        _sum: { amount: true },
+      });
+
       return successResponse({
         claimed: true,
         verificationSent: true,
         message: 'Verification email resent',
+        totalCredits: credits._sum.amount || 0,
       });
     }
 
