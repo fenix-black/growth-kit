@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.12] - 2025-09-25
+
+### Added
+- **User Profile Display**: Widget now shows actual user name and email values
+  - Added `name` and `email` fields to `GrowthKitState` interface
+  - Server endpoints now return actual profile values along with boolean flags
+  - Widget displays real names instead of generic "User" text
+  - Email addresses shown with verification status badge
+
+### Fixed
+- **State Synchronization**: Fixed widget not updating when credits change
+  - Implemented shared state context to ensure all components sync properly
+  - Widget now updates immediately when credits are used or earned
+  - Eliminated separate state instances between components
+
+### Changed
+- **API Response Types**: Enhanced response interfaces to include profile data
+  - `MeResponse` now includes `name` and `email` fields
+  - `ClaimResponse` returns the actual claimed values
+  - Better data consistency across SDK and server
+
 ## [0.1.11] - 2025-09-24
 
 ### Changed

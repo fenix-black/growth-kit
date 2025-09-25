@@ -145,6 +145,42 @@ function App() {
 }
 ```
 
+## Hook Properties
+
+The `useGrowthKit` hook returns an object with the following properties:
+
+```typescript
+{
+  // User State
+  credits: number;              // Current credit balance
+  usage: number;                // Total credits used
+  name: string | null;          // User's claimed name
+  email: string | null;         // User's claimed email
+  hasClaimedName: boolean;      // Whether user has claimed a name
+  hasClaimedEmail: boolean;     // Whether user has claimed an email
+  hasVerifiedEmail: boolean;    // Whether email is verified
+  
+  // Referral System
+  referralCode: string | null;  // User's unique referral code
+  getReferralLink: () => string; // Get shareable referral link
+  share: (options?) => void;    // Share referral link
+  
+  // Actions
+  completeAction: (action: string, options?) => Promise<boolean>;
+  canPerformAction: (action: string) => boolean;
+  claimName: (name: string) => Promise<boolean>;
+  claimEmail: (email: string) => Promise<boolean>;
+  verifyEmail: (token: string) => Promise<boolean>;
+  
+  // App State
+  loading: boolean;             // Initial loading state
+  initialized: boolean;         // Whether SDK is initialized
+  error: Error | null;          // Any error that occurred
+  policy: GrowthKitPolicy;      // App credit policy
+  refresh: () => Promise<void>; // Refresh user data
+}
+```
+
 ## Components
 
 ### GrowthKitGate
@@ -158,6 +194,31 @@ import { GrowthKitGate } from '@fenixblack/growthkit';
   <YourApp />
 </GrowthKitGate>
 ```
+
+### GrowthKitAccountWidget
+All-in-one account widget with credit display and profile management:
+
+```tsx
+import { GrowthKitAccountWidget } from '@fenixblack/growthkit';
+
+<GrowthKitAccountWidget 
+  config={{ apiKey: 'your-api-key' }}
+  position="top-right"
+  showName={true}
+  showEmail={true}
+  theme="auto"
+>
+  <YourApp />
+</GrowthKitAccountWidget>
+```
+
+Features:
+- Displays current credit balance
+- Shows user's name and email (when claimed)
+- Email verification status badge
+- Earn credits modal integration
+- Automatic flow management
+- Customizable position and theme
 
 ### WaitlistForm
 Customizable waitlist signup:
