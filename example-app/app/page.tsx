@@ -6,7 +6,7 @@ import toast, { Toaster } from 'react-hot-toast';
 
 // Main App Component (wrapped by GrowthKitGate)
 function MainApp() {
-  const { credits, completeAction, loading, refresh, getReferralLink, share } = useGrowthKit();
+  const { credits, completeAction, loading, refresh, getReferralLink, share, policy } = useGrowthKit();
   const [isProcessing, setIsProcessing] = useState(false);
   
   // Handle email verification feedback from middleware redirect
@@ -101,7 +101,7 @@ function MainApp() {
       <div style={styles.referralSection}>
         <h3 style={styles.sectionTitle}>Share & Earn Credits</h3>
         <p style={styles.sectionText}>
-          Invite friends and earn 3 credits for each referral!
+          Invite friends and earn {policy?.referralCredits || 5} credits for each referral!
         </p>
         <button 
           onClick={handleShare}
