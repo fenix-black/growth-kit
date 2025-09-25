@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db';
+import { withRetry } from '@/lib/db-helpers';
 import { extractApiKey, verifyApiKey } from './apiKeys';
 import { App, ApiKey } from '@prisma/client';
 
@@ -19,29 +20,33 @@ export async function verifyAppAuth(headers: Headers): Promise<AuthContext | nul
   // Extract key hint (first 8 chars)
   const hint = key.substring(0, 8);
 
-  // Find active API keys with this hint
-  const apiKeys = await prisma.apiKey.findMany({
-    where: {
-      keyHint: hint,
-      isActive: true,
-      OR: [
-        { expiresAt: null },
-        { expiresAt: { gt: new Date() } }
-      ]
-    },
-    include: {
-      app: true
-    }
-  });
+  // Find active API keys with this hint (with retry for connection pool timeouts)
+  const apiKeys = await withRetry(() => 
+    prisma.apiKey.findMany({
+      where: {
+        keyHint: hint,
+        isActive: true,
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gt: new Date() } }
+        ]
+      },
+      include: {
+        app: true
+      }
+    })
+  );
 
   // Try to verify against each potential match
   for (const apiKey of apiKeys) {
     if (await verifyApiKey(key, apiKey.hashedKey)) {
-      // Update last used timestamp
-      await prisma.apiKey.update({
-        where: { id: apiKey.id },
-        data: { lastUsedAt: new Date() }
-      });
+      // Update last used timestamp (with retry for connection pool timeouts)
+      await withRetry(() => 
+        prisma.apiKey.update({
+          where: { id: apiKey.id },
+          data: { lastUsedAt: new Date() }
+        })
+      );
 
       // Check if app is active
       if (!apiKey.app.isActive) {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyAppAuth } from '@/lib/security/auth';
 import { generateReferralCode, verifyClaim } from '@/lib/security/hmac';
-import { checkRateLimit, getClientIp, rateLimits } from '@/lib/middleware/rateLimitSafe';
+import { checkRateLimit, getClientIp } from '@/lib/middleware/rateLimitSafe';
 import { withCorsHeaders } from '@/lib/middleware/cors';
 import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { successResponse, errors } from '@/lib/utils/response';
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Rate limiting by IP
     const clientIp = getClientIp(request.headers);
-    const rateLimitCheck = await checkRateLimit(clientIp, rateLimits.api);
+    const rateLimitCheck = await checkRateLimit(clientIp, 'api');
     if (!rateLimitCheck.success) {
       return rateLimitCheck.response!;
     }
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Rate limiting by fingerprint
     const fingerprintRateLimit = await checkRateLimit(
       `${authContext.app.id}:${fingerprint}`,
-      rateLimits.fingerprint
+      'fingerprint'
     );
     if (!fingerprintRateLimit.success) {
       return fingerprintRateLimit.response!;
@@ -169,8 +169,12 @@ export async function POST(request: NextRequest) {
               fingerprintRecord = await prisma.fingerprint.findUnique({
                 where: { id: fingerprintRecord.id },
                 include: {
-                  credits: true,
-                  usage: true,
+                  credits: {
+                    orderBy: { createdAt: 'desc' },
+                  },
+                  usage: {
+                    orderBy: { createdAt: 'desc' },
+                  },
                 },
               });
             }
@@ -256,8 +260,12 @@ export async function POST(request: NextRequest) {
             fingerprintRecord = await prisma.fingerprint.findUnique({
               where: { id: fingerprintRecord.id },
               include: {
-                credits: true,
-                usage: true,
+                credits: {
+                  orderBy: { createdAt: 'desc' },
+                },
+                usage: {
+                  orderBy: { createdAt: 'desc' },
+                },
               },
             });
           } else {
@@ -347,8 +355,12 @@ export async function POST(request: NextRequest) {
                 fingerprintRecord = await prisma.fingerprint.findUnique({
                   where: { id: fingerprintRecord.id },
                   include: {
-                    credits: true,
-                    usage: true,
+                    credits: {
+                      orderBy: { createdAt: 'desc' },
+                    },
+                    usage: {
+                      orderBy: { createdAt: 'desc' },
+                    },
                   },
                 });
                 }
@@ -466,8 +478,12 @@ export async function POST(request: NextRequest) {
         fingerprintRecord = await prisma.fingerprint.findUnique({
           where: { id: fingerprintRecord.id },
           include: {
-            credits: true,
-            usage: true,
+            credits: {
+              orderBy: { createdAt: 'desc' },
+            },
+            usage: {
+              orderBy: { createdAt: 'desc' },
+            },
           },
         });
       } else {
@@ -587,6 +603,25 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Error in /v1/me:', error);
-    return errors.serverError();
+    
+    // Handle Prisma connection pool timeouts specifically
+    if (error instanceof Error && error.message.includes('connection pool')) {
+      console.error('Connection pool timeout detected:', error.message);
+      return corsErrors.serverError(
+        'Service temporarily unavailable. Please try again in a moment.',
+        origin
+      );
+    }
+    
+    // Handle other Prisma errors
+    if (error instanceof Error && error.message.includes('Prisma')) {
+      console.error('Database error:', error.message);
+      return corsErrors.serverError(
+        'Database service temporarily unavailable',
+        origin
+      );
+    }
+    
+    return corsErrors.serverError('Internal server error', origin);
   }
 }
