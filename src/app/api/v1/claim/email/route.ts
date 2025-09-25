@@ -6,7 +6,9 @@ import { checkRateLimit, getClientIp } from '@/lib/middleware/rateLimitSafe';
 import { withCorsHeaders } from '@/lib/middleware/cors';
 import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { successResponse, errors } from '@/lib/utils/response';
-import { corsErrors } from '@/lib/utils/corsResponse';import { isValidFingerprint, isValidEmail } from '@/lib/utils/validation';
+import { corsErrors } from '@/lib/utils/corsResponse';
+import { isValidFingerprint, isValidEmail } from '@/lib/utils/validation';
+import { sendVerificationEmail } from '@/lib/email/send';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -88,8 +90,19 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // TODO: Send verification email via Resend
-      console.log('Would send verification email to:', normalizedEmail, 'with token:', verifyToken);
+      // Send verification email
+      const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}&email=${encodeURIComponent(normalizedEmail)}`;
+      
+      try {
+        await sendVerificationEmail(authContext.app, normalizedEmail, {
+          link: verificationLink,
+          name: existingLead.name || undefined,
+        });
+        console.log('✅ Verification email sent to:', normalizedEmail);
+      } catch (emailError) {
+        console.error('❌ Failed to send verification email:', emailError);
+        // Don't fail the request if email sending fails
+      }
 
       return successResponse({
         claimed: true,
@@ -139,8 +152,19 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Send verification email via Resend
-    console.log('Would send verification email to:', normalizedEmail, 'with token:', verifyToken);
+    // Send verification email
+    const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}&email=${encodeURIComponent(normalizedEmail)}`;
+    
+    try {
+      await sendVerificationEmail(authContext.app, normalizedEmail, {
+        link: verificationLink,
+        name: lead.name || undefined,
+      });
+      console.log('✅ Verification email sent to:', normalizedEmail);
+    } catch (emailError) {
+      console.error('❌ Failed to send verification email:', emailError);
+      // Don't fail the request if email sending fails
+    }
 
     // Log event
     await prisma.eventLog.create({

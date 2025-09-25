@@ -31,30 +31,34 @@ export function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig) {
     // Handle email verification
     if (pathname === '/verify') {
       const token = request.nextUrl.searchParams.get('token');
+      const email = request.nextUrl.searchParams.get('email');
       
-      if (!token) {
+      if (!token || !email) {
         if (config.debug) {
-          console.warn('[GrowthKit] No verification token found');
+          console.warn('[GrowthKit] Missing verification token or email');
         }
         const redirectUrl = new URL(redirectTo, request.url);
         redirectUrl.searchParams.set('verified', 'false');
-        redirectUrl.searchParams.set('error', 'missing-token');
+        redirectUrl.searchParams.set('error', 'missing-params');
         return NextResponse.redirect(redirectUrl);
       }
       
       if (config.debug) {
-        console.log('[GrowthKit] Processing verification token');
+        console.log('[GrowthKit] Processing email verification for:', email);
       }
       
       try {
-        // Verify the email token via GrowthKit API
-        const verifyResponse = await fetch(`${config.apiUrl}/v1/verify`, {
+        // Verify the email token via GrowthKit API (using email + token mode)
+        const verifyResponse = await fetch(`${config.apiUrl}/v1/verify/email`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${config.apiKey}`,
           },
-          body: JSON.stringify({ token }),
+          body: JSON.stringify({ 
+            token,
+            email: decodeURIComponent(email)
+          }),
         });
         
         const redirectUrl = new URL(redirectTo, request.url);
