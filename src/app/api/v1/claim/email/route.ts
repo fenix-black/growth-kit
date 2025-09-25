@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       });
 
       // Send verification email
-      const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}&email=${encodeURIComponent(normalizedEmail)}`;
+      const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}`;
       
       try {
         await sendVerificationEmail(authContext.app, normalizedEmail, {
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Send verification email for new email
-        const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}&email=${encodeURIComponent(normalizedEmail)}`;
+        const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}`;
         
         try {
           await sendVerificationEmail(authContext.app, normalizedEmail, {
@@ -192,25 +192,22 @@ export async function POST(request: NextRequest) {
           totalCredits: credits._sum.amount || 0,
         });
       } else {
-        // Previous email was verified, create new lead for email change verification
-        // This will be handled after verification in the verify endpoint
+        // Previous email was verified, update same lead with new email pending verification
         const verifyToken = generateVerificationToken();
         const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-        const newLead = await prisma.lead.create({
+        await prisma.lead.update({
+          where: { id: existingEmailLead.id },
           data: {
-            appId: authContext.app.id,
-            fingerprintId: fingerprintRecord.id,
             email: normalizedEmail,
             emailVerified: false,
             verifyToken,
             verifyExpiresAt,
-            name: existingEmailLead.name, // Keep existing name
           },
         });
 
         // Send verification email
-        const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}&email=${encodeURIComponent(normalizedEmail)}`;
+        const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}`;
         
         try {
           await sendVerificationEmail(authContext.app, normalizedEmail, {
@@ -280,7 +277,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Send verification email
-    const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}&email=${encodeURIComponent(normalizedEmail)}`;
+    const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}`;
     
     try {
       await sendVerificationEmail(authContext.app, normalizedEmail, {

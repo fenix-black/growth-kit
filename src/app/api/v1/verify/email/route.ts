@@ -37,61 +37,14 @@ export async function POST(request: NextRequest) {
       return errors.badRequest('Invalid or missing verification token');
     }
 
-    let fingerprintRecord;
-
-    // Support two modes: fingerprint + token OR email + token
-    if (fingerprint) {
-      // Mode 1: Direct fingerprint verification (for API usage)
-      if (!isValidFingerprint(fingerprint)) {
-        return errors.badRequest('Invalid fingerprint');
-      }
-
-      fingerprintRecord = await prisma.fingerprint.findUnique({
-        where: {
-          appId_fingerprint: {
-            appId: authContext.app.id,
-            fingerprint,
-          },
-        },
-      });
-
-      if (!fingerprintRecord) {
-        return errors.badRequest('Fingerprint not found');
-      }
-    } else if (email) {
-      // Mode 2: Email + token verification (for email links)
-      if (!isValidEmail(email)) {
-        return errors.badRequest('Invalid email');
-      }
-
-      // Find the lead record with this email and token
-      const lead = await prisma.lead.findFirst({
-        where: {
-          appId: authContext.app.id,
-          email: email.toLowerCase(),
-          verifyToken: token,
-          verifyExpiresAt: { gt: new Date() },
-        },
-        include: {
-          fingerprint: true,
-        },
-      });
-
-      if (!lead || !lead.fingerprint) {
-        return errors.badRequest('Invalid or expired verification token');
-      }
-
-      fingerprintRecord = lead.fingerprint;
-    } else {
-      return errors.badRequest('Either fingerprint or email must be provided');
-    }
-
-    // Find lead with this verification token
+    // Find lead by token only (token is unique across the entire system)
     const lead = await prisma.lead.findFirst({
       where: {
         appId: authContext.app.id,
-        fingerprintId: fingerprintRecord.id,
         verifyToken: token,
+      },
+      include: {
+        fingerprint: true,
       },
     });
 
@@ -117,7 +70,7 @@ export async function POST(request: NextRequest) {
     const otherVerifiedEmails = await prisma.lead.findMany({
       where: {
         appId: authContext.app.id,
-        fingerprintId: fingerprintRecord.id,
+        fingerprintId: lead.fingerprintId,
         emailVerified: true,
         id: { not: lead.id },
       },
@@ -140,7 +93,7 @@ export async function POST(request: NextRequest) {
         await tx.lead.updateMany({
           where: {
             appId: authContext.app.id,
-            fingerprintId: fingerprintRecord.id,
+            fingerprintId: lead.fingerprintId,
             emailVerified: true,
             id: { not: lead.id },
           },
@@ -151,7 +104,7 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        console.log(`📧 Replaced ${otherVerifiedEmails.length} previous verified email(s) for fingerprint ${fingerprintRecord.id}`);
+        console.log(`📧 Replaced ${otherVerifiedEmails.length} previous verified email(s) for fingerprint ${lead.fingerprintId}`);
       }
     });
 
@@ -161,7 +114,7 @@ export async function POST(request: NextRequest) {
 
     await prisma.credit.create({
       data: {
-        fingerprintId: fingerprintRecord.id,
+        fingerprintId: lead.fingerprintId,
         amount: verifyCredits,
         reason: 'email_verify',
         metadata: { email: lead.email },
@@ -175,7 +128,7 @@ export async function POST(request: NextRequest) {
         event: 'lead.email_verified',
         entityType: 'lead',
         entityId: lead.id,
-        metadata: { fingerprintId: fingerprintRecord.id, email: lead.email },
+        metadata: { fingerprintId: lead.fingerprintId, email: lead.email },
         ipAddress: clientIp,
         userAgent: request.headers.get('user-agent'),
       },
@@ -183,7 +136,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate new credit balance
     const credits = await prisma.credit.aggregate({
-      where: { fingerprintId: fingerprintRecord.id },
+      where: { fingerprintId: lead.fingerprintId },
       _sum: { amount: true },
     });
 

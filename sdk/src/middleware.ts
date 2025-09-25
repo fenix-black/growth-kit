@@ -56,8 +56,7 @@ export function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig) {
             'Authorization': `Bearer ${config.apiKey}`,
           },
           body: JSON.stringify({ 
-            token,
-            email: decodeURIComponent(email)
+            token
           }),
         });
         
