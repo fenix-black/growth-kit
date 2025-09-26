@@ -158,4 +158,15 @@ export class GrowthKitAPI {
       body: JSON.stringify({ claim }),
     });
   }
+
+  async trackEvents(events: Array<{
+    eventName: string;
+    properties?: Record<string, any>;
+    timestamp: number;
+  }>): Promise<APIResponse<{ tracked: boolean }>> {
+    return this.request('/v1/track', {
+      method: 'POST',
+      body: JSON.stringify({ events }),
+    });
+  }
 }

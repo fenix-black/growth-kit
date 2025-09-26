@@ -65,6 +65,7 @@ interface GrowthKitActions {
     getReferralLink: () => string;
     shouldShowSoftPaywall: () => boolean;
     canPerformAction: (action?: string) => boolean;
+    track: (eventName: string, properties?: Record<string, any>) => void;
 }
 interface ShareOptions {
     title?: string;
@@ -145,6 +146,13 @@ declare class GrowthKitAPI {
     verifyEmail(fingerprint: string, token: string): Promise<APIResponse<VerifyResponse>>;
     joinWaitlist(email: string, fingerprint?: string, metadata?: any): Promise<APIResponse<WaitlistResponse>>;
     trackReferralVisit(claim?: string): Promise<APIResponse<any>>;
+    trackEvents(events: Array<{
+        eventName: string;
+        properties?: Record<string, any>;
+        timestamp: number;
+    }>): Promise<APIResponse<{
+        tracked: boolean;
+    }>>;
 }
 
 interface GrowthKitGateProps {

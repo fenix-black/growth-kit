@@ -6,7 +6,7 @@ import type { GrowthKitAccountWidgetRef } from '@growthkit/sdk';
 
 // Main App Component (now completely GrowthKit-agnostic)
 function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<GrowthKitAccountWidgetRef | null> }) {
-  const { credits, completeAction, policy } = useGrowthKit();
+  const { credits, completeAction, policy, track } = useGrowthKit();
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastAction, setLastAction] = useState<string>('');
   
@@ -15,8 +15,17 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
     console.log('Credits updated:', credits);
   }, [credits]);
   
+  // Track page view on mount
+  useEffect(() => {
+    track('page_viewed', { page: 'home', path: '/' });
+  }, [track]);
+  
   const handleUseFeature = async () => {
     console.log('Credits before action:', credits);
+    
+    // Track button click
+    track('button_clicked', { button: 'use-feature', section: 'main' });
+    
     setIsProcessing(true);
     const success = await completeAction('generate');
     setIsProcessing(false);
@@ -25,14 +34,22 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
       // Note: The credits value here is still the old value due to React's closure
       // The widget will update automatically when the context updates
       console.log('Feature used successfully!');
+      // Track successful feature usage
+      track('feature_used', { feature: 'generate', success: true, creditsUsed: 1 });
     } else {
       console.log('Not enough credits');
+      // Track failed attempt
+      track('feature_used', { feature: 'generate', success: false, reason: 'no_credits' });
     }
   };
 
   // Test USD spending with different values
   const handleTestUsdSpending = async (action: string, usdValue: number, creditsRequired: number) => {
     console.log(`Testing ${action} - Credits: ${creditsRequired}, USD Cost: $${usdValue}`);
+    
+    // Track USD action attempt
+    track('usd_action_started', { action, usdValue, creditsRequired });
+    
     setIsProcessing(true);
     setLastAction(`${action} ($${usdValue})`);
     
@@ -41,8 +58,12 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
     
     if (success) {
       console.log(`${action} completed successfully! Credits: ${creditsRequired}, USD tracked: $${usdValue}`);
+      // Track successful USD action
+      track('usd_action_completed', { action, usdValue, creditsRequired, success: true });
     } else {
       console.log('Not enough credits or action failed');
+      // Track failed USD action
+      track('usd_action_failed', { action, usdValue, creditsRequired, reason: 'insufficient_credits' });
     }
   };
 
@@ -151,6 +172,42 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
             Last action: {lastAction} - USD value sent to backend for tracking
           </p>
         )}
+      </div>
+
+      {/* Activity Tracking Section */}
+      <div style={styles.trackingSection}>
+        <h3 style={styles.sectionTitle}>📊 Activity Tracking Demo</h3>
+        <p style={styles.sectionText}>
+          This app automatically tracks user interactions. Try these actions:
+        </p>
+        <div style={styles.trackingButtonGrid}>
+          <button 
+            onClick={() => track('demo_button_clicked', { buttonId: 'test-1', value: 'low' })}
+            style={styles.trackingButton}
+          >
+            Track Custom Event
+          </button>
+          <button 
+            onClick={() => track('feature_explored', { feature: 'tracking', depth: 1 })}
+            style={styles.trackingButton}
+          >
+            Track Exploration
+          </button>
+          <button 
+            onClick={() => {
+              const startTime = Date.now();
+              setTimeout(() => {
+                track('time_spent', { section: 'tracking_demo', duration: Date.now() - startTime });
+              }, 2000);
+            }}
+            style={styles.trackingButton}
+          >
+            Track Time (2s)
+          </button>
+        </div>
+        <p style={styles.trackingNote}>
+          Check the browser console to see tracking events being batched and sent!
+        </p>
       </div>
 
       {/* Referral Section */}
@@ -303,6 +360,36 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#e74c3c',
     fontSize: '0.95rem',
     fontWeight: '500',
+  },
+  trackingSection: {
+    padding: '2rem',
+    background: '#f0f9ff',
+    borderRadius: '12px',
+    marginBottom: '3rem',
+  },
+  trackingButtonGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    gap: '1rem',
+    marginBottom: '1rem',
+  },
+  trackingButton: {
+    background: '#60a5fa',
+    color: 'white',
+    padding: '0.75rem 1rem',
+    fontSize: '0.9rem',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontWeight: '500',
+    transition: 'all 0.2s',
+  },
+  trackingNote: {
+    fontSize: '0.85rem',
+    color: '#64748b',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: '1rem',
   },
   referralSection: {
     textAlign: 'center',

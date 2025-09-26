@@ -67,6 +67,7 @@ export interface GrowthKitActions {
   getReferralLink: () => string;
   shouldShowSoftPaywall: () => boolean;
   canPerformAction: (action?: string) => boolean;
+  track: (eventName: string, properties?: Record<string, any>) => void;
 }
 
 export interface ShareOptions {
@@ -128,6 +129,23 @@ export interface WaitlistResponse {
   status?: string;
   reason?: string;
   message?: string;
+}
+
+export interface TrackedEvent {
+  eventName: string;
+  properties?: Record<string, any>;
+  timestamp: number;
+}
+
+export interface TrackContext {
+  browser: string;
+  os: string;
+  device: 'desktop' | 'mobile' | 'tablet';
+  screenResolution: string;
+  viewport: string;
+  url: string;
+  referrer: string;
+  userAgent: string;
 }
 
 export type GrowthKitHook = GrowthKitState & GrowthKitActions;

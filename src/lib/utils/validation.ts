@@ -45,3 +45,11 @@ export function isValidReferralCode(code: string): boolean {
   const codeRegex = /^GROWTH-[A-F0-9]{6}$/i;
   return codeRegex.test(code);
 }
+
+/**
+ * Generate a session ID for activity tracking
+ */
+export function generateSessionId(): string {
+  // Simple session ID based on timestamp and random value
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}

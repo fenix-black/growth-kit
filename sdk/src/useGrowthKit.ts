@@ -3,6 +3,7 @@ import { GrowthKitAPI } from './api';
 import { getFingerprint } from './fingerprint';
 import { useGrowthKitConfig } from './components/GrowthKitProvider';
 import { useGrowthKitState } from './components/GrowthKitStateProvider';
+import { getBrowserContext, generateSessionId } from './context';
 import type {
   GrowthKitConfig,
   GrowthKitState,
@@ -10,15 +11,26 @@ import type {
   GrowthKitHook,
   ShareOptions,
   CompleteActionOptions,
+  TrackedEvent,
 } from './types';
 
 // Initial state is now managed in GrowthKitStateProvider
+
+// Constants for event batching
+const BATCH_SIZE = 10;
+const BATCH_INTERVAL = 30000; // 30 seconds
 
 export function useGrowthKit(): GrowthKitHook {
   const config = useGrowthKitConfig();
   const { state, setState, apiRef, initRef } = useGrowthKitState();
   const configRef = useRef(config);
   configRef.current = config;
+  
+  // Event tracking state
+  const eventQueueRef = useRef<TrackedEvent[]>([]);
+  const batchTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const sessionIdRef = useRef<string>(generateSessionId());
+  const contextRef = useRef(getBrowserContext());
 
   // Initialize API client
   useEffect(() => {
@@ -434,6 +446,92 @@ export function useGrowthKit(): GrowthKitHook {
     }
   }, [state.fingerprint, state.waitlistStatus, config.debug, refresh]);
 
+  // Send batched events
+  const sendEvents = useCallback(async () => {
+    if (!apiRef.current || eventQueueRef.current.length === 0) return;
+
+    const eventsToSend = [...eventQueueRef.current];
+    eventQueueRef.current = [];
+
+    try {
+      await apiRef.current.trackEvents(eventsToSend);
+      if (config.debug) {
+        console.log(`Sent ${eventsToSend.length} events`);
+      }
+    } catch (error) {
+      if (config.debug) {
+        console.error('Failed to send events:', error);
+      }
+      // Re-queue events on failure
+      eventQueueRef.current = [...eventsToSend, ...eventQueueRef.current];
+    }
+  }, [config.debug]);
+
+  // Track event
+  const track = useCallback((eventName: string, properties?: Record<string, any>) => {
+    if (!state.fingerprint) {
+      if (config.debug) {
+        console.warn('Cannot track event - no fingerprint available');
+      }
+      return;
+    }
+
+    // Add event to queue
+    eventQueueRef.current.push({
+      eventName,
+      properties,
+      timestamp: Date.now(),
+    });
+
+    // Update context periodically
+    contextRef.current = getBrowserContext();
+
+    // Send immediately if batch size reached
+    if (eventQueueRef.current.length >= BATCH_SIZE) {
+      sendEvents();
+      if (batchTimerRef.current) {
+        clearTimeout(batchTimerRef.current);
+        batchTimerRef.current = null;
+      }
+    } else if (!batchTimerRef.current) {
+      // Start batch timer if not already running
+      batchTimerRef.current = setTimeout(() => {
+        sendEvents();
+        batchTimerRef.current = null;
+      }, BATCH_INTERVAL);
+    }
+  }, [state.fingerprint, config.debug, sendEvents]);
+
+  // Send events on unmount or page unload
+  useEffect(() => {
+    const handleUnload = () => {
+      if (eventQueueRef.current.length > 0 && apiRef.current) {
+        // Use sendBeacon for reliability
+        const data = JSON.stringify({
+          events: eventQueueRef.current,
+        });
+        const headers = {
+          type: 'application/json',
+        };
+        const blob = new Blob([data], headers);
+        navigator.sendBeacon(
+          `${apiRef.current['apiUrl']}/v1/track`,
+          blob
+        );
+      }
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+      if (batchTimerRef.current) {
+        clearTimeout(batchTimerRef.current);
+      }
+      // Send any remaining events
+      sendEvents();
+    };
+  }, [sendEvents]);
+
   // Combine state and actions
   const actions: GrowthKitActions = {
     refresh,
@@ -447,6 +545,7 @@ export function useGrowthKit(): GrowthKitHook {
     getReferralLink,
     shouldShowSoftPaywall,
     canPerformAction,
+    track,
   };
 
   return {

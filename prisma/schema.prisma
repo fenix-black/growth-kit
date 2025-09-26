@@ -56,6 +56,7 @@ model App {
   leads                 Lead[]
   referrals             Referral[]
   waitlist              Waitlist[]
+  activities            Activity[]
 
   @@index([tenantId])
   @@index([domain])
@@ -96,6 +97,7 @@ model Fingerprint {
   referredBy   Referral?  @relation("Referred")
   referrals    Referral[] @relation("Referrer")
   usage        Usage[]
+  activities   Activity[]
 
   @@unique([appId, fingerprint])
   @@index([appId])
@@ -231,4 +233,23 @@ model EventLog {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@map("event_logs")
+}
+
+model Activity {
+  id            String   @id @default(cuid())
+  appId         String
+  fingerprintId String
+  eventName     String
+  properties    Json?
+  context       Json
+  sessionId     String
+  timestamp     DateTime @default(now())
+  
+  app           App          @relation(fields: [appId], references: [id], onDelete: Cascade)
+  fingerprint   Fingerprint  @relation(fields: [fingerprintId], references: [id], onDelete: Cascade)
+  
+  @@index([appId, timestamp])
+  @@index([fingerprintId, timestamp])
+  @@index([appId, eventName])
+  @@map("activities")
 }
