@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { events } = body;
+    const { events, context: clientContext, sessionId: clientSessionId } = body;
 
     if (!Array.isArray(events) || events.length === 0) {
       return corsErrors.badRequest('Events must be a non-empty array', origin);
@@ -80,8 +80,8 @@ export async function POST(request: NextRequest) {
       return corsErrors.badRequest(`Rate limit exceeded: Maximum ${rateLimit} events per minute`, origin);
     }
 
-    // Get browser context from the first event or generate default
-    const context = {
+    // Use client context if provided, otherwise create default
+    const context = clientContext || {
       browser: 'unknown',
       os: 'unknown', 
       device: 'unknown',
@@ -92,8 +92,8 @@ export async function POST(request: NextRequest) {
       userAgent: request.headers.get('user-agent') || '',
     };
 
-    // Generate session ID
-    const sessionId = generateSessionId();
+    // Use client session ID if provided, otherwise generate new one
+    const sessionId = clientSessionId || generateSessionId();
 
     // Create activity records
     const activities = events.map((event: any) => ({

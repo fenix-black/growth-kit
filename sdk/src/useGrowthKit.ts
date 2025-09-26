@@ -31,6 +31,13 @@ export function useGrowthKit(): GrowthKitHook {
   const batchTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sessionIdRef = useRef<string>(generateSessionId());
   const contextRef = useRef(getBrowserContext());
+  
+  // Log initial context for debugging
+  useEffect(() => {
+    if (config.debug) {
+      console.log('Initial browser context:', getBrowserContext());
+    }
+  }, [config.debug]);
 
   // Initialize API client
   useEffect(() => {
@@ -464,9 +471,13 @@ export function useGrowthKit(): GrowthKitHook {
     eventQueueRef.current = [];
 
     try {
-      await apiRef.current.trackEvents(eventsToSend);
+      const currentContext = getBrowserContext();
       if (config.debug) {
-        console.log(`Sent ${eventsToSend.length} events`);
+        console.log('Current context before sending:', currentContext);
+      }
+      await apiRef.current.trackEvents(eventsToSend, currentContext, sessionIdRef.current);
+      if (config.debug) {
+        console.log(`Sent ${eventsToSend.length} events with context:`, currentContext);
       }
     } catch (error) {
       if (config.debug) {
@@ -493,7 +504,7 @@ export function useGrowthKit(): GrowthKitHook {
       timestamp: Date.now(),
     });
 
-    // Update context periodically
+    // Update context when tracking
     contextRef.current = getBrowserContext();
 
     // Send immediately if batch size reached

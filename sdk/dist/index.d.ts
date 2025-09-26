@@ -150,7 +150,7 @@ declare class GrowthKitAPI {
         eventName: string;
         properties?: Record<string, any>;
         timestamp: number;
-    }>): Promise<APIResponse<{
+    }>, context?: any, sessionId?: string): Promise<APIResponse<{
         tracked: boolean;
     }>>;
 }
