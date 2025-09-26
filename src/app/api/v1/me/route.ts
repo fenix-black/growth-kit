@@ -548,13 +548,13 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      if (lead) {
+      if (lead && lead.email) {
         // Check waitlist status for this email
         const waitlistEntry = await prisma.waitlist.findUnique({
           where: {
             appId_email: {
               appId: authContext.app.id,
-              email: lead.email!,
+              email: lead.email,
             },
           },
         });
