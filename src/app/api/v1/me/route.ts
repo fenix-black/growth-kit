@@ -96,8 +96,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Check if user should be grandfathered BEFORE processing any claims
+    const appWithWaitlist = authContext.app as any;
+    let isGrandfathered = false;
+    if (appWithWaitlist.waitlistEnabled && appWithWaitlist.waitlistEnabledAt) {
+      isGrandfathered = fingerprintRecord!.createdAt < appWithWaitlist.waitlistEnabledAt;
+    }
+
     // Process referral claim if present (works for both new and existing users)
-    if (claim) {
+    // Skip invitation code processing for grandfathered users
+    if (claim && !isGrandfathered) {
       // First check if this is an invitation code (INV-XXXXXX format)
       if (isInvitationCode(claim)) {
         // Handle unique invitation code redemption
@@ -517,12 +525,8 @@ export async function POST(request: NextRequest) {
 
     // Check waitlist status if enabled for this app
     let waitlistData = null;
-    const appWithWaitlist = authContext.app as any; // Temporary cast until migration is run
     if (appWithWaitlist.waitlistEnabled) {
-      // Check if user should be grandfathered (existed before waitlist was enabled)
-      const isGrandfathered = appWithWaitlist.waitlistEnabledAt && 
-        fingerprintRecord!.createdAt < appWithWaitlist.waitlistEnabledAt;
-      
+      // Use the isGrandfathered check we already did above
       if (isGrandfathered) {
         // User existed before waitlist was enabled, grant access
         waitlistData = {
