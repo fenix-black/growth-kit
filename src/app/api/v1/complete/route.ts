@@ -249,14 +249,6 @@ export async function POST(request: NextRequest) {
       creditsRemaining: Math.max(0, newCreditsBalance),
       creditsRequired,
       hadSufficientCredits: totalCredits >= creditsRequired,
-      // Temporary debug info
-      _debug: {
-        creditSource,
-        clientCreditsRequested: clientCreditsRequired,
-        allowCustomCredits: authContext.app.allowCustomCredits,
-        maxCustomCredits: authContext.app.maxCustomCredits,
-        actionInPolicy: !!policy?.actions?.[action]
-      }
     });
 
     // Apply CORS headers
