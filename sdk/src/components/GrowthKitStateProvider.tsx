@@ -10,6 +10,7 @@ const initialState: GrowthKitState = {
   initialized: false,
   credits: 0,
   usage: 0,
+  creditsPaused: false,
   name: null,
   email: null,
   hasClaimedName: false,

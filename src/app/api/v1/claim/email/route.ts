@@ -276,17 +276,21 @@ export async function POST(request: NextRequest) {
     });
 
     // Award initial credits for email claim
-    const policy = authContext.app.policyJson as any;
-    const emailCredits = policy?.emailClaimCredits || 2;
+    // Award credits for email claim (only if credits are not paused)
+    let emailCredits = 0;
+    if (!authContext.app.creditsPaused) {
+      const policy = authContext.app.policyJson as any;
+      emailCredits = policy?.emailClaimCredits || 2;
 
-    await prisma.credit.create({
-      data: {
-        fingerprintId: fingerprintRecord.id,
-        amount: emailCredits,
-        reason: 'email_claim',
-        metadata: { email: normalizedEmail },
-      },
-    });
+      await prisma.credit.create({
+        data: {
+          fingerprintId: fingerprintRecord.id,
+          amount: emailCredits,
+          reason: 'email_claim',
+          metadata: { email: normalizedEmail },
+        },
+      });
+    }
 
     // Send verification email
     const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}`;

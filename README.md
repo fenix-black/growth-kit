@@ -70,7 +70,7 @@ npm run dev
 Access the admin dashboard at `http://localhost:3000/admin`
 
 Use the credentials from your .env.local:
-- Username: fenixproduct
+- Username: admin
 - Password: admin
 
 From the dashboard you can:

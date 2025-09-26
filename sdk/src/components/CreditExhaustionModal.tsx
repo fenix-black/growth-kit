@@ -23,6 +23,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
     hasClaimedEmail,
     hasVerifiedEmail,
     credits,
+    creditsPaused,
     policy
   } = useGrowthKit();
   
@@ -98,7 +99,11 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
     <div style={styles.overlay} onClick={handleOverlayClick}>
       <div style={styles.modal}>
         <h2 style={styles.title}>Earn Credits</h2>
-        <p style={styles.subtitle}>Complete tasks below to earn more credits:</p>
+        <p style={styles.subtitle}>
+          {creditsPaused 
+            ? 'Credit earning is temporarily paused for this app' 
+            : 'Complete tasks below to earn more credits:'}
+        </p>
 
         <div style={styles.tabs}>
           {!hasClaimedName && (
@@ -106,7 +111,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
               style={{...styles.tab, ...(activeTab === 'name' ? styles.activeTab : {})}}
               onClick={() => setActiveTab('name')}
             >
-              Name (+{policy?.nameClaimCredits || 2})
+              Name {!creditsPaused && `(+${policy?.nameClaimCredits || 2})`}
             </button>
           )}
           {!hasClaimedEmail && (
@@ -114,7 +119,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
               style={{...styles.tab, ...(activeTab === 'email' ? styles.activeTab : {})}}
               onClick={() => setActiveTab('email')}
             >
-              Email (+{policy?.emailClaimCredits || 2})
+              Email {!creditsPaused && `(+${policy?.emailClaimCredits || 2})`}
             </button>
           )}
           {hasClaimedEmail && !hasVerifiedEmail && (
@@ -122,15 +127,17 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
               style={{...styles.tab, ...(activeTab === 'verify' ? styles.activeTab : {})}}
               onClick={() => setActiveTab('verify')}
             >
-              Verify (+{policy?.emailVerifyCredits || 5})
+              Verify {!creditsPaused && `(+${policy?.emailVerifyCredits || 5})`}
             </button>
           )}
-          <button 
-            style={{...styles.tab, ...(activeTab === 'share' ? styles.activeTab : {})}}
-            onClick={() => setActiveTab('share')}
-          >
-            Share
-          </button>
+          {!creditsPaused && (
+            <button 
+              style={{...styles.tab, ...(activeTab === 'share' ? styles.activeTab : {})}}
+              onClick={() => setActiveTab('share')}
+            >
+              Share
+            </button>
+          )}
         </div>
 
         <div style={styles.content}>
@@ -140,6 +147,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
               loading={loading} 
               setLoading={setLoading} 
               credits={policy?.nameClaimCredits || 2}
+              creditsPaused={creditsPaused}
               onSuccess={() => setActiveTab(getNextAvailableTab('name'))}
             />
           )}
@@ -149,14 +157,23 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
               loading={loading} 
               setLoading={setLoading} 
               credits={policy?.emailClaimCredits || 2}
+              creditsPaused={creditsPaused}
               onSuccess={() => setActiveTab(getNextAvailableTab('email'))}
             />
           )}
           {activeTab === 'verify' && hasClaimedEmail && !hasVerifiedEmail && (
-            <VerifyTab credits={policy?.emailVerifyCredits || 5} />
+            <VerifyTab credits={policy?.emailVerifyCredits || 5} creditsPaused={creditsPaused} />
           )}
-          {activeTab === 'share' && (
+          {activeTab === 'share' && !creditsPaused && (
             <ShareTab referralLink={getReferralLink()} onShare={share} referralCredits={policy?.referralCredits || 5} />
+          )}
+          {activeTab === 'share' && creditsPaused && (
+            <div style={{ textAlign: 'center', padding: '20px' }}>
+              <p>Referral sharing is temporarily unavailable</p>
+              <p style={{ fontSize: '14px', color: '#666', marginTop: '10px' }}>
+                New credits are paused
+              </p>
+            </div>
           )}
         </div>
 
@@ -174,7 +191,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
 CreditExhaustionModal.displayName = 'CreditExhaustionModal';
 
 // Tab Components
-function NameTab({ onClaim, loading, setLoading, credits, onSuccess }: any) {
+function NameTab({ onClaim, loading, setLoading, credits, creditsPaused, onSuccess }: any) {
   const [name, setName] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -193,7 +210,7 @@ function NameTab({ onClaim, loading, setLoading, credits, onSuccess }: any) {
   return (
     <form onSubmit={handleSubmit}>
       <h3>Enter Your Name</h3>
-      <p>Earn {credits} credits by telling us your name</p>
+      <p>{creditsPaused ? 'Tell us your name' : `Earn ${credits} credits by telling us your name`}</p>
       <input 
         type="text"
         value={name}
@@ -213,7 +230,7 @@ function NameTab({ onClaim, loading, setLoading, credits, onSuccess }: any) {
   );
 }
 
-function EmailTab({ onClaim, loading, setLoading, credits, onSuccess }: any) {
+function EmailTab({ onClaim, loading, setLoading, credits, creditsPaused, onSuccess }: any) {
   const [email, setEmail] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -232,7 +249,7 @@ function EmailTab({ onClaim, loading, setLoading, credits, onSuccess }: any) {
   return (
     <form onSubmit={handleSubmit}>
       <h3>Enter Your Email</h3>
-      <p>Earn {credits} credits + unlock email verification bonus</p>
+      <p>{creditsPaused ? 'Provide your email address' : `Earn ${credits} credits + unlock email verification bonus`}</p>
       <input 
         type="email"
         value={email}
@@ -252,13 +269,15 @@ function EmailTab({ onClaim, loading, setLoading, credits, onSuccess }: any) {
   );
 }
 
-function VerifyTab({ credits }: any) {
+function VerifyTab({ credits, creditsPaused }: any) {
   return (
     <div>
       <h3>Verify Your Email</h3>
       <p>Check your inbox for a verification email</p>
       <p style={{ marginTop: 20, fontSize: 14, color: '#666' }}>
-        Click the verification link in the email to earn {credits} additional credits
+        {creditsPaused 
+          ? 'Click the verification link to activate your account' 
+          : `Click the verification link in the email to earn ${credits} additional credits`}
       </p>
     </div>
   );

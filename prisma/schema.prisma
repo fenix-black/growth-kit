@@ -47,6 +47,8 @@ model App {
   creditsForEmail             Int           @default(1)
   creditsForEmailVerification Int           @default(1)
   maxCreditBalance            Int?
+  creditsPaused               Boolean       @default(false)
+  creditsPausedAt             DateTime?
   apiKeys               ApiKey[]
   tenant                Tenant?       @relation(fields: [tenantId], references: [id])
   eventLogs             EventLog[]

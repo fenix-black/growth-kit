@@ -46,6 +46,8 @@ interface AppDetails {
   trackUsdValue: boolean;
   allowCustomCredits: boolean;
   maxCustomCredits: number;
+  creditsPaused: boolean;
+  creditsPausedAt?: string;
   todayUsdSpent?: number;
   createdAt: string;
   _count: {
@@ -124,6 +126,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           waitlistEnabled: appData.waitlistEnabled ?? false,
           autoApproveWaitlist: appData.autoApproveWaitlist ?? false,
           trackUsdValue: appData.trackUsdValue ?? false,
+          creditsPaused: appData.creditsPaused ?? false,
         });
         // Initialize JSON text state
         setPolicyJsonText(JSON.stringify(appData.policyJson || {}, null, 2));
@@ -195,6 +198,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           trackUsdValue: editedApp.trackUsdValue,
           allowCustomCredits: editedApp.allowCustomCredits,
           maxCustomCredits: editedApp.maxCustomCredits,
+          creditsPaused: editedApp.creditsPaused,
         }),
       });
 
@@ -329,6 +333,11 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
             )}>
               {app.isActive ? 'Active' : 'Inactive'}
             </div>
+            {app.creditsPaused && (
+              <div className="px-3 py-1.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+                ⏸️ Credits Paused
+              </div>
+            )}
             {activeTab === 'settings' && (
               <>
                 {isEditing ? (
@@ -363,6 +372,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                           trackUsdValue: app?.trackUsdValue ?? false,
                           allowCustomCredits: app?.allowCustomCredits ?? true,
                           maxCustomCredits: app?.maxCustomCredits ?? 100,
+                          creditsPaused: app?.creditsPaused ?? false,
                         });
                         // Reset JSON text state
                         setPolicyJsonText(JSON.stringify(app?.policyJson || {}, null, 2));
@@ -393,6 +403,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                         trackUsdValue: app.trackUsdValue ?? false,
                         allowCustomCredits: app.allowCustomCredits ?? true,
                         maxCustomCredits: app.maxCustomCredits ?? 100,
+                        creditsPaused: app.creditsPaused ?? false,
                       });
                       // Initialize JSON text state for editing
                       setPolicyJsonText(JSON.stringify(app.policyJson || {}, null, 2));
@@ -656,6 +667,30 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
 
           <ContentCard title="Advanced Settings">
             <div className="space-y-4">
+              <div>
+                <label className="flex items-center space-x-3">
+                  <button
+                    onClick={() => isEditing && setEditedApp({ ...editedApp, creditsPaused: !editedApp.creditsPaused })}
+                    disabled={!isEditing}
+                    className="cursor-pointer"
+                  >
+                    {(isEditing ? editedApp.creditsPaused : app.creditsPaused) ? 
+                      <ToggleRight className="h-6 w-6 text-red-600" /> : 
+                      <ToggleLeft className="h-6 w-6 text-gray-400" />
+                    }
+                  </button>
+                  <span className="text-sm font-medium text-gray-700">Pause Credits</span>
+                </label>
+                <p className="text-xs text-gray-500 mt-1 ml-9">
+                  Temporarily stop all credit earning (users can still spend existing credits)
+                </p>
+                {app.creditsPaused && app.creditsPausedAt && (
+                  <p className="text-xs text-red-600 mt-1 ml-9">
+                    Paused since: {new Date(app.creditsPausedAt).toLocaleString()}
+                  </p>
+                )}
+              </div>
+
               <div>
                 <label className="flex items-center space-x-3">
                   <button

@@ -35,6 +35,7 @@ interface GrowthKitState {
     credits: number;
     usage: number;
     referralCode: string | null;
+    creditsPaused: boolean;
     policy: GrowthKitPolicy | null;
     name: string | null;
     email: string | null;
@@ -81,6 +82,7 @@ interface MeResponse {
     credits: number;
     usage: number;
     referralCode: string;
+    creditsPaused: boolean;
     policy: GrowthKitPolicy;
     name: string | null;
     email: string | null;

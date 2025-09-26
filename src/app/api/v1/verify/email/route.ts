@@ -108,18 +108,21 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Award verification credits
-    const policy = authContext.app.policyJson as any;
-    const verifyCredits = policy?.emailVerifyCredits || 5;
+    // Award verification credits (only if credits are not paused)
+    let verifyCredits = 0;
+    if (!authContext.app.creditsPaused) {
+      const policy = authContext.app.policyJson as any;
+      verifyCredits = policy?.emailVerifyCredits || 5;
 
-    await prisma.credit.create({
-      data: {
-        fingerprintId: lead.fingerprintId,
-        amount: verifyCredits,
-        reason: 'email_verify',
-        metadata: { email: lead.email },
-      },
-    });
+      await prisma.credit.create({
+        data: {
+          fingerprintId: lead.fingerprintId,
+          amount: verifyCredits,
+          reason: 'email_verify',
+          metadata: { email: lead.email },
+        },
+      });
+    }
 
     // Log event
     await prisma.eventLog.create({

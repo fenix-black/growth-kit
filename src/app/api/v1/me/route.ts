@@ -436,7 +436,7 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    if (shouldGrantCredits) {
+    if (shouldGrantCredits && !app.creditsPaused) {
       const now = new Date();
       const lastGrant = fingerprintRecord.lastDailyGrant;
       const policy = authContext.app.policyJson as any;
@@ -632,6 +632,7 @@ export async function POST(request: NextRequest) {
       referralCode: fingerprintRecord!.referralCode,
       credits: totalCredits,
       usage: usageCount,
+      creditsPaused: app.creditsPaused,
       // User profile data
       name: userLead?.name || null,
       email: userLead?.email || null,

@@ -53,6 +53,7 @@ const AccountWidgetInternal = forwardRef<
     loading,
     initialized,
     credits,
+    creditsPaused,
     shouldShowWaitlist,
     waitlistEnabled,
     name,
@@ -203,6 +204,14 @@ const AccountWidgetInternal = forwardRef<
           <div style={styles.creditsSection}>
             <span style={styles.creditsIcon}>💰</span>
             <span style={{ ...styles.creditsValue, color: themeColors.text }}>{credits}</span>
+            {creditsPaused && (
+              <span 
+                style={styles.pausedIcon} 
+                title="Credit earning is temporarily paused"
+              >
+                ⏸️
+              </span>
+            )}
           </div>
         )}
         
@@ -483,6 +492,11 @@ const styles: Record<string, React.CSSProperties> = {
   creditsValue: {
     fontWeight: '600',
     fontSize: '16px',
+  },
+  pausedIcon: {
+    fontSize: '14px',
+    marginLeft: '4px',
+    cursor: 'help',
   },
   profileSection: {
     display: 'flex',

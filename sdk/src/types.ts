@@ -33,6 +33,7 @@ export interface GrowthKitState {
   credits: number;
   usage: number;
   referralCode: string | null;
+  creditsPaused: boolean;
   policy: GrowthKitPolicy | null;
   // User profile
   name: string | null;
@@ -86,6 +87,7 @@ export interface MeResponse {
   credits: number;
   usage: number;
   referralCode: string;
+  creditsPaused: boolean;
   policy: GrowthKitPolicy;
   name: string | null;
   email: string | null;

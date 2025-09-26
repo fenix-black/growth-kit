@@ -94,18 +94,21 @@ export async function POST(request: NextRequest) {
       data: { name: sanitizedName },
     });
 
-    // Award credits for name claim
-    const policy = authContext.app.policyJson as any;
-    const nameCredits = policy?.nameClaimCredits || 2;
+    // Award credits for name claim (only if credits are not paused)
+    let nameCredits = 0;
+    if (!authContext.app.creditsPaused) {
+      const policy = authContext.app.policyJson as any;
+      nameCredits = policy?.nameClaimCredits || 2;
 
-    await prisma.credit.create({
-      data: {
-        fingerprintId: fingerprintRecord.id,
-        amount: nameCredits,
-        reason: 'name_claim',
-        metadata: { name: sanitizedName },
-      },
-    });
+      await prisma.credit.create({
+        data: {
+          fingerprintId: fingerprintRecord.id,
+          amount: nameCredits,
+          reason: 'name_claim',
+          metadata: { name: sanitizedName },
+        },
+      });
+    }
 
     // Log event
     await prisma.eventLog.create({

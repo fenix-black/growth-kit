@@ -11,11 +11,11 @@ pending:
 - test spending with dollars - DONE
 
 todo:
+- add a way to stop giving more credits for an app, or pause it. - DONE
 - add fingerprint tracking event on sdk  (for tracking 'activities' on an app)
 - add more info about the browser on each usage
 - add support for answering forms linked to fingerprint (to earn credits)
 - add some UI auto-branding support to sdk hook (since it has access to the rest of the webpage, it could grab the page colors and UI language) 
-- add a way to stop giving more credits for an app, or pause it.
 - admin, add a way to send an email to some/all users/leads that have emails, from the admin.
 - admin, add a way of seeing the fingerprint usage across apps
 - admin, add admin users management owner of groups of apps
