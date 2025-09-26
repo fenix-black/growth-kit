@@ -17,7 +17,46 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
   
   // Track page view on mount
   useEffect(() => {
+    console.log('📊 Tracking page view...');
     track('page_viewed', { page: 'home', path: '/' });
+  }, [track]);
+  
+  // Add session tracking
+  useEffect(() => {
+    const sessionStart = Date.now();
+    
+    // Track session start
+    track('session_started', { timestamp: sessionStart });
+    
+    // Track session end on unmount
+    return () => {
+      const sessionDuration = Date.now() - sessionStart;
+      track('session_ended', { 
+        duration: sessionDuration, 
+        durationSeconds: Math.floor(sessionDuration / 1000) 
+      });
+    };
+  }, [track]);
+  
+  // Track scroll behavior
+  useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        const scrollPercentage = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
+        track('page_scrolled', { 
+          percentage: scrollPercentage,
+          position: window.scrollY
+        });
+      }, 1000); // Only track after scrolling stops for 1 second
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
   }, [track]);
   
   const handleUseFeature = async () => {
@@ -69,6 +108,7 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
 
   const handleTestEarnCredits = () => {
     console.log('Button clicked, widget ref:', accountWidgetRef.current);
+    track('manage_account_clicked', { source: 'header_button' });
     accountWidgetRef.current?.openEarnCreditsModal();
   };
 
@@ -175,7 +215,10 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
       </div>
 
       {/* Activity Tracking Section */}
-      <div style={styles.trackingSection}>
+      <div 
+        style={styles.trackingSection}
+        onMouseEnter={() => track('section_hover', { section: 'tracking_demo' })}
+      >
         <h3 style={styles.sectionTitle}>📊 Activity Tracking Demo</h3>
         <p style={styles.sectionText}>
           This app automatically tracks user interactions. Try these actions:
@@ -204,6 +247,33 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
           >
             Track Time (2s)
           </button>
+          <button 
+            onClick={() => {
+              // Send multiple events to test batching
+              for (let i = 0; i < 5; i++) {
+                track('batch_test_event', { index: i, timestamp: Date.now() });
+              }
+              console.log('Sent 5 events - check console for batching behavior');
+            }}
+            style={styles.trackingButton}
+          >
+            Test Batching (5 events)
+          </button>
+          <button 
+            onClick={() => {
+              // Send 10 events to trigger immediate batch send
+              console.log('Sending 10 events to trigger immediate batch...');
+              for (let i = 0; i < 10; i++) {
+                track('immediate_batch_test', { 
+                  index: i, 
+                  message: 'This should trigger immediate send at 10 events' 
+                });
+              }
+            }}
+            style={styles.trackingButton}
+          >
+            Trigger Immediate (10 events)
+          </button>
         </div>
         <p style={styles.trackingNote}>
           Check the browser console to see tracking events being batched and sent!
@@ -217,7 +287,10 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
           Invite friends and earn {policy?.referralCredits || 5} credits for each referral!
         </p>
         <button 
-          onClick={() => accountWidgetRef.current?.openEarnCreditsModal()}
+          onClick={() => {
+            track('earn_credits_modal_opened', { source: 'referral_section' });
+            accountWidgetRef.current?.openEarnCreditsModal();
+          }}
           style={styles.secondaryButton}
         >
           Open Earn Credits Modal

@@ -449,6 +449,16 @@ export function useGrowthKit(): GrowthKitHook {
   // Send batched events
   const sendEvents = useCallback(async () => {
     if (!apiRef.current || eventQueueRef.current.length === 0) return;
+    
+    // Ensure fingerprint is set before sending
+    if (state.fingerprint) {
+      apiRef.current.setFingerprint(state.fingerprint);
+      if (config.debug) {
+        console.log(`Set fingerprint for tracking: ${state.fingerprint}`);
+      }
+    } else if (config.debug) {
+      console.warn('No fingerprint available for tracking');
+    }
 
     const eventsToSend = [...eventQueueRef.current];
     eventQueueRef.current = [];
@@ -465,7 +475,7 @@ export function useGrowthKit(): GrowthKitHook {
       // Re-queue events on failure
       eventQueueRef.current = [...eventsToSend, ...eventQueueRef.current];
     }
-  }, [config.debug]);
+  }, [config.debug, state.fingerprint]);
 
   // Track event
   const track = useCallback((eventName: string, properties?: Record<string, any>) => {
