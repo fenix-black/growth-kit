@@ -46,6 +46,7 @@ interface AppDetails {
   trackUsdValue: boolean;
   allowCustomCredits: boolean;
   maxCustomCredits: number;
+  initialCreditsPerDay: number;
   creditsPaused: boolean;
   creditsPausedAt?: string;
   todayUsdSpent?: number;
@@ -126,6 +127,9 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           waitlistEnabled: appData.waitlistEnabled ?? false,
           autoApproveWaitlist: appData.autoApproveWaitlist ?? false,
           trackUsdValue: appData.trackUsdValue ?? false,
+          allowCustomCredits: appData.allowCustomCredits ?? true,
+          maxCustomCredits: appData.maxCustomCredits ?? 100,
+          initialCreditsPerDay: appData.initialCreditsPerDay ?? 3,
           creditsPaused: appData.creditsPaused ?? false,
         });
         // Initialize JSON text state
@@ -198,6 +202,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           trackUsdValue: editedApp.trackUsdValue,
           allowCustomCredits: editedApp.allowCustomCredits,
           maxCustomCredits: editedApp.maxCustomCredits,
+          initialCreditsPerDay: editedApp.initialCreditsPerDay,
           creditsPaused: editedApp.creditsPaused,
         }),
       });
@@ -372,6 +377,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                           trackUsdValue: app?.trackUsdValue ?? false,
                           allowCustomCredits: app?.allowCustomCredits ?? true,
                           maxCustomCredits: app?.maxCustomCredits ?? 100,
+                          initialCreditsPerDay: app?.initialCreditsPerDay ?? 3,
                           creditsPaused: app?.creditsPaused ?? false,
                         });
                         // Reset JSON text state
@@ -403,6 +409,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                         trackUsdValue: app.trackUsdValue ?? false,
                         allowCustomCredits: app.allowCustomCredits ?? true,
                         maxCustomCredits: app.maxCustomCredits ?? 100,
+                        initialCreditsPerDay: app.initialCreditsPerDay ?? 3,
                         creditsPaused: app.creditsPaused ?? false,
                       });
                       // Initialize JSON text state for editing
@@ -511,6 +518,10 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
               <div>
                 <dt className="text-sm text-gray-500">USD Tracking</dt>
                 <dd className="text-sm font-medium">{app.trackUsdValue ? 'Enabled' : 'Disabled'}</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-gray-500">Daily Credits</dt>
+                <dd className="text-sm font-medium">{app.initialCreditsPerDay} credits/day</dd>
               </div>
               <div>
                 <dt className="text-sm text-gray-500">Redirect URL</dt>
@@ -667,6 +678,24 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
 
           <ContentCard title="Advanced Settings">
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Daily Credits Amount
+                </label>
+                <input
+                  type="number"
+                  value={isEditing ? editedApp.initialCreditsPerDay : app.initialCreditsPerDay}
+                  onChange={(e) => isEditing && setEditedApp({ ...editedApp, initialCreditsPerDay: parseInt(e.target.value) || 3 })}
+                  disabled={!isEditing}
+                  min="0"
+                  max="100"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm disabled:bg-gray-50"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Number of credits automatically granted to users each day (0-100)
+                </p>
+              </div>
+
               <div>
                 <label className="flex items-center space-x-3">
                   <button

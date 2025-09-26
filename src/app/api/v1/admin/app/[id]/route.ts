@@ -122,7 +122,8 @@ export async function PUT(
       'trackUsdValue': 'trackUsdValue',
       'creditsPaused': 'creditsPaused',
       'allowCustomCredits': 'allowCustomCredits',
-      'maxCustomCredits': 'maxCustomCredits'
+      'maxCustomCredits': 'maxCustomCredits',
+      'initialCreditsPerDay': 'initialCreditsPerDay'
     };
     
     const updateData: any = {};
@@ -175,6 +176,13 @@ export async function PUT(
         return errors.badRequest('Invalid maxCustomCredits: must be between 1 and 1000');
       }
       updateData.maxCustomCredits = maxCredits;
+    }
+    if (updateData.initialCreditsPerDay !== undefined) {
+      const initialCredits = parseInt(updateData.initialCreditsPerDay);
+      if (isNaN(initialCredits) || initialCredits < 0 || initialCredits > 100) {
+        return errors.badRequest('Invalid initialCreditsPerDay: must be between 0 and 100');
+      }
+      updateData.initialCreditsPerDay = initialCredits;
     }
 
     // Check if waitlist is being enabled (false -> true)
