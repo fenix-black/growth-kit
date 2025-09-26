@@ -133,6 +133,16 @@ export async function PUT(
     if (updateData.trackUsdValue !== undefined && typeof updateData.trackUsdValue !== 'boolean') {
       return errors.badRequest('Invalid trackUsdValue');
     }
+    if (updateData.allowCustomCredits !== undefined && typeof updateData.allowCustomCredits !== 'boolean') {
+      return errors.badRequest('Invalid allowCustomCredits');
+    }
+    if (updateData.maxCustomCredits !== undefined) {
+      const maxCredits = parseInt(updateData.maxCustomCredits);
+      if (isNaN(maxCredits) || maxCredits < 1 || maxCredits > 1000) {
+        return errors.badRequest('Invalid maxCustomCredits: must be between 1 and 1000');
+      }
+      updateData.maxCustomCredits = maxCredits;
+    }
 
     // Update app
     const updatedApp = await prisma.app.update({

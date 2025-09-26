@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { fingerprint, action = 'default', claim, usdValue } = body;
+    const { fingerprint, action = 'default', claim, usdValue, creditsRequired: clientCreditsRequired } = body;
 
     if (!fingerprint || !isValidFingerprint(fingerprint)) {
       return errors.badRequest('Invalid or missing fingerprint');
@@ -71,8 +71,33 @@ export async function POST(request: NextRequest) {
 
     // Get policy
     const policy = authContext.app.policyJson as any;
-    const actionConfig = policy?.actions?.[action] || policy?.actions?.default || { creditsRequired: 1 };
-    const creditsRequired = actionConfig.creditsRequired || 1;
+    
+    // Determine credits required
+    let creditsRequired: number;
+    let creditSource: 'policy' | 'client' | 'default';
+    
+    // Priority 1: Policy-defined action
+    const actionConfig = policy?.actions?.[action];
+    if (actionConfig) {
+      creditsRequired = actionConfig.creditsRequired || 1;
+      creditSource = 'policy';
+    }
+    // Priority 2: Client-specified (if allowed)
+    else if (authContext.app.allowCustomCredits && clientCreditsRequired !== undefined) {
+      // Validate client credits
+      const requestedCredits = parseInt(String(clientCreditsRequired));
+      if (isNaN(requestedCredits) || requestedCredits < 1) {
+        return errors.badRequest('Invalid creditsRequired: must be a positive integer');
+      }
+      // Apply maximum limit
+      creditsRequired = Math.min(requestedCredits, authContext.app.maxCustomCredits);
+      creditSource = 'client';
+    }
+    // Priority 3: Default fallback
+    else {
+      creditsRequired = policy?.actions?.default?.creditsRequired || 1;
+      creditSource = 'default';
+    }
 
     // Calculate current credits
     const totalCredits = fingerprintRecord.credits.reduce(
@@ -204,7 +229,9 @@ export async function POST(request: NextRequest) {
           creditsConsumed,
           creditsRequired,
           hadSufficientCredits: totalCredits >= creditsRequired,
-          usdValue: validatedUsdValue
+          usdValue: validatedUsdValue,
+          creditSource,
+          isCustomCredits: creditSource === 'client'
         },
         ipAddress: clientIp,
         userAgent: request.headers.get('user-agent'),

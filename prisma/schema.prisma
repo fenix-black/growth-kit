@@ -39,6 +39,8 @@ model App {
   waitlistEnabled             Boolean       @default(false)
   waitlistMessage             String?
   trackUsdValue               Boolean       @default(false)
+  allowCustomCredits          Boolean       @default(true)
+  maxCustomCredits            Int           @default(100)
   initialCreditsPerDay        Int           @default(3)
   creditsForName              Int           @default(1)
   creditsForEmail             Int           @default(1)

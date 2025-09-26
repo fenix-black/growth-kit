@@ -181,13 +181,15 @@ export function useGrowthKit(): GrowthKitHook {
   ): Promise<boolean> => {
     if (!apiRef.current || !state.fingerprint) return false;
 
-    // Handle both old (metadata) and new (options with usdValue) signatures
+    // Handle both old (metadata) and new (options) signatures
+    let creditsRequired: number | undefined;
     let usdValue: number | undefined;
     let metadata: any;
     
     if (optionsOrMetadata && typeof optionsOrMetadata === 'object') {
-      if ('usdValue' in optionsOrMetadata || 'metadata' in optionsOrMetadata) {
+      if ('creditsRequired' in optionsOrMetadata || 'usdValue' in optionsOrMetadata || 'metadata' in optionsOrMetadata) {
         // New signature with options
+        creditsRequired = optionsOrMetadata.creditsRequired;
         usdValue = optionsOrMetadata.usdValue;
         metadata = optionsOrMetadata.metadata;
       } else {
@@ -200,6 +202,7 @@ export function useGrowthKit(): GrowthKitHook {
       const response = await apiRef.current.completeAction(
         state.fingerprint,
         action,
+        creditsRequired,
         usdValue,
         metadata
       );

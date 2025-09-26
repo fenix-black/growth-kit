@@ -48,6 +48,7 @@ interface GrowthKitState {
     shouldShowWaitlist: boolean;
 }
 interface CompleteActionOptions {
+    creditsRequired?: number;
     usdValue?: number;
     metadata?: any;
 }
@@ -136,7 +137,7 @@ declare class GrowthKitAPI {
     setFingerprint(fingerprint: string): void;
     private request;
     getMe(fingerprint: string, claim?: string): Promise<APIResponse<MeResponse>>;
-    completeAction(fingerprint: string, action?: string, usdValue?: number, metadata?: any): Promise<APIResponse<CompleteResponse>>;
+    completeAction(fingerprint: string, action?: string, creditsRequired?: number, usdValue?: number, metadata?: any): Promise<APIResponse<CompleteResponse>>;
     claimName(fingerprint: string, name: string): Promise<APIResponse<ClaimResponse>>;
     claimEmail(fingerprint: string, email: string): Promise<APIResponse<ClaimResponse>>;
     verifyEmail(fingerprint: string, token: string): Promise<APIResponse<VerifyResponse>>;

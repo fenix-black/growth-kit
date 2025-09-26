@@ -36,11 +36,11 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
     setIsProcessing(true);
     setLastAction(`${action} ($${usdValue})`);
     
-    const success = await completeAction(action, { usdValue });
+    const success = await completeAction(action, { creditsRequired, usdValue });
     setIsProcessing(false);
     
     if (success) {
-      console.log(`${action} completed successfully! USD value tracked: $${usdValue}`);
+      console.log(`${action} completed successfully! Credits: ${creditsRequired}, USD tracked: $${usdValue}`);
     } else {
       console.log('Not enough credits or action failed');
     }

@@ -49,6 +49,7 @@ export interface GrowthKitState {
 }
 
 export interface CompleteActionOptions {
+  creditsRequired?: number;
   usdValue?: number;
   metadata?: any;
 }
