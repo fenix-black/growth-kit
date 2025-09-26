@@ -521,7 +521,7 @@ export async function POST(request: NextRequest) {
     if (appWithWaitlist.waitlistEnabled) {
       // Check if user should be grandfathered (existed before waitlist was enabled)
       const isGrandfathered = appWithWaitlist.waitlistEnabledAt && 
-        fingerprintRecord!.createdAt < new Date(appWithWaitlist.waitlistEnabledAt);
+        fingerprintRecord!.createdAt < appWithWaitlist.waitlistEnabledAt;
       
       if (isGrandfathered) {
         // User existed before waitlist was enabled, grant access
