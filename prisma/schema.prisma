@@ -37,6 +37,7 @@ model App {
   masterReferralCode          String?       @unique
   masterReferralCredits       Int           @default(10)
   waitlistEnabled             Boolean       @default(false)
+  waitlistEnabledAt           DateTime?
   waitlistMessage             String?
   trackUsdValue               Boolean       @default(false)
   allowCustomCredits          Boolean       @default(true)

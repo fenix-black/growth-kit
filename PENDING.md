@@ -17,3 +17,7 @@ todo:
 - add some UI auto-branding support to sdk hook (since it has access to the rest of the webpage, it could grab the page colors and UI language) 
 - add a way to stop giving more credits for an app, or pause it.
 - admin, add a way to send an email to some/all users/leads that have emails, from the admin.
+- admin, add a way of seeing the fingerprint usage across apps
+- admin, add admin users management owner of groups of apps
+- admin, add a way of grouping apps with a single apikey, so they share credits consumption and earnings (like a passport by topic)
+- admin. add app description field and keywords, to have better insights as to why a user wanted to use them (tracking)

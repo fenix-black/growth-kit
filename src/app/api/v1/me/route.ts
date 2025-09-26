@@ -521,6 +521,20 @@ export async function POST(request: NextRequest) {
     let waitlistData = null;
     const appWithWaitlist = authContext.app as any; // Temporary cast until migration is run
     if (appWithWaitlist.waitlistEnabled) {
+      // Check if user should be grandfathered (existed before waitlist was enabled)
+      const isGrandfathered = appWithWaitlist.waitlistEnabledAt && 
+        fingerprintRecord!.createdAt < new Date(appWithWaitlist.waitlistEnabledAt);
+      
+      if (isGrandfathered) {
+        // User existed before waitlist was enabled, grant access
+        waitlistData = {
+          enabled: true,
+          status: 'accepted',
+          position: null,
+          requiresWaitlist: false, // Important: don't require waitlist for grandfathered users
+          grandfathered: true,
+        };
+      } else {
       // Check if user has an email registered (verified or unverified)
       const lead = await prisma.lead.findFirst({
         where: {
@@ -577,6 +591,7 @@ export async function POST(request: NextRequest) {
           message: appWithWaitlist.waitlistMessage || 'Join our exclusive waitlist for early access',
         };
       }
+      } // Close the else block for non-grandfathered users
     }
 
     // Get or create user lead record

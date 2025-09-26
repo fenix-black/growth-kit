@@ -159,6 +159,19 @@ export async function PUT(request: NextRequest) {
     if (masterReferralCode !== undefined) updateData.masterReferralCode = masterReferralCode;
     if (masterReferralCredits !== undefined) updateData.masterReferralCredits = masterReferralCredits;
 
+    // Check if waitlist is being enabled (false -> true)
+    if (updateData.waitlistEnabled === true) {
+      const currentApp = await prisma.app.findUnique({
+        where: { id },
+        select: { waitlistEnabled: true, waitlistEnabledAt: true }
+      });
+      
+      if (currentApp && !currentApp.waitlistEnabled && !currentApp.waitlistEnabledAt) {
+        // First time enabling waitlist, set the timestamp
+        updateData.waitlistEnabledAt = new Date();
+      }
+    }
+
     // Update app configuration
     const app = await prisma.app.update({
       where: { id },

@@ -171,6 +171,19 @@ export async function PUT(
       updateData.maxCustomCredits = maxCredits;
     }
 
+    // Check if waitlist is being enabled (false -> true)
+    if (updateData.waitlistEnabled === true) {
+      const currentApp = await prisma.app.findUnique({
+        where: { id },
+        select: { waitlistEnabled: true, waitlistEnabledAt: true }
+      });
+      
+      if (currentApp && !currentApp.waitlistEnabled && !currentApp.waitlistEnabledAt) {
+        // First time enabling waitlist, set the timestamp
+        updateData.waitlistEnabledAt = new Date();
+      }
+    }
+
     // Update app
     const updatedApp = await prisma.app.update({
       where: { id },
