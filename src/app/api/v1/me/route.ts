@@ -533,22 +533,23 @@ export async function POST(request: NextRequest) {
           grandfathered: true,
         };
       } else {
-      // Check if user has an email registered (verified or unverified)
-      const lead = await prisma.lead.findFirst({
-        where: {
-          appId: authContext.app.id,
-          fingerprintId: fingerprintRecord!.id,
-          // Remove emailVerified requirement to check waitlist status for all emails
-        },
-        select: {
-          email: true,
-          emailVerified: true,
-        },
-      });
+        // Not grandfathered - check waitlist status
+        // Check if user has an email registered (verified or unverified)
+        const lead = await prisma.lead.findFirst({
+          where: {
+            appId: authContext.app.id,
+            fingerprintId: fingerprintRecord!.id,
+            // Remove emailVerified requirement to check waitlist status for all emails
+          },
+          select: {
+            email: true,
+            emailVerified: true,
+          },
+        });
 
-      if (lead && lead.email) {
-        // Check waitlist status for this email
-        const waitlistEntry = await prisma.waitlist.findUnique({
+        if (lead && lead.email) {
+          // Check waitlist status for this email
+          const waitlistEntry = await prisma.waitlist.findUnique({
           where: {
             appId_email: {
               appId: authContext.app.id,
@@ -579,16 +580,16 @@ export async function POST(request: NextRequest) {
             message: appWithWaitlist.waitlistMessage || 'Join our exclusive waitlist for early access',
           };
         }
-      } else {
-        // No email registered yet
-        waitlistData = {
+        } else {
+          // No email registered yet
+          waitlistData = {
           enabled: true,
           status: 'none',
           position: null,
           requiresWaitlist: true,
           message: appWithWaitlist.waitlistMessage || 'Join our exclusive waitlist for early access',
-        };
-      }
+          };
+        }
       } // Close the else block for non-grandfathered users
     }
 
