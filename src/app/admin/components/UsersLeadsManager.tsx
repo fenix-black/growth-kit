@@ -634,6 +634,19 @@ export default function UsersLeadsManager({
                       <p className="text-sm text-gray-600 dark:text-gray-400">Referrals</p>
                     </div>
                   </div>
+                  
+                  {/* Show USD stats if available */}
+                  {selectedUser.recentUsage.some(u => u.usdValue) && (
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                      <p className="text-lg font-bold text-yellow-700 dark:text-yellow-400">
+                        ${selectedUser.recentUsage
+                          .filter(u => u.usdValue)
+                          .reduce((sum, u) => sum + parseFloat(u.usdValue!), 0)
+                          .toFixed(2)}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Total USD Cost</p>
+                    </div>
+                  )}
 
                   {/* Email/Lead History */}
                   <div>
@@ -695,6 +708,43 @@ export default function UsersLeadsManager({
                       </Button>
                     </div>
                   </div>
+
+                  {/* Recent Usage History */}
+                  {selectedUser.recentUsage.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Recent Actions</h4>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                          <thead className="bg-gray-50 dark:bg-gray-900">
+                            <tr>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">USD Cost</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            {selectedUser.recentUsage.slice(0, 10).map((usage) => (
+                              <tr key={usage.id}>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm">{usage.action}</td>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                  {usage.usdValue ? (
+                                    <span className="text-green-600 dark:text-green-400 font-medium">
+                                      ${parseFloat(usage.usdValue).toFixed(2)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                                  {new Date(usage.createdAt).toLocaleString()}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Recent Credit History */}
                   <div>

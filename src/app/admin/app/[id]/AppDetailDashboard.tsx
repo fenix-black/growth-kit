@@ -27,7 +27,8 @@ import {
   Plus,
   Trash2,
   Clock,
-  FileText
+  FileText,
+  DollarSign
 } from 'lucide-react';
 
 interface AppDetails {
@@ -45,6 +46,7 @@ interface AppDetails {
   trackUsdValue: boolean;
   allowCustomCredits: boolean;
   maxCustomCredits: number;
+  todayUsdSpent?: number;
   createdAt: string;
   _count: {
     apiKeys: number;
@@ -459,6 +461,20 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                 <p className="text-2xl font-bold">{app._count.waitlist.toLocaleString()}</p>
               </div>
             </div>
+            
+            {app.trackUsdValue && (
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-blue-600 font-medium mb-1">USD Spent Today</p>
+                    <p className="text-2xl font-bold text-blue-900">
+                      ${(app.todayUsdSpent || 0).toFixed(2)}
+                    </p>
+                  </div>
+                  <DollarSign className="text-blue-500" size={32} />
+                </div>
+              </div>
+            )}
           </ContentCard>
 
           <ContentCard title="Configuration">

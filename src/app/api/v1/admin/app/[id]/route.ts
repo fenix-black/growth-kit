@@ -44,12 +44,39 @@ export async function GET(
       return errors.notFound();
     }
 
+    // Calculate today's USD spending if USD tracking is enabled
+    let todayUsdSpent = 0;
+    if (app.trackUsdValue) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const todayUsages = await prisma.usage.aggregate({
+        where: {
+          fingerprint: {
+            appId: id
+          },
+          createdAt: {
+            gte: today
+          },
+          usdValue: {
+            not: null
+          }
+        },
+        _sum: {
+          usdValue: true
+        }
+      });
+      
+      todayUsdSpent = todayUsages._sum.usdValue ? parseFloat(todayUsages._sum.usdValue.toString()) : 0;
+    }
+
     // Map database field names to client field names for compatibility
     const clientApp = {
       ...app,
       autoApproveWaitlist: app.autoInviteEnabled,
       invitationQuota: app.dailyInviteQuota,
       invitationCronTime: app.inviteTime,
+      todayUsdSpent,
     };
 
     return successResponse({ app: clientApp });
