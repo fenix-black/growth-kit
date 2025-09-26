@@ -119,7 +119,10 @@ export async function PUT(
       'autoApproveWaitlist': 'autoInviteEnabled',  // Map to correct field name
       'invitationQuota': 'dailyInviteQuota',        // Map to correct field name
       'invitationCronTime': 'inviteTime',           // Map to correct field name
-      'trackUsdValue': 'trackUsdValue'
+      'trackUsdValue': 'trackUsdValue',
+      'creditsPaused': 'creditsPaused',
+      'allowCustomCredits': 'allowCustomCredits',
+      'maxCustomCredits': 'maxCustomCredits'
     };
     
     const updateData: any = {};
@@ -160,6 +163,9 @@ export async function PUT(
     if (updateData.trackUsdValue !== undefined && typeof updateData.trackUsdValue !== 'boolean') {
       return errors.badRequest('Invalid trackUsdValue');
     }
+    if (updateData.creditsPaused !== undefined && typeof updateData.creditsPaused !== 'boolean') {
+      return errors.badRequest('Invalid creditsPaused');
+    }
     if (updateData.allowCustomCredits !== undefined && typeof updateData.allowCustomCredits !== 'boolean') {
       return errors.badRequest('Invalid allowCustomCredits');
     }
@@ -182,6 +188,24 @@ export async function PUT(
         // Waitlist is being enabled (was disabled, now enabled)
         // Always update the timestamp when re-enabling
         updateData.waitlistEnabledAt = new Date();
+      }
+    }
+
+    // Handle creditsPaused timestamp
+    if (updateData.creditsPaused !== undefined) {
+      const currentApp = await prisma.app.findUnique({
+        where: { id },
+        select: { creditsPaused: true }
+      });
+      
+      if (currentApp) {
+        if (updateData.creditsPaused === true && !currentApp.creditsPaused) {
+          // Pausing credits - set timestamp
+          updateData.creditsPausedAt = new Date();
+        } else if (updateData.creditsPaused === false && currentApp.creditsPaused) {
+          // Resuming credits - clear timestamp
+          updateData.creditsPausedAt = null;
+        }
       }
     }
 
