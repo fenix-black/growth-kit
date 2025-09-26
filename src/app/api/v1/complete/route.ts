@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
     let creditsRequired: number;
     let creditSource: 'policy' | 'client' | 'default';
     
+    
     // Priority 1: Policy-defined action
     const actionConfig = policy?.actions?.[action];
     if (actionConfig) {
@@ -83,14 +84,16 @@ export async function POST(request: NextRequest) {
       creditSource = 'policy';
     }
     // Priority 2: Client-specified (if allowed)
-    else if (authContext.app.allowCustomCredits && clientCreditsRequired !== undefined) {
+    // Default to true if allowCustomCredits is null/undefined (for backward compatibility)
+    else if ((authContext.app.allowCustomCredits ?? true) && clientCreditsRequired !== undefined) {
       // Validate client credits
       const requestedCredits = parseInt(String(clientCreditsRequired));
       if (isNaN(requestedCredits) || requestedCredits < 1) {
         return errors.badRequest('Invalid creditsRequired: must be a positive integer');
       }
-      // Apply maximum limit
-      creditsRequired = Math.min(requestedCredits, authContext.app.maxCustomCredits);
+      // Apply maximum limit (default to 100 if not set)
+      const maxCredits = authContext.app.maxCustomCredits ?? 100;
+      creditsRequired = Math.min(requestedCredits, maxCredits);
       creditSource = 'client';
     }
     // Priority 3: Default fallback
@@ -246,6 +249,14 @@ export async function POST(request: NextRequest) {
       creditsRemaining: Math.max(0, newCreditsBalance),
       creditsRequired,
       hadSufficientCredits: totalCredits >= creditsRequired,
+      // Temporary debug info
+      _debug: {
+        creditSource,
+        clientCreditsRequested: clientCreditsRequired,
+        allowCustomCredits: authContext.app.allowCustomCredits,
+        maxCustomCredits: authContext.app.maxCustomCredits,
+        actionInPolicy: !!policy?.actions?.[action]
+      }
     });
 
     // Apply CORS headers
