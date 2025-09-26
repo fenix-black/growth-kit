@@ -219,17 +219,17 @@ export async function POST(request: NextRequest) {
               },
             });
 
-            if (lead) {
+            if (lead && lead.email) {
               await prisma.waitlist.upsert({
                 where: {
                   appId_email: {
                     appId: authContext.app.id,
-                    email: lead.email!,
+                    email: lead.email,
                   },
                 },
                 create: {
                   appId: authContext.app.id,
-                  email: lead.email!,
+                  email: lead.email,
                   status: 'INVITED',
                   invitedAt: new Date(),
                   ...({ invitedVia: 'master_referral' } as any), // Temporary cast until migration is run
@@ -406,12 +406,12 @@ export async function POST(request: NextRequest) {
         },
       });
       
-      if (lead) {
+      if (lead && lead.email) {
         const waitlistEntry = await prisma.waitlist.findUnique({
           where: {
             appId_email: {
               appId: authContext.app.id,
-              email: lead.email!,
+              email: lead.email,
             },
           },
           select: { status: true },
