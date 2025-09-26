@@ -99,6 +99,7 @@ export async function POST(request: NextRequest) {
     // Check if user should be grandfathered BEFORE processing any claims
     const appWithWaitlist = authContext.app as any;
     let isGrandfathered = false;
+    
     if (appWithWaitlist.waitlistEnabled && appWithWaitlist.waitlistEnabledAt) {
       isGrandfathered = fingerprintRecord!.createdAt < appWithWaitlist.waitlistEnabledAt;
     }
@@ -649,6 +650,13 @@ export async function POST(request: NextRequest) {
         }
       },
       ...(waitlistData && { waitlist: waitlistData }),
+      // Debug info
+      _debug: {
+        waitlistEnabled: appWithWaitlist.waitlistEnabled,
+        waitlistEnabledAt: appWithWaitlist.waitlistEnabledAt,
+        fingerprintCreatedAt: fingerprintRecord!.createdAt,
+        isGrandfathered,
+      },
     });
 
     // Apply CORS headers
