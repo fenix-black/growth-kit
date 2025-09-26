@@ -24,9 +24,6 @@ const initialState: GrowthKitState = {
   shouldShowWaitlist: false,
   waitlistPosition: null,
   waitlistMessage: undefined,
-  totalUsdSpent: 0,
-  lastUsdTransaction: 0,
-  usdTrackingEnabled: false,
 };
 
 interface GrowthKitStateContextValue {

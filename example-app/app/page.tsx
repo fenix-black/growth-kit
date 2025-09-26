@@ -8,6 +8,7 @@ import type { GrowthKitAccountWidgetRef } from '@growthkit/sdk';
 function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<GrowthKitAccountWidgetRef | null> }) {
   const { credits, completeAction, policy } = useGrowthKit();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [lastAction, setLastAction] = useState<string>('');
   
   // Monitor credit changes
   useEffect(() => {
@@ -26,6 +27,22 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
       console.log('Feature used successfully!');
     } else {
       console.log('Not enough credits');
+    }
+  };
+
+  // Test USD spending with different values
+  const handleTestUsdSpending = async (action: string, usdValue: number, creditsRequired: number) => {
+    console.log(`Testing ${action} - Credits: ${creditsRequired}, USD Cost: $${usdValue}`);
+    setIsProcessing(true);
+    setLastAction(`${action} ($${usdValue})`);
+    
+    const success = await completeAction(action, { usdValue });
+    setIsProcessing(false);
+    
+    if (success) {
+      console.log(`${action} completed successfully! USD value tracked: $${usdValue}`);
+    } else {
+      console.log('Not enough credits or action failed');
     }
   };
 
@@ -73,6 +90,65 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
         {credits === 0 && (
           <p style={styles.warning}>
             Out of credits! The account widget will help you earn more.
+          </p>
+        )}
+      </div>
+
+      {/* USD Testing Section */}
+      <div style={styles.usdTestSection}>
+        <h3 style={styles.sectionTitle}>🧪 Test USD Tracking</h3>
+        <p style={styles.sectionText}>
+          Test credit consumption with different USD values (admin-only tracking)
+        </p>
+        <div style={styles.testButtonGrid}>
+          <button 
+            onClick={() => handleTestUsdSpending('text-generation', 0.002, 1)}
+            disabled={credits < 1 || isProcessing}
+            style={{
+              ...styles.testActionButton,
+              ...(credits < 1 || isProcessing ? styles.disabledButton : {})
+            }}
+          >
+            Text Generation<br/>
+            <small>1 credit ($0.002)</small>
+          </button>
+          <button 
+            onClick={() => handleTestUsdSpending('image-generation', 0.15, 5)}
+            disabled={credits < 5 || isProcessing}
+            style={{
+              ...styles.testActionButton,
+              ...(credits < 5 || isProcessing ? styles.disabledButton : {})
+            }}
+          >
+            Image Generation<br/>
+            <small>5 credits ($0.15)</small>
+          </button>
+          <button 
+            onClick={() => handleTestUsdSpending('video-processing', 1.50, 10)}
+            disabled={credits < 10 || isProcessing}
+            style={{
+              ...styles.testActionButton,
+              ...(credits < 10 || isProcessing ? styles.disabledButton : {})
+            }}
+          >
+            Video Processing<br/>
+            <small>10 credits ($1.50)</small>
+          </button>
+          <button 
+            onClick={() => handleTestUsdSpending('api-call', 0.01, 2)}
+            disabled={credits < 2 || isProcessing}
+            style={{
+              ...styles.testActionButton,
+              ...(credits < 2 || isProcessing ? styles.disabledButton : {})
+            }}
+          >
+            API Call<br/>
+            <small>2 credits ($0.01)</small>
+          </button>
+        </div>
+        {lastAction && (
+          <p style={styles.lastActionText}>
+            Last action: {lastAction} - USD value sent to backend for tracking
           </p>
         )}
       </div>
@@ -276,5 +352,38 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#6c757d',
     marginLeft: '1.5rem',
     marginBottom: '1rem',
+  },
+  usdTestSection: {
+    background: '#f0f8ff',
+    border: '1px solid #b8d4e3',
+    borderRadius: '12px',
+    padding: '2rem',
+    marginBottom: '2rem',
+  },
+  testButtonGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    gap: '1rem',
+    marginTop: '1.5rem',
+    marginBottom: '1rem',
+  },
+  testActionButton: {
+    background: '#fff',
+    border: '2px solid #4a90e2',
+    padding: '1rem',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center' as const,
+  },
+  lastActionText: {
+    textAlign: 'center' as const,
+    color: '#4a90e2',
+    fontSize: '0.9rem',
+    marginTop: '1rem',
+    fontStyle: 'italic',
   },
 };

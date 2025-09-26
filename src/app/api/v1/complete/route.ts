@@ -211,23 +211,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Calculate total USD spent if tracking is enabled
-    let totalUsdSpent = undefined;
-    if (authContext.app.trackUsdValue) {
-      const allUsages = await prisma.usage.findMany({
-        where: {
-          fingerprintId: fingerprintRecord.id,
-          usdValue: { not: null }
-        },
-        select: { usdValue: true }
-      });
-      
-      totalUsdSpent = allUsages.reduce((sum, u) => 
-        sum + (u.usdValue ? parseFloat(u.usdValue.toString()) : 0), 0
-      );
-      // Round to 2 decimal places
-      totalUsdSpent = Math.round(totalUsdSpent * 100) / 100;
-    }
 
     // Build response
     const response = successResponse({
@@ -236,8 +219,6 @@ export async function POST(request: NextRequest) {
       creditsRemaining: Math.max(0, newCreditsBalance),
       creditsRequired,
       hadSufficientCredits: totalCredits >= creditsRequired,
-      ...(validatedUsdValue !== undefined && { usdValue: validatedUsdValue }),
-      ...(totalUsdSpent !== undefined && { totalUsdSpent }),
     });
 
     // Apply CORS headers

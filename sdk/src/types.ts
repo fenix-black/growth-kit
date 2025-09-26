@@ -46,10 +46,6 @@ export interface GrowthKitState {
   waitlistPosition: number | null;
   waitlistMessage?: string;
   shouldShowWaitlist: boolean;
-  // USD tracking (v0.0.4)
-  totalUsdSpent?: number;
-  lastUsdTransaction?: number;
-  usdTrackingEnabled?: boolean;
 }
 
 export interface CompleteActionOptions {
@@ -96,16 +92,12 @@ export interface MeResponse {
   hasClaimedEmail: boolean;
   hasVerifiedEmail: boolean;
   waitlist?: WaitlistData;
-  totalUsdSpent?: number;
-  usdTrackingEnabled?: boolean;
 }
 
 export interface CompleteResponse {
   success: boolean;
   creditsRemaining: number;
   creditsConsumed: number;
-  usdValue?: number;
-  totalUsdSpent?: number;
 }
 
 export interface ClaimResponse {

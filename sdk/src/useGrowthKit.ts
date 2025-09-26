@@ -106,9 +106,6 @@ export function useGrowthKit(): GrowthKitHook {
         waitlistPosition,
         waitlistMessage,
         shouldShowWaitlist,
-        // USD tracking
-        totalUsdSpent: data.totalUsdSpent,
-        usdTrackingEnabled: data.usdTrackingEnabled,
       });
 
       if (configRef.current.debug) {
@@ -170,9 +167,6 @@ export function useGrowthKit(): GrowthKitHook {
           waitlistPosition,
           waitlistMessage,
           shouldShowWaitlist,
-          // USD tracking
-          totalUsdSpent: data.totalUsdSpent,
-          usdTrackingEnabled: data.usdTrackingEnabled,
         }));
       }
     } catch (error) {
