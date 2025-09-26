@@ -163,11 +163,12 @@ export async function PUT(request: NextRequest) {
     if (updateData.waitlistEnabled === true) {
       const currentApp = await prisma.app.findUnique({
         where: { id },
-        select: { waitlistEnabled: true, waitlistEnabledAt: true }
+        select: { waitlistEnabled: true }
       });
       
-      if (currentApp && !currentApp.waitlistEnabled && !currentApp.waitlistEnabledAt) {
-        // First time enabling waitlist, set the timestamp
+      if (currentApp && !currentApp.waitlistEnabled) {
+        // Waitlist is being enabled (was disabled, now enabled)
+        // Always update the timestamp when re-enabling
         updateData.waitlistEnabledAt = new Date();
       }
     }

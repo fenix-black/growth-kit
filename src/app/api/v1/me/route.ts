@@ -650,13 +650,6 @@ export async function POST(request: NextRequest) {
         }
       },
       ...(waitlistData && { waitlist: waitlistData }),
-      // Debug info
-      _debug: {
-        waitlistEnabled: appWithWaitlist.waitlistEnabled,
-        waitlistEnabledAt: appWithWaitlist.waitlistEnabledAt,
-        fingerprintCreatedAt: fingerprintRecord!.createdAt,
-        isGrandfathered,
-      },
     });
 
     // Apply CORS headers
