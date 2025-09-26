@@ -172,6 +172,7 @@ model Lead {
   fingerprint     Fingerprint? @relation(fields: [fingerprintId], references: [id])
 
   @@unique([appId, email])
+  @@unique([appId, fingerprintId])
   @@index([appId])
   @@index([fingerprintId])
   @@index([email])

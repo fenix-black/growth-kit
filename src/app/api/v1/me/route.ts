@@ -127,25 +127,23 @@ export async function POST(request: NextRequest) {
                   },
                 });
 
-                // Create or update lead with email
-                await tx.lead.upsert({
+                // Update existing lead with email (don't create new one)
+                const existingLead = await tx.lead.findFirst({
                   where: {
-                    appId_email: {
-                      appId: authContext.app.id,
-                      email: waitlistEntry.email,
-                    },
-                  },
-                  update: {
-                    fingerprintId: fingerprintRecord!.id,
-                    emailVerified: true,
-                  },
-                  create: {
                     appId: authContext.app.id,
                     fingerprintId: fingerprintRecord!.id,
-                    email: waitlistEntry.email,
-                    emailVerified: true,
                   },
                 });
+
+                if (existingLead) {
+                  await tx.lead.update({
+                    where: { id: existingLead.id },
+                    data: {
+                      email: waitlistEntry.email,
+                      emailVerified: true,
+                    },
+                  });
+                }
 
                 // Log event
                 await tx.eventLog.create({
