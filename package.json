@@ -18,11 +18,13 @@
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
+    "@radix-ui/react-slot": "^1.2.3",
     "@react-email/render": "^1.2.3",
     "@types/bcrypt": "^6.0.0",
     "@upstash/ratelimit": "^2.0.6",
     "@upstash/redis": "^1.35.4",
     "bcrypt": "^6.0.0",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "crypto": "^1.0.1",
     "date-fns": "^4.1.0",
@@ -33,7 +35,8 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "recharts": "^3.2.1",
-    "resend": "^6.1.0"
+    "resend": "^6.1.0",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -1,5 +1,13 @@
 import React from 'react';
-import { cn } from './utils';
+import { cn } from '@/lib/utils';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 
 interface ContentCardProps {
   title?: string;
@@ -21,20 +29,13 @@ export default function ContentCard({
   loading = false
 }: ContentCardProps) {
   return (
-    <div className={cn(
-      'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700',
-      className
-    )}>
-      {(title || actions) && (
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <Card className={className}>
+      {(title || description || actions) && (
+        <CardHeader>
           <div className="flex items-center justify-between">
-            <div>
-              {title && (
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
-              )}
-              {description && (
-                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{description}</p>
-              )}
+            <div className="space-y-1">
+              {title && <CardTitle>{title}</CardTitle>}
+              {description && <CardDescription>{description}</CardDescription>}
             </div>
             {actions && (
               <div className="flex items-center space-x-2">
@@ -42,21 +43,22 @@ export default function ContentCard({
               </div>
             )}
           </div>
-        </div>
+        </CardHeader>
       )}
       
-      <div className={cn(
-        !noPadding && 'p-6',
-        loading && 'opacity-50'
+      <CardContent className={cn(
+        noPadding && 'p-0',
+        loading && 'opacity-50',
+        !title && !description && !actions && 'pt-6' // Add top padding when no header
       )}>
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
           children
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
