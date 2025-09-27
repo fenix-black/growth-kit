@@ -49,35 +49,35 @@ export async function GET(request: NextRequest) {
       take: 10, // Top 10 events
     });
 
-    // Fetch device breakdown
-    const deviceBreakdown = await prisma.$queryRaw<Array<{device: string, count: bigint}>>`
-      SELECT context->>'device' as device, COUNT(*) as count
-      FROM "activity"
-      WHERE "appId" = ${appId} AND timestamp >= ${startDate}
-      GROUP BY context->>'device'
-      ORDER BY count DESC
-    `;
+        // Fetch device breakdown
+        const deviceBreakdown = await prisma.$queryRaw<Array<{device: string, count: bigint}>>`
+          SELECT context->>'device' as device, COUNT(*) as count
+          FROM "activities"
+          WHERE "appId" = ${appId} AND timestamp >= ${startDate}
+          GROUP BY context->>'device'
+          ORDER BY count DESC
+        `;
 
-    // Fetch browser breakdown
-    const browserBreakdown = await prisma.$queryRaw<Array<{browser: string, count: bigint}>>`
-      SELECT context->>'browser' as browser, COUNT(*) as count
-      FROM "activity"
-      WHERE "appId" = ${appId} AND timestamp >= ${startDate}
-      GROUP BY context->>'browser'
-      ORDER BY count DESC
-    `;
+        // Fetch browser breakdown
+        const browserBreakdown = await prisma.$queryRaw<Array<{browser: string, count: bigint}>>`
+          SELECT context->>'browser' as browser, COUNT(*) as count
+          FROM "activities"
+          WHERE "appId" = ${appId} AND timestamp >= ${startDate}
+          GROUP BY context->>'browser'
+          ORDER BY count DESC
+        `;
 
-    // Fetch hourly activity for heatmap
-    const hourlyActivity = await prisma.$queryRaw<Array<{hour: number, day_of_week: number, count: bigint}>>`
-      SELECT 
-        EXTRACT(HOUR FROM timestamp) as hour,
-        EXTRACT(DOW FROM timestamp) as day_of_week,
-        COUNT(*) as count
-      FROM "activity"
-      WHERE "appId" = ${appId} AND timestamp >= ${startDate}
-      GROUP BY hour, day_of_week
-      ORDER BY day_of_week, hour
-    `;
+        // Fetch hourly activity for heatmap
+        const hourlyActivity = await prisma.$queryRaw<Array<{hour: number, day_of_week: number, count: bigint}>>`
+          SELECT 
+            EXTRACT(HOUR FROM timestamp) as hour,
+            EXTRACT(DOW FROM timestamp) as day_of_week,
+            COUNT(*) as count
+          FROM "activities"
+          WHERE "appId" = ${appId} AND timestamp >= ${startDate}
+          GROUP BY hour, day_of_week
+          ORDER BY day_of_week, hour
+        `;
 
     // Get total stats
     const [totalEvents, uniqueUsers, eventsToday] = await Promise.all([
