@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import ContentCard from '@/components/ui/ContentCard';
 import StatsCard from '@/components/ui/StatsCard';
-import { ActivityFeed } from '@/components/ui/ActivityFeed';
+import { AdminActivityFeed } from './AdminActivityFeed';
 import {
   BarChart3,
   Activity,
@@ -67,25 +67,23 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
   const [timeRange, setTimeRange] = useState('7');
   const [showFeed, setShowFeed] = useState(false);
 
-  // Use app's public key if available, otherwise use admin key
-  const authToken = app?.publicKey ? `Bearer ${app.publicKey}` : `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`;
-
   useEffect(() => {
+    console.log('ActivityAnalytics mounted:', { appId, app });
     fetchSummary();
   }, [appId, timeRange]);
 
   const fetchSummary = async () => {
     setRefreshing(true);
     try {
-      const response = await fetch(`/api/v1/analytics/events/summary?days=${timeRange}`, {
-        headers: {
-          'Authorization': authToken,
-        },
-      });
+      // Use admin proxy endpoint that handles authentication server-side
+      const response = await fetch(`/api/admin/proxy/analytics/events/summary?days=${timeRange}&appId=${appId}`);
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Event summary data:', data);
         setSummary(data);
+      } else {
+        console.error('Failed to fetch event summary:', response.status, await response.text());
       }
     } catch (error) {
       console.error('Error fetching event summary:', error);
@@ -199,9 +197,8 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
       {showFeed ? (
         <ContentCard title="Activity Feed" noPadding>
           <div className="p-6">
-            <ActivityFeed 
+            <AdminActivityFeed 
               appId={appId} 
-              authToken={authToken}
               showUser={true}
             />
           </div>

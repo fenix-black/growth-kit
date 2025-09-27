@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { cn } from '@/components/ui/utils';
-import { UnifiedTimeline } from '@/components/ui/UnifiedTimeline';
+import { AdminUnifiedTimeline } from './AdminUnifiedTimeline';
 
 interface User {
   id: string;
@@ -779,9 +779,8 @@ export default function UsersLeadsManager({
                       <span className="text-xs text-gray-500 ml-2">(Activities & Credits)</span>
                     </h4>
                     <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 max-h-96 overflow-y-auto">
-                      <UnifiedTimeline 
+                      <AdminUnifiedTimeline 
                         appId={appId} 
-                        authToken={app?.publicKey ? `Bearer ${app.publicKey}` : `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`}
                         fingerprintId={selectedUser.fingerprintId}
                       />
                     </div>
