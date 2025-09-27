@@ -33,11 +33,16 @@ export function UserActivityHistory({ appId, fingerprintId }: UserActivityHistor
   const fetchActivities = async () => {
     setLoading(true);
     try {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - parseInt(timeRange));
+
       const params = new URLSearchParams({
         page: page.toString(),
         limit: '50',
-        days: timeRange,
         fingerprintId,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
         ...(eventFilter && { eventName: eventFilter }),
       });
 

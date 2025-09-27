@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
     const eventName = searchParams.get('eventName');
-    const fingerprintId = searchParams.get('fingerprintId');
+    const fingerprintValue = searchParams.get('fingerprintId');
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
@@ -31,6 +31,22 @@ export async function GET(request: NextRequest) {
 
     if (!app) {
       return errors.notFound();
+    }
+
+    // If fingerprint value provided, look up the ID
+    let fingerprintId: string | undefined;
+    if (fingerprintValue) {
+      const fingerprint = await prisma.fingerprint.findUnique({
+        where: { 
+          appId_fingerprint: {
+            appId,
+            fingerprint: fingerprintValue
+          }
+        },
+      });
+      if (fingerprint) {
+        fingerprintId = fingerprint.id;
+      }
     }
 
     // Build where clause
