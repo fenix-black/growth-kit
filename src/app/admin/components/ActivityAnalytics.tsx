@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import ContentCard from '@/components/ui/ContentCard';
 import StatsCard from '@/components/ui/StatsCard';
 import { AdminActivityFeed } from './AdminActivityFeed';
+import { ActivityHeatmap } from '@/components/ui/ActivityHeatmap';
+import { FunnelChart } from '@/components/ui/FunnelChart';
 import {
   BarChart3,
   Activity,
@@ -66,9 +68,14 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
   const [refreshing, setRefreshing] = useState(false);
   const [timeRange, setTimeRange] = useState('7');
   const [showFeed, setShowFeed] = useState(false);
+  const [funnelData, setFunnelData] = useState<any>(null);
+  const [segmentsData, setSegmentsData] = useState<any>(null);
+  const [funnelSteps, setFunnelSteps] = useState<string[]>(['page_viewed', 'button_clicked', 'form_submitted']);
 
   useEffect(() => {
     fetchSummary();
+    fetchFunnelData();
+    fetchSegmentsData();
   }, [appId, timeRange]);
 
   const fetchSummary = async () => {
@@ -94,29 +101,48 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
     }
   };
 
+  const fetchFunnelData = async () => {
+    try {
+      const params = new URLSearchParams({
+        appId,
+        steps: funnelSteps.join(','),
+        days: timeRange,
+      });
+
+      const response = await fetch(`/api/v1/admin/analytics/funnel?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFunnelData(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching funnel data:', error);
+    }
+  };
+
+  const fetchSegmentsData = async () => {
+    try {
+      const response = await fetch(`/api/v1/admin/analytics/segments?appId=${appId}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSegmentsData(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching segments data:', error);
+    }
+  };
+
   // Prepare chart colors
   const chartColors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1'];
-  
-  // Transform hourly activity data for heatmap
-  const prepareHeatmapData = () => {
-    if (!summary?.hourlyActivity) return [];
-    
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const heatmapData: any[] = [];
-    
-    for (let hour = 0; hour < 24; hour++) {
-      const hourData: any = { hour: `${hour}:00` };
-      days.forEach((day, dayIndex) => {
-        const activity = summary.hourlyActivity.find(
-          a => a.hour === hour && a.dayOfWeek === dayIndex
-        );
-        hourData[day] = activity?.count || 0;
-      });
-      heatmapData.push(hourData);
-    }
-    
-    return heatmapData;
-  };
 
   if (loading) {
     return (
@@ -280,25 +306,87 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
               title="Activity Heatmap" 
               description="User activity patterns by day and hour"
             >
-              <div className="overflow-x-auto">
-                <ResponsiveContainer width="100%" height={400}>
-                  <LineChart data={prepareHeatmapData()}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="hour" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                      <Line
-                        key={day}
-                        type="monotone"
-                        dataKey={day}
-                        stroke={chartColors[index % chartColors.length]}
-                        strokeWidth={2}
-                      />
+              <ActivityHeatmap 
+                data={summary.hourlyActivity.map(item => ({
+                  hour: item.hour,
+                  dayOfWeek: item.dayOfWeek,
+                  count: item.count
+                }))}
+              />
+            </ContentCard>
+          )}
+
+          {/* Funnel Analysis */}
+          {funnelData && (
+            <ContentCard 
+              title="Conversion Funnel" 
+              description="Track user progression through key events"
+              className="col-span-2"
+            >
+              <FunnelChart 
+                data={funnelData.funnel}
+                overallConversion={funnelData.overallConversion}
+              />
+            </ContentCard>
+          )}
+
+          {/* User Segments */}
+          {segmentsData && (
+            <ContentCard 
+              title="User Segments" 
+              description="Behavioral user segmentation"
+              className="col-span-2"
+            >
+              <div className="space-y-4">
+                {/* Segment Overview */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {segmentsData.segments.map((segment: any) => (
+                    <div 
+                      key={segment.key}
+                      className={`p-4 rounded-lg border-2 ${
+                        segment.color === 'purple' ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' :
+                        segment.color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' :
+                        segment.color === 'green' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' :
+                        segment.color === 'orange' ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' :
+                        'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                      }`}
+                    >
+                      <h4 className={`font-semibold ${
+                        segment.color === 'purple' ? 'text-purple-900 dark:text-purple-100' :
+                        segment.color === 'blue' ? 'text-blue-900 dark:text-blue-100' :
+                        segment.color === 'green' ? 'text-green-900 dark:text-green-100' :
+                        segment.color === 'orange' ? 'text-orange-900 dark:text-orange-100' :
+                        'text-red-900 dark:text-red-100'
+                      }`}>
+                        {segment.name}
+                      </h4>
+                      <p className="text-2xl font-bold mt-2">{segment.count}</p>
+                      <p className="text-sm opacity-75">{segment.percentage}%</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Segment Details */}
+                <div className="border-t pt-4">
+                  <h4 className="text-sm font-semibold mb-3">Segment Criteria</h4>
+                  <div className="space-y-2">
+                    {segmentsData.segments.map((segment: any) => (
+                      <div key={segment.key} className="flex items-start space-x-3">
+                        <div className={`w-3 h-3 rounded-full mt-1 flex-shrink-0 ${
+                          segment.color === 'purple' ? 'bg-purple-500' :
+                          segment.color === 'blue' ? 'bg-blue-500' :
+                          segment.color === 'green' ? 'bg-green-500' :
+                          segment.color === 'orange' ? 'bg-orange-500' :
+                          'bg-red-500'
+                        }`} />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{segment.name}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{segment.criteria}</p>
+                        </div>
+                      </div>
                     ))}
-                  </LineChart>
-                </ResponsiveContainer>
+                  </div>
+                </div>
               </div>
             </ContentCard>
           )}
