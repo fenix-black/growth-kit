@@ -267,10 +267,10 @@ export default function DashboardOverview() {
     
     // Credits breakdown pie chart
     const credits = [
-      { name: 'Referrals', value: 35, color: '#3b82f6' },
-      { name: 'Email Verify', value: 30, color: '#8b5cf6' },
-      { name: 'Name Claims', value: 20, color: '#10b981' },
-      { name: 'Actions', value: 15, color: '#f59e0b' },
+      { name: 'Referrals', value: 35, color: '#10b981' },
+      { name: 'Email Verify', value: 30, color: '#14b8a6' },
+      { name: 'Name Claims', value: 20, color: '#06b6d4' },
+      { name: 'Actions', value: 15, color: '#0ea5e9' },
     ];
     
     // Conversion funnel
@@ -366,7 +366,7 @@ export default function DashboardOverview() {
           change={metrics.activeApps > 0 ? Math.round((metrics.activeApps / metrics.totalApps) * 100) : 0}
           changeLabel="active"
           icon={<Package size={24} />}
-          color="blue"
+          color="primary"
         />
         <StatsCard
           title="Total Users"
@@ -374,25 +374,25 @@ export default function DashboardOverview() {
           change={metrics.growthRate}
           changeLabel="growth"
           icon={<Users size={24} />}
-          color="green"
+          color="secondary"
         />
         <StatsCard
           title="Credits Issued"
           value={metrics.totalCreditsIssued.toLocaleString()}
           icon={<Coins size={24} />}
-          color="purple"
+          color="primary"
         />
         <StatsCard
           title="Credits Used"
           value={metrics.totalCreditsConsumed.toLocaleString()}
           icon={<Activity size={24} />}
-          color="red"
+          color="secondary"
         />
         <StatsCard
           title="USD Spent"
           value={`$${metrics.totalUsdSpent.toFixed(2)}`}
           icon={<DollarSign size={24} />}
-          color="yellow"
+          color="primary"
         />
       </div>
 
@@ -415,24 +415,24 @@ export default function DashboardOverview() {
                 type="monotone" 
                 dataKey="users" 
                 stackId="1"
-                stroke="#3b82f6" 
-                fill="#3b82f6" 
+                stroke="#10b981" 
+                fill="#10b981" 
                 fillOpacity={0.6}
               />
               <Area 
                 type="monotone" 
                 dataKey="referrals" 
                 stackId="1"
-                stroke="#8b5cf6" 
-                fill="#8b5cf6" 
+                stroke="#14b8a6" 
+                fill="#14b8a6" 
                 fillOpacity={0.6}
               />
               <Area 
                 type="monotone" 
                 dataKey="waitlist" 
                 stackId="1"
-                stroke="#10b981" 
-                fill="#10b981" 
+                stroke="#06b6d4" 
+                fill="#06b6d4" 
                 fillOpacity={0.6}
               />
             </AreaChart>
@@ -461,7 +461,7 @@ export default function DashboardOverview() {
                 type="monotone" 
                 dataKey="spent" 
                 name="USD Spent"
-                stroke="#f59e0b" 
+                stroke="#10b981" 
                 strokeWidth={2}
                 dot={false}
               />
@@ -469,7 +469,7 @@ export default function DashboardOverview() {
                 yAxisId="right"
                 dataKey="transactions" 
                 name="Transactions"
-                fill="#3b82f6" 
+                fill="#14b8a6" 
                 fillOpacity={0.3}
               />
             </LineChart>
@@ -515,7 +515,7 @@ export default function DashboardOverview() {
               <XAxis type="number" />
               <YAxis dataKey="stage" type="category" />
               <Tooltip />
-              <Bar dataKey="users" fill="#3b82f6" />
+              <Bar dataKey="users" fill="#10b981" />
             </BarChart>
           </ResponsiveContainer>
         </ContentCard>

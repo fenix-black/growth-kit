@@ -234,6 +234,59 @@ textarea {
   .ring-offset-background {
     --tw-ring-offset-color: hsl(var(--background));
   }
+  
+  /* Gradient utilities for GrowthKit theme */
+  .from-primary {
+    --tw-gradient-from: hsl(var(--primary)) var(--tw-gradient-from-position);
+    --tw-gradient-to: hsl(var(--primary) / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .to-accent {
+    --tw-gradient-to: hsl(var(--accent)) var(--tw-gradient-to-position);
+  }
+  .bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+  }
+  .bg-clip-text {
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  .text-transparent {
+    color: transparent;
+  }
+  
+  /* Hover opacity utilities */
+  .hover\:bg-primary\/90:hover {
+    background-color: hsl(var(--primary) / 0.9);
+  }
+  .hover\:bg-secondary\/80:hover {
+    background-color: hsl(var(--secondary) / 0.8);
+  }
+  .hover\:bg-destructive\/90:hover {
+    background-color: hsl(var(--destructive) / 0.9);
+  }
+  .hover\:bg-accent:hover {
+    background-color: hsl(var(--accent));
+  }
+  .hover\:text-accent-foreground:hover {
+    color: hsl(var(--accent-foreground));
+  }
+  .bg-primary\/10 {
+    background-color: hsl(var(--primary) / 0.1);
+  }
+  .bg-secondary\/10 {
+    background-color: hsl(var(--secondary) / 0.1);
+  }
+  
+  /* Additional gradient positions for flexibility */
+  .from-emerald-400 {
+    --tw-gradient-from: #34d399 var(--tw-gradient-from-position);
+    --tw-gradient-to: rgb(52 211 153 / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .to-cyan-500 {
+    --tw-gradient-to: #06b6d4 var(--tw-gradient-to-position);
+  }
 }
 
 /* Manual dark mode utilities for Tailwind v4 */
