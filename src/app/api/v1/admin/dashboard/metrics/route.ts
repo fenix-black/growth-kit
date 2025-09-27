@@ -23,6 +23,16 @@ export async function GET(request: NextRequest) {
     const previousPeriodStart = new Date(currentPeriodStart);
     previousPeriodStart.setDate(previousPeriodStart.getDate() - days);
 
+    // Calculate dates for time series
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
     // Fetch all data in parallel
     const [
       currentPeriodUsers,
@@ -31,7 +41,13 @@ export async function GET(request: NextRequest) {
       totalCreditsConsumed,
       creditsDistribution,
       topEvents,
-      recentActivities
+      recentActivities,
+      todayUsers,
+      yesterdayUsers,
+      todayReferrals,
+      yesterdayReferrals,
+      todayWaitlist,
+      yesterdayWaitlist
     ] = await Promise.all([
       // Current period new users
       prisma.fingerprint.count({
@@ -86,22 +102,68 @@ export async function GET(request: NextRequest) {
         take: 5
       }),
       
-      // Recent activities across all apps
-      prisma.activity.findMany({
+      // Recent admin activities
+      prisma.adminActivity.findMany({
         take: 20,
-        orderBy: { timestamp: 'desc' },
-        include: {
-          app: {
-            select: { name: true }
-          },
-          fingerprint: {
-            include: {
-              leads: {
-                where: { emailVerified: true },
-                select: { email: true, name: true },
-                take: 1
-              }
-            }
+        orderBy: { timestamp: 'desc' }
+      }),
+      
+      // Today's new users
+      prisma.fingerprint.count({
+        where: {
+          createdAt: { 
+            gte: today,
+            lt: tomorrow
+          }
+        }
+      }),
+      
+      // Yesterday's new users
+      prisma.fingerprint.count({
+        where: {
+          createdAt: { 
+            gte: yesterday,
+            lt: today
+          }
+        }
+      }),
+      
+      // Today's referrals
+      prisma.referral.count({
+        where: {
+          createdAt: { 
+            gte: today,
+            lt: tomorrow
+          }
+        }
+      }),
+      
+      // Yesterday's referrals
+      prisma.referral.count({
+        where: {
+          createdAt: { 
+            gte: yesterday,
+            lt: today
+          }
+        }
+      }),
+      
+      // Today's waitlist
+      prisma.waitlist.count({
+        where: {
+          createdAt: { 
+            gte: today,
+            lt: tomorrow
+          }
+        }
+      }),
+      
+      // Yesterday's waitlist
+      prisma.waitlist.count({
+        where: {
+          createdAt: { 
+            gte: yesterday,
+            lt: today
           }
         }
       })
@@ -119,11 +181,11 @@ export async function GET(request: NextRequest) {
 
     // Format credits distribution
     const totalCreditsInDistribution = creditsDistribution.reduce(
-      (sum, item) => sum + (item._sum.amount || 0), 
+      (sum: number, item: any) => sum + (item._sum.amount || 0), 
       0
     );
     
-    const formattedCreditsDistribution = creditsDistribution.map(item => ({
+    const formattedCreditsDistribution = creditsDistribution.map((item: any) => ({
       reason: item.reason,
       count: item._sum.amount || 0,
       percentage: totalCreditsInDistribution > 0 
@@ -132,21 +194,27 @@ export async function GET(request: NextRequest) {
     }));
 
     // Format top events
-    const formattedTopEvents = topEvents.map(event => ({
+    const formattedTopEvents = topEvents.map((event: any) => ({
       eventName: event.eventName,
       count: event._count
     }));
 
     // Format recent activities
-    const formattedActivities = recentActivities.map(activity => ({
-      id: activity.id,
-      eventName: activity.eventName,
-      appName: activity.app.name,
-      timestamp: activity.timestamp,
-      user: activity.fingerprint.leads[0]?.email || 
-            activity.fingerprint.leads[0]?.name || 
-            `User ${activity.fingerprintId.substring(0, 8)}`
-    }));
+    const formattedActivities = recentActivities.map((activity: any) => {
+      // Format action for display
+      const actionLabels: Record<string, string> = {
+        'app_created': 'Created app',
+        'app_updated': 'Updated app'
+      };
+      
+      return {
+        id: activity.id,
+        eventName: actionLabels[activity.action] || activity.action,
+        appName: activity.metadata?.name || activity.targetId || '',
+        timestamp: activity.timestamp,
+        user: 'Admin'
+      };
+    });
 
     // System health metrics
     const memoryUsage = process.memoryUsage();
@@ -156,11 +224,28 @@ export async function GET(request: NextRequest) {
       creditsUtilization: Math.min(creditsUtilization, 100)
     };
 
+    // Format growth time series data
+    const growthTimeSeries = [
+      {
+        date: yesterday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        users: yesterdayUsers,
+        referrals: yesterdayReferrals,
+        waitlist: yesterdayWaitlist
+      },
+      {
+        date: today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        users: todayUsers,
+        referrals: todayReferrals,
+        waitlist: todayWaitlist
+      }
+    ];
+
     return successResponse({
       growth: {
         rate: parseFloat(growthRate.toFixed(2)),
         currentPeriodUsers,
-        previousPeriodUsers
+        previousPeriodUsers,
+        timeSeries: growthTimeSeries
       },
       credits: {
         distribution: formattedCreditsDistribution,

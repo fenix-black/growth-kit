@@ -173,6 +173,7 @@ export default function DashboardOverview() {
           // Update chart data with real data
           setChartData((prev: any) => ({
             ...prev,
+            growth: growth.timeSeries || [],
             credits: credits.distribution.map((item: any) => ({
               name: item.reason,
               value: item.percentage,
@@ -495,7 +496,6 @@ export default function DashboardOverview() {
             ]}
             height={300}
             colorScheme="financial"
-            formatter={(value) => value >= 100 ? `$${value.toFixed(0)}` : `$${value.toFixed(2)}`}
           />
         </ContentCard>
 

@@ -253,3 +253,17 @@ model Activity {
   @@index([appId, eventName])
   @@map("activities")
 }
+
+model AdminActivity {
+  id         String   @id @default(cuid())
+  action     String   // e.g., "app_created", "user_paused", "credits_issued"
+  targetType String?  // e.g., "app", "user", "waitlist"
+  targetId   String?  // ID of the affected entity
+  metadata   Json?    // Additional context
+  timestamp  DateTime @default(now())
+  
+  @@index([action])
+  @@index([targetType, targetId])
+  @@index([timestamp])
+  @@map("admin_activities")
+}

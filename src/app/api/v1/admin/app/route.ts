@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { verifyServiceKey } from '@/lib/security/auth';
 import { successResponse, errors } from '@/lib/utils/response';
 import { generateApiKey, hashApiKey } from '@/lib/security/apiKeys';
+import { trackAdminActivity } from '@/lib/admin-activity-tracking';
 
 export async function POST(request: NextRequest) {
   try {
@@ -96,6 +97,14 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      // Track admin activity
+      await trackAdminActivity({
+        action: 'app_created',
+        targetType: 'app',
+        targetId: app.id,
+        metadata: { name, domain }
+      });
+
       // Return the app with the initial API key (only time it's shown)
       return successResponse({
         app,
@@ -113,6 +122,14 @@ export async function POST(request: NextRequest) {
         entityId: app.id,
         metadata: { name, domain },
       },
+    });
+
+    // Track admin activity
+    await trackAdminActivity({
+      action: 'app_updated',
+      targetType: 'app',
+      targetId: app.id,
+      metadata: { name, domain }
     });
 
     return successResponse({
