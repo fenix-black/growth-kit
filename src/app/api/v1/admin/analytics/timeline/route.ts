@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const searchParams = request.nextUrl.searchParams;
     const appId = searchParams.get('appId');
-    const fingerprintId = searchParams.get('fingerprintId');
+    const fingerprintValue = searchParams.get('fingerprintId');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
     const startDate = searchParams.get('startDate');
@@ -23,18 +23,34 @@ export async function GET(request: NextRequest) {
       return errors.badRequest('appId is required');
     }
 
-    if (!fingerprintId) {
+    if (!fingerprintValue) {
       return errors.badRequest('fingerprintId is required');
     }
 
-    // Verify app exists
-    const app = await prisma.app.findUnique({
-      where: { id: appId },
-    });
+    // Verify app exists and get fingerprint
+    const [app, fingerprint] = await Promise.all([
+      prisma.app.findUnique({
+        where: { id: appId },
+      }),
+      prisma.fingerprint.findUnique({
+        where: { 
+          appId_fingerprint: {
+            appId,
+            fingerprint: fingerprintValue
+          }
+        },
+      }),
+    ]);
 
     if (!app) {
       return errors.notFound();
     }
+
+    if (!fingerprint) {
+      return errors.notFound();
+    }
+
+    const fingerprintId = fingerprint.id;
 
     // Build date filter
     const dateFilter: any = {};
