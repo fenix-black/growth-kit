@@ -241,7 +241,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
                   <XAxis dataKey="eventName" angle={-45} textAnchor="end" height={80} />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#10b981" />
+                  <Bar dataKey="count" fill="#a855f7" />
                 </BarChart>
               </ResponsiveContainer>
             </ContentCard>
@@ -259,7 +259,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
                       cy="50%"
                       labelLine={false}
                       outerRadius={100}
-                      fill="#14b8a6"
+                      fill="#d946ef"
                       dataKey="count"
                       label={(entry) => `${entry.device}: ${entry.count}`}
                     >
@@ -284,7 +284,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
                       cy="50%"
                       labelLine={false}
                       outerRadius={100}
-                      fill="#14b8a6"
+                      fill="#d946ef"
                       dataKey="count"
                       label={(entry) => `${entry.browser}: ${entry.count}`}
                     >

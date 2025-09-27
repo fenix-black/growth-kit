@@ -268,9 +268,9 @@ export default function DashboardOverview() {
     // Credits breakdown pie chart
     const credits = [
       { name: 'Referrals', value: 35, color: '#10b981' },
-      { name: 'Email Verify', value: 30, color: '#14b8a6' },
-      { name: 'Name Claims', value: 20, color: '#06b6d4' },
-      { name: 'Actions', value: 15, color: '#0ea5e9' },
+      { name: 'Email Verify', value: 30, color: '#a855f7' },
+      { name: 'Name Claims', value: 20, color: '#f97316' },
+      { name: 'Actions', value: 15, color: '#d946ef' },
     ];
     
     // Conversion funnel
@@ -374,25 +374,25 @@ export default function DashboardOverview() {
           change={metrics.growthRate}
           changeLabel="growth"
           icon={<Users size={24} />}
-          color="secondary"
+          color="purple"
         />
         <StatsCard
           title="Credits Issued"
           value={metrics.totalCreditsIssued.toLocaleString()}
           icon={<Coins size={24} />}
-          color="primary"
+          color="secondary"
         />
         <StatsCard
           title="Credits Used"
           value={metrics.totalCreditsConsumed.toLocaleString()}
           icon={<Activity size={24} />}
-          color="secondary"
+          color="violet"
         />
         <StatsCard
           title="USD Spent"
           value={`$${metrics.totalUsdSpent.toFixed(2)}`}
           icon={<DollarSign size={24} />}
-          color="primary"
+          color="orange"
         />
       </div>
 
@@ -423,8 +423,8 @@ export default function DashboardOverview() {
                 type="monotone" 
                 dataKey="referrals" 
                 stackId="1"
-                stroke="#14b8a6" 
-                fill="#14b8a6" 
+                stroke="#a855f7" 
+                fill="#a855f7" 
                 fillOpacity={0.6}
               />
               <Area 
@@ -461,7 +461,7 @@ export default function DashboardOverview() {
                 type="monotone" 
                 dataKey="spent" 
                 name="USD Spent"
-                stroke="#10b981" 
+                stroke="#f97316" 
                 strokeWidth={2}
                 dot={false}
               />
@@ -469,7 +469,7 @@ export default function DashboardOverview() {
                 yAxisId="right"
                 dataKey="transactions" 
                 name="Transactions"
-                fill="#14b8a6" 
+                fill="#ec4899" 
                 fillOpacity={0.3}
               />
             </LineChart>

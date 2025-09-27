@@ -24,13 +24,24 @@ export const growthKitTheme = {
         end: 'hsl(var(--growthkit-gradient-end))',
       },
     },
+    fenix: {
+      magenta: 'hsl(var(--fenix-magenta))',
+      purple: 'hsl(var(--fenix-purple))',
+      violet: 'hsl(var(--fenix-violet))',
+      orange: 'hsl(var(--fenix-orange))',
+      pink: 'hsl(var(--fenix-pink))',
+    },
   },
   charts: {
-    colors: ['#10b981', '#14b8a6', '#06b6d4', '#0ea5e9', '#0284c7'],
+    colors: ['#10b981', '#14b8a6', '#a855f7', '#f97316', '#06b6d4', '#d946ef', '#8b5cf6', '#ec4899'],
+    growth: ['#10b981', '#14b8a6', '#06b6d4'],
+    financial: ['#f97316', '#ec4899', '#d946ef'],
+    analytics: ['#10b981', '#a855f7', '#f97316', '#06b6d4', '#d946ef'],
     gradients: [
       ['#34d399', '#10b981'],
       ['#14b8a6', '#06b6d4'],
-      ['#06b6d4', '#0ea5e9'],
+      ['#d946ef', '#06b6d4'],
+      ['#f97316', '#ec4899'],
     ],
   },
   radius: {

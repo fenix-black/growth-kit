@@ -9,7 +9,7 @@ interface StatsCardProps {
   change?: number;
   changeLabel?: string;
   icon?: React.ReactNode;
-  color?: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'primary' | 'secondary';
+  color?: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'primary' | 'secondary' | 'magenta' | 'orange' | 'violet' | 'pink';
   loading?: boolean;
   className?: string;
 }
@@ -32,6 +32,10 @@ export default function StatsCard({
     red: 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400',
     primary: 'bg-primary/10 text-primary',
     secondary: 'bg-secondary/10 text-secondary',
+    magenta: 'bg-fenix-magenta/10 text-fenix-magenta',
+    orange: 'bg-fenix-orange/10 text-fenix-orange',
+    violet: 'bg-fenix-violet/10 text-fenix-violet',
+    pink: 'bg-fenix-pink/10 text-fenix-pink',
   };
 
   const getTrendIcon = () => {

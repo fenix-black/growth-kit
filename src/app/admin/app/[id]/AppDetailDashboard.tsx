@@ -335,12 +335,12 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           <div className="flex items-center space-x-3">
             <div className={cn(
               'px-3 py-1.5 rounded-full text-xs font-semibold',
-              app.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              app.isActive ? 'bg-primary/10 text-primary' : 'bg-red-100 text-red-800'
             )}>
               {app.isActive ? 'Active' : 'Inactive'}
             </div>
             {app.creditsPaused && (
-              <div className="px-3 py-1.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+              <div className="px-3 py-1.5 rounded-full text-xs font-semibold bg-fenix-orange/10 text-fenix-orange">
                 ⏸️ Credits Paused
               </div>
             )}
@@ -445,7 +445,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
               className={cn(
                 'py-2 px-1 border-b-2 font-medium text-sm transition-colors',
                 activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
+                  ? 'border-primary text-primary'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               )}
             >
@@ -482,15 +482,15 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
             </div>
             
             {app.trackUsdValue && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="mt-4 p-4 bg-fenix-orange/10 border border-fenix-orange/20 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-blue-600 font-medium mb-1">USD Spent Today</p>
-                    <p className="text-2xl font-bold text-blue-900">
+                    <p className="text-sm text-fenix-orange font-medium mb-1">USD Spent Today</p>
+                    <p className="text-2xl font-bold text-gray-900">
                       ${(app.todayUsdSpent || 0).toFixed(2)}
                     </p>
                   </div>
-                  <DollarSign className="text-blue-500" size={32} />
+                  <DollarSign className="text-fenix-orange" size={32} />
                 </div>
               </div>
             )}
@@ -581,7 +581,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                     className="cursor-pointer"
                   >
                     {(isEditing ? editedApp.isActive : app.isActive) ? 
-                      <ToggleRight className="h-6 w-6 text-green-600" /> : 
+                      <ToggleRight className="h-6 w-6 text-primary" /> : 
                       <ToggleLeft className="h-6 w-6 text-gray-400" />
                     }
                   </button>
@@ -628,7 +628,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                     className="cursor-pointer"
                   >
                     {(isEditing ? editedApp.waitlistEnabled : app.waitlistEnabled) ? 
-                      <ToggleRight className="h-6 w-6 text-green-600" /> : 
+                      <ToggleRight className="h-6 w-6 text-primary" /> : 
                       <ToggleLeft className="h-6 w-6 text-gray-400" />
                     }
                   </button>
@@ -645,7 +645,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                         className="cursor-pointer"
                       >
                         {(isEditing ? editedApp.autoApproveWaitlist : app.autoApproveWaitlist) ? 
-                          <ToggleRight className="h-6 w-6 text-green-600" /> : 
+                          <ToggleRight className="h-6 w-6 text-primary" /> : 
                           <ToggleLeft className="h-6 w-6 text-gray-400" />
                         }
                       </button>
@@ -705,7 +705,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                     className="cursor-pointer"
                   >
                     {(isEditing ? editedApp.creditsPaused : app.creditsPaused) ? 
-                      <ToggleRight className="h-6 w-6 text-red-600" /> : 
+                      <ToggleRight className="h-6 w-6 text-fenix-orange" /> : 
                       <ToggleLeft className="h-6 w-6 text-gray-400" />
                     }
                   </button>
@@ -715,7 +715,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                   Temporarily stop all credit earning (users can still spend existing credits)
                 </p>
                 {app.creditsPaused && app.creditsPausedAt && (
-                  <p className="text-xs text-red-600 mt-1 ml-9">
+                  <p className="text-xs text-fenix-orange mt-1 ml-9">
                     Paused since: {new Date(app.creditsPausedAt).toLocaleString()}
                   </p>
                 )}
@@ -729,7 +729,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                     className="cursor-pointer"
                   >
                     {(isEditing ? editedApp.trackUsdValue : app.trackUsdValue) ? 
-                      <ToggleRight className="h-6 w-6 text-green-600" /> : 
+                      <ToggleRight className="h-6 w-6 text-primary" /> : 
                       <ToggleLeft className="h-6 w-6 text-gray-400" />
                     }
                   </button>
@@ -748,7 +748,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                     className="cursor-pointer"
                   >
                     {(isEditing ? editedApp.allowCustomCredits : app.allowCustomCredits) ? 
-                      <ToggleRight className="h-6 w-6 text-green-600" /> : 
+                      <ToggleRight className="h-6 w-6 text-primary" /> : 
                       <ToggleLeft className="h-6 w-6 text-gray-400" />
                     }
                   </button>
@@ -807,13 +807,13 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                 placeholder="Enter valid JSON for the credit policy..."
               />
               {isEditing && policyJsonError && (
-                <div className="flex items-center space-x-2 text-red-600 text-sm">
+                <div className="flex items-center space-x-2 text-red-500 text-sm">
                   <AlertCircle size={16} />
                   <span>{policyJsonError}</span>
                 </div>
               )}
               {isEditing && !policyJsonError && policyJsonText && (
-                <div className="flex items-center space-x-2 text-green-600 text-sm">
+                <div className="flex items-center space-x-2 text-primary text-sm">
                   <CheckCircle size={16} />
                   <span>Valid JSON format</span>
                 </div>
@@ -885,7 +885,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                       className={cn(
                         'px-2 py-1 text-xs font-semibold rounded-full',
                         apiKey.isActive
-                          ? 'bg-green-100 text-green-800'
+                          ? 'bg-primary/10 text-primary'
                           : 'bg-red-100 text-red-800'
                       )}
                     >
@@ -945,7 +945,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                   setShowCopySuccess('modal');
                   setTimeout(() => setShowCopySuccess(null), 2000);
                 }}
-                icon={showCopySuccess === 'modal' ? <CheckCircle className="h-5 w-5 text-green-600" /> : <Copy className="h-5 w-5" />}
+                icon={showCopySuccess === 'modal' ? <CheckCircle className="h-5 w-5 text-primary" /> : <Copy className="h-5 w-5" />}
               >
                 {showCopySuccess === 'modal' ? 'Copied!' : 'Copy to Clipboard'}
               </Button>

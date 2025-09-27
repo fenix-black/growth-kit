@@ -217,7 +217,7 @@ export default function AnalyticsDashboard() {
   }
 
   // Prepare chart colors
-  const chartColors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1'];
+  const chartColors = ['#10b981', '#a855f7', '#f97316', '#06b6d4', '#d946ef', '#8b5cf6', '#ec4899'];
 
   return (
     <DashboardLayout
@@ -298,25 +298,25 @@ export default function AnalyticsDashboard() {
             title="Credits Consumed"
             value={generalMetrics.overview.totalCreditsConsumed.toLocaleString()}
             icon={<TrendingUp size={24} />}
-            color="secondary"
+            color="purple"
           />
           <StatsCard
             title="Referral Conversion"
             value={`${generalMetrics.conversion.referralConversionRate.toFixed(1)}%`}
             icon={<Users size={24} />}
-            color="primary"
+            color="secondary"
           />
           <StatsCard
             title="Email Verification"
             value={`${generalMetrics.conversion.emailVerificationRate.toFixed(1)}%`}
             icon={<FileText size={24} />}
-            color="secondary"
+            color="violet"
           />
           <StatsCard
             title="Credits Balance"
             value={(generalMetrics.overview.totalCreditsIssued - generalMetrics.overview.totalCreditsConsumed).toLocaleString()}
             icon={<BarChart3 size={24} />}
-            color="primary"
+            color="magenta"
           />
         </div>
       )}
@@ -328,25 +328,25 @@ export default function AnalyticsDashboard() {
             title="Total USD Spent"
             value={formatCurrency(usdMetrics.summary.totalRevenue)}
             icon={<DollarSign size={24} />}
-            color="primary"
+            color="orange"
           />
           <StatsCard
             title="Total Transactions"
             value={usdMetrics.summary.totalTransactions.toLocaleString()}
             icon={<Activity size={24} />}
-            color="primary"
+            color="pink"
           />
           <StatsCard
             title="Avg Transaction Value"
             value={formatCurrency(usdMetrics.summary.avgTransactionValue)}
             icon={<TrendingUp size={24} />}
-            color="secondary"
+            color="violet"
           />
           <StatsCard
             title="Avg User Spend"
             value={formatCurrency(usdMetrics.summary.avgUserValue)}
             icon={<Users size={24} />}
-            color="secondary"
+            color="magenta"
           />
         </div>
       )}
@@ -371,15 +371,15 @@ export default function AnalyticsDashboard() {
                   type="monotone" 
                   dataKey="revenue" 
                   name="USD Spent"
-                  stroke="#10b981" 
-                  fill="#10b981" 
+                  stroke="#f97316" 
+                  fill="#f97316" 
                   fillOpacity={0.6}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="transactionCount" 
                   name="Transactions"
-                  stroke="#14b8a6" 
+                  stroke="#ec4899" 
                   strokeWidth={2}
                   yAxisId="right"
                 />
@@ -403,7 +403,7 @@ export default function AnalyticsDashboard() {
                   <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
                   <YAxis dataKey="action" type="category" width={100} />
                   <Tooltip formatter={(value: any) => formatCurrency(value)} />
-                  <Bar dataKey="totalRevenue" name="Total Spent" fill="#06b6d4" />
+                  <Bar dataKey="totalRevenue" name="Total Spent" fill="#d946ef" />
                 </BarChart>
               </ResponsiveContainer>
             </ContentCard>
@@ -421,7 +421,7 @@ export default function AnalyticsDashboard() {
                     cy="50%"
                     labelLine={false}
                     outerRadius={120}
-                    fill="#0ea5e9"
+                    fill="#a855f7"
                     dataKey="totalRevenue"
                     label={(entry: any) => `${entry.action}: ${formatCurrency(entry.totalRevenue as number)}`}
                   >

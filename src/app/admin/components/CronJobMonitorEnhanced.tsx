@@ -414,10 +414,10 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
 
   const getLogColor = (log: string) => {
     if (log.includes('[ERROR]')) return 'text-red-600';
-    if (log.includes('[WARNING]')) return 'text-yellow-600';
-    if (log.includes('[SUCCESS]')) return 'text-green-600';
-    if (log.includes('[INFO]')) return 'text-blue-600';
-    if (log.includes('[TEST]')) return 'text-purple-600';
+    if (log.includes('[WARNING]')) return 'text-fenix-orange';
+    if (log.includes('[SUCCESS]')) return 'text-primary';
+    if (log.includes('[INFO]')) return 'text-fenix-purple';
+    if (log.includes('[TEST]')) return 'text-fenix-violet';
     return 'text-gray-700';
   };
 
@@ -432,7 +432,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
             <p className="text-sm text-gray-400">Cron jobs will appear here after they run</p>
             <button
               onClick={() => setShowManualRunModal(true)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground text-sm rounded-md hover:bg-primary/90"
             >
               Run Manual Job to Generate Data
             </button>
@@ -447,8 +447,8 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
             <div key={run.id} className="relative flex items-start mb-8">
               {/* Timeline dot */}
               <div className={`absolute left-6 w-4 h-4 rounded-full border-2 border-white z-10 ${
-                run.status === 'success' ? 'bg-green-500' :
-                run.status === 'partial' ? 'bg-yellow-500' :
+                run.status === 'success' ? 'bg-primary' :
+                run.status === 'partial' ? 'bg-fenix-orange' :
                 'bg-red-500'
               }`}></div>
               
@@ -461,9 +461,9 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-2">
                       {run.status === 'success' ? (
-                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <CheckCircle className="w-5 h-5 text-primary" />
                       ) : run.status === 'partial' ? (
-                        <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                        <AlertTriangle className="w-5 h-5 text-fenix-orange" />
                       ) : (
                         <XCircle className="w-5 h-5 text-red-500" />
                       )}
@@ -487,7 +487,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
                     </div>
                     <div>
                       <span className="text-gray-500">Errors: </span>
-                      <span className={`font-medium ${run.errorCount > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      <span className={`font-medium ${run.errorCount > 0 ? 'text-red-600' : 'text-primary'}`}>
                         {run.errorCount}
                       </span>
                     </div>
@@ -529,8 +529,8 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
                   {selectedRun.appName} - {formatDate(selectedRun.executedAt)}
                 </span>
                 <span className={`px-2 py-1 text-xs rounded-full ${
-                  selectedRun.status === 'success' ? 'bg-green-100 text-green-800' :
-                  selectedRun.status === 'partial' ? 'bg-yellow-100 text-yellow-800' :
+                  selectedRun.status === 'success' ? 'bg-primary/10 text-primary' :
+                  selectedRun.status === 'partial' ? 'bg-fenix-orange/10 text-fenix-orange' :
                   'bg-red-100 text-red-800'
                 }`}>
                   {selectedRun.status}
@@ -609,7 +609,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center space-x-3">
               {alertConfig.enabled ? (
-                <Bell className="w-5 h-5 text-blue-600" />
+                <Bell className="w-5 h-5 text-fenix-purple" />
               ) : (
                 <BellOff className="w-5 h-5 text-gray-400" />
               )}
@@ -625,7 +625,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
                 onChange={(e) => setAlertConfig({ ...alertConfig, enabled: e.target.checked })}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
           
@@ -688,7 +688,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
           <div className="flex justify-end">
             <button
               onClick={handleSaveAlerts}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
             >
               Save Alert Configuration
             </button>
@@ -725,7 +725,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
             </select>
             <button
               onClick={() => setShowManualRunModal(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="flex items-center space-x-2 px-4 py-2 bg-fenix-violet text-white rounded-md hover:bg-fenix-violet/90"
             >
               <Play className="w-4 h-4" />
               <span>Manual Run</span>
@@ -747,9 +747,9 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">Status</p>
-                <p className="text-xl font-semibold text-green-600">Active</p>
+                <p className="text-xl font-semibold text-primary">Active</p>
               </div>
-              <CheckCircle className="w-8 h-8 text-green-500" />
+              <CheckCircle className="w-8 h-8 text-primary" />
             </div>
           </div>
           <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -790,7 +790,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
                 onClick={() => setActiveTab(id as any)}
                 className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
                   activeTab === id
-                    ? 'border-blue-500 text-blue-600'
+                    ? 'border-primary text-primary'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -827,7 +827,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
             <h3 className="text-lg font-medium text-gray-900 mb-4">Manual Cron Run</h3>
             
             {isRunning && (
-              <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md text-sm">
+              <div className="mb-4 p-3 bg-primary/10 text-primary rounded-md text-sm">
                 Processing... Please wait while the cron job executes.
               </div>
             )}
@@ -916,7 +916,7 @@ export default function CronJobMonitorEnhanced({ appId, onClose }: CronJobMonito
                 className={`px-4 py-2 text-white rounded-md ${
                   isRunning 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                    : 'bg-primary hover:bg-primary/90 cursor-pointer'
                 }`}
               >
                 {isRunning ? 'Running...' : 'Run Now'}

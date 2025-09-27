@@ -13,6 +13,13 @@
     --growthkit-gradient-start: 156 62% 60%; /* #34d399 */
     --growthkit-gradient-end: 187 92% 43%; /* #06b6d4 */
     
+    /* FenixBlack Accent Colors */
+    --fenix-magenta: 288 85% 60%; /* #d946ef */
+    --fenix-purple: 270 66% 66%; /* #a855f7 */
+    --fenix-violet: 252 78% 60%; /* #8b5cf6 */
+    --fenix-orange: 27 90% 52%; /* #f97316 */
+    --fenix-pink: 339 90% 60%; /* #ec4899 */
+    
     /* shadcn/ui variables */
     --card: 0 0% 100%;
     --card-foreground: 0 0% 9%;
@@ -45,6 +52,13 @@
     --growthkit-accent: 199 89% 48%;
     --growthkit-gradient-start: 156 62% 60%;
     --growthkit-gradient-end: 187 92% 43%;
+    
+    /* FenixBlack Accent Colors (same in dark mode) */
+    --fenix-magenta: 288 85% 60%;
+    --fenix-purple: 270 66% 66%;
+    --fenix-violet: 252 78% 60%;
+    --fenix-orange: 27 90% 52%;
+    --fenix-pink: 339 90% 60%;
     
     /* shadcn/ui variables for dark mode */
     --card: 0 0% 4%;
@@ -286,6 +300,47 @@ textarea {
   }
   .to-cyan-500 {
     --tw-gradient-to: #06b6d4 var(--tw-gradient-to-position);
+  }
+  
+  /* FenixBlack color utilities */
+  .bg-fenix-magenta {
+    background-color: hsl(var(--fenix-magenta));
+  }
+  .bg-fenix-purple {
+    background-color: hsl(var(--fenix-purple));
+  }
+  .bg-fenix-violet {
+    background-color: hsl(var(--fenix-violet));
+  }
+  .bg-fenix-orange {
+    background-color: hsl(var(--fenix-orange));
+  }
+  .bg-fenix-pink {
+    background-color: hsl(var(--fenix-pink));
+  }
+  .text-fenix-magenta {
+    color: hsl(var(--fenix-magenta));
+  }
+  .text-fenix-purple {
+    color: hsl(var(--fenix-purple));
+  }
+  .text-fenix-violet {
+    color: hsl(var(--fenix-violet));
+  }
+  .text-fenix-orange {
+    color: hsl(var(--fenix-orange));
+  }
+  .text-fenix-pink {
+    color: hsl(var(--fenix-pink));
+  }
+  .bg-fenix-purple\/10 {
+    background-color: hsl(var(--fenix-purple) / 0.1);
+  }
+  .bg-fenix-magenta\/10 {
+    background-color: hsl(var(--fenix-magenta) / 0.1);
+  }
+  .bg-fenix-orange\/10 {
+    background-color: hsl(var(--fenix-orange) / 0.1);
   }
 }
 
