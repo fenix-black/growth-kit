@@ -12,8 +12,9 @@ pending:
 
 todo:
 - add a way to stop giving more credits for an app, or pause it. - DONE
-- add fingerprint tracking event on sdk  (for tracking 'activities' on an app) - DONE (Phase 1 complete: SDK + API)
-    - add more info about the browser on each usage
+- add fingerprint tracking event on sdk  (for tracking 'activities' on an app) - DONE ✅
+    - Phase 1: SDK + API endpoint with browser context - DONE ✅
+    - Phase 2: Dashboard visualizations (activity feed, analytics, unified timeline) - DONE ✅
 - add support for answering forms linked to fingerprint (to earn credits)
 - add some UI auto-branding support to sdk hook (since it has access to the rest of the webpage, it could grab the page colors and UI language) - add some growthkit default branding to the widget
 - admin, add a way to send an email to some/all users/leads that have emails, from the admin.
@@ -21,3 +22,4 @@ todo:
 - admin, add admin users management owner of groups of apps
 - admin, add a way of grouping apps with a single apikey, so they share credits consumption and earnings (like a passport by topic)
 - admin. add app description field and keywords, to have better insights as to why a user wanted to use them (tracking)
+- sdk: add localization support for widget, and expose method so the client can switch the active language (for example, if the client app handles the locale)

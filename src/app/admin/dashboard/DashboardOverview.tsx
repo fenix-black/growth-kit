@@ -6,7 +6,6 @@ import DashboardLayout from '@/components/ui/DashboardLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
 import StatsCard from '@/components/ui/StatsCard';
-import ActivityFeed from '@/components/ui/ActivityFeed';
 import Button from '@/components/ui/Button';
 import { cn } from '@/components/ui/utils';
 import { 
@@ -73,14 +72,6 @@ interface Metrics {
   conversionRate: number;
 }
 
-interface Activity {
-  id: string;
-  type: 'app_created' | 'user_joined' | 'referral' | 'waitlist' | 'invitation';
-  message: string;
-  timestamp: string;
-  icon: React.ReactNode;
-  color: string;
-}
 
 export default function DashboardOverview() {
   const router = useRouter();
@@ -101,7 +92,6 @@ export default function DashboardOverview() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [timeRange, setTimeRange] = useState('7d');
-  const [activities, setActivities] = useState<Activity[]>([]);
   const [chartData, setChartData] = useState<any>({
     growth: [],
     expenses: [],
@@ -154,9 +144,6 @@ export default function DashboardOverview() {
           growthRate,
           conversionRate
         });
-        
-        // Activities are generated from apps data
-        generateActivities(appsList);
       }
       
       // Fetch general metrics
@@ -298,51 +285,6 @@ export default function DashboardOverview() {
     setChartData({ growth, expenses, credits, conversion });
   };
 
-  const generateActivities = (appsList: App[]) => {
-    const mockActivities: Activity[] = [
-      {
-        id: '1',
-        type: 'app_created',
-        message: 'New app "MyApp" was created',
-        timestamp: new Date().toISOString(),
-        icon: <Package size={16} />,
-        color: 'text-blue-600'
-      },
-      {
-        id: '2',
-        type: 'user_joined',
-        message: '25 new users joined waitlist',
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        icon: <Users size={16} />,
-        color: 'text-green-600'
-      },
-      {
-        id: '3',
-        type: 'invitation',
-        message: 'Batch invitation sent to 10 users',
-        timestamp: new Date(Date.now() - 7200000).toISOString(),
-        icon: <CheckCircle size={16} />,
-        color: 'text-purple-600'
-      },
-      {
-        id: '4',
-        type: 'referral',
-        message: '5 referrals completed successfully',
-        timestamp: new Date(Date.now() - 10800000).toISOString(),
-        icon: <Link size={16} />,
-        color: 'text-indigo-600'
-      },
-      {
-        id: '5',
-        type: 'waitlist',
-        message: 'Waitlist position updated for 15 users',
-        timestamp: new Date(Date.now() - 14400000).toISOString(),
-        icon: <FileText size={16} />,
-        color: 'text-yellow-600'
-      }
-    ];
-    setActivities(mockActivities);
-  };
 
   const handleLogout = async () => {
     await fetch('/api/admin/login', { method: 'DELETE' });
@@ -587,7 +529,9 @@ export default function DashboardOverview() {
           description="Latest events across all apps"
           className="col-span-2"
         >
-          <ActivityFeed activities={activities} />
+          <div className="text-center py-8 text-gray-500">
+            Activity tracking data will appear here once apps start tracking events.
+          </div>
         </ContentCard>
 
         {/* System Health */}

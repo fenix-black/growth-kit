@@ -9,6 +9,7 @@ import Button from '@/components/ui/Button';
 import WaitlistManager from '../../components/WaitlistManager';
 import EmailTemplateEditor from '../../components/EmailTemplateEditor';
 import UsersLeadsManager from '../../components/UsersLeadsManager';
+import ActivityAnalytics from '../../components/ActivityAnalytics';
 import { cn } from '@/components/ui/utils';
 import { 
   Settings,
@@ -827,6 +828,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           appId={appId}
           appName={app.name}
           appDomain={app.domain}
+          app={app}
           embedded={true}
           onClose={() => setActiveTab('overview')}
         />
@@ -843,19 +845,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
       )}
 
       {activeTab === 'analytics' && (
-        <ContentCard title="App Analytics">
-          <div className="text-center py-12 text-gray-500">
-            <BarChart3 className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <p>Analytics data for this app will be displayed here</p>
-            <Button
-              variant="primary"
-              onClick={() => router.push(`/admin/analytics?appId=${appId}`)}
-              className="mt-4"
-            >
-              View in Analytics Dashboard
-            </Button>
-          </div>
-        </ContentCard>
+        <ActivityAnalytics appId={appId} app={app} />
       )}
 
       {activeTab === 'api-keys' && (

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { cn } from '@/components/ui/utils';
+import { UnifiedTimeline } from '@/components/ui/UnifiedTimeline';
 
 interface User {
   id: string;
@@ -85,6 +86,7 @@ interface UsersLeadsManagerProps {
   appId: string;
   appName: string;
   appDomain: string;
+  app?: any; // App object with publicKey
   embedded?: boolean;
   onClose?: () => void;
 }
@@ -93,6 +95,7 @@ export default function UsersLeadsManager({
   appId,
   appName,
   appDomain,
+  app,
   embedded = false,
   onClose,
 }: UsersLeadsManagerProps) {
@@ -766,6 +769,21 @@ export default function UsersLeadsManager({
                           </span>
                         </div>
                       ))}
+                    </div>
+                  </div>
+
+                  {/* Unified Timeline (Activities + Credits) */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                      Complete Timeline 
+                      <span className="text-xs text-gray-500 ml-2">(Activities & Credits)</span>
+                    </h4>
+                    <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 max-h-96 overflow-y-auto">
+                      <UnifiedTimeline 
+                        appId={appId} 
+                        authToken={app?.publicKey ? `Bearer ${app.publicKey}` : `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`}
+                        fingerprintId={selectedUser.fingerprintId}
+                      />
                     </div>
                   </div>
 
