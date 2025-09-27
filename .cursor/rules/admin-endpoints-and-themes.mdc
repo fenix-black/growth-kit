@@ -9,33 +9,34 @@ globs: src/app/admin/**/*.tsx,src/app/admin/**/*.ts,src/app/api/admin/**/*.ts,sr
 
 ### API Route Structure
 All admin API routes should follow this pattern:
-- Location: `src/app/api/admin/[resource]/route.ts`
-- Authentication: Always verify admin token using the auth helper
-- Use the proxy pattern for sensitive operations
+- Location: `src/app/api/v1/admin/[resource]/route.ts`
+- Authentication: Always verify service key using `verifyServiceKey(request.headers)`
+- Service key should NEVER be exposed to client-side code
+- Client components should call API endpoints without Authorization headers
 
 Example admin endpoint:
 ```typescript
 import { NextRequest } from 'next/server';
-import { verifyAdminAuth } from '@/lib/auth/admin';
-import { db } from '@/lib/db';
-import { jsonResponse, errorResponse } from '@/lib/utils/response';
+import { verifyServiceKey } from '@/lib/security/auth';
+import { prisma } from '@/lib/db';
+import { successResponse, errors } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
-  // Always verify admin auth first
-  const authResult = await verifyAdminAuth(request);
-  if (!authResult.isValid) {
-    return errorResponse('Unauthorized', 401);
-  }
-
   try {
+    // Always verify service key first
+    if (!verifyServiceKey(request.headers)) {
+      return errors.forbidden();
+    }
+
     // Your endpoint logic here
-    const data = await db.app.findMany({
-      where: { adminId: authResult.adminId }
+    const data = await prisma.app.findMany({
+      orderBy: { createdAt: 'desc' }
     });
     
-    return jsonResponse({ success: true, data });
+    return successResponse({ data });
   } catch (error) {
-    return errorResponse('Internal server error', 500);
+    console.error('Error:', error);
+    return errors.serverError();
   }
 }
 ```

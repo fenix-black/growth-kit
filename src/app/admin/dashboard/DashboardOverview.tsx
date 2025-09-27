@@ -152,11 +152,7 @@ export default function DashboardOverview() {
       
       // Fetch dashboard metrics
       try {
-        const dashboardResponse = await fetch(`/api/v1/admin/dashboard/metrics?timeRange=${timeRange}`, {
-          headers: {
-            'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-          },
-        });
+        const dashboardResponse = await fetch(`/api/admin/proxy/dashboard/metrics?timeRange=${timeRange}`);
         
         if (dashboardResponse.ok) {
           const dashboardData = await dashboardResponse.json();
