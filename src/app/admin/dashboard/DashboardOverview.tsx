@@ -25,23 +25,12 @@ import {
   AlertCircle,
   Coins
 } from 'lucide-react';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  Legend
-} from 'recharts';
+import { 
+  EChartsAreaChart,
+  EChartsBarChart,
+  EChartsPieChart,
+  chartColorSchemes
+} from '@/components/ui/charts';
 
 interface App {
   id: string;
@@ -404,39 +393,17 @@ export default function DashboardOverview() {
           description="Track user acquisition over time"
           className="col-span-1"
         >
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={chartData.growth}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="users" 
-                stackId="1"
-                stroke="#10b981" 
-                fill="#10b981" 
-                fillOpacity={0.6}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="referrals" 
-                stackId="1"
-                stroke="#a855f7" 
-                fill="#a855f7" 
-                fillOpacity={0.6}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="waitlist" 
-                stackId="1"
-                stroke="#06b6d4" 
-                fill="#06b6d4" 
-                fillOpacity={0.6}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          <EChartsAreaChart
+            data={chartData.growth}
+            xKey="date"
+            series={[
+              { dataKey: 'users', name: 'Total Users', type: 'area', gradient: true },
+              { dataKey: 'referrals', name: 'Referrals', type: 'area' },
+              { dataKey: 'waitlist', name: 'Waitlist', type: 'area' }
+            ]}
+            height={300}
+            colorScheme="growth"
+          />
         </ContentCard>
 
         {/* USD Expenses Chart */}
@@ -445,35 +412,17 @@ export default function DashboardOverview() {
           description="Credit usage costs and transaction volume"
           className="col-span-1"
         >
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData.expenses}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis yAxisId="left" />
-              <YAxis yAxisId="right" orientation="right" />
-              <Tooltip formatter={(value: any, name: string) => {
-                if (name === 'spent') return [`$${value.toFixed(2)}`, 'USD Spent'];
-                return [value, 'Transactions'];
-              }} />
-              <Legend />
-              <Line 
-                yAxisId="left"
-                type="monotone" 
-                dataKey="spent" 
-                name="USD Spent"
-                stroke="#f97316" 
-                strokeWidth={2}
-                dot={false}
-              />
-              <Bar 
-                yAxisId="right"
-                dataKey="transactions" 
-                name="Transactions"
-                fill="#ec4899" 
-                fillOpacity={0.3}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <EChartsAreaChart
+            data={chartData.expenses}
+            xKey="date"
+            series={[
+              { dataKey: 'spent', name: 'USD Spent', type: 'line' },
+              { dataKey: 'transactions', name: 'Transactions', type: 'area' }
+            ]}
+            height={300}
+            colorScheme="financial"
+            formatter={(value) => value >= 100 ? `$${value.toFixed(0)}` : `$${value.toFixed(2)}`}
+          />
         </ContentCard>
 
         {/* Credits Distribution */}
@@ -482,25 +431,12 @@ export default function DashboardOverview() {
           description="How credits are being earned"
           className="col-span-1"
         >
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={chartData.credits}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label={(entry) => `${entry.name} ${entry.value}%`}
-              >
-                {chartData.credits.map((entry: any, index: number) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          <EChartsPieChart
+            data={chartData.credits.map((item: any) => ({ name: item.name, value: item.value }))}
+            height={300}
+            colorScheme="analytics"
+            formatter={(value) => `${value}%`}
+          />
         </ContentCard>
 
         {/* Conversion Funnel */}
@@ -509,15 +445,17 @@ export default function DashboardOverview() {
           description="User journey through your app"
           className="col-span-1"
         >
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData.conversion} layout="horizontal">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis dataKey="stage" type="category" />
-              <Tooltip />
-              <Bar dataKey="users" fill="#10b981" />
-            </BarChart>
-          </ResponsiveContainer>
+          <EChartsBarChart
+            data={chartData.conversion}
+            xKey="stage"
+            series={[
+              { dataKey: 'users', name: 'Users' }
+            ]}
+            height={300}
+            horizontal={true}
+            colorScheme="growth"
+            showLabel={true}
+          />
         </ContentCard>
       </div>
 

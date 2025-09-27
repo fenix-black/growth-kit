@@ -20,23 +20,12 @@ import {
   BarChart3,
   FileText
 } from 'lucide-react';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  Legend,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
+import { 
+  EChartsAreaChart,
+  EChartsBarChart,
+  EChartsPieChart,
+  chartColorSchemes
+} from '@/components/ui/charts';
 
 interface UsdMetrics {
   summary: {
@@ -216,8 +205,6 @@ export default function AnalyticsDashboard() {
     );
   }
 
-  // Prepare chart colors
-  const chartColors = ['#10b981', '#a855f7', '#f97316', '#06b6d4', '#d946ef', '#8b5cf6', '#ec4899'];
 
   return (
     <DashboardLayout
@@ -360,32 +347,17 @@ export default function AnalyticsDashboard() {
             description={`Grouped by ${groupBy}`}
             className="col-span-2"
           >
-            <ResponsiveContainer width="100%" height={400}>
-              <AreaChart data={usdMetrics.timeline}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="period" />
-                <YAxis />
-                <Tooltip formatter={(value: any) => formatCurrency(value)} />
-                <Legend />
-                <Area 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  name="USD Spent"
-                  stroke="#f97316" 
-                  fill="#f97316" 
-                  fillOpacity={0.6}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="transactionCount" 
-                  name="Transactions"
-                  stroke="#ec4899" 
-                  strokeWidth={2}
-                  yAxisId="right"
-                />
-                <YAxis yAxisId="right" orientation="right" />
-              </AreaChart>
-            </ResponsiveContainer>
+            <EChartsAreaChart
+              data={usdMetrics.timeline}
+              xKey="period"
+              series={[
+                { dataKey: 'revenue', name: 'USD Spent', type: 'area', gradient: true },
+                { dataKey: 'transactionCount', name: 'Transactions', type: 'line' }
+              ]}
+              height={400}
+              colorScheme="financial"
+              formatter={(value) => typeof value === 'number' ? formatCurrency(value) : value.toString()}
+            />
           </ContentCard>
         )}
 
@@ -397,15 +369,18 @@ export default function AnalyticsDashboard() {
               description="Which actions consume the most value"
               className="col-span-1"
             >
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={usdMetrics.byAction} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
-                  <YAxis dataKey="action" type="category" width={100} />
-                  <Tooltip formatter={(value: any) => formatCurrency(value)} />
-                  <Bar dataKey="totalRevenue" name="Total Spent" fill="#d946ef" />
-                </BarChart>
-              </ResponsiveContainer>
+              <EChartsBarChart
+                data={usdMetrics.byAction}
+                xKey="action"
+                series={[
+                  { dataKey: 'totalRevenue', name: 'Total Spent', color: '#d946ef' }
+                ]}
+                height={400}
+                horizontal={true}
+                colorScheme="financial"
+                formatter={(value) => formatCurrency(value)}
+                showLabel={true}
+              />
             </ContentCard>
 
             <ContentCard
@@ -413,25 +388,16 @@ export default function AnalyticsDashboard() {
               description="Percentage of spending by action type"
               className="col-span-1"
             >
-              <ResponsiveContainer width="100%" height={400}>
-                <PieChart>
-                  <Pie
-                    data={usdMetrics.byAction}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={120}
-                    fill="#a855f7"
-                    dataKey="totalRevenue"
-                    label={(entry: any) => `${entry.action}: ${formatCurrency(entry.totalRevenue as number)}`}
-                  >
-                    {usdMetrics.byAction.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: any) => formatCurrency(value)} />
-                </PieChart>
-              </ResponsiveContainer>
+              <EChartsPieChart
+                data={usdMetrics.byAction.map((item: any) => ({ 
+                  name: item.action, 
+                  value: item.totalRevenue 
+                }))}
+                height={400}
+                colorScheme="financial"
+                formatter={(value) => formatCurrency(value)}
+                donut={true}
+              />
             </ContentCard>
           </>
         )}

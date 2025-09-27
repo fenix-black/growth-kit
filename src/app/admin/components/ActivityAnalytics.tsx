@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import ContentCard from '@/components/ui/ContentCard';
 import StatsCard from '@/components/ui/StatsCard';
 import { AdminActivityFeed } from './AdminActivityFeed';
-import { ActivityHeatmap } from '@/components/ui/ActivityHeatmap';
-import { FunnelChart } from '@/components/ui/FunnelChart';
+import { EChartsHeatmap } from '@/components/ui/EChartsHeatmap';
+import { EChartsFunnelChart } from '@/components/ui/EChartsFunnelChart';
 import {
   BarChart3,
   Activity,
@@ -306,7 +306,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
               title="Activity Heatmap" 
               description="User activity patterns by day and hour"
             >
-              <ActivityHeatmap 
+              <EChartsHeatmap 
                 data={summary.hourlyActivity.map(item => ({
                   hour: item.hour,
                   dayOfWeek: item.dayOfWeek,
@@ -323,7 +323,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
               description="Track user progression through key events"
               className="col-span-2"
             >
-              <FunnelChart 
+              <EChartsFunnelChart 
                 data={funnelData.funnel}
                 overallConversion={funnelData.overallConversion}
               />

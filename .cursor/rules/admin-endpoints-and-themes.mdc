@@ -1,0 +1,184 @@
+---
+description: Guidelines for creating admin endpoints and using the GrowthKit + FenixBlack color theme system
+globs: src/app/admin/**/*.tsx,src/app/admin/**/*.ts,src/app/api/admin/**/*.ts,src/components/**/*.tsx
+---
+
+# Admin Endpoints and Color Theme Guidelines
+
+## Creating Admin Endpoints
+
+### API Route Structure
+All admin API routes should follow this pattern:
+- Location: `src/app/api/admin/[resource]/route.ts`
+- Authentication: Always verify admin token using the auth helper
+- Use the proxy pattern for sensitive operations
+
+Example admin endpoint:
+```typescript
+import { NextRequest } from 'next/server';
+import { verifyAdminAuth } from '@/lib/auth/admin';
+import { db } from '@/lib/db';
+import { jsonResponse, errorResponse } from '@/lib/utils/response';
+
+export async function GET(request: NextRequest) {
+  // Always verify admin auth first
+  const authResult = await verifyAdminAuth(request);
+  if (!authResult.isValid) {
+    return errorResponse('Unauthorized', 401);
+  }
+
+  try {
+    // Your endpoint logic here
+    const data = await db.app.findMany({
+      where: { adminId: authResult.adminId }
+    });
+    
+    return jsonResponse({ success: true, data });
+  } catch (error) {
+    return errorResponse('Internal server error', 500);
+  }
+}
+```
+
+### Security Patterns
+1. **Always use the proxy pattern** for sensitive operations:
+   ```typescript
+   // Use: /api/admin/proxy/[resource]
+   const response = await fetch('/api/admin/proxy/apps');
+   ```
+
+2. **Rate limiting** for admin endpoints:
+   ```typescript
+   import { rateLimitSafe } from '@/lib/middleware/rateLimitSafe';
+   
+   const { success } = await rateLimitSafe.limit(identifier);
+   if (!success) {
+     return errorResponse('Too many requests', 429);
+   }
+   ```
+
+## Color Theme System
+
+### Brand Colors
+The project uses a dual-brand color system combining GrowthKit and FenixBlack:
+
+#### Primary Colors (GrowthKit)
+- **Primary**: `#10b981` (emerald-500) - Main CTAs, success states
+- **Secondary**: `#14b8a6` (teal-500) - Supporting elements
+- **Accent**: `#0ea5e9` (sky-500) - Links, highlights
+
+#### Accent Colors (FenixBlack)
+- **Magenta**: `#d946ef` - Premium features, special highlights
+- **Purple**: `#a855f7` - Secondary actions, alternate data series
+- **Violet**: `#8b5cf6` - Supporting data, tertiary actions
+- **Orange**: `#f97316` - Warnings, financial data, important CTAs
+- **Pink**: `#ec4899` - Notifications, alerts, transactions
+
+### Using Colors in Components
+
+#### StatsCard Color Props
+```tsx
+<StatsCard
+  title="Total Revenue"
+  value="$1,234"
+  icon={<DollarSign />}
+  color="orange"  // Use FenixBlack orange for financial data
+/>
+
+// Available colors:
+// 'primary', 'secondary', 'magenta', 'purple', 'violet', 'orange', 'pink'
+```
+
+#### Chart Color Patterns
+Use specific color sets for different data types:
+```typescript
+// Growth data - cool colors
+const growthColors = ['#10b981', '#14b8a6', '#06b6d4'];
+
+// Financial data - warm colors
+const financialColors = ['#f97316', '#ec4899', '#d946ef'];
+
+// Mixed analytics - full palette
+const analyticsColors = ['#10b981', '#a855f7', '#f97316', '#06b6d4', '#d946ef'];
+```
+
+#### Gradient Usage
+```tsx
+// Page headers with gradient text
+<h1 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+  Dashboard
+</h1>
+
+// Special feature cards
+<div className="bg-gradient-to-r from-fenix-magenta to-cyan-500 p-[1px] rounded-lg">
+  <div className="bg-white rounded-lg p-4">
+    Premium Feature
+  </div>
+</div>
+```
+
+### Tailwind Utilities
+The project includes custom utilities for the color system:
+```tsx
+// Background colors
+className="bg-fenix-purple"
+className="bg-fenix-magenta/10"  // With opacity
+
+// Text colors
+className="text-fenix-orange"
+className="text-primary"
+
+// Hover states
+className="hover:bg-primary/90"
+className="hover:bg-fenix-violet/80"
+```
+
+### Component Patterns
+
+#### Status Indicators
+```tsx
+// Active/Success - use primary (emerald)
+<div className="bg-primary/10 text-primary">Active</div>
+
+// Warning/Paused - use FenixBlack orange
+<div className="bg-fenix-orange/10 text-fenix-orange">Paused</div>
+
+// Premium/Special - use FenixBlack magenta
+<div className="bg-fenix-magenta/10 text-fenix-magenta">Premium</div>
+```
+
+#### Button Variants
+```tsx
+// Primary action - GrowthKit emerald
+<Button variant="primary">Save Changes</Button>
+
+// Secondary action - FenixBlack purple (use ghost variant)
+<Button variant="ghost" className="text-fenix-purple hover:bg-fenix-purple/10">
+  Secondary Action
+</Button>
+
+// Warning action - FenixBlack orange
+<Button variant="warning">Pause Credits</Button>
+```
+
+### Best Practices
+1. **Primary actions** always use GrowthKit emerald
+2. **Data visualization** uses mixed palette for distinction
+3. **Financial metrics** prefer warm FenixBlack colors (orange, pink)
+4. **Growth metrics** prefer cool colors (emerald, teal, cyan)
+5. **Special/Premium features** use FenixBlack magenta
+6. **Maintain consistency** - same data type = same color across pages
+
+### CSS Variables Reference
+All colors are defined as CSS variables in [globals.css](mdc:src/app/globals.css):
+```css
+--primary: 167 85% 40%; /* #10b981 */
+--secondary: 174 72% 41%; /* #14b8a6 */
+--fenix-magenta: 288 85% 60%; /* #d946ef */
+--fenix-purple: 270 66% 66%; /* #a855f7 */
+--fenix-violet: 252 78% 60%; /* #8b5cf6 */
+--fenix-orange: 27 90% 52%; /* #f97316 */
+--fenix-pink: 339 90% 60%; /* #ec4899 */
+```
+
+Theme configuration is in [theme.ts](mdc:src/lib/theme.ts).
