@@ -30,8 +30,6 @@ import {
   EChartsBarChart,
   EChartsPieChart,
   EChartsGauge,
-  EChartsRadar,
-  EChartsSankey,
   chartColorSchemes
 } from '@/components/ui/charts';
 
@@ -65,6 +63,19 @@ interface Metrics {
 }
 
 
+// Helper function to map credit reasons to colors
+const getColorForReason = (reason: string): string => {
+  const colorMap: Record<string, string> = {
+    'daily_grant': '#10b981',     // primary green
+    'referral': '#a855f7',        // purple
+    'email_verification': '#f97316', // orange
+    'name_claim': '#d946ef',      // magenta
+    'custom': '#06b6d4',          // cyan
+    'action': '#14b8a6',          // teal
+  };
+  return colorMap[reason] || '#8b5cf6'; // default violet
+};
+
 export default function DashboardOverview() {
   const router = useRouter();
   const [apps, setApps] = useState<App[]>([]);
@@ -90,6 +101,7 @@ export default function DashboardOverview() {
     credits: [],
     conversion: []
   });
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -138,29 +150,71 @@ export default function DashboardOverview() {
         });
       }
       
-      // Fetch general metrics
+      // Fetch dashboard metrics
       try {
-        const metricsResponse = await fetch('/api/v1/admin/metrics', {
+        const dashboardResponse = await fetch(`/api/v1/admin/dashboard/metrics?timeRange=${timeRange}`, {
           headers: {
             'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
           },
         });
         
-        if (metricsResponse.ok) {
-          const metricsData = await metricsResponse.json();
-          const { overview, daily } = metricsData.data;
+        if (dashboardResponse.ok) {
+          const dashboardData = await dashboardResponse.json();
+          const { growth, credits, topEvents, systemHealth, recentActivity } = dashboardData.data;
           
+          // Update metrics with real data
           setMetrics(prev => ({ 
             ...prev, 
-            totalCreditsIssued: overview.totalCreditsIssued || 0,
-            totalCreditsConsumed: overview.totalCreditsConsumed || 0,
+            totalCreditsIssued: credits.totalIssued,
+            totalCreditsConsumed: credits.totalConsumed,
+            growthRate: growth.rate,
           }));
           
-          // Use real daily data for charts if available
-          if (daily) {
-            generateChartDataFromMetrics(daily, totalStats);
-          } else {
-            generateMockChartData(totalStats);
+          // Update chart data with real data
+          setChartData((prev: any) => ({
+            ...prev,
+            credits: credits.distribution.map((item: any) => ({
+              name: item.reason,
+              value: item.percentage,
+              color: getColorForReason(item.reason)
+            })),
+            conversion: topEvents.map((event: any) => ({
+              stage: event.eventName,
+              users: event.count
+            })),
+            systemHealth: {
+              cpuUsage: systemHealth.cpu,
+              memoryUsage: systemHealth.memory,
+              creditsUsage: systemHealth.creditsUtilization,
+            }
+          }));
+          
+          // Update recent activity
+          setRecentActivities(recentActivity || []);
+        } else {
+          // Fall back to legacy metrics endpoint
+          const metricsResponse = await fetch('/api/v1/admin/metrics', {
+            headers: {
+              'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+            },
+          });
+          
+          if (metricsResponse.ok) {
+            const metricsData = await metricsResponse.json();
+            const { overview, daily } = metricsData.data;
+            
+            setMetrics(prev => ({ 
+              ...prev, 
+              totalCreditsIssued: overview.totalCreditsIssued || 0,
+              totalCreditsConsumed: overview.totalCreditsConsumed || 0,
+            }));
+            
+            // Use real daily data for charts if available
+            if (daily) {
+              generateChartDataFromMetrics(daily, totalStats);
+            } else {
+              generateMockChartData(totalStats);
+            }
           }
         }
       } catch (error) {
@@ -233,33 +287,12 @@ export default function DashboardOverview() {
         : 0,
     };
     
-    // App performance radar data (mock for now - could be calculated from real metrics)
-    const appPerformance: Array<{name: string; data: number[]}> = [];
-    
-    // User flow sankey data (using real conversion data)
-    const userFlow = {
-      nodes: [
-        { name: 'Visitors' },
-        { name: 'Signed Up' },
-        { name: 'Verified' },
-        { name: 'Active' },
-        { name: 'Power Users' },
-      ],
-      links: conversion.slice(0, -1).map((stage, index) => ({
-        source: stage.stage,
-        target: conversion[index + 1].stage,
-        value: conversion[index + 1].users,
-      })),
-    };
-    
     setChartData({ 
       growth: chartGrowth,
       expenses: [], // Will be populated by USD metrics
       credits: credits.slice(-30),
       conversion,
-      systemHealth,
-      appPerformance,
-      userFlow
+      systemHealth
     });
   };
   
@@ -312,46 +345,7 @@ export default function DashboardOverview() {
       creditsUsage: (stats.totalCreditsConsumed / stats.totalCreditsIssued) * 100,
     };
     
-    // App performance radar data
-    const appPerformance = apps.slice(0, 3).map(app => ({
-      name: app.name,
-      data: [
-        Math.floor(Math.random() * 50) + 50, // User Engagement
-        Math.floor(Math.random() * 40) + 60, // Conversion Rate
-        Math.floor(Math.random() * 30) + 70, // Retention
-        Math.floor(Math.random() * 40) + 50, // API Usage
-        Math.floor(Math.random() * 50) + 40, // Performance Score
-      ]
-    }));
-    
-    // User flow sankey data
-    const userFlow = {
-      nodes: [
-        { name: 'Landing Page' },
-        { name: 'Sign Up' },
-        { name: 'Email Verification' },
-        { name: 'Dashboard' },
-        { name: 'Referral' },
-        { name: 'Complete Action' },
-        { name: 'Upgrade' },
-        { name: 'Churn' },
-      ],
-      links: [
-        { source: 'Landing Page', target: 'Sign Up', value: 3500 },
-        { source: 'Landing Page', target: 'Churn', value: 6500 },
-        { source: 'Sign Up', target: 'Email Verification', value: 2800 },
-        { source: 'Sign Up', target: 'Churn', value: 700 },
-        { source: 'Email Verification', target: 'Dashboard', value: 2500 },
-        { source: 'Email Verification', target: 'Churn', value: 300 },
-        { source: 'Dashboard', target: 'Referral', value: 800 },
-        { source: 'Dashboard', target: 'Complete Action', value: 1200 },
-        { source: 'Dashboard', target: 'Churn', value: 500 },
-        { source: 'Complete Action', target: 'Upgrade', value: 450 },
-        { source: 'Referral', target: 'Complete Action', value: 300 },
-      ]
-    };
-    
-    setChartData({ growth, expenses, credits, conversion, systemHealth, appPerformance, userFlow });
+    setChartData({ growth, expenses, credits, conversion, systemHealth });
   };
 
 
@@ -591,46 +585,6 @@ export default function DashboardOverview() {
           </ContentCard>
         </div>
 
-        {/* App Performance Radar and User Flow */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {chartData.appPerformance && chartData.appPerformance.length > 0 && (
-            <ContentCard
-              title="App Performance Comparison"
-              description="Multi-dimensional performance metrics"
-            >
-              <EChartsRadar
-                indicators={[
-                  { name: 'User Engagement', max: 100 },
-                  { name: 'Conversion Rate', max: 100 },
-                  { name: 'Retention', max: 100 },
-                  { name: 'API Usage', max: 100 },
-                  { name: 'Performance Score', max: 100 },
-                ]}
-                series={chartData.appPerformance.map((app: any) => ({
-                  name: app.name,
-                  value: app.data,
-                }))}
-                height={400}
-                colorScheme="analytics"
-              />
-            </ContentCard>
-          )}
-
-          {chartData.userFlow && (
-            <ContentCard
-              title="User Flow Analysis"
-              description="Journey mapping from landing to conversion"
-            >
-              <EChartsSankey
-                nodes={chartData.userFlow.nodes}
-                links={chartData.userFlow.links}
-                height={400}
-                colorScheme="growth"
-                nodeAlign="left"
-              />
-            </ContentCard>
-          )}
-        </div>
       </div>
 
       {/* Activity Feed and Quick Actions */}
@@ -641,9 +595,30 @@ export default function DashboardOverview() {
           description="Latest events across all apps"
           className="col-span-2"
         >
-          <div className="text-center py-8 text-gray-500">
-            Activity tracking data will appear here once apps start tracking events.
-          </div>
+          {recentActivities.length > 0 ? (
+            <div className="space-y-3">
+              {recentActivities.map((activity) => (
+                <div key={activity.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div className="flex items-center space-x-3">
+                    <Activity className="text-gray-400" size={16} />
+                    <div>
+                      <p className="text-sm font-medium">{activity.eventName}</p>
+                      <p className="text-xs text-gray-500">
+                        {activity.user} • {activity.appName}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    {new Date(activity.timestamp).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              Activity tracking data will appear here once apps start tracking events.
+            </div>
+          )}
         </ContentCard>
 
         {/* System Health */}
