@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Growthkit FenixBlack.ai - Leads and Referrals",
+  title: "FenixBlack.ai GrowthKit",
   description: "Powering growth with intelligent waitlist management and referral systems",
 };
 
