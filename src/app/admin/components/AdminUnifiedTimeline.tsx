@@ -43,13 +43,16 @@ export function AdminUnifiedTimeline({ appId, fingerprintId }: AdminUnifiedTimel
         appId,
       });
 
-      // Use admin proxy endpoint
-      const response = await fetch(`/api/admin/proxy/analytics/timeline?${params}`);
+      const response = await fetch(`/api/v1/admin/analytics/timeline?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
-        setTimeline(data.timeline);
-        setTotalPages(data.pagination.totalPages);
+        setTimeline(data.data.timeline);
+        setTotalPages(data.data.pagination.totalPages);
       }
     } catch (error) {
       console.error('Error fetching timeline:', error);

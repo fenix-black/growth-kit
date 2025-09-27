@@ -49,13 +49,16 @@ export function AdminActivityFeed({ appId, fingerprintId, showUser = true }: Adm
         appId,
       });
 
-      // Use admin proxy endpoint
-      const response = await fetch(`/api/admin/proxy/analytics/activities?${params}`);
+      const response = await fetch(`/api/v1/admin/analytics/activities?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
-        setActivities(data.activities);
-        setTotalPages(data.pagination.totalPages);
+        setActivities(data.data.activities);
+        setTotalPages(data.data.pagination.totalPages);
       }
     } catch (error) {
       console.error('Error fetching activities:', error);

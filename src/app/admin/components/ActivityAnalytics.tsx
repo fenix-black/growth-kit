@@ -75,13 +75,16 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
   const fetchSummary = async () => {
     setRefreshing(true);
     try {
-      // Use admin proxy endpoint that handles authentication server-side
-      const response = await fetch(`/api/admin/proxy/analytics/events/summary?days=${timeRange}&appId=${appId}`);
+      const response = await fetch(`/api/v1/admin/analytics/events/summary?days=${timeRange}&appId=${appId}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
         console.log('Event summary data:', data);
-        setSummary(data);
+        setSummary(data.data);
       } else {
         console.error('Failed to fetch event summary:', response.status, await response.text());
       }
