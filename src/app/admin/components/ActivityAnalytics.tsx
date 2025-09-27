@@ -68,7 +68,6 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
   const [showFeed, setShowFeed] = useState(false);
 
   useEffect(() => {
-    console.log('ActivityAnalytics mounted:', { appId, app });
     fetchSummary();
   }, [appId, timeRange]);
 
@@ -83,10 +82,9 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Event summary data:', data);
         setSummary(data.data);
       } else {
-        console.error('Failed to fetch event summary:', response.status, await response.text());
+        console.error('Failed to fetch event summary:', response.status);
       }
     } catch (error) {
       console.error('Error fetching event summary:', error);
