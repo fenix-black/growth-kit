@@ -15,21 +15,11 @@ import {
   Calendar,
   RefreshCw
 } from 'lucide-react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-  LineChart,
-  Line
-} from 'recharts';
+import { 
+  EChartsBarChart,
+  EChartsPieChart,
+  chartColorSchemes
+} from '@/components/ui/charts';
 
 interface ActivityAnalyticsProps {
   appId: string;
@@ -141,8 +131,6 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
     }
   };
 
-  // Prepare chart colors
-  const chartColors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1'];
 
   if (loading) {
     return (
@@ -235,15 +223,16 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
           {/* Event Frequency Chart */}
           {summary?.eventFrequency && summary.eventFrequency.length > 0 && (
             <ContentCard title="Most Common Events">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={summary.eventFrequency}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="eventName" angle={-45} textAnchor="end" height={80} />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#a855f7" />
-                </BarChart>
-              </ResponsiveContainer>
+              <EChartsBarChart
+                data={summary.eventFrequency}
+                xKey="eventName"
+                series={[
+                  { dataKey: 'count', name: 'Events', color: '#a855f7' }
+                ]}
+                height={300}
+                showLegend={false}
+                colorScheme="analytics"
+              />
             </ContentCard>
           )}
 
@@ -251,51 +240,29 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {summary?.deviceBreakdown && summary.deviceBreakdown.length > 0 && (
               <ContentCard title="Device Breakdown">
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={summary.deviceBreakdown}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={100}
-                      fill="#d946ef"
-                      dataKey="count"
-                      label={(entry) => `${entry.device}: ${entry.count}`}
-                    >
-                      {summary.deviceBreakdown.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <EChartsPieChart
+                  data={summary.deviceBreakdown.map(item => ({
+                    name: item.device,
+                    value: item.count
+                  }))}
+                  height={300}
+                  colorScheme="analytics"
+                  donut={true}
+                />
               </ContentCard>
             )}
 
             {summary?.browserBreakdown && summary.browserBreakdown.length > 0 && (
               <ContentCard title="Browser Breakdown">
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={summary.browserBreakdown}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={100}
-                      fill="#d946ef"
-                      dataKey="count"
-                      label={(entry) => `${entry.browser}: ${entry.count}`}
-                    >
-                      {summary.browserBreakdown.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <EChartsPieChart
+                  data={summary.browserBreakdown.map(item => ({
+                    name: item.browser,
+                    value: item.count
+                  }))}
+                  height={300}
+                  colorScheme="analytics"
+                  donut={true}
+                />
               </ContentCard>
             )}
           </div>

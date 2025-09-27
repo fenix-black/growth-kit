@@ -1,8 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { format, startOfDay, endOfDay, subDays } from 'date-fns';
+import { 
+  EChartsBarChart,
+  EChartsLineChart,
+  EChartsPieChart,
+  chartColorSchemes
+} from '@/components/ui/charts';
+import { format } from 'date-fns';
 
 interface UserActivityAnalyticsProps {
   appId: string;
@@ -76,7 +81,6 @@ export function UserActivityAnalytics({ appId, fingerprintId }: UserActivityAnal
     }
   };
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF6B6B'];
 
   if (loading) {
     return (
@@ -151,21 +155,16 @@ export function UserActivityAnalytics({ appId, fingerprintId }: UserActivityAnal
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <h4 className="text-sm font-semibold mb-4">Event Frequency</h4>
           {eventFrequency.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={eventFrequency.slice(0, 10)}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="eventName" 
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  fontSize={12}
-                />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#a855f7" />
-              </BarChart>
-            </ResponsiveContainer>
+            <EChartsBarChart
+              data={eventFrequency.slice(0, 10)}
+              xKey="eventName"
+              series={[
+                { dataKey: 'count', name: 'Events', color: '#a855f7' }
+              ]}
+              height={250}
+              showLegend={false}
+              colorScheme="analytics"
+            />
           ) : (
             <div className="h-[250px] flex items-center justify-center text-gray-400">
               No event data
@@ -177,27 +176,17 @@ export function UserActivityAnalytics({ appId, fingerprintId }: UserActivityAnal
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <h4 className="text-sm font-semibold mb-4">Daily Activity Trend</h4>
           {dailyActivity.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={dailyActivity}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
-                  tickFormatter={(date) => format(new Date(date), 'MMM d')}
-                  fontSize={12}
-                />
-                <YAxis />
-                <Tooltip 
-                  labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="count" 
-                  stroke="#a855f7" 
-                  strokeWidth={2}
-                  dot={{ fill: '#10B981' }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <EChartsLineChart
+              data={dailyActivity}
+              xKey="date"
+              series={[
+                { dataKey: 'count', name: 'Activity', color: '#10b981', smooth: true }
+              ]}
+              height={250}
+              showLegend={false}
+              colorScheme="growth"
+              xAxisFormatter={(date: string) => format(new Date(date), 'MMM d')}
+            />
           ) : (
             <div className="h-[250px] flex items-center justify-center text-gray-400">
               No activity data
@@ -209,29 +198,15 @@ export function UserActivityAnalytics({ appId, fingerprintId }: UserActivityAnal
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <h4 className="text-sm font-semibold mb-4">Event Type Distribution</h4>
           {eventFrequency.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={eventFrequency.slice(0, 8).map(item => ({ 
-                    ...item,
-                    name: item.eventName 
-                  }))}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#f97316"
-                  dataKey="count"
-                  nameKey="name"
-                >
-                  {eventFrequency.slice(0, 8).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            <EChartsPieChart
+              data={eventFrequency.slice(0, 8).map(item => ({ 
+                name: item.eventName,
+                value: item.count 
+              }))}
+              height={250}
+              colorScheme="analytics"
+              showLegend={false}
+            />
           ) : (
             <div className="h-[250px] flex items-center justify-center text-gray-400">
               No event data
@@ -243,21 +218,17 @@ export function UserActivityAnalytics({ appId, fingerprintId }: UserActivityAnal
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <h4 className="text-sm font-semibold mb-4">Average Hourly Activity</h4>
           {hourlyPattern.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={hourlyPattern}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="hour"
-                  tickFormatter={(hour) => `${hour}:00`}
-                  fontSize={12}
-                />
-                <YAxis />
-                <Tooltip 
-                  labelFormatter={(hour) => `${hour}:00`}
-                />
-                <Bar dataKey="avgCount" fill="#8b5cf6" />
-              </BarChart>
-            </ResponsiveContainer>
+            <EChartsBarChart
+              data={hourlyPattern}
+              xKey="hour"
+              series={[
+                { dataKey: 'avgCount', name: 'Average Activity', color: '#8b5cf6' }
+              ]}
+              height={250}
+              showLegend={false}
+              colorScheme="analytics"
+              formatter={(value) => value.toFixed(1)}
+            />
           ) : (
             <div className="h-[250px] flex items-center justify-center text-gray-400">
               No activity data
