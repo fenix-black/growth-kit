@@ -8,7 +8,10 @@ import {
   PieChart, 
   FunnelChart,
   HeatmapChart,
-  ScatterChart 
+  ScatterChart,
+  GaugeChart,
+  RadarChart,
+  SankeyChart
 } from 'echarts/charts';
 import {
   GridComponent,
@@ -33,6 +36,9 @@ echarts.use([
   FunnelChart,
   HeatmapChart,
   ScatterChart,
+  GaugeChart,
+  RadarChart,
+  SankeyChart,
   GridComponent,
   LegendComponent,
   TooltipComponent,

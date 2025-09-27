@@ -29,6 +29,9 @@ import {
   EChartsAreaChart,
   EChartsBarChart,
   EChartsPieChart,
+  EChartsGauge,
+  EChartsRadar,
+  EChartsSankey,
   chartColorSchemes
 } from '@/components/ui/charts';
 
@@ -221,11 +224,42 @@ export default function DashboardOverview() {
       { stage: 'Power Users', users: Math.floor(stats.totalUsers * 0.15) },
     ];
     
+    // System health data (use real metrics where available)
+    const systemHealth = {
+      cpuUsage: 45, // In production, get from monitoring service
+      memoryUsage: 68, // In production, get from monitoring service
+      creditsUsage: stats.totalCredits > 0 
+        ? Math.min((stats.totalCreditsConsumed / stats.totalCredits) * 100, 100)
+        : 0,
+    };
+    
+    // App performance radar data (mock for now - could be calculated from real metrics)
+    const appPerformance: Array<{name: string; data: number[]}> = [];
+    
+    // User flow sankey data (using real conversion data)
+    const userFlow = {
+      nodes: [
+        { name: 'Visitors' },
+        { name: 'Signed Up' },
+        { name: 'Verified' },
+        { name: 'Active' },
+        { name: 'Power Users' },
+      ],
+      links: conversion.slice(0, -1).map((stage, index) => ({
+        source: stage.stage,
+        target: conversion[index + 1].stage,
+        value: conversion[index + 1].users,
+      })),
+    };
+    
     setChartData({ 
       growth: chartGrowth,
       expenses: [], // Will be populated by USD metrics
       credits: credits.slice(-30),
-      conversion
+      conversion,
+      systemHealth,
+      appPerformance,
+      userFlow
     });
   };
   
@@ -271,7 +305,53 @@ export default function DashboardOverview() {
       { stage: 'Paid', users: 450 },
     ];
     
-    setChartData({ growth, expenses, credits, conversion });
+    // System health data (mock for now)
+    const systemHealth = {
+      cpuUsage: Math.floor(Math.random() * 30) + 40, // 40-70%
+      memoryUsage: Math.floor(Math.random() * 20) + 60, // 60-80%
+      creditsUsage: (stats.totalCreditsConsumed / stats.totalCreditsIssued) * 100,
+    };
+    
+    // App performance radar data
+    const appPerformance = apps.slice(0, 3).map(app => ({
+      name: app.name,
+      data: [
+        Math.floor(Math.random() * 50) + 50, // User Engagement
+        Math.floor(Math.random() * 40) + 60, // Conversion Rate
+        Math.floor(Math.random() * 30) + 70, // Retention
+        Math.floor(Math.random() * 40) + 50, // API Usage
+        Math.floor(Math.random() * 50) + 40, // Performance Score
+      ]
+    }));
+    
+    // User flow sankey data
+    const userFlow = {
+      nodes: [
+        { name: 'Landing Page' },
+        { name: 'Sign Up' },
+        { name: 'Email Verification' },
+        { name: 'Dashboard' },
+        { name: 'Referral' },
+        { name: 'Complete Action' },
+        { name: 'Upgrade' },
+        { name: 'Churn' },
+      ],
+      links: [
+        { source: 'Landing Page', target: 'Sign Up', value: 3500 },
+        { source: 'Landing Page', target: 'Churn', value: 6500 },
+        { source: 'Sign Up', target: 'Email Verification', value: 2800 },
+        { source: 'Sign Up', target: 'Churn', value: 700 },
+        { source: 'Email Verification', target: 'Dashboard', value: 2500 },
+        { source: 'Email Verification', target: 'Churn', value: 300 },
+        { source: 'Dashboard', target: 'Referral', value: 800 },
+        { source: 'Dashboard', target: 'Complete Action', value: 1200 },
+        { source: 'Dashboard', target: 'Churn', value: 500 },
+        { source: 'Complete Action', target: 'Upgrade', value: 450 },
+        { source: 'Referral', target: 'Complete Action', value: 300 },
+      ]
+    };
+    
+    setChartData({ growth, expenses, credits, conversion, systemHealth, appPerformance, userFlow });
   };
 
 
@@ -457,6 +537,100 @@ export default function DashboardOverview() {
             showLabel={true}
           />
         </ContentCard>
+      </div>
+
+      {/* Advanced Analytics */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">Advanced Analytics</h2>
+        
+        {/* System Health Gauges */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <ContentCard
+            title="CPU Usage"
+            description="Current system CPU utilization"
+          >
+            <EChartsGauge
+              value={chartData.systemHealth?.cpuUsage || 0}
+              max={100}
+              title="CPU"
+              subtitle="Server load average"
+              height={250}
+              formatter={(value) => `${value.toFixed(0)}%`}
+              thresholds={{ low: 40, medium: 70, high: 85 }}
+            />
+          </ContentCard>
+
+          <ContentCard
+            title="Memory Usage"
+            description="System memory consumption"
+          >
+            <EChartsGauge
+              value={chartData.systemHealth?.memoryUsage || 0}
+              max={100}
+              title="Memory"
+              subtitle="RAM utilization"
+              height={250}
+              formatter={(value) => `${value.toFixed(0)}%`}
+              thresholds={{ low: 50, medium: 75, high: 90 }}
+            />
+          </ContentCard>
+
+          <ContentCard
+            title="Credits Utilization"
+            description="Credits consumed vs issued"
+          >
+            <EChartsGauge
+              value={chartData.systemHealth?.creditsUsage || 0}
+              max={100}
+              title="Credits"
+              subtitle="Usage percentage"
+              height={250}
+              formatter={(value) => `${value.toFixed(1)}%`}
+              thresholds={{ low: 60, medium: 80, high: 95 }}
+            />
+          </ContentCard>
+        </div>
+
+        {/* App Performance Radar and User Flow */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {chartData.appPerformance && chartData.appPerformance.length > 0 && (
+            <ContentCard
+              title="App Performance Comparison"
+              description="Multi-dimensional performance metrics"
+            >
+              <EChartsRadar
+                indicators={[
+                  { name: 'User Engagement', max: 100 },
+                  { name: 'Conversion Rate', max: 100 },
+                  { name: 'Retention', max: 100 },
+                  { name: 'API Usage', max: 100 },
+                  { name: 'Performance Score', max: 100 },
+                ]}
+                series={chartData.appPerformance.map((app: any) => ({
+                  name: app.name,
+                  value: app.data,
+                }))}
+                height={400}
+                colorScheme="analytics"
+              />
+            </ContentCard>
+          )}
+
+          {chartData.userFlow && (
+            <ContentCard
+              title="User Flow Analysis"
+              description="Journey mapping from landing to conversion"
+            >
+              <EChartsSankey
+                nodes={chartData.userFlow.nodes}
+                links={chartData.userFlow.links}
+                height={400}
+                colorScheme="growth"
+                nodeAlign="left"
+              />
+            </ContentCard>
+          )}
+        </div>
       </div>
 
       {/* Activity Feed and Quick Actions */}

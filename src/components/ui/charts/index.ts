@@ -11,6 +11,9 @@ export { EChartsLineChart } from '../EChartsLineChart';
 export { EChartsPieChart } from '../EChartsPieChart';
 export { EChartsFunnelChart } from '../EChartsFunnelChart';
 export { EChartsHeatmap } from '../EChartsHeatmap';
+export { EChartsGauge } from '../EChartsGauge';
+export { EChartsRadar } from '../EChartsRadar';
+export { EChartsSankey } from '../EChartsSankey';
 
 // Re-export theme utilities
 export { chartColorSchemes, createGradient } from '@/lib/echarts-theme';
