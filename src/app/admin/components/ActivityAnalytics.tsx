@@ -197,25 +197,25 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
             title="Total Events"
             value={summary.stats.totalEvents.toLocaleString()}
             icon={<Activity size={24} />}
-            color="blue"
+            color="primary"
           />
           <StatsCard
             title="Unique Users"
             value={summary.stats.uniqueUsers.toLocaleString()}
             icon={<Users size={24} />}
-            color="purple"
+            color="secondary"
           />
           <StatsCard
             title="Events Today"
             value={summary.stats.eventsToday.toLocaleString()}
             icon={<Calendar size={24} />}
-            color="green"
+            color="primary"
           />
           <StatsCard
             title="Events per User"
             value={summary.stats.eventsPerUser.toFixed(1)}
             icon={<TrendingUp size={24} />}
-            color="yellow"
+            color="secondary"
           />
         </div>
       )}
@@ -241,7 +241,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
                   <XAxis dataKey="eventName" angle={-45} textAnchor="end" height={80} />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#3b82f6" />
+                  <Bar dataKey="count" fill="#10b981" />
                 </BarChart>
               </ResponsiveContainer>
             </ContentCard>
@@ -259,7 +259,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
                       cy="50%"
                       labelLine={false}
                       outerRadius={100}
-                      fill="#8884d8"
+                      fill="#14b8a6"
                       dataKey="count"
                       label={(entry) => `${entry.device}: ${entry.count}`}
                     >
@@ -284,7 +284,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
                       cy="50%"
                       labelLine={false}
                       outerRadius={100}
-                      fill="#8884d8"
+                      fill="#14b8a6"
                       dataKey="count"
                       label={(entry) => `${entry.browser}: ${entry.count}`}
                     >

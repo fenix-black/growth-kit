@@ -163,7 +163,7 @@ export function UserActivityAnalytics({ appId, fingerprintId }: UserActivityAnal
                 />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="count" fill="#3B82F6" />
+                <Bar dataKey="count" fill="#10b981" />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -192,7 +192,7 @@ export function UserActivityAnalytics({ appId, fingerprintId }: UserActivityAnal
                 <Line 
                   type="monotone" 
                   dataKey="count" 
-                  stroke="#10B981" 
+                  stroke="#10b981" 
                   strokeWidth={2}
                   dot={{ fill: '#10B981' }}
                 />
@@ -221,7 +221,7 @@ export function UserActivityAnalytics({ appId, fingerprintId }: UserActivityAnal
                   labelLine={false}
                   label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill="#14b8a6"
                   dataKey="count"
                   nameKey="name"
                 >
@@ -255,7 +255,7 @@ export function UserActivityAnalytics({ appId, fingerprintId }: UserActivityAnal
                 <Tooltip 
                   labelFormatter={(hour) => `${hour}:00`}
                 />
-                <Bar dataKey="avgCount" fill="#F59E0B" />
+                <Bar dataKey="avgCount" fill="#06b6d4" />
               </BarChart>
             </ResponsiveContainer>
           ) : (

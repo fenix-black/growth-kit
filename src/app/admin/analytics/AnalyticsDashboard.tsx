@@ -292,31 +292,31 @@ export default function AnalyticsDashboard() {
             title="Total Credits Issued"
             value={generalMetrics.overview.totalCreditsIssued.toLocaleString()}
             icon={<Activity size={24} />}
-            color="blue"
+            color="primary"
           />
           <StatsCard
             title="Credits Consumed"
             value={generalMetrics.overview.totalCreditsConsumed.toLocaleString()}
             icon={<TrendingUp size={24} />}
-            color="purple"
+            color="secondary"
           />
           <StatsCard
             title="Referral Conversion"
             value={`${generalMetrics.conversion.referralConversionRate.toFixed(1)}%`}
             icon={<Users size={24} />}
-            color="green"
+            color="primary"
           />
           <StatsCard
             title="Email Verification"
             value={`${generalMetrics.conversion.emailVerificationRate.toFixed(1)}%`}
             icon={<FileText size={24} />}
-            color="yellow"
+            color="secondary"
           />
           <StatsCard
             title="Credits Balance"
             value={(generalMetrics.overview.totalCreditsIssued - generalMetrics.overview.totalCreditsConsumed).toLocaleString()}
             icon={<BarChart3 size={24} />}
-            color="red"
+            color="primary"
           />
         </div>
       )}
@@ -328,25 +328,25 @@ export default function AnalyticsDashboard() {
             title="Total USD Spent"
             value={formatCurrency(usdMetrics.summary.totalRevenue)}
             icon={<DollarSign size={24} />}
-            color="green"
+            color="primary"
           />
           <StatsCard
             title="Total Transactions"
             value={usdMetrics.summary.totalTransactions.toLocaleString()}
             icon={<Activity size={24} />}
-            color="blue"
+            color="primary"
           />
           <StatsCard
             title="Avg Transaction Value"
             value={formatCurrency(usdMetrics.summary.avgTransactionValue)}
             icon={<TrendingUp size={24} />}
-            color="purple"
+            color="secondary"
           />
           <StatsCard
             title="Avg User Spend"
             value={formatCurrency(usdMetrics.summary.avgUserValue)}
             icon={<Users size={24} />}
-            color="yellow"
+            color="secondary"
           />
         </div>
       )}
@@ -379,7 +379,7 @@ export default function AnalyticsDashboard() {
                   type="monotone" 
                   dataKey="transactionCount" 
                   name="Transactions"
-                  stroke="#3b82f6" 
+                  stroke="#14b8a6" 
                   strokeWidth={2}
                   yAxisId="right"
                 />
@@ -403,7 +403,7 @@ export default function AnalyticsDashboard() {
                   <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
                   <YAxis dataKey="action" type="category" width={100} />
                   <Tooltip formatter={(value: any) => formatCurrency(value)} />
-                  <Bar dataKey="totalRevenue" name="Total Spent" fill="#8b5cf6" />
+                  <Bar dataKey="totalRevenue" name="Total Spent" fill="#06b6d4" />
                 </BarChart>
               </ResponsiveContainer>
             </ContentCard>
@@ -421,7 +421,7 @@ export default function AnalyticsDashboard() {
                     cy="50%"
                     labelLine={false}
                     outerRadius={120}
-                    fill="#8884d8"
+                    fill="#0ea5e9"
                     dataKey="totalRevenue"
                     label={(entry: any) => `${entry.action}: ${formatCurrency(entry.totalRevenue as number)}`}
                   >

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { cn } from './utils';
 import ThemeSwitcher from './ThemeSwitcher';
 import { 
@@ -120,12 +121,28 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              {!collapsed && (
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">GrowthKit</h1>
-              )}
+              <div className={cn(
+                "flex items-center",
+                collapsed ? "justify-center w-full" : ""
+              )}>
+                <Image
+                  src="/growthkit-logo.png"
+                  alt="GrowthKit"
+                  width={collapsed ? 40 : 150}
+                  height={collapsed ? 40 : 40}
+                  className={cn(
+                    "object-contain transition-all duration-200",
+                    collapsed ? "mx-auto" : ""
+                  )}
+                  priority
+                />
+              </div>
               <button
                 onClick={() => setCollapsed(!collapsed)}
-                className="hidden lg:block p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                className={cn(
+                  "hidden lg:block p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800",
+                  collapsed ? "absolute right-2 top-4" : ""
+                )}
               >
                 {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
               </button>

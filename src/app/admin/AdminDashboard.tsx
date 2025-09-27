@@ -221,25 +221,25 @@ export default function AdminDashboard() {
           change={activeApps > 0 ? Math.round((activeApps / apps.length) * 100) : 0}
           changeLabel="active"
           icon={<Package size={24} />}
-          color="blue"
+          color="primary"
         />
         <StatsCard
           title="Total Users"
           value={totalStats.totalUsers.toLocaleString()}
           icon={<Users size={24} />}
-          color="green"
+          color="secondary"
         />
         <StatsCard
           title="Total Referrals"
           value={totalStats.totalReferrals.toLocaleString()}
           icon={<Link size={24} />}
-          color="purple"
+          color="primary"
         />
         <StatsCard
           title="Waitlist Entries"
           value={totalStats.totalWaitlist.toLocaleString()}
           icon={<FileText size={24} />}
-          color="yellow"
+          color="secondary"
         />
       </div>
 
