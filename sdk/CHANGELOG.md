@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.0] - 2025-09-28
+
+### ✨ Features
+- **Slim Widget Mode**: Added `slim` prop to `GrowthKitAccountWidget` for ultra-minimal display
+  - Reduced padding, margins, and font sizes for unobtrusive appearance
+  - Smart positioning to prevent off-screen expansion menus
+  - Always expands on hover for accessibility
+- **Flexible Slim Labels**: Added `slim_labels` prop (default: true) to control text display in slim mode
+  - `slim_labels={true}`: Shows descriptive text like "X credits, Name"
+  - `slim_labels={false}`: Shows minimal "X" format with only essential info
+- **Clean Expanded Menus**: In slim mode, empty rows (name/email "Not Set") are automatically hidden
+- **Smart Layout**: Widget automatically trims unused space when user data is missing
+
+### 🎨 Improvements
+- Enhanced hover expansion logic to work consistently across all widget modes
+- Improved responsive positioning for bottom and right-aligned widgets
+- Better visual hierarchy in minimal display modes
+
 ## [0.3.1] - 2025-09-28
 
 ### Fixed

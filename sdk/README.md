@@ -512,7 +512,9 @@ import { GrowthKitAccountWidget } from '@fenixblack/growthkit';
   showName={true}
   showEmail={true}
   theme="auto"
-  ref={widgetRef} // Optional: For programmatic control
+  slim={false}          // Optional: Enable ultra-minimal mode
+  slim_labels={true}    // Optional: Show labels in slim mode
+  ref={widgetRef}       // Optional: For programmatic control
 >
   <YourApp />
 </GrowthKitAccountWidget>
@@ -521,6 +523,11 @@ import { GrowthKitAccountWidget } from '@fenixblack/growthkit';
 Features:
 - Displays current credit balance
 - Shows user's name and email (when claimed)
+- **Slim mode**: Ultra-minimal display with `slim={true}`
+  - `slim_labels={true}` (default): Shows "X credits, Name"
+  - `slim_labels={false}`: Shows minimal "X" format only
+- Smart positioning to prevent off-screen menus
+- Always expands on hover for full details
 - Email verification status badge
 - Earn credits modal integration
 - Automatic flow management

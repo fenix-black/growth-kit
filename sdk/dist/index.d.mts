@@ -359,6 +359,7 @@ interface GrowthKitAccountWidgetProps {
     position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'inline';
     theme?: GrowthKitTheme;
     slim?: boolean;
+    slim_labels?: boolean;
     showName?: boolean;
     showEmail?: boolean;
     showCredits?: boolean;

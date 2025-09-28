@@ -15,6 +15,7 @@ interface GrowthKitAccountWidgetProps {
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'inline';
   theme?: GrowthKitTheme;
   slim?: boolean;
+  slim_labels?: boolean;
   showName?: boolean;
   showEmail?: boolean;
   showCredits?: boolean;
@@ -41,6 +42,7 @@ const AccountWidgetInternal = forwardRef<
   children,
   position = 'top-right',
   slim = false,
+  slim_labels = true,
   showName = true,
   showEmail = true,
   showCredits = true,
@@ -214,7 +216,7 @@ const AccountWidgetInternal = forwardRef<
               backgroundClip: 'text',
             }}>●</div>
             <span style={{ ...(slim ? styles.slimCreditsValue : styles.creditsValue), color: themeColors.text }}>{credits}</span>
-            {!slim && <span style={{ ...styles.creditsLabel, color: themeColors.textSecondary }}>{t('widget.credits')}</span>}
+            {(!slim || slim_labels) && <span style={{ ...styles.creditsLabel, color: themeColors.textSecondary }}>{t('widget.credits')}</span>}
             {creditsPaused && (
               <div 
                 style={{
@@ -230,7 +232,7 @@ const AccountWidgetInternal = forwardRef<
           </div>
         )}
         
-{(showName || showEmail) && !slim && (
+{(showName || showEmail) && (!slim || slim_labels) && (
           <div style={styles.profileSection}>
             <div style={{
               ...styles.profileIcon,
@@ -260,8 +262,8 @@ const AccountWidgetInternal = forwardRef<
           </div>
         )}
         
-        {/* Show verification badge in slim mode, but only next to credits */}
-        {slim && showEmail && hasClaimedEmail && hasVerifiedEmail && (
+        {/* Show verification badge in slim mode when labels are hidden, but only next to credits */}
+        {slim && !slim_labels && showEmail && hasClaimedEmail && hasVerifiedEmail && (
           <div style={{
             ...styles.slimVerifiedBadge,
             backgroundColor: themeColors.success + '20',
@@ -269,7 +271,7 @@ const AccountWidgetInternal = forwardRef<
           }}>✓</div>
         )}
 
-{credits === 0 && !slim && (
+{credits === 0 && (!slim || slim_labels) && (
           <button
             style={{ 
               ...styles.earnButton, 
@@ -293,8 +295,8 @@ const AccountWidgetInternal = forwardRef<
           </button>
         )}
         
-        {/* Slim mode: show a tiny earn button when credits are 0 */}
-        {credits === 0 && slim && (
+        {/* Slim mode: show a tiny earn button when credits are 0 and labels are hidden */}
+        {credits === 0 && slim && !slim_labels && (
           <button
             style={{ 
               ...styles.slimEarnButton, 
@@ -331,7 +333,7 @@ const AccountWidgetInternal = forwardRef<
           <div style={styles.expandedSection}>
             <h4 style={{ ...styles.expandedTitle, color: themeColors.textSecondary }}>{t('widget.account')}</h4>
             
-            {showName && (
+            {showName && (name || !slim) && (
               <div style={styles.expandedRow}>
                 <span style={{ ...styles.expandedLabel, color: themeColors.textSecondary }}>{t('widget.name')}</span>
                 <span style={{ ...styles.expandedValue, color: themeColors.text }}>
@@ -340,7 +342,7 @@ const AccountWidgetInternal = forwardRef<
               </div>
             )}
             
-            {showEmail && (
+            {showEmail && (email || !slim) && (
               <div style={styles.expandedRow}>
                 <span style={{ ...styles.expandedLabel, color: themeColors.textSecondary }}>{t('widget.email')}</span>
                 <span style={{ ...styles.expandedValue, color: themeColors.text }}>
