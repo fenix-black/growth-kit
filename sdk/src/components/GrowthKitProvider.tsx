@@ -70,8 +70,8 @@ export function GrowthKitProvider({ children, config }: GrowthKitProviderProps) 
   // Get translations for current language
   const translations = getTranslations(currentLanguage);
   
-  // Get theme colors for current theme
-  const themeColors = getThemeColors(currentTheme);
+  // Get theme colors for effective theme (resolved from 'auto' if needed)
+  const themeColors = getThemeColors(effectiveTheme);
   
   return (
     <GrowthKitContext.Provider value={{ 

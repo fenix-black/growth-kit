@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.2] - 2025-09-28
+
+### Fixed
+- **Theme Prop Functionality**: Fixed `theme` prop on `GrowthKitAccountWidget` to properly override config theme
+  - Theme prop now takes precedence over `config.theme` when provided
+  - Supports flexible usage: config-only, prop-only, or both (prop wins)
+  - Enables dynamic theme switching via component props
+  - Maintains backward compatibility with existing implementations
+
+### Enhanced
+- **Theme Override Logic**: Improved theme resolution to handle prop vs config precedence
+- **Type Safety**: Enhanced TypeScript support for theme prop scenarios
+
 ## [0.2.1] - 2025-09-28
 
 ### Added

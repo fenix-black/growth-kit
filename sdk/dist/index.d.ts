@@ -355,7 +355,7 @@ interface GrowthKitAccountWidgetProps {
     config: GrowthKitConfig;
     children: React.ReactNode;
     position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'inline';
-    theme?: 'light' | 'dark' | 'minimal' | 'auto';
+    theme?: GrowthKitTheme;
     compact?: boolean;
     showName?: boolean;
     showEmail?: boolean;
@@ -443,6 +443,6 @@ declare function createGrowthKitServer(): GrowthKitServer;
 declare function getFingerprint(): Promise<string>;
 declare function clearFingerprintCache(): void;
 
-declare const VERSION = "0.2.1";
+declare const VERSION = "0.2.2";
 
 export { APIResponse, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };

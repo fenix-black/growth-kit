@@ -76,4 +76,4 @@ export { useLocalization, useTranslation } from './localization';
 export type { Language, Translations } from './localization';
 
 // Version
-export const VERSION = '0.2.1';
+export const VERSION = '0.2.2';

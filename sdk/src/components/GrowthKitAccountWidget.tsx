@@ -13,7 +13,7 @@ interface GrowthKitAccountWidgetProps {
   config: GrowthKitConfig;
   children: React.ReactNode;
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'inline';
-  theme?: 'light' | 'dark' | 'minimal' | 'auto';
+  theme?: GrowthKitTheme;
   compact?: boolean;
   showName?: boolean;
   showEmail?: boolean;
@@ -36,11 +36,10 @@ export interface GrowthKitAccountWidgetRef {
 // Internal widget component that uses the context
 const AccountWidgetInternal = forwardRef<
   GrowthKitAccountWidgetRef,
-  Omit<GrowthKitAccountWidgetProps, 'config'>
+  Omit<GrowthKitAccountWidgetProps, 'config' | 'theme'>
 >(({
   children,
   position = 'top-right',
-  theme = 'auto',
   compact = false,
   showName = true,
   showEmail = true,
@@ -397,9 +396,12 @@ AccountWidgetInternal.displayName = 'AccountWidgetInternal';
 export const GrowthKitAccountWidget = forwardRef<
   GrowthKitAccountWidgetRef,
   GrowthKitAccountWidgetProps
->(({ config, children, ...props }, ref) => {
+>(({ config, theme, children, ...props }, ref) => {
+  // If theme prop is provided, it overrides config.theme
+  const effectiveConfig = theme ? { ...config, theme } : config;
+  
   return (
-    <GrowthKitProvider config={config}>
+    <GrowthKitProvider config={effectiveConfig}>
       <AccountWidgetInternal {...props} ref={ref}>
         {children}
       </AccountWidgetInternal>
