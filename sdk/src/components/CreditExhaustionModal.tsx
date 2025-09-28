@@ -178,8 +178,38 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
         </div>
 
         <div style={styles.footer}>
-          <p>Current credits: {credits}</p>
-          <button onClick={() => setIsOpen(false)} style={styles.primaryButton}>
+          <div style={{ 
+            backgroundColor: 'rgba(16, 185, 129, 0.1)', 
+            padding: '12px 16px',
+            borderRadius: '10px',
+            border: '2px solid rgba(16, 185, 129, 0.2)',
+          }}>
+            <p style={{ 
+              margin: 0, 
+              fontSize: '14px', 
+              fontWeight: '600', 
+              color: '#64748b' 
+            }}>
+              Current credits: <span style={{ color: '#10b981', fontWeight: '700' }}>{credits}</span>
+            </p>
+          </div>
+          <button 
+            onClick={() => setIsOpen(false)} 
+            style={{
+              ...styles.primaryButton,
+              width: 'auto',
+              minWidth: '100px',
+              marginTop: 0,
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 20px 40px -5px rgba(16, 185, 129, 0.5), 0 8px 16px -4px rgba(16, 185, 129, 0.2)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(16, 185, 129, 0.4), 0 4px 6px -2px rgba(16, 185, 129, 0.1)';
+            }}
+          >
             Done
           </button>
         </div>
@@ -209,8 +239,10 @@ function NameTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucce
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Enter Your Name</h3>
-      <p>{creditsPaused ? 'Tell us your name' : `Earn ${credits} credits by telling us your name`}</p>
+      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>Enter Your Name</h3>
+      <p style={{ color: '#64748b', fontSize: '15px', fontWeight: '500', lineHeight: '1.5' }}>
+        {creditsPaused ? 'Tell us your name' : `Earn ${credits} credits by telling us your name`}
+      </p>
       <input 
         type="text"
         value={name}
@@ -218,6 +250,16 @@ function NameTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucce
         placeholder="Your name"
         style={styles.input}
         disabled={loading}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = '#10b981';
+          e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = '#e2e8f0';
+          e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        }}
       />
       <button 
         type="submit" 
@@ -248,8 +290,10 @@ function EmailTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucc
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Enter Your Email</h3>
-      <p>{creditsPaused ? 'Provide your email address' : `Earn ${credits} credits + unlock email verification bonus`}</p>
+      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>Enter Your Email</h3>
+      <p style={{ color: '#64748b', fontSize: '15px', fontWeight: '500', lineHeight: '1.5' }}>
+        {creditsPaused ? 'Provide your email address' : `Earn ${credits} credits + unlock email verification bonus`}
+      </p>
       <input 
         type="email"
         value={email}
@@ -257,6 +301,16 @@ function EmailTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucc
         placeholder="your@email.com"
         style={styles.input}
         disabled={loading}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = '#10b981';
+          e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = '#e2e8f0';
+          e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        }}
       />
       <button 
         type="submit" 
@@ -272,13 +326,21 @@ function EmailTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucc
 function VerifyTab({ credits, creditsPaused }: any) {
   return (
     <div>
-      <h3>Verify Your Email</h3>
-      <p>Check your inbox for a verification email</p>
-      <p style={{ marginTop: 20, fontSize: 14, color: '#666' }}>
-        {creditsPaused 
-          ? 'Click the verification link to activate your account' 
-          : `Click the verification link in the email to earn ${credits} additional credits`}
-      </p>
+      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '12px' }}>Verify Your Email</h3>
+      <p style={{ color: '#64748b', fontSize: '16px', fontWeight: '500', lineHeight: '1.6', marginBottom: '16px' }}>Check your inbox for a verification email</p>
+      <div style={{ 
+        backgroundColor: 'rgba(16, 185, 129, 0.1)', 
+        border: '2px solid rgba(16, 185, 129, 0.2)', 
+        borderRadius: '12px', 
+        padding: '16px',
+        marginTop: '20px'
+      }}>
+        <p style={{ marginTop: 0, marginBottom: 0, fontSize: '14px', color: '#64748b', fontWeight: '500' }}>
+          {creditsPaused 
+            ? '✉️ Click the verification link to activate your account' 
+            : `🎉 Click the verification link in the email to earn ${credits} additional credits`}
+        </p>
+      </div>
     </div>
   );
 }
@@ -301,18 +363,40 @@ function ShareTab({ referralLink, onShare, referralCredits }: any) {
 
   return (
     <div>
-      <h3>Share & Earn</h3>
-      <p>Earn credits for each friend who joins!</p>
+      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '12px' }}>Share & Earn</h3>
+      <p style={{ color: '#64748b', fontSize: '16px', fontWeight: '500', lineHeight: '1.6', marginBottom: '20px' }}>Earn credits for each friend who joins!</p>
       
       <div style={styles.referralBox}>
         <input 
           type="text" 
           value={referralLink} 
           readOnly 
-          style={styles.input}
+          style={{
+            ...styles.input,
+            marginTop: 0,
+            marginBottom: 0,
+            flexGrow: 1,
+            cursor: 'pointer',
+          }}
           onClick={(e) => (e.target as HTMLInputElement).select()}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = '#d946ef';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(217, 70, 239, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = '#e2e8f0';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
         />
-        <button onClick={handleCopy} style={styles.secondaryButton}>
+        <button 
+          onClick={handleCopy} 
+          style={{
+            ...styles.secondaryButton,
+            backgroundColor: copied ? '#10b981' : '#f1f5f9',
+            color: copied ? 'white' : '#475569',
+            borderColor: copied ? '#10b981' : '#e2e8f0',
+          }}
+        >
           {copied ? 'Copied!' : 'Copy'}
         </button>
       </div>
@@ -323,9 +407,17 @@ function ShareTab({ referralLink, onShare, referralCredits }: any) {
         </button>
       )}
       
-      <p style={{ marginTop: 20, fontSize: 14, color: '#666' }}>
-        You'll earn {referralCredits} credits per referral
-      </p>
+      <div style={{ 
+        backgroundColor: 'rgba(217, 70, 239, 0.1)', 
+        border: '2px solid rgba(217, 70, 239, 0.2)', 
+        borderRadius: '12px', 
+        padding: '16px',
+        marginTop: '20px'
+      }}>
+        <p style={{ marginTop: 0, marginBottom: 0, fontSize: '14px', color: '#64748b', fontWeight: '600' }}>
+          💫 You'll earn {referralCredits} credits per referral
+        </p>
+      </div>
     </div>
   );
 }
@@ -338,99 +430,130 @@ const styles: Record<string, React.CSSProperties> = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backdropFilter: 'blur(8px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
+    padding: '20px',
   },
   modal: {
     backgroundColor: 'white',
-    padding: '2rem',
-    borderRadius: '12px',
-    maxWidth: '500px',
-    width: '90%',
+    padding: '32px',
+    borderRadius: '20px',
+    maxWidth: '520px',
+    width: '100%',
     maxHeight: '90vh',
     overflow: 'auto',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
   },
   title: {
-    margin: '0 0 0.5rem 0',
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
+    margin: '0 0 8px 0',
+    fontSize: '28px',
+    fontWeight: '800',
+    background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
+    letterSpacing: '-0.025em',
   },
   subtitle: {
-    margin: '0 0 1.5rem 0',
-    color: '#666',
+    margin: '0 0 24px 0',
+    color: '#64748b',
+    fontSize: '16px',
+    fontWeight: '500',
+    lineHeight: '1.6',
   },
   tabs: {
     display: 'flex',
-    gap: '0.5rem',
-    marginBottom: '1.5rem',
-    borderBottom: '2px solid #e0e0e0',
+    gap: '8px',
+    marginBottom: '24px',
+    borderBottom: '2px solid #e2e8f0',
+    padding: '0 4px',
   },
   tab: {
-    padding: '0.5rem 1rem',
+    padding: '12px 16px',
     border: 'none',
     background: 'none',
     cursor: 'pointer',
-    color: '#666',
+    color: '#64748b',
     fontSize: '14px',
-    fontWeight: '500',
+    fontWeight: '600',
     borderBottomWidth: '2px',
     borderBottomStyle: 'solid',
     borderBottomColor: 'transparent',
     marginBottom: '-2px',
+    borderRadius: '8px 8px 0 0',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   },
   activeTab: {
-    color: '#0070f3',
-    borderBottomColor: '#0070f3',
+    color: '#10b981',
+    borderBottomColor: '#10b981',
+    backgroundColor: 'rgba(16, 185, 129, 0.05)',
   },
   content: {
-    minHeight: '200px',
+    minHeight: '220px',
+    padding: '8px 4px',
   },
   input: {
     width: '100%',
-    padding: '0.75rem',
-    border: '1px solid #e0e0e0',
-    borderRadius: '8px',
-    marginTop: '1rem',
-    marginBottom: '1rem',
+    padding: '16px 20px',
+    border: '2px solid #e2e8f0',
+    borderRadius: '12px',
+    marginTop: '16px',
+    marginBottom: '16px',
     fontSize: '16px',
+    fontFamily: 'inherit',
+    fontWeight: '500',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    outline: 'none',
+    boxSizing: 'border-box',
   },
   primaryButton: {
     width: '100%',
-    padding: '0.75rem',
-    backgroundColor: '#0070f3',
+    padding: '16px 24px',
+    background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '12px',
     fontSize: '16px',
-    fontWeight: '500',
+    fontWeight: '700',
     cursor: 'pointer',
-    marginTop: '0.5rem',
+    marginTop: '8px',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    fontFamily: 'inherit',
+    letterSpacing: '0.025em',
+    boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.4), 0 4px 6px -2px rgba(16, 185, 129, 0.1)',
   },
   secondaryButton: {
-    padding: '0.75rem 1.5rem',
-    backgroundColor: '#f0f0f0',
-    color: '#333',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '500',
+    padding: '12px 24px',
+    backgroundColor: '#f1f5f9',
+    color: '#475569',
+    border: '2px solid #e2e8f0',
+    borderRadius: '10px',
+    fontSize: '15px',
+    fontWeight: '600',
     cursor: 'pointer',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    fontFamily: 'inherit',
   },
   footer: {
-    marginTop: '2rem',
-    paddingTop: '1rem',
-    borderTop: '1px solid #e0e0e0',
+    marginTop: '32px',
+    paddingTop: '20px',
+    borderTop: '2px solid #e2e8f0',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: '16px',
   },
   referralBox: {
     display: 'flex',
-    gap: '0.5rem',
-    marginTop: '1rem',
-    marginBottom: '1rem',
+    gap: '8px',
+    marginTop: '16px',
+    marginBottom: '16px',
   },
 };

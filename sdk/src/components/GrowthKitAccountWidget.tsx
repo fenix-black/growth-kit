@@ -202,31 +202,54 @@ const AccountWidgetInternal = forwardRef<
       <div style={styles.compactContent}>
         {showCredits && (
           <div style={styles.creditsSection}>
-            <span style={styles.creditsIcon}>💰</span>
+            <div style={{
+              ...styles.creditsIcon,
+              background: themeColors.primaryGradient,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>●</div>
             <span style={{ ...styles.creditsValue, color: themeColors.text }}>{credits}</span>
+            <span style={{ ...styles.creditsLabel, color: themeColors.textSecondary }}>credits</span>
             {creditsPaused && (
-              <span 
-                style={styles.pausedIcon} 
+              <div 
+                style={{
+                  ...styles.pausedIcon,
+                  backgroundColor: themeColors.warning + '20',
+                  color: themeColors.warning,
+                }} 
                 title="Credit earning is temporarily paused"
               >
-                ⏸️
-              </span>
+                ⏸
+              </div>
             )}
           </div>
         )}
         
         {(showName || showEmail) && (
           <div style={styles.profileSection}>
-            <span style={styles.profileIcon}>👤</span>
+            <div style={{
+              ...styles.profileIcon,
+              backgroundColor: themeColors.accent + '20',
+              color: themeColors.accent,
+            }}>●</div>
             {showName && name && (
               <span style={{ ...styles.profileText, color: themeColors.textSecondary }}>{name}</span>
             )}
             {showEmail && hasClaimedEmail && (
               <>
                 {hasVerifiedEmail ? (
-                  <span style={styles.verifiedBadge}>✅</span>
+                  <div style={{
+                    ...styles.verifiedBadge,
+                    backgroundColor: themeColors.success + '20',
+                    color: themeColors.success,
+                  }}>✓</div>
                 ) : (
-                  <span style={styles.unverifiedBadge}>📧</span>
+                  <div style={{
+                    ...styles.unverifiedBadge,
+                    backgroundColor: themeColors.warning + '20',
+                    color: themeColors.warning,
+                  }}>!</div>
                 )}
               </>
             )}
@@ -235,10 +258,22 @@ const AccountWidgetInternal = forwardRef<
 
         {credits === 0 && (
           <button
-            style={{ ...styles.earnButton, backgroundColor: themeColors.primary }}
+            style={{ 
+              ...styles.earnButton, 
+              background: themeColors.primaryGradient,
+              boxShadow: themeColors.shadowSm,
+            }}
             onClick={(e) => {
               e.stopPropagation();
               creditModalRef.current?.open();
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = themeColors.shadow;
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = themeColors.shadowSm;
             }}
           >
             Earn Credits
@@ -288,11 +323,23 @@ const AccountWidgetInternal = forwardRef<
           </div>
 
           <button
-            style={{ ...styles.expandedEarnButton, backgroundColor: themeColors.primary }}
+            style={{ 
+              ...styles.expandedEarnButton, 
+              background: themeColors.primaryGradient,
+              boxShadow: themeColors.shadowSm,
+            }}
             onClick={(e) => {
               e.stopPropagation();
               creditModalRef.current?.open();
               setShowProfileExpanded(false);
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = themeColors.shadow;
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = themeColors.shadowSm;
             }}
           >
             Earn More Credits
@@ -387,30 +434,45 @@ function getThemeColors(theme: string) {
   switch (effectiveTheme) {
     case 'dark':
       return {
-        background: '#1f2937',
-        text: '#f9fafb',
-        textSecondary: '#9ca3af',
-        border: '#374151',
-        primary: '#3b82f6',
-        shadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3)',
+        background: '#1e293b',
+        text: '#f8fafc',
+        textSecondary: '#94a3b8',
+        border: '#334155',
+        primary: '#10b981',
+        primaryGradient: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+        accent: '#d946ef',
+        success: '#10b981',
+        warning: '#f97316',
+        shadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
+        shadowSm: '0 4px 6px -1px rgba(0, 0, 0, 0.2)',
       };
     case 'minimal':
       return {
         background: '#ffffff',
-        text: '#1f2937',
-        textSecondary: '#6b7280',
+        text: '#1e293b',
+        textSecondary: '#64748b',
         border: 'transparent',
-        primary: '#3b82f6',
+        primary: '#10b981',
+        primaryGradient: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+        accent: '#d946ef',
+        success: '#10b981',
+        warning: '#f97316',
         shadow: 'none',
+        shadowSm: 'none',
       };
     default: // light
       return {
         background: '#ffffff',
-        text: '#1f2937',
-        textSecondary: '#6b7280',
-        border: '#e5e7eb',
-        primary: '#3b82f6',
-        shadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        text: '#1e293b',
+        textSecondary: '#64748b',
+        border: '#e2e8f0',
+        primary: '#10b981',
+        primaryGradient: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+        accent: '#d946ef',
+        success: '#10b981',
+        warning: '#f97316',
+        shadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        shadowSm: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
       };
   }
 }
@@ -419,29 +481,36 @@ function getWidgetStyles(themeColors: any, compact: boolean): React.CSSPropertie
   return {
     backgroundColor: themeColors.background,
     color: themeColors.text,
-    border: `1px solid ${themeColors.border}`,
-    borderRadius: compact ? '8px' : '12px',
-    padding: compact ? '8px 12px' : '12px 16px',
+    border: themeColors.border === 'transparent' ? 'none' : `1px solid ${themeColors.border}`,
+    borderRadius: compact ? '12px' : '16px',
+    padding: compact ? '12px 16px' : '16px 20px',
     boxShadow: themeColors.shadow,
     fontSize: compact ? '14px' : '16px',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    transition: 'all 0.2s ease',
-    minWidth: compact ? 'auto' : '180px',
+    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontWeight: '500',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    minWidth: compact ? 'auto' : '200px',
+    backdropFilter: 'blur(8px)',
   };
 }
 
 function getNotificationStyles(themeColors: any, type: 'success' | 'error'): React.CSSProperties {
   return {
-    backgroundColor: type === 'success' ? '#10b981' : '#ef4444',
+    background: type === 'success' 
+      ? 'linear-gradient(135deg, #10b981 0%, #14b8a6 100%)' 
+      : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
     color: 'white',
-    padding: '8px 12px',
-    borderRadius: '8px',
+    padding: '12px 16px',
+    borderRadius: '12px',
     fontSize: '14px',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    fontWeight: '500',
+    boxShadow: themeColors.shadow,
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '10px',
     zIndex: 1002,
+    border: 'none',
+    backdropFilter: 'blur(8px)',
   };
 }
 
@@ -450,82 +519,126 @@ const styles: Record<string, React.CSSProperties> = {
   loading: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '12px',
   },
   spinner: {
-    width: '16px',
-    height: '16px',
-    border: '2px solid #e5e7eb',
-    borderTop: '2px solid #3b82f6',
+    width: '20px',
+    height: '20px',
+    border: '2px solid #e2e8f0',
+    borderTop: '2px solid #10b981',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
   },
   loadingText: {
     fontSize: '14px',
+    fontWeight: '500',
   },
   waitlistWidget: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '12px',
   },
   waitlistIcon: {
-    fontSize: '16px',
+    fontSize: '20px',
+    width: '24px',
+    height: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '6px',
+    backgroundColor: '#f97316' + '20',
+    color: '#f97316',
   },
   waitlistText: {
     fontSize: '14px',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   compactContent: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '16px',
     flexWrap: 'wrap',
   },
   creditsSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
+    gap: '8px',
   },
   creditsIcon: {
-    fontSize: '16px',
+    fontSize: '12px',
+    fontWeight: '900',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   creditsValue: {
-    fontWeight: '600',
-    fontSize: '16px',
+    fontWeight: '700',
+    fontSize: '18px',
+  },
+  creditsLabel: {
+    fontSize: '13px',
+    fontWeight: '500',
   },
   pausedIcon: {
-    fontSize: '14px',
-    marginLeft: '4px',
+    fontSize: '12px',
+    width: '20px',
+    height: '20px',
+    borderRadius: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     cursor: 'help',
+    fontWeight: '600',
   },
   profileSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
+    gap: '8px',
   },
   profileIcon: {
-    fontSize: '16px',
+    fontSize: '8px',
+    width: '16px',
+    height: '16px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: '900',
   },
   profileText: {
     fontSize: '14px',
     fontWeight: '500',
   },
   verifiedBadge: {
-    fontSize: '12px',
+    fontSize: '10px',
+    fontWeight: '700',
+    width: '16px',
+    height: '16px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   unverifiedBadge: {
-    fontSize: '12px',
+    fontSize: '10px',
+    fontWeight: '700',
+    width: '16px',
+    height: '16px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   earnButton: {
-    backgroundColor: '#3b82f6',
     color: 'white',
     border: 'none',
-    borderRadius: '6px',
-    padding: '6px 12px',
-    fontSize: '12px',
-    fontWeight: '500',
+    borderRadius: '8px',
+    padding: '8px 16px',
+    fontSize: '13px',
+    fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    letterSpacing: '0.025em',
   },
   expandedContent: {
     position: 'absolute',
@@ -533,10 +646,11 @@ const styles: Record<string, React.CSSProperties> = {
     left: 0,
     right: 0,
     borderTop: 'none',
-    borderRadius: '0 0 12px 12px',
-    padding: '12px 16px',
-    marginTop: '1px',
+    borderRadius: '0 0 16px 16px',
+    padding: '16px 20px',
+    marginTop: '2px',
     zIndex: 1001,
+    backdropFilter: 'blur(8px)',
   },
   expandedSection: {
     marginBottom: '12px',
@@ -566,15 +680,15 @@ const styles: Record<string, React.CSSProperties> = {
   },
   expandedEarnButton: {
     width: '100%',
-    backgroundColor: '#3b82f6',
     color: 'white',
     border: 'none',
-    borderRadius: '6px',
-    padding: '8px 16px',
+    borderRadius: '10px',
+    padding: '12px 20px',
     fontSize: '14px',
-    fontWeight: '500',
+    fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    letterSpacing: '0.025em',
   },
   notificationClose: {
     background: 'rgba(255, 255, 255, 0.2)',

@@ -82,34 +82,73 @@ export function WaitlistForm({
           justifyContent: 'center',
           alignItems: 'center',
           minHeight: '100vh',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+          background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
           ...style
         }}
       >
         <div style={{
           textAlign: 'center',
-          padding: '40px',
-          maxWidth: '500px',
+          padding: '48px',
+          maxWidth: '520px',
+          background: 'rgba(255, 255, 255, 0.95)',
+          borderRadius: '20px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
         }}>
-          <div style={{ fontSize: '60px', marginBottom: '20px' }}>🎉</div>
-          <h1 style={{ marginBottom: '20px', color: '#333' }}>You're on the list!</h1>
+          <div style={{ 
+            fontSize: '72px', 
+            marginBottom: '24px',
+            background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.2))',
+          }}>✨</div>
+          <h1 style={{ 
+            marginBottom: '24px', 
+            color: '#1e293b',
+            fontSize: '32px',
+            fontWeight: '800',
+            background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            letterSpacing: '-0.025em',
+          }}>You're on the list!</h1>
           <div style={{
-            background: '#f0f7ff',
-            border: '2px solid #0066cc',
-            borderRadius: '12px',
-            padding: '30px',
-            marginBottom: '20px',
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(20, 184, 166, 0.1) 50%, rgba(6, 182, 212, 0.1) 100%)',
+            border: '2px solid rgba(16, 185, 129, 0.2)',
+            borderRadius: '16px',
+            padding: '36px',
+            marginBottom: '24px',
+            backdropFilter: 'blur(8px)',
           }}>
-            <p style={{ color: '#666', marginBottom: '10px' }}>Your position:</p>
+            <p style={{ 
+              color: '#64748b', 
+              marginBottom: '12px',
+              fontSize: '16px',
+              fontWeight: '600',
+            }}>Your position:</p>
             <div style={{
-              fontSize: '48px',
-              fontWeight: 'bold',
-              color: '#0066cc',
+              fontSize: '56px',
+              fontWeight: '900',
+              background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              letterSpacing: '-0.05em',
             }}>
               #{displayPosition}
             </div>
           </div>
-          <p style={{ color: '#666' }}>
+          <p style={{ 
+            color: '#64748b',
+            fontSize: '16px',
+            fontWeight: '500',
+            lineHeight: '1.6',
+          }}>
             We'll notify you at {email || 'your email'} when it's your turn!
           </p>
         </div>
@@ -125,30 +164,40 @@ export function WaitlistForm({
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '100vh',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
         ...style
       }}
     >
       <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        padding: '40px',
-        maxWidth: '450px',
+        background: 'rgba(255, 255, 255, 0.95)',
+        borderRadius: '20px',
+        padding: '48px',
+        maxWidth: '480px',
         width: '100%',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2)',
+        backdropFilter: 'blur(16px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
       }}>
         <h1 style={{ 
-          marginBottom: '10px', 
-          color: '#333',
-          fontSize: '28px',
+          marginBottom: '12px', 
+          color: '#1e293b',
+          fontSize: '32px',
+          fontWeight: '800',
+          background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          letterSpacing: '-0.025em',
         }}>
           Early Access
         </h1>
         <p style={{ 
-          color: '#666',
-          marginBottom: '30px',
+          color: '#64748b',
+          marginBottom: '36px',
           fontSize: '16px',
+          fontWeight: '500',
+          lineHeight: '1.6',
         }}>
           {message || 'Join our exclusive waitlist for early access'}
         </p>
@@ -163,28 +212,41 @@ export function WaitlistForm({
               disabled={isSubmitting}
               style={{
                 width: '100%',
-                padding: '14px',
+                padding: '16px 20px',
                 fontSize: '16px',
-                border: '1px solid #ddd',
-                borderRadius: '6px',
+                border: '2px solid #e2e8f0',
+                borderRadius: '12px',
                 outline: 'none',
-                transition: 'border-color 0.2s',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 boxSizing: 'border-box',
+                fontFamily: 'inherit',
+                fontWeight: '500',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(8px)',
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#667eea';
+                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#ddd';
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
               }}
             />
           </div>
 
           {error && (
-            <p style={{ 
-              color: '#e74c3c',
-              marginBottom: '20px',
+            <p             style={{ 
+              color: '#ef4444',
+              marginBottom: '24px',
               fontSize: '14px',
+              fontWeight: '500',
+              padding: '12px 16px',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              borderRadius: '8px',
             }}>
               {error}
             </p>
@@ -195,27 +257,34 @@ export function WaitlistForm({
             disabled={isSubmitting}
             style={{
               width: '100%',
-              padding: '14px',
+              padding: '16px 24px',
               fontSize: '16px',
-              fontWeight: 'bold',
+              fontWeight: '700',
               background: isSubmitting 
-                ? '#999' 
-                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)' 
+                : 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
               color: 'white',
               border: 'none',
-              borderRadius: '6px',
+              borderRadius: '12px',
               cursor: isSubmitting ? 'not-allowed' : 'pointer',
-              transition: 'transform 0.2s, opacity 0.2s',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              fontFamily: 'inherit',
+              letterSpacing: '0.025em',
+              boxShadow: isSubmitting 
+                ? 'none'
+                : '0 10px 25px -5px rgba(16, 185, 129, 0.4), 0 4px 6px -2px rgba(16, 185, 129, 0.1)',
             }}
             onMouseOver={(e) => {
               if (!isSubmitting) {
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.opacity = '0.95';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 20px 40px -5px rgba(16, 185, 129, 0.5), 0 8px 16px -4px rgba(16, 185, 129, 0.2)';
               }
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.opacity = '1';
+              if (!isSubmitting) {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(16, 185, 129, 0.4), 0 4px 6px -2px rgba(16, 185, 129, 0.1)';
+              }
             }}
           >
             {isSubmitting ? 'Joining...' : 'Join Waitlist'}
@@ -223,10 +292,11 @@ export function WaitlistForm({
         </form>
 
         <p style={{
-          marginTop: '20px',
+          marginTop: '24px',
           textAlign: 'center',
-          color: '#999',
-          fontSize: '13px',
+          color: '#94a3b8',
+          fontSize: '14px',
+          fontWeight: '500',
         }}>
           No spam. We'll only email you when it's your turn.
         </p>
