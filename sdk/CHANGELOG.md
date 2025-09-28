@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.4.1] - 2025-09-28
+
+### ✨ Features
+- **Auto-Middleware**: Zero-configuration middleware setup for instant GrowthKit integration
+  - New `@fenixblack/growthkit/auto-middleware` export with pre-configured middleware and routes
+  - Reduces setup time from 15-30 minutes to 30 seconds
+  - Automatically handles all necessary routes: referrals, verification, invitations, and API proxy
+  - Smart defaults for all configuration options (debug mode, paths, redirects)
+  - Backward compatible - existing manual configurations continue to work
+
+### 🎯 Developer Experience
+- **One-Line Setup**: Replace entire middleware.ts with `export { middleware, config } from '@fenixblack/growthkit/auto-middleware';`
+- **Smart Defaults**: Environment variables auto-detected, debug mode enabled in development
+- **Zero Configuration**: All routes and settings configured automatically
+- **Immediate Success**: Developers get working integration in seconds instead of minutes
+
+### 📦 Package Updates
+- Added `./auto-middleware` export path in package.json
+- Updated tsup build configuration to include auto-middleware
+- Enhanced README.md with quick start guide and auto-middleware documentation
+
 ## [0.4.0] - 2025-09-28
 
 ### ✨ Features

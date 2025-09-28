@@ -34,4 +34,15 @@ export default defineConfig([
     sourcemap: true,
     clean: false,
   },
+  {
+    // Auto-middleware with zero config
+    entry: ['src/auto-middleware.ts'],
+    format: ['esm', 'cjs'],
+    dts: true,
+    minify: true,
+    splitting: false,
+    sourcemap: true,
+    clean: false,
+    external: ['next/server'],
+  },
 ]);

@@ -2,6 +2,16 @@
 
 React SDK for GrowthKit - Intelligent waitlist and referral management system with Next.js middleware support.
 
+## ⚡ Quick Start (30 seconds)
+
+1. **Install**: `npm install @fenixblack/growthkit`
+2. **Add middleware**: Create `middleware.ts` with one line:
+   ```ts
+   export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
+   ```
+3. **Set env vars**: Add your API key to `.env.local`
+4. **Done!** 🎉
+
 ## Installation
 
 ```bash
@@ -12,7 +22,7 @@ yarn add @fenixblack/growthkit
 
 ## Import Paths
 
-The SDK provides three separate entry points optimized for different environments:
+The SDK provides four separate entry points optimized for different environments:
 
 ### Main Package (React Components & Hooks)
 ```tsx
@@ -43,8 +53,17 @@ import type {
 
 ### Middleware (Edge Runtime Compatible)
 ```ts
-// For Next.js middleware (Edge Runtime)
+// Zero-config middleware (recommended)
+export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
+
+// Or advanced configuration
 import { createGrowthKitMiddleware } from '@fenixblack/growthkit/middleware';
+```
+
+### Auto-Middleware (Zero Config)
+```ts
+// For instant setup with zero configuration
+export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
 ```
 
 ### Server Utilities (Node.js)
@@ -60,26 +79,16 @@ import { GrowthKitServer, createGrowthKitServer } from '@fenixblack/growthkit/se
 Create `middleware.ts` in your Next.js root:
 
 ```ts
-// middleware.ts
-import { createGrowthKitMiddleware } from '@fenixblack/growthkit/middleware';
-
-export const middleware = createGrowthKitMiddleware({
-  apiKey: process.env.GROWTHKIT_API_KEY!,
-  apiUrl: process.env.GROWTHKIT_API_URL!,
-  referralPath: '/r',  // Handles /r/CODE links
-  redirectTo: '/',      // Where to redirect after processing
-});
-
-export const config = {
-  matcher: ['/r/:code*', '/verify', '/invite/:code*', '/api/growthkit/:path*']  // Handles referrals, verification, invitations, and API proxying
-};
+// middleware.ts - Zero configuration required! 🚀
+export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
 ```
 
-The middleware automatically handles:
+**That's it!** The auto-middleware automatically handles:
 - **Referral links**: `/r/ABC123` → exchanges code for claim token → redirects to `/?ref=token`
 - **Email verification**: `/verify?token=xyz` → verifies email → redirects to `/?verified=true`  
 - **Invitation codes**: `/invite/INV-XXXXXX` → redirects with code → grants invitation credits
 - **API Proxying**: `/api/growthkit/*` → securely proxies widget API calls with server-side credentials
+- **Smart defaults**: All routes, debug mode, and configuration handled automatically
 
 ### 2. Set Environment Variables
 
@@ -89,13 +98,42 @@ GROWTHKIT_API_KEY=gk_your_api_key_here
 GROWTHKIT_API_URL=https://growth.fenixblack.ai/api
 ```
 
+> 💡 **Developer Experience**: Setup time reduced from 15-30 minutes to 30 seconds with auto-middleware!
+
 **🔒 Security Note**: The API key is server-side only and never exposed to the client. The middleware handles all API proxying automatically.
+
+### Advanced Middleware Configuration (Optional)
+
+If you need custom paths or settings, use the advanced configuration:
+
+```ts
+// middleware.ts - Custom configuration
+import { createGrowthKitMiddleware } from '@fenixblack/growthkit/middleware';
+
+export const middleware = createGrowthKitMiddleware({
+  apiKey: process.env.GROWTHKIT_API_KEY!,
+  apiUrl: process.env.GROWTHKIT_API_URL!,
+  referralPath: '/r',     // Custom referral path
+  redirectTo: '/home',    // Custom redirect destination
+  debug: true,            // Force debug mode
+});
+
+export const config = {
+  matcher: ['/r/:code*', '/verify', '/invite/:code*', '/api/growthkit/:path*']
+};
+```
 
 ## Migration from v1.x (Legacy Direct Mode)
 
 If you're upgrading from a previous version that used `NEXT_PUBLIC_GROWTHKIT_API_KEY`:
 
-### 1. Update your middleware matcher to include API proxying:
+### 1. Simplify your middleware (recommended):
+```tsx
+// Replace your entire middleware.ts with this one line:
+export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
+```
+
+Or manually update your middleware matcher to include API proxying:
 ```tsx
 export const config = {
   matcher: ['/r/:code*', '/verify', '/invite/:code*', '/api/growthkit/:path*']
@@ -128,10 +166,10 @@ GROWTHKIT_API_URL=https://growth.fenixblack.ai/api
 
 The SDK automatically detects proxy mode when no `apiKey` is provided and routes all requests through your middleware's secure proxy.
 
-### 4. Use the Hook
+### 3. Use the Hook
 
 ```tsx
-import { useGrowthKit } from '@growthkit/sdk';
+import { useGrowthKit } from '@fenixblack/growthkit';
 
 function App() {
   const gk = useGrowthKit({

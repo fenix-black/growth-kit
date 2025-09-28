@@ -1,6 +1,6 @@
 {
   "name": "@fenixblack/growthkit",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "React SDK for GrowthKit - Intelligent waitlist and referral management",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -23,6 +23,11 @@
       "import": "./dist/server.mjs",
       "require": "./dist/server.js",
       "types": "./dist/server.d.ts"
+    },
+    "./auto-middleware": {
+      "import": "./dist/auto-middleware.mjs",
+      "require": "./dist/auto-middleware.js",
+      "types": "./dist/auto-middleware.d.ts"
     }
   },
   "scripts": {
