@@ -24,14 +24,5 @@ export default defineConfig([
     // No React in middleware
     external: ['next/server'],
   },
-  {
-    // Server-side utilities (Node.js compatible)
-    entry: ['src/server.ts'],
-    format: ['esm', 'cjs'],
-    dts: true,
-    minify: true,
-    splitting: false,
-    sourcemap: true,
-    clean: false,
-  },
+  // Note: Server utilities are now handled by middleware
 ]);

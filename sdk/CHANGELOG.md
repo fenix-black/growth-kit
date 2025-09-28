@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.3.0] - 2025-09-28
+
+### 🔒 Security Enhancement
+- **Secure Proxy Mode**: Completely resolved API key exposure vulnerability
+  - API keys are now server-side only and never exposed to the client
+  - Middleware automatically handles API proxying with zero manual setup required
+  - Widget automatically detects and uses secure proxy mode when no `apiKey` is provided
+  - Console warnings for deprecated direct API mode in production
+
+### ✨ Features
+- **Auto-Proxy Integration**: Extended middleware to handle `/api/growthkit/*` routes automatically
+  - No manual API route setup required in consumer apps
+  - Built directly into the existing `createGrowthKitMiddleware` functionality
+  - Maintains all existing middleware features (referrals, verification, invitations)
+
+### 🔄 Migration (Backward Compatible)
+- **Zero Breaking Changes**: Existing implementations continue to work unchanged
+- **Simple Migration Path**: 
+  1. Add `/api/growthkit/:path*` to middleware matcher
+  2. Remove `apiKey` from `GrowthKitProvider` config
+  3. Remove `NEXT_PUBLIC_GROWTHKIT_*` environment variables
+- **Enhanced Security**: Deprecated client-side API key usage with warnings
+
+### 📖 Documentation
+- **Updated Setup Guide**: Simplified configuration with secure defaults
+- **Migration Instructions**: Clear upgrade path for existing users
+- **Security Best Practices**: Guidance on secure vs deprecated usage patterns
+
 ## [0.2.2] - 2025-09-28
 
 ### Fixed

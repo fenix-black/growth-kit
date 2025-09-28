@@ -28,6 +28,96 @@ export function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig) {
     
     const pathname = request.nextUrl.pathname;
     
+    // Handle API proxy requests
+    if (pathname.startsWith('/api/growthkit/')) {
+      const apiPath = pathname.replace('/api/growthkit', '');
+      
+      if (config.debug) {
+        console.log('[GrowthKit] Proxying API request to:', apiPath);
+      }
+
+      try {
+        // Build the target URL
+        const targetUrl = `${config.apiUrl}${apiPath}`;
+        
+        // Prepare headers for the proxied request
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.apiKey}`,
+        };
+
+        // Forward specific headers from the original request
+        const forwardHeaders = ['X-Fingerprint', 'User-Agent', 'Accept-Language'];
+        forwardHeaders.forEach(headerName => {
+          const value = request.headers.get(headerName);
+          if (value) {
+            headers[headerName] = value;
+          }
+        });
+
+        // Prepare the request body
+        let body: string | undefined;
+        if (request.method !== 'GET' && request.method !== 'HEAD') {
+          body = await request.text();
+        }
+
+        // Make the proxied request
+        const response = await fetch(targetUrl, {
+          method: request.method,
+          headers,
+          body,
+        });
+
+        // Get the response data
+        const data = await response.text();
+        
+        if (config.debug) {
+          console.log('[GrowthKit] Proxy response status:', response.status);
+        }
+
+        // Create the response with the same status and headers
+        const proxyResponse = NextResponse.next();
+        
+        // Clear the response and set new content
+        const finalResponse = new NextResponse(data, {
+          status: response.status,
+          statusText: response.statusText,
+        });
+
+        // Forward relevant response headers
+        const responseHeaders = ['Content-Type'];
+        responseHeaders.forEach(headerName => {
+          const value = response.headers.get(headerName);
+          if (value) {
+            finalResponse.headers.set(headerName, value);
+          }
+        });
+
+        // Add CORS headers for browser requests
+        finalResponse.headers.set('Access-Control-Allow-Origin', '*');
+        finalResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        finalResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Fingerprint');
+
+        return finalResponse;
+
+      } catch (error) {
+        if (config.debug) {
+          console.error('[GrowthKit] Proxy error:', error);
+        }
+        
+        return new NextResponse(
+          JSON.stringify({ 
+            error: 'Proxy request failed',
+            message: error instanceof Error ? error.message : 'Unknown error'
+          }),
+          { 
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+    }
+    
     // Handle email verification
     if (pathname === '/verify') {
       const token = request.nextUrl.searchParams.get('token');

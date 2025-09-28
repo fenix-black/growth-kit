@@ -8,17 +8,28 @@ import type {
 } from './types';
 
 export class GrowthKitAPI {
-  private apiKey: string;
+  private apiKey: string | null;
   private apiUrl: string;
   private fingerprint: string | null = null;
+  private isProxyMode: boolean;
 
-  constructor(apiKey: string, apiUrl: string = '') {
-    this.apiKey = apiKey;
-    this.apiUrl = apiUrl || this.detectApiUrl();
+  constructor(apiKey?: string, apiUrl: string = '') {
+    // Default to proxy mode (secure) unless apiKey is explicitly provided
+    this.isProxyMode = !apiKey;
+    this.apiKey = apiKey || null;
+    this.apiUrl = this.isProxyMode ? this.detectProxyUrl() : (apiUrl || this.detectApiUrl());
+    
+    if (this.isProxyMode && typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.log('[GrowthKit] Using secure proxy mode via middleware - API key is handled server-side');
+    }
+    
+    if (!this.isProxyMode && typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+      console.warn('[GrowthKit] Using direct API mode with client-side API key. Consider upgrading to proxy mode for better security by removing the apiKey parameter.');
+    }
   }
 
   private detectApiUrl(): string {
-    // Auto-detect based on current environment
+    // Auto-detect based on current environment for direct API mode
     if (typeof window !== 'undefined') {
       const { hostname } = window.location;
       if (hostname === 'localhost' || hostname === '127.0.0.1') {
@@ -27,6 +38,17 @@ export class GrowthKitAPI {
     }
     // Default to production URL (update this when deployed)
     return 'https://growth.fenixblack.ai/api';
+  }
+
+  private detectProxyUrl(): string {
+    // For proxy mode, use local middleware proxy routes
+    // The middleware automatically handles /api/growthkit/* routes
+    if (typeof window !== 'undefined') {
+      const { protocol, host } = window.location;
+      return `${protocol}//${host}/api/growthkit`;
+    }
+    // Fallback for SSR
+    return '/api/growthkit';
   }
 
   setFingerprint(fingerprint: string) {
@@ -40,14 +62,25 @@ export class GrowthKitAPI {
     const url = `${this.apiUrl}${endpoint}`;
     
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(this.fingerprint && { 'X-Fingerprint': this.fingerprint }),
+      };
+
+      // Safely merge additional headers
+      if (options.headers) {
+        const additionalHeaders = options.headers as Record<string, string>;
+        Object.assign(headers, additionalHeaders);
+      }
+
+      // Only add Authorization header in direct API mode
+      if (!this.isProxyMode && this.apiKey) {
+        headers['Authorization'] = `Bearer ${this.apiKey}`;
+      }
+
       const response = await fetch(url, {
         ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
-          ...(this.fingerprint && { 'X-Fingerprint': this.fingerprint }),
-          ...options.headers,
-        },
+        headers,
         credentials: 'include', // For cookies
       });
 

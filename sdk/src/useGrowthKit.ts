@@ -41,15 +41,8 @@ export function useGrowthKit(): GrowthKitHook {
 
   // Initialize API client
   useEffect(() => {
-    if (!config.apiKey) {
-      setState(prev => ({
-        ...prev,
-        loading: false,
-        error: new Error('API key is required'),
-      }));
-      return;
-    }
-
+    // In proxy mode, no API key is required (it's handled server-side)
+    // In direct mode, API key is required
     apiRef.current = new GrowthKitAPI(config.apiKey, config.apiUrl);
   }, [config.apiKey, config.apiUrl]);
 

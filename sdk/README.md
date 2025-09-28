@@ -71,38 +71,75 @@ export const middleware = createGrowthKitMiddleware({
 });
 
 export const config = {
-  matcher: ['/r/:code*', '/verify', '/invite/:code*']  // Handles referral, verification, and invitations
+  matcher: ['/r/:code*', '/verify', '/invite/:code*', '/api/growthkit/:path*']  // Handles referrals, verification, invitations, and API proxying
 };
 ```
 
-The middleware automatically:
+The middleware automatically handles:
 - **Referral links**: `/r/ABC123` → exchanges code for claim token → redirects to `/?ref=token`
-- **Email verification**: `/verify?token=xyz` → verifies email → redirects to `/?verified=true`
+- **Email verification**: `/verify?token=xyz` → verifies email → redirects to `/?verified=true`  
 - **Invitation codes**: `/invite/INV-XXXXXX` → redirects with code → grants invitation credits
+- **API Proxying**: `/api/growthkit/*` → securely proxies widget API calls with server-side credentials
 
 ### 2. Set Environment Variables
 
 ```env
-# .env.local
-NEXT_PUBLIC_GROWTHKIT_API_KEY=gk_your_api_key_here
-NEXT_PUBLIC_GROWTHKIT_API_URL=https://growth.fenixblack.ai/api
-
-# For middleware (server-side)
+# .env.local - Server-side only (secure)
 GROWTHKIT_API_KEY=gk_your_api_key_here
 GROWTHKIT_API_URL=https://growth.fenixblack.ai/api
 ```
 
-### 3. Use the Hook
+**🔒 Security Note**: The API key is server-side only and never exposed to the client. The middleware handles all API proxying automatically.
+
+## Migration from v1.x (Legacy Direct Mode)
+
+If you're upgrading from a previous version that used `NEXT_PUBLIC_GROWTHKIT_API_KEY`:
+
+### 1. Update your middleware matcher to include API proxying:
+```tsx
+export const config = {
+  matcher: ['/r/:code*', '/verify', '/invite/:code*', '/api/growthkit/:path*']
+};
+```
+
+### 2. Update your environment variables:
+```env
+# Remove these (old, insecure):
+# NEXT_PUBLIC_GROWTHKIT_API_KEY=...
+# NEXT_PUBLIC_GROWTHKIT_API_URL=...
+
+# Keep these (secure):
+GROWTHKIT_API_KEY=gk_your_api_key_here
+GROWTHKIT_API_URL=https://growth.fenixblack.ai/api
+```
+
+### 3. Update your GrowthKitProvider config:
+```tsx
+// Old way (still works but shows deprecation warning):
+<GrowthKitProvider config={{ 
+  apiKey: process.env.NEXT_PUBLIC_GROWTHKIT_API_KEY 
+}}>
+
+// New way (secure):
+<GrowthKitProvider config={{ 
+  debug: process.env.NODE_ENV === 'development'
+}}>
+```
+
+The SDK automatically detects proxy mode when no `apiKey` is provided and routes all requests through your middleware's secure proxy.
+
+### 4. Use the Hook
 
 ```tsx
-import { useGrowthKit } from '@fenixblack/growthkit';
+import { useGrowthKit } from '@growthkit/sdk';
 
 function App() {
   const gk = useGrowthKit({
-    apiKey: process.env.NEXT_PUBLIC_GROWTHKIT_API_KEY!
+    // No apiKey needed - uses secure proxy mode automatically
+    debug: process.env.NODE_ENV === 'development'
   });
   
-  // That's it! The hook handles everything
+  // That's it! The hook handles everything securely
   return <div>Credits: {gk.credits}</div>;
 }
 ```

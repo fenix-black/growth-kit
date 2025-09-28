@@ -3,7 +3,7 @@ import { NextRequest, NextFetchEvent } from 'next/server';
 
 type GrowthKitTheme = 'light' | 'dark' | 'auto';
 interface GrowthKitConfig {
-    apiKey: string;
+    apiKey?: string;
     apiUrl?: string;
     debug?: boolean;
     language?: 'en' | 'es';
@@ -300,8 +300,10 @@ declare class GrowthKitAPI {
     private apiKey;
     private apiUrl;
     private fingerprint;
-    constructor(apiKey: string, apiUrl?: string);
+    private isProxyMode;
+    constructor(apiKey?: string, apiUrl?: string);
     private detectApiUrl;
+    private detectProxyUrl;
     setFingerprint(fingerprint: string): void;
     private request;
     getMe(fingerprint: string, claim?: string): Promise<APIResponse<MeResponse>>;
@@ -393,56 +395,9 @@ interface GrowthKitMiddlewareConfig {
 declare function createGrowthKitMiddleware(config: GrowthKitMiddlewareConfig): (request: NextRequest, event?: NextFetchEvent) => Promise<any>;
 declare function growthKitMiddleware(request: NextRequest, event?: NextFetchEvent): Promise<any>;
 
-/**
- * Server-side utilities for GrowthKit
- * These utilities are meant to be used in API routes and server components
- */
-
-interface GrowthKitServerConfig {
-    apiKey: string;
-    apiUrl?: string;
-}
-/**
- * Server-side API client for GrowthKit
- * Use this in API routes and server components
- */
-declare class GrowthKitServer {
-    private apiKey;
-    private apiUrl;
-    constructor(config: GrowthKitServerConfig);
-    /**
-     * Get user data by fingerprint
-     */
-    getUser(fingerprint: string): Promise<any>;
-    /**
-     * Complete an action for a user
-     */
-    completeAction(fingerprint: string, action?: string, metadata?: any): Promise<any>;
-    /**
-     * Add email to waitlist
-     */
-    addToWaitlist(email: string, fingerprint?: string, metadata?: any): Promise<any>;
-    /**
-     * Exchange referral code for claim token
-     */
-    exchangeReferralCode(code: string): Promise<any>;
-}
-/**
- * Extract fingerprint from request headers (if using custom header)
- */
-declare function getFingerprintFromRequest(request: NextRequest): string | null;
-/**
- * Extract referral claim from request cookies
- */
-declare function getReferralClaimFromRequest(request: NextRequest): string | null;
-/**
- * Create a server instance with environment variables
- */
-declare function createGrowthKitServer(): GrowthKitServer;
-
 declare function getFingerprint(): Promise<string>;
 declare function clearFingerprintCache(): void;
 
-declare const VERSION = "0.2.2";
+declare const VERSION = "0.3.0";
 
-export { APIResponse, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };
+export { APIResponse, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitState, GrowthKitTheme, Language, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createThemeVariables, darkTheme, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFocusStyles, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };

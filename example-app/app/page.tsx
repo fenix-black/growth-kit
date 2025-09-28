@@ -368,8 +368,7 @@ export default function HomePage() {
   const [currentTheme, setCurrentTheme] = useState<'light' | 'dark' | 'auto'>('auto');
   
   const config = {
-    apiKey: process.env.NEXT_PUBLIC_GROWTHKIT_API_KEY || '',
-    apiUrl: `${process.env.NEXT_PUBLIC_GROWTHKIT_SERVER_URL || 'https://growth.fenixblack.ai'}/api`,
+    // No apiKey needed - uses secure proxy mode automatically
     debug: process.env.NODE_ENV === 'development',
     language: currentLanguage,
     theme: currentTheme,

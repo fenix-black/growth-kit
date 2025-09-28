@@ -1,7 +1,7 @@
 export type GrowthKitTheme = 'light' | 'dark' | 'auto';
 
 export interface GrowthKitConfig {
-  apiKey: string;
+  apiKey?: string;
   apiUrl?: string;
   debug?: boolean;
   language?: 'en' | 'es';
