@@ -284,20 +284,21 @@ export default function DashboardOverview() {
         : 0,
     };
     
-    setChartData({ 
+    setChartData((prev: any) => ({ 
+      ...prev,
       growth: chartGrowth,
       expenses: [], // Will be populated by USD metrics
       credits: credits.slice(-30),
       conversion,
       systemHealth
-    });
+    }));
   };
   
   const generateMockChartData = (stats: any) => {
     // Generate mock time series data
     const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
-    const growth = [];
-    const expenses = [];
+    const growth: any[] = [];
+    const expenses: any[] = [];
     
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date();
@@ -342,7 +343,7 @@ export default function DashboardOverview() {
       creditsUsage: (stats.totalCreditsConsumed / stats.totalCreditsIssued) * 100,
     };
     
-    setChartData({ growth, expenses, credits, conversion, systemHealth });
+    setChartData((prev: any) => ({ ...prev, growth, expenses, credits, conversion, systemHealth }));
   };
 
 
