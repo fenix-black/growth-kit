@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useGrowthKit } from '../useGrowthKit';
+import { useTranslation } from '../localization';
 
 interface CreditExhaustionModalProps {
   // No props needed - modal manages its own state
@@ -26,6 +27,8 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
     creditsPaused,
     policy
   } = useGrowthKit();
+  
+  const { t } = useTranslation();
   
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(
@@ -98,11 +101,11 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
   return (
     <div style={styles.overlay} onClick={handleOverlayClick}>
       <div style={styles.modal}>
-        <h2 style={styles.title}>Earn Credits</h2>
+        <h2 style={styles.title}>{t('modal.earnCredits')}</h2>
         <p style={styles.subtitle}>
           {creditsPaused 
-            ? 'Credit earning is temporarily paused for this app' 
-            : 'Complete tasks below to earn more credits:'}
+            ? t('modal.creditsPausedMessage')
+            : t('modal.completeTasks')}
         </p>
 
         <div style={styles.tabs}>
@@ -111,7 +114,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
               style={{...styles.tab, ...(activeTab === 'name' ? styles.activeTab : {})}}
               onClick={() => setActiveTab('name')}
             >
-              Name {!creditsPaused && `(+${policy?.nameClaimCredits || 2})`}
+              {t('modal.nameTab')} {!creditsPaused && `(+${policy?.nameClaimCredits || 2})`}
             </button>
           )}
           {!hasClaimedEmail && (
@@ -119,7 +122,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
               style={{...styles.tab, ...(activeTab === 'email' ? styles.activeTab : {})}}
               onClick={() => setActiveTab('email')}
             >
-              Email {!creditsPaused && `(+${policy?.emailClaimCredits || 2})`}
+              {t('modal.emailTab')} {!creditsPaused && `(+${policy?.emailClaimCredits || 2})`}
             </button>
           )}
           {hasClaimedEmail && !hasVerifiedEmail && (
@@ -127,7 +130,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
               style={{...styles.tab, ...(activeTab === 'verify' ? styles.activeTab : {})}}
               onClick={() => setActiveTab('verify')}
             >
-              Verify {!creditsPaused && `(+${policy?.emailVerifyCredits || 5})`}
+              {t('modal.verifyTab')} {!creditsPaused && `(+${policy?.emailVerifyCredits || 5})`}
             </button>
           )}
           {!creditsPaused && (
@@ -135,7 +138,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
               style={{...styles.tab, ...(activeTab === 'share' ? styles.activeTab : {})}}
               onClick={() => setActiveTab('share')}
             >
-              Share
+              {t('modal.shareTab')}
             </button>
           )}
         </div>
@@ -169,9 +172,9 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
           )}
           {activeTab === 'share' && creditsPaused && (
             <div style={{ textAlign: 'center', padding: '20px' }}>
-              <p>Referral sharing is temporarily unavailable</p>
+              <p>{t('modal.referralUnavailable')}</p>
               <p style={{ fontSize: '14px', color: '#666', marginTop: '10px' }}>
-                New credits are paused
+                {t('modal.newCreditsPaused')}
               </p>
             </div>
           )}
@@ -190,7 +193,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
               fontWeight: '600', 
               color: '#64748b' 
             }}>
-              Current credits: <span style={{ color: '#10b981', fontWeight: '700' }}>{credits}</span>
+              {t('modal.currentCredits')} <span style={{ color: '#10b981', fontWeight: '700' }}>{credits}</span>
             </p>
           </div>
           <button 
@@ -210,7 +213,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
               e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(16, 185, 129, 0.4), 0 4px 6px -2px rgba(16, 185, 129, 0.1)';
             }}
           >
-            Done
+            {t('modal.done')}
           </button>
         </div>
       </div>
@@ -222,6 +225,7 @@ CreditExhaustionModal.displayName = 'CreditExhaustionModal';
 
 // Tab Components
 function NameTab({ onClaim, loading, setLoading, credits, creditsPaused, onSuccess }: any) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -239,15 +243,15 @@ function NameTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucce
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>Enter Your Name</h3>
+      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{t('modal.enterYourName')}</h3>
       <p style={{ color: '#64748b', fontSize: '15px', fontWeight: '500', lineHeight: '1.5' }}>
-        {creditsPaused ? 'Tell us your name' : `Earn ${credits} credits by telling us your name`}
+        {creditsPaused ? t('modal.tellUsName') : t('modal.earnCreditsName', { credits })}
       </p>
       <input 
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Your name"
+        placeholder={t('modal.yourName')}
         style={styles.input}
         disabled={loading}
         onFocus={(e) => {
@@ -266,13 +270,14 @@ function NameTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucce
         disabled={loading || !name.trim()}
         style={styles.primaryButton}
       >
-        {loading ? 'Claiming...' : `Claim ${credits} Credits`}
+        {loading ? t('modal.claiming') : t('modal.claimCredits', { credits })}
       </button>
     </form>
   );
 }
 
 function EmailTab({ onClaim, loading, setLoading, credits, creditsPaused, onSuccess }: any) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -290,15 +295,15 @@ function EmailTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucc
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>Enter Your Email</h3>
+      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{t('modal.enterYourEmail')}</h3>
       <p style={{ color: '#64748b', fontSize: '15px', fontWeight: '500', lineHeight: '1.5' }}>
-        {creditsPaused ? 'Provide your email address' : `Earn ${credits} credits + unlock email verification bonus`}
+        {creditsPaused ? t('modal.provideEmail') : t('modal.earnCreditsEmail', { credits })}
       </p>
       <input 
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="your@email.com"
+        placeholder={t('modal.yourEmail')}
         style={styles.input}
         disabled={loading}
         onFocus={(e) => {
@@ -317,17 +322,19 @@ function EmailTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucc
         disabled={loading || !email.trim()}
         style={styles.primaryButton}
       >
-        {loading ? 'Claiming...' : `Claim ${credits} Credits`}
+        {loading ? t('modal.claiming') : t('modal.claimCredits', { credits })}
       </button>
     </form>
   );
 }
 
 function VerifyTab({ credits, creditsPaused }: any) {
+  const { t } = useTranslation();
+  
   return (
     <div>
-      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '12px' }}>Verify Your Email</h3>
-      <p style={{ color: '#64748b', fontSize: '16px', fontWeight: '500', lineHeight: '1.6', marginBottom: '16px' }}>Check your inbox for a verification email</p>
+      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '12px' }}>{t('modal.verifyYourEmail')}</h3>
+      <p style={{ color: '#64748b', fontSize: '16px', fontWeight: '500', lineHeight: '1.6', marginBottom: '16px' }}>{t('modal.checkInbox')}</p>
       <div style={{ 
         backgroundColor: 'rgba(16, 185, 129, 0.1)', 
         border: '2px solid rgba(16, 185, 129, 0.2)', 
@@ -337,8 +344,8 @@ function VerifyTab({ credits, creditsPaused }: any) {
       }}>
         <p style={{ marginTop: 0, marginBottom: 0, fontSize: '14px', color: '#64748b', fontWeight: '500' }}>
           {creditsPaused 
-            ? '✉️ Click the verification link to activate your account' 
-            : `🎉 Click the verification link in the email to earn ${credits} additional credits`}
+            ? `✉️ ${t('modal.clickVerificationLink')}` 
+            : `🎉 ${t('modal.earnVerificationCredits', { credits })}`}
         </p>
       </div>
     </div>
@@ -346,6 +353,7 @@ function VerifyTab({ credits, creditsPaused }: any) {
 }
 
 function ShareTab({ referralLink, onShare, referralCredits }: any) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -363,8 +371,8 @@ function ShareTab({ referralLink, onShare, referralCredits }: any) {
 
   return (
     <div>
-      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '12px' }}>Share & Earn</h3>
-      <p style={{ color: '#64748b', fontSize: '16px', fontWeight: '500', lineHeight: '1.6', marginBottom: '20px' }}>Earn credits for each friend who joins!</p>
+      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '12px' }}>{t('modal.shareAndEarn')}</h3>
+      <p style={{ color: '#64748b', fontSize: '16px', fontWeight: '500', lineHeight: '1.6', marginBottom: '20px' }}>{t('modal.earnCreditsEachFriend')}</p>
       
       <div style={styles.referralBox}>
         <input 
@@ -397,13 +405,13 @@ function ShareTab({ referralLink, onShare, referralCredits }: any) {
             borderColor: copied ? '#10b981' : '#e2e8f0',
           }}
         >
-          {copied ? 'Copied!' : 'Copy'}
+          {copied ? t('modal.copied') : t('modal.copy')}
         </button>
       </div>
       
       {typeof navigator !== 'undefined' && 'share' in navigator && (
         <button onClick={handleShare} style={styles.primaryButton}>
-          Share Now
+          {t('modal.shareNow')}
         </button>
       )}
       
@@ -415,7 +423,7 @@ function ShareTab({ referralLink, onShare, referralCredits }: any) {
         marginTop: '20px'
       }}>
         <p style={{ marginTop: 0, marginBottom: 0, fontSize: '14px', color: '#64748b', fontWeight: '600' }}>
-          💫 You'll earn {referralCredits} credits per referral
+          💫 {t('modal.earnCreditsPerReferral', { credits: referralCredits })}
         </p>
       </div>
     </div>

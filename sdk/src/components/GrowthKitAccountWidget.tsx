@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
-import { GrowthKitProvider } from './GrowthKitProvider';
+import { GrowthKitProvider, useGrowthKitConfig } from './GrowthKitProvider';
 import { useGrowthKit } from '../useGrowthKit';
 import { WaitlistForm } from './WaitlistForm';
 import { CreditExhaustionModal } from './CreditExhaustionModal';
 import type { CreditExhaustionModalRef } from './CreditExhaustionModal';
 import type { GrowthKitConfig } from '../types';
+import { useTranslation } from '../localization';
 
 interface GrowthKitAccountWidgetProps {
   config: GrowthKitConfig;
@@ -29,6 +30,7 @@ export interface GrowthKitAccountWidgetRef {
   refresh: () => Promise<void>;
   getCurrentBalance: () => number;
   getProfile: () => { name?: string; email?: string; verified?: boolean };
+  setLanguage: (language: 'en' | 'es') => void;
 }
 
 // Internal widget component that uses the context
@@ -64,6 +66,9 @@ const AccountWidgetInternal = forwardRef<
     refresh,
   } = useGrowthKit();
 
+  const { t } = useTranslation();
+  const { setLanguage } = useGrowthKitConfig();
+
   const creditModalRef = useRef<CreditExhaustionModalRef>(null);
   const [showProfileExpanded, setShowProfileExpanded] = useState(false);
   const [prevCredits, setPrevCredits] = useState(credits);
@@ -98,14 +103,14 @@ const AccountWidgetInternal = forwardRef<
     const params = new URLSearchParams(window.location.search);
     
     if (params.get('verified') === 'true') {
-      showNotification('Email verified successfully! +5 credits earned', 'success');
+      showNotification(t('widget.emailVerifiedSuccess'), 'success');
       refresh();
       cleanupUrl();
     } else if (params.get('verified') === 'false') {
       const error = params.get('error');
       const message = error === 'missing-token' 
-        ? 'No verification token provided'
-        : 'Verification failed. The token may be invalid or expired.';
+        ? t('widget.noVerificationToken')
+        : t('widget.verificationFailed');
       showNotification(message, 'error');
       cleanupUrl();
     }
@@ -134,6 +139,7 @@ const AccountWidgetInternal = forwardRef<
       email: email || undefined,
       verified: hasVerifiedEmail,
     }),
+    setLanguage: setLanguage || (() => {}),
   }));
 
   // Determine current theme colors
@@ -145,7 +151,7 @@ const AccountWidgetInternal = forwardRef<
       <div style={{ ...getWidgetStyles(themeColors, compact), ...style }} className={className}>
         <div style={styles.loading}>
           <div style={{ ...styles.spinner, borderTopColor: themeColors.primary }} />
-          <span style={{ ...styles.loadingText, color: themeColors.textSecondary }}>Loading...</span>
+          <span style={{ ...styles.loadingText, color: themeColors.textSecondary }}>{t('widget.loading')}</span>
         </div>
       </div>
     );
@@ -167,7 +173,7 @@ const AccountWidgetInternal = forwardRef<
       <div style={{ ...getWidgetStyles(themeColors, compact), ...style }} className={className}>
         <div style={styles.waitlistWidget}>
           <span style={styles.waitlistIcon}>⏳</span>
-          <span style={{ ...styles.waitlistText, color: themeColors.text }}>Waitlist Active</span>
+          <span style={{ ...styles.waitlistText, color: themeColors.text }}>{t('widget.waitlistActive')}</span>
         </div>
       </div>
     );
@@ -210,7 +216,7 @@ const AccountWidgetInternal = forwardRef<
               backgroundClip: 'text',
             }}>●</div>
             <span style={{ ...styles.creditsValue, color: themeColors.text }}>{credits}</span>
-            <span style={{ ...styles.creditsLabel, color: themeColors.textSecondary }}>credits</span>
+            <span style={{ ...styles.creditsLabel, color: themeColors.textSecondary }}>{t('widget.credits')}</span>
             {creditsPaused && (
               <div 
                 style={{
@@ -218,7 +224,7 @@ const AccountWidgetInternal = forwardRef<
                   backgroundColor: themeColors.warning + '20',
                   color: themeColors.warning,
                 }} 
-                title="Credit earning is temporarily paused"
+                title={t('widget.creditsPausedTooltip')}
               >
                 ⏸
               </div>
@@ -276,7 +282,7 @@ const AccountWidgetInternal = forwardRef<
               e.currentTarget.style.boxShadow = themeColors.shadowSm;
             }}
           >
-            Earn Credits
+            {t('widget.earnCredits')}
           </button>
         )}
       </div>
@@ -290,34 +296,34 @@ const AccountWidgetInternal = forwardRef<
           boxShadow: themeColors.shadow,
         }}>
           <div style={styles.expandedSection}>
-            <h4 style={{ ...styles.expandedTitle, color: themeColors.textSecondary }}>Account</h4>
+            <h4 style={{ ...styles.expandedTitle, color: themeColors.textSecondary }}>{t('widget.account')}</h4>
             
             {showName && (
               <div style={styles.expandedRow}>
-                <span style={{ ...styles.expandedLabel, color: themeColors.textSecondary }}>Name:</span>
+                <span style={{ ...styles.expandedLabel, color: themeColors.textSecondary }}>{t('widget.name')}</span>
                 <span style={{ ...styles.expandedValue, color: themeColors.text }}>
-                  {name || 'Not set'}
+                  {name || t('widget.notSet')}
                 </span>
               </div>
             )}
             
             {showEmail && (
               <div style={styles.expandedRow}>
-                <span style={{ ...styles.expandedLabel, color: themeColors.textSecondary }}>Email:</span>
+                <span style={{ ...styles.expandedLabel, color: themeColors.textSecondary }}>{t('widget.email')}</span>
                 <span style={{ ...styles.expandedValue, color: themeColors.text }}>
                   {email ? (
                     <span style={styles.expandedEmailStatus}>
                       {email} {hasVerifiedEmail && <span style={styles.verifiedBadge}>✅</span>}
                     </span>
                   ) : (
-                    'Not set'
+                    t('widget.notSet')
                   )}
                 </span>
               </div>
             )}
             
             <div style={styles.expandedRow}>
-              <span style={{ ...styles.expandedLabel, color: themeColors.textSecondary }}>Credits:</span>
+              <span style={{ ...styles.expandedLabel, color: themeColors.textSecondary }}>{t('widget.creditsLabel')}</span>
               <span style={{ ...styles.expandedValue, color: themeColors.text }}>{credits}</span>
             </div>
           </div>
@@ -342,7 +348,7 @@ const AccountWidgetInternal = forwardRef<
               e.currentTarget.style.boxShadow = themeColors.shadowSm;
             }}
           >
-            Earn More Credits
+            {t('widget.earnMoreCredits')}
           </button>
         </div>
       )}

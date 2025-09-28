@@ -2,6 +2,7 @@ export interface GrowthKitConfig {
   apiKey: string;
   apiUrl?: string;
   debug?: boolean;
+  language?: 'en' | 'es';
 }
 
 export interface GrowthKitPolicy {

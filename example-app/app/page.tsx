@@ -5,7 +5,15 @@ import { useState, useRef, useEffect } from 'react';
 import type { GrowthKitAccountWidgetRef } from '@growthkit/sdk';
 
 // Main App Component (now completely GrowthKit-agnostic)
-function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<GrowthKitAccountWidgetRef | null> }) {
+function MainApp({ 
+  accountWidgetRef, 
+  currentLanguage, 
+  onLanguageToggle 
+}: { 
+  accountWidgetRef: React.RefObject<GrowthKitAccountWidgetRef | null>;
+  currentLanguage: 'en' | 'es';
+  onLanguageToggle: () => void;
+}) {
   const { credits, completeAction, policy, track } = useGrowthKit();
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastAction, setLastAction] = useState<string>('');
@@ -119,6 +127,18 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
         <h1 style={styles.title}>Example App</h1>
         <div style={styles.headerActions}>
           <button 
+            onClick={onLanguageToggle}
+            style={{
+              ...styles.testButton,
+              background: currentLanguage === 'es' ? '#10b981' : '#f0f0f0',
+              color: currentLanguage === 'es' ? 'white' : '#333',
+              marginRight: '0.5rem',
+            }}
+            aria-label={`Switch to ${currentLanguage === 'en' ? 'Spanish' : 'English'}`}
+          >
+            🌍 {currentLanguage === 'en' ? 'ES' : 'EN'}
+          </button>
+          <button 
             onClick={handleTestEarnCredits}
             style={styles.testButton}
             aria-label="Open earn credits modal"
@@ -133,6 +153,15 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
         <h2 style={styles.heroTitle}>Welcome to Example App</h2>
         <p style={styles.heroText}>Each action uses 1 credit. Earn credits through various actions!</p>
         <p style={styles.heroSubtext}>Check your account widget to see your balance and earn more credits</p>
+        <p style={{
+          ...styles.heroSubtext,
+          fontSize: '0.9rem',
+          color: '#10b981',
+          fontWeight: '600',
+          marginTop: '1rem',
+        }}>
+          🌍 Try the language toggle! The SDK widgets now support English and Spanish.
+        </p>
       </div>
 
       {/* Main Action */}
@@ -319,13 +348,27 @@ function MainApp({ accountWidgetRef }: { accountWidgetRef: React.RefObject<Growt
 
 // Main Page Component - Now uses the new all-in-one widget
 export default function HomePage() {
+  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
+  
   const config = {
     apiKey: process.env.NEXT_PUBLIC_GROWTHKIT_API_KEY || '',
     apiUrl: `${process.env.NEXT_PUBLIC_GROWTHKIT_SERVER_URL || 'https://growth.fenixblack.ai'}/api`,
     debug: process.env.NODE_ENV === 'development',
+    language: currentLanguage,
   };
 
   const accountWidgetRef = useRef<GrowthKitAccountWidgetRef>(null);
+  
+  // Function to handle language switching
+  const handleLanguageToggle = () => {
+    const newLanguage = currentLanguage === 'en' ? 'es' : 'en';
+    setCurrentLanguage(newLanguage);
+    
+    // Also update the widget's language programmatically
+    setTimeout(() => {
+      accountWidgetRef.current?.setLanguage(newLanguage);
+    }, 100);
+  };
 
   return (
     <>
@@ -341,7 +384,11 @@ export default function HomePage() {
           console.log('Profile updated:', profile);
         }}
       >
-        <MainApp accountWidgetRef={accountWidgetRef} />
+        <MainApp 
+          accountWidgetRef={accountWidgetRef} 
+          currentLanguage={currentLanguage}
+          onLanguageToggle={handleLanguageToggle}
+        />
       </GrowthKitAccountWidget>
     </>
   );

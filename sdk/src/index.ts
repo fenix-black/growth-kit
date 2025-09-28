@@ -54,5 +54,9 @@ export { getFingerprint, clearFingerprintCache } from './fingerprint';
 // API client export (for advanced users)
 export { GrowthKitAPI } from './api';
 
+// Localization exports
+export { useLocalization, useTranslation } from './localization';
+export type { Language, Translations } from './localization';
+
 // Version
 export const VERSION = '0.0.4';

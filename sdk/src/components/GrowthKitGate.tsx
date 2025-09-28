@@ -5,6 +5,7 @@ import { useGrowthKit } from '../useGrowthKit';
 import { WaitlistForm } from './WaitlistForm';
 import { CreditExhaustionModal } from './CreditExhaustionModal';
 import type { CreditExhaustionModalRef } from './CreditExhaustionModal';
+import { useTranslation } from '../localization';
 
 interface GrowthKitGateProps {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
     waitlistEnabled 
   } = useGrowthKit();
   
+  const { t } = useTranslation();
   const creditModalRef = useRef<CreditExhaustionModalRef>(null);
 
   // Show credit exhaustion modal when needed
@@ -72,7 +74,7 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}>
-                Loading...
+                {t('widget.loading')}
               </p>
             </div>
           </div>

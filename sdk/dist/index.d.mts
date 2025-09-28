@@ -5,6 +5,7 @@ interface GrowthKitConfig {
     apiKey: string;
     apiUrl?: string;
     debug?: boolean;
+    language?: 'en' | 'es';
 }
 interface GrowthKitPolicy {
     referralCredits: number;
@@ -125,6 +126,84 @@ type GrowthKitHook = GrowthKitState & GrowthKitActions;
 
 declare function useGrowthKit(): GrowthKitHook;
 
+type Language = 'en' | 'es';
+interface Translations {
+    waitlist: {
+        youreOnTheList: string;
+        yourPosition: string;
+        notifyEmail: string;
+        earlyAccess: string;
+        joinWaitlistMessage: string;
+        enterYourEmail: string;
+        emailRequired: string;
+        invalidEmail: string;
+        joinFailed: string;
+        errorOccurred: string;
+        joining: string;
+        joinWaitlist: string;
+        noSpam: string;
+    };
+    widget: {
+        loading: string;
+        waitlistActive: string;
+        credits: string;
+        creditsPausedTooltip: string;
+        earnCredits: string;
+        account: string;
+        name: string;
+        email: string;
+        creditsLabel: string;
+        notSet: string;
+        earnMoreCredits: string;
+        emailVerifiedSuccess: string;
+        noVerificationToken: string;
+        verificationFailed: string;
+    };
+    modal: {
+        earnCredits: string;
+        creditsPausedMessage: string;
+        completeTasks: string;
+        nameTab: string;
+        emailTab: string;
+        verifyTab: string;
+        shareTab: string;
+        enterYourName: string;
+        earnCreditsName: string;
+        tellUsName: string;
+        yourName: string;
+        claiming: string;
+        claimCredits: string;
+        enterYourEmail: string;
+        earnCreditsEmail: string;
+        provideEmail: string;
+        yourEmail: string;
+        verifyYourEmail: string;
+        checkInbox: string;
+        clickVerificationLink: string;
+        earnVerificationCredits: string;
+        shareAndEarn: string;
+        earnCreditsEachFriend: string;
+        copy: string;
+        copied: string;
+        shareNow: string;
+        earnCreditsPerReferral: string;
+        referralUnavailable: string;
+        newCreditsPaused: string;
+        currentCredits: string;
+        done: string;
+    };
+}
+interface LocalizationContextValue {
+    language: Language;
+    t: Translations;
+    setLanguage?: (language: Language) => void;
+}
+declare function useLocalization(): LocalizationContextValue;
+declare function useTranslation(): {
+    t: (key: string, values?: Record<string, string | number>) => string;
+    language: Language;
+};
+
 interface GrowthKitProviderProps {
     children: React.ReactNode;
     config: GrowthKitConfig;
@@ -214,6 +293,7 @@ interface GrowthKitAccountWidgetRef {
         email?: string;
         verified?: boolean;
     };
+    setLanguage: (language: 'en' | 'es') => void;
 }
 declare const GrowthKitAccountWidget: React.ForwardRefExoticComponent<GrowthKitAccountWidgetProps & React.RefAttributes<GrowthKitAccountWidgetRef>>;
 
@@ -279,4 +359,4 @@ declare function clearFingerprintCache(): void;
 
 declare const VERSION = "0.0.4";
 
-export { APIResponse, ClaimResponse, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, MeResponse, ShareOptions, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit };
+export { APIResponse, ClaimResponse, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, Language, MeResponse, ShareOptions, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit, useLocalization, useTranslation };

@@ -2,6 +2,7 @@
 
 import React, { useState, FormEvent } from 'react';
 import { useGrowthKit } from '../useGrowthKit';
+import { useTranslation, interpolate } from '../localization';
 
 export interface WaitlistFormProps {
   message?: string;
@@ -25,6 +26,7 @@ export function WaitlistForm({
   style 
 }: WaitlistFormProps) {
   const growthKit = useGrowthKit();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [position, setPosition] = useState<number | null>(null);
@@ -34,14 +36,14 @@ export function WaitlistForm({
     e.preventDefault();
     
     if (!email) {
-      setError('Email is required');
+      setError(t('waitlist.emailRequired'));
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address');
+      setError(t('waitlist.invalidEmail'));
       return;
     }
 
@@ -61,10 +63,10 @@ export function WaitlistForm({
           onSuccess(newPosition);
         }
       } else {
-        setError('Failed to join waitlist. Please try again.');
+        setError(t('waitlist.joinFailed'));
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(t('waitlist.errorOccurred'));
     } finally {
       setIsSubmitting(false);
     }
@@ -116,7 +118,7 @@ export function WaitlistForm({
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
             letterSpacing: '-0.025em',
-          }}>You're on the list!</h1>
+          }}>{t('waitlist.youreOnTheList')}</h1>
           <div style={{
             background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(20, 184, 166, 0.1) 50%, rgba(6, 182, 212, 0.1) 100%)',
             border: '2px solid rgba(16, 185, 129, 0.2)',
@@ -130,7 +132,7 @@ export function WaitlistForm({
               marginBottom: '12px',
               fontSize: '16px',
               fontWeight: '600',
-            }}>Your position:</p>
+            }}>{t('waitlist.yourPosition')}</p>
             <div style={{
               fontSize: '56px',
               fontWeight: '900',
@@ -149,7 +151,7 @@ export function WaitlistForm({
             fontWeight: '500',
             lineHeight: '1.6',
           }}>
-            We'll notify you at {email || 'your email'} when it's your turn!
+            {t('waitlist.notifyEmail', { email: email || 'your email' })}
           </p>
         </div>
       </div>
@@ -190,7 +192,7 @@ export function WaitlistForm({
           backgroundClip: 'text',
           letterSpacing: '-0.025em',
         }}>
-          Early Access
+          {t('waitlist.earlyAccess')}
         </h1>
         <p style={{ 
           color: '#64748b',
@@ -199,14 +201,14 @@ export function WaitlistForm({
           fontWeight: '500',
           lineHeight: '1.6',
         }}>
-          {message || 'Join our exclusive waitlist for early access'}
+          {message || t('waitlist.joinWaitlistMessage')}
         </p>
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '20px' }}>
             <input
               type="email"
-              placeholder="Enter your email"
+              placeholder={t('waitlist.enterYourEmail')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
@@ -287,7 +289,7 @@ export function WaitlistForm({
               }
             }}
           >
-            {isSubmitting ? 'Joining...' : 'Join Waitlist'}
+            {isSubmitting ? t('waitlist.joining') : t('waitlist.joinWaitlist')}
           </button>
         </form>
 
@@ -298,7 +300,7 @@ export function WaitlistForm({
           fontSize: '14px',
           fontWeight: '500',
         }}>
-          No spam. We'll only email you when it's your turn.
+          {t('waitlist.noSpam')}
         </p>
       </div>
     </div>

@@ -21,7 +21,7 @@ const BATCH_SIZE = 10;
 const BATCH_INTERVAL = 30000; // 30 seconds
 
 export function useGrowthKit(): GrowthKitHook {
-  const config = useGrowthKitConfig();
+  const { config } = useGrowthKitConfig();
   const { state, setState, apiRef, initRef } = useGrowthKitState();
   const configRef = useRef(config);
   configRef.current = config;
