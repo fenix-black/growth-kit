@@ -445,6 +445,6 @@ declare function createGrowthKitServer(): GrowthKitServer;
 declare function getFingerprint(): Promise<string>;
 declare function clearFingerprintCache(): void;
 
-declare const VERSION = "0.3.0";
+declare const VERSION = "0.3.1";
 
 export { APIResponse, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };

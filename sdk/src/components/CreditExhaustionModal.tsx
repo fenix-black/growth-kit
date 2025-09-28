@@ -130,7 +130,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
                 ...(activeTab === 'name' ? { 
                   ...styles.activeTab, 
                   borderBottomColor: themeColors.primary, 
-                  backgroundColor: `${themeColors.primary}10` 
+                  background: `${themeColors.primary}10` 
                 } : {})
               }}
               onClick={() => setActiveTab('name')}
@@ -146,7 +146,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
                 ...(activeTab === 'email' ? { 
                   ...styles.activeTab, 
                   borderBottomColor: themeColors.primary, 
-                  backgroundColor: `${themeColors.primary}10` 
+                  background: `${themeColors.primary}10` 
                 } : {})
               }}
               onClick={() => setActiveTab('email')}
@@ -162,7 +162,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
                 ...(activeTab === 'verify' ? { 
                   ...styles.activeTab, 
                   borderBottomColor: themeColors.primary, 
-                  backgroundColor: `${themeColors.primary}10` 
+                  background: `${themeColors.primary}10` 
                 } : {})
               }}
               onClick={() => setActiveTab('verify')}
@@ -178,7 +178,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
                 ...(activeTab === 'share' ? { 
                   ...styles.activeTab, 
                   borderBottomColor: themeColors.primary, 
-                  backgroundColor: `${themeColors.primary}10` 
+                  background: `${themeColors.primary}10` 
                 } : {})
               }}
               onClick={() => setActiveTab('share')}
