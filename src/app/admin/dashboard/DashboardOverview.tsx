@@ -188,7 +188,7 @@ export default function DashboardOverview() {
           
           // Update recent activity
           setRecentActivities(recentActivity || []);
-          return;
+          //return;
         } else {
           // Fall back to legacy metrics endpoint
           const metricsResponse = await fetch('/api/v1/admin/metrics', {
