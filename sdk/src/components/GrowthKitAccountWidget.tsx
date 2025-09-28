@@ -10,6 +10,22 @@ import type { GrowthKitConfig, GrowthKitTheme } from '../types';
 import { useTranslation } from '../localization';
 import { GROWTHKIT_LOGO_ICON_BASE64 } from '../assets';
 
+// Helper function to get footer logo URL from config with theme support
+const getFooterLogoUrl = (apiUrl?: string, isDark?: boolean, customUrl?: string): string => {
+  if (customUrl) return customUrl;
+  
+  const logoFileName = isDark ? 'growthkit-logo-dark-alpha-120px.png' : 'growthkit-logo-alpha-120px.png';
+  
+  if (apiUrl) {
+    // Remove /v1 or /api suffix and add logo file
+    const baseUrl = apiUrl.replace(/\/v1$|\/api$/, '');
+    return `${baseUrl}/${logoFileName}`;
+  }
+  
+  // Fallback for development or when no apiUrl is provided
+  return `https://growth.fenixblack.ai/${logoFileName}`;
+};
+
 interface GrowthKitAccountWidgetProps {
   config: GrowthKitConfig;
   children: React.ReactNode;
@@ -21,6 +37,7 @@ interface GrowthKitAccountWidgetProps {
   showEmail?: boolean;
   showCredits?: boolean;
   showLogo?: boolean;
+  footerLogoUrl?: string;
   autoOpenCreditModal?: boolean;
   onCreditsChange?: (credits: number) => void;
   onProfileChange?: (profile: { name?: string; email?: string; verified?: boolean }) => void;
@@ -49,6 +66,7 @@ const AccountWidgetInternal = forwardRef<
   showEmail = true,
   showCredits = true,
   showLogo = true,
+  footerLogoUrl,
   autoOpenCreditModal = true,
   onCreditsChange,
   onProfileChange,
@@ -71,7 +89,10 @@ const AccountWidgetInternal = forwardRef<
   } = useGrowthKit();
 
   const { t } = useTranslation();
-  const { setLanguage, themeColors } = useGrowthKitConfig();
+  const { config, setLanguage, themeColors, effectiveTheme } = useGrowthKitConfig();
+
+  // Generate footer logo URL from config with theme support
+  const finalFooterLogoUrl = getFooterLogoUrl(config.apiUrl, effectiveTheme === 'dark', footerLogoUrl);
 
   const creditModalRef = useRef<CreditExhaustionModalRef>(null);
   const [showProfileExpanded, setShowProfileExpanded] = useState(false);
@@ -397,6 +418,59 @@ const AccountWidgetInternal = forwardRef<
           >
             {t('widget.earnMoreCredits')}
           </button>
+
+          {/* Branded Footer */}
+          <div style={{
+            ...styles.brandedFooter,
+            borderTopColor: themeColors.border,
+          }}>
+            <a
+              href="https://growth.fenixblack.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.footerLink}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              onMouseOver={(e) => {
+                // Add subtle hover effect to the text
+                const text = e.currentTarget.querySelector('span');
+                if (text) {
+                  text.style.color = themeColors.text;
+                  text.style.opacity = '1';
+                }
+              }}
+              onMouseOut={(e) => {
+                // Reset text color
+                const text = e.currentTarget.querySelector('span');
+                if (text) {
+                  text.style.color = themeColors.textSecondary;
+                  text.style.opacity = '0.8';
+                }
+              }}
+            >
+              <img 
+                src={finalFooterLogoUrl}
+                alt="Powered by GrowthKit"
+                style={styles.footerLogo}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.opacity = '0.8';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+                onError={(e) => {
+                  // Fallback to a simple text if image fails to load
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+              <span style={{ ...styles.footerText, color: themeColors.textSecondary }}>
+                Powered by GrowthKit
+              </span>
+            </a>
+          </div>
         </div>
       )}
     </div>
@@ -825,6 +899,37 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  brandedFooter: {
+    borderTop: '1px solid',
+    paddingTop: '12px',
+    marginTop: '16px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '6px',
+  },
+  footerLink: {
+    textDecoration: 'none',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '6px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  footerLogo: {
+    height: '28px',
+    width: 'auto',
+    opacity: 0.8,
+    transition: 'opacity 0.2s ease, transform 0.2s ease',
+    maxWidth: '120px',
+  },
+  footerText: {
+    fontSize: '11px',
+    fontWeight: '400',
+    textAlign: 'center',
+    opacity: 0.8,
   },
 };
 

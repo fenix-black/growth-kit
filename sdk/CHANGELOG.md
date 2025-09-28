@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.4.3] - 2025-09-28
+
+### ✨ Features
+- **Branded Footer Widget**: New clickable footer in widget expanded view
+  - Theme-aware logo display with automatic light/dark mode switching
+  - Clickable footer opens `https://growth.fenixblack.ai` in new tab
+  - Smart URL generation from config's `apiUrl` for logo assets
+  - Professional "Powered by GrowthKit" branding with interactive hover effects
+  - 120px optimized logos for crisp display: `growthkit-logo-alpha-120px.png` and `growthkit-logo-dark-alpha-120px.png`
+  - Security-first implementation with `rel="noopener noreferrer"`
+
+### 🎨 Improvements
+- **Enhanced Widget Interactions**: Subtle scale and opacity effects on footer hover
+- **Performance**: Removed unused base64 footer assets, switched to URL-based system
+- **Brand Discovery**: Seamless path for users to learn more about GrowthKit
+- **Responsive Design**: Footer adapts perfectly to widget theme and positioning
+
+### 🔧 Technical
+- Added `footerLogoUrl` prop to `GrowthKitAccountWidget` for custom logo URLs
+- Smart logo URL generation: `{apiUrl}/growthkit-logo-{theme}-alpha-120px.png`
+- Automatic theme detection for logo switching based on `effectiveTheme`
+- Clean removal of deprecated `GROWTHKIT_LOGO_FOOTER` base64 constant
+
 ## [0.4.2] - 2025-09-28
 
 ### 🚀 Features

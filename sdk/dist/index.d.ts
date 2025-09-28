@@ -364,6 +364,7 @@ interface GrowthKitAccountWidgetProps {
     showEmail?: boolean;
     showCredits?: boolean;
     showLogo?: boolean;
+    footerLogoUrl?: string;
     autoOpenCreditModal?: boolean;
     onCreditsChange?: (credits: number) => void;
     onProfileChange?: (profile: {
