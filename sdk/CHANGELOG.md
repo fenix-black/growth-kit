@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.1] - 2025-09-28
+
+### Fixed
+- **Server Utilities**: Restored `GrowthKitServer`, `createGrowthKitServer`, and related server-side utilities that were accidentally removed
+- **Server API URL**: Fixed default API URL for server utilities to use localhost for development
+
 ## [0.3.0] - 2025-09-28
 
 ### 🔒 Security Enhancement

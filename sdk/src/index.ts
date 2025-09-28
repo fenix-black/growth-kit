@@ -56,8 +56,14 @@ export {
 } from './middleware';
 export type { GrowthKitMiddlewareConfig } from './middleware';
 
-// Note: API proxying is now handled automatically by the middleware
-// No manual server setup required
+// Server-side utilities
+export {
+  GrowthKitServer,
+  createGrowthKitServer,
+  getFingerprintFromRequest,
+  getReferralClaimFromRequest,
+} from './server';
+export type { GrowthKitServerConfig } from './server';
 
 // Client-side utilities
 export { getFingerprint, clearFingerprintCache } from './fingerprint';
@@ -70,4 +76,4 @@ export { useLocalization, useTranslation } from './localization';
 export type { Language, Translations } from './localization';
 
 // Version
-export const VERSION = '0.3.0';
+export const VERSION = '0.3.1';
