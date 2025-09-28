@@ -4,6 +4,17 @@ React SDK for GrowthKit - Intelligent waitlist and referral management system wi
 
 ## ⚡ Quick Start (30 seconds)
 
+### Option 1: Automated Setup (Recommended)
+```bash
+npx @fenixblack/growthkit setup
+```
+**That's it!** The CLI will automatically:
+- Detect your Next.js project
+- Create `middleware.ts` with auto-middleware
+- Set up environment variables
+- Provide next steps
+
+### Option 2: Manual Setup
 1. **Install**: `npm install @fenixblack/growthkit`
 2. **Add middleware**: Create `middleware.ts` with one line:
    ```ts
@@ -72,11 +83,36 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
 import { GrowthKitServer, createGrowthKitServer } from '@fenixblack/growthkit/server';
 ```
 
-## Complete Setup (3 Steps)
+## CLI Setup Tool
+
+GrowthKit provides an interactive CLI for zero-effort setup:
+
+```bash
+# Interactive setup wizard
+npx @fenixblack/growthkit setup
+
+# Show help
+npx @fenixblack/growthkit help
+```
+
+### What the CLI does:
+✅ **Project Detection**: Automatically detects Next.js projects  
+✅ **File Generation**: Creates `middleware.ts` with auto-middleware  
+✅ **Environment Setup**: Configures `.env.local` with your API credentials  
+✅ **Dependency Check**: Verifies GrowthKit is installed  
+✅ **Next Steps**: Provides clear instructions for integration  
+
+### Requirements:
+- Next.js project (creates middleware for referral handling)
+- GrowthKit API key (get from your dashboard)
+
+## Manual Setup (3 Steps)
 
 ### 1. Add Middleware (handles referral links & email verification)
 
-Create `middleware.ts` in your Next.js root:
+**Automated**: Run `npx @fenixblack/growthkit setup` (recommended)
+
+**Manual**: Create `middleware.ts` in your Next.js root:
 
 ```ts
 // middleware.ts - Zero configuration required! 🚀

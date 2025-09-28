@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.4.2] - 2025-09-28
+
+### 🚀 Features
+- **Interactive CLI Setup**: Complete automation of GrowthKit integration
+  - New `npx @fenixblack/growthkit setup` command for zero-effort setup
+  - Automatic Next.js project detection and validation
+  - Interactive prompts for API key and configuration
+  - Automatic file generation (middleware.ts, .env.local updates)
+  - Built-in dependency checking and installation guidance
+  - Comprehensive success messaging and next steps
+
+### 🎯 Developer Experience  
+- **Ultimate Simplification**: From 30 seconds (auto-middleware) to 10 seconds (CLI)
+- **Zero Manual Steps**: No file creation, no copy-pasting, no configuration
+- **Smart Detection**: Automatically detects project type and existing files
+- **Safe Overwriting**: Prompts before overwriting existing middleware files
+- **Help System**: Built-in help with `npx @fenixblack/growthkit help`
+
+### 📦 CLI Commands
+- `npx @fenixblack/growthkit setup` - Interactive setup wizard
+- `npx @fenixblack/growthkit help` - Show available commands
+- `npx @fenixblack/growthkit-setup` - Direct setup (backward compatibility)
+
 ## [0.4.1] - 2025-09-28
 
 ### ✨ Features
