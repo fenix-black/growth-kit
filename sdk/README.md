@@ -17,7 +17,21 @@ The SDK provides three separate entry points optimized for different environment
 ### Main Package (React Components & Hooks)
 ```tsx
 // For React components and hooks (client-side)
-import { useGrowthKit, GrowthKitGate, WaitlistForm } from '@fenixblack/growthkit';
+import { 
+  useGrowthKit, 
+  GrowthKitGate, 
+  WaitlistForm,
+  GrowthKitAccountWidget,
+  useTranslation,
+  useLocalization
+} from '@fenixblack/growthkit';
+
+// TypeScript types
+import type { 
+  Language, 
+  Translations, 
+  GrowthKitAccountWidgetRef 
+} from '@fenixblack/growthkit';
 ```
 
 ### Middleware (Edge Runtime Compatible)
@@ -145,6 +159,120 @@ function App() {
 }
 ```
 
+## Localization Support
+
+The SDK supports multiple languages with real-time language switching capabilities.
+
+### Supported Languages
+
+- **English** (`en`) - Default
+- **Spanish** (`es`)
+
+### Configuration
+
+Set the default language in your configuration:
+
+```tsx
+const config = {
+  apiKey: 'your-api-key',
+  language: 'es', // Set Spanish as default
+};
+```
+
+### Basic Usage
+
+```tsx
+import { useGrowthKit, GrowthKitAccountWidget } from '@fenixblack/growthkit';
+
+function App() {
+  const config = {
+    apiKey: 'your-api-key',
+    language: 'es', // Spanish by default
+  };
+
+  return (
+    <GrowthKitAccountWidget config={config}>
+      <YourApp />
+    </GrowthKitAccountWidget>
+  );
+}
+```
+
+### Programmatic Language Switching
+
+You can change the language dynamically from the parent app:
+
+```tsx
+import { useRef } from 'react';
+import { GrowthKitAccountWidget, GrowthKitAccountWidgetRef } from '@fenixblack/growthkit';
+
+function App() {
+  const [language, setLanguage] = useState<'en' | 'es'>('en');
+  const widgetRef = useRef<GrowthKitAccountWidgetRef>(null);
+
+  const toggleLanguage = () => {
+    const newLang = language === 'en' ? 'es' : 'en';
+    setLanguage(newLang);
+    
+    // Update the widget language programmatically
+    widgetRef.current?.setLanguage(newLang);
+  };
+
+  return (
+    <>
+      <button onClick={toggleLanguage}>
+        🌍 {language === 'en' ? 'ES' : 'EN'}
+      </button>
+      
+      <GrowthKitAccountWidget 
+        ref={widgetRef}
+        config={{ apiKey: 'your-key', language }}
+      >
+        <YourApp />
+      </GrowthKitAccountWidget>
+    </>
+  );
+}
+```
+
+### Localized Components
+
+All user-facing components support localization:
+
+- **WaitlistForm**: Form labels, error messages, success notifications
+- **GrowthKitAccountWidget**: Credit displays, profile sections, tooltips
+- **CreditExhaustionModal**: All tabs (Name, Email, Verify, Share) with complete localization
+- **GrowthKitGate**: Loading states and gating messages
+
+### Custom Translations (Advanced)
+
+Access the translation system directly:
+
+```tsx
+import { useTranslation, useLocalization } from '@fenixblack/growthkit';
+
+function CustomComponent() {
+  const { t } = useTranslation(); // Translation function with interpolation
+  const { language, setLanguage } = useLocalization(); // Current language state
+  
+  return (
+    <div>
+      <p>{t('waitlist.joinWaitlistMessage')}</p>
+      <p>{t('modal.earnCreditsName', { credits: 5 })}</p>
+      <p>Current language: {language}</p>
+    </div>
+  );
+}
+```
+
+### Language Switching Features
+
+- **Instant Updates**: Language changes apply immediately to all components
+- **No Remounting**: Components update without losing state
+- **Type Safety**: Full TypeScript support for language types
+- **String Interpolation**: Dynamic content like "Earn {{credits}} credits"
+- **Persistent State**: Widget remembers language preference
+
 ## Hook Properties
 
 The `useGrowthKit` hook returns an object with the following properties:
@@ -178,6 +306,10 @@ The `useGrowthKit` hook returns an object with the following properties:
   error: Error | null;          // Any error that occurred
   policy: GrowthKitPolicy;      // App credit policy
   refresh: () => Promise<void>; // Refresh user data
+  
+  // Localization (when using translation hooks)
+  language?: 'en' | 'es';       // Current language
+  setLanguage?: (lang: 'en' | 'es') => void; // Change language
 }
 ```
 
@@ -202,11 +334,15 @@ All-in-one account widget with credit display and profile management:
 import { GrowthKitAccountWidget } from '@fenixblack/growthkit';
 
 <GrowthKitAccountWidget 
-  config={{ apiKey: 'your-api-key' }}
+  config={{ 
+    apiKey: 'your-api-key',
+    language: 'es' // Optional: Set language
+  }}
   position="top-right"
   showName={true}
   showEmail={true}
   theme="auto"
+  ref={widgetRef} // Optional: For programmatic control
 >
   <YourApp />
 </GrowthKitAccountWidget>
@@ -219,6 +355,8 @@ Features:
 - Earn credits modal integration
 - Automatic flow management
 - Customizable position and theme
+- **Full localization support** (English/Spanish)
+- **Programmatic language switching** via ref
 
 ### WaitlistForm
 Customizable waitlist signup:

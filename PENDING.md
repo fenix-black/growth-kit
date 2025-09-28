@@ -22,4 +22,4 @@ todo:
 - admin, add admin users management owner of groups of apps
 - admin, add a way of grouping apps with a single apikey, so they share credits consumption and earnings (like a passport by topic)
 - admin. add app description field and keywords, to have better insights as to why a user wanted to use them (tracking)
-- sdk: add localization support for widget, and expose method so the client can switch the active language (for example, if the client app handles the locale)
+- sdk: add localization support for widget, and expose method so the client can switch the active language (for example, if the client app handles the locale) - DONE

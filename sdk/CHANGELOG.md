@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.2.0] - 2025-09-28
+
+### Added
+- **Full Localization Support**: Complete internationalization system for SDK components
+  - Added English (en) and Spanish (es) language support
+  - All user-facing text in widgets is now localizable
+  - String interpolation support for dynamic content (e.g., "Earn {{credits}} credits")
+  
+- **Language Configuration**: New `language` option in `GrowthKitConfig`
+  - Set default language: `{ apiKey: 'key', language: 'es' }`
+  - Supports 'en' (English, default) and 'es' (Spanish)
+  
+- **Programmatic Language Control**: Dynamic language switching capabilities  
+  - Added `setLanguage()` method to `GrowthKitAccountWidgetRef`
+  - Parent apps can switch languages in real-time: `widgetRef.current?.setLanguage('es')`
+  - Language changes apply immediately to all SDK components
+  
+- **New Localization Exports**:
+  - `useLocalization()`: Hook for accessing current language and translations
+  - `useTranslation()`: Hook with translation function and string interpolation
+  - `Language` and `Translations` TypeScript types
+
+### Enhanced Components
+- **WaitlistForm**: All text elements now support localization
+  - Form labels, error messages, success states, and help text
+  - Position display and email notifications
+  
+- **GrowthKitAccountWidget**: Fully localized account widget
+  - Credit labels, loading states, profile sections
+  - Hover tooltips and notification messages
+  
+- **CreditExhaustionModal**: Complete modal localization  
+  - All tabs (Name, Email, Verify, Share) with localized content
+  - Form fields, buttons, status messages, and help text
+  
+- **GrowthKitGate**: Localized loading and status messages
+
+### Developer Experience
+- **TypeScript Support**: Full type safety for all localization features
+- **Real-time Switching**: Language changes without component remount or page reload
+- **Consistent API**: Same component APIs with automatic language detection
+
 ## [0.1.13] - 2025-09-25
 
 ### Fixed

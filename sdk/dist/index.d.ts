@@ -357,6 +357,6 @@ declare function createGrowthKitServer(): GrowthKitServer;
 declare function getFingerprint(): Promise<string>;
 declare function clearFingerprintCache(): void;
 
-declare const VERSION = "0.0.4";
+declare const VERSION = "0.2.0";
 
 export { APIResponse, ClaimResponse, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, Language, MeResponse, ShareOptions, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit, useLocalization, useTranslation };
