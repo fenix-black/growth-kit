@@ -1,8 +1,11 @@
+export type GrowthKitTheme = 'light' | 'dark' | 'auto';
+
 export interface GrowthKitConfig {
   apiKey: string;
   apiUrl?: string;
   debug?: boolean;
   language?: 'en' | 'es';
+  theme?: GrowthKitTheme;
 }
 
 export interface GrowthKitPolicy {
@@ -69,6 +72,7 @@ export interface GrowthKitActions {
   shouldShowSoftPaywall: () => boolean;
   canPerformAction: (action?: string) => boolean;
   track: (eventName: string, properties?: Record<string, any>) => void;
+  setTheme: (theme: GrowthKitTheme) => void;
 }
 
 export interface ShareOptions {

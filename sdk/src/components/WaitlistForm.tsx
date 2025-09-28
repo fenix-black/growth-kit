@@ -2,6 +2,7 @@
 
 import React, { useState, FormEvent } from 'react';
 import { useGrowthKit } from '../useGrowthKit';
+import { useGrowthKitConfig } from './GrowthKitProvider';
 import { useTranslation, interpolate } from '../localization';
 
 export interface WaitlistFormProps {
@@ -26,6 +27,7 @@ export function WaitlistForm({
   style 
 }: WaitlistFormProps) {
   const growthKit = useGrowthKit();
+  const { themeColors } = useGrowthKitConfig();
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,7 +87,7 @@ export function WaitlistForm({
           alignItems: 'center',
           minHeight: '100vh',
           fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-          background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+          background: themeColors.primaryGradient,
           ...style
         }}
       >
@@ -93,42 +95,42 @@ export function WaitlistForm({
           textAlign: 'center',
           padding: '48px',
           maxWidth: '520px',
-          background: 'rgba(255, 255, 255, 0.95)',
+          background: themeColors.backgroundGlass,
           borderRadius: '20px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2)',
+          boxShadow: themeColors.shadowLg,
           backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          border: `1px solid ${themeColors.borderLight}`,
         }}>
           <div style={{ 
             fontSize: '72px', 
             marginBottom: '24px',
-            background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+            background: themeColors.primaryGradient,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
-            filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.2))',
+            filter: `drop-shadow(0 2px 4px ${themeColors.primary}40)`,
           }}>✨</div>
           <h1 style={{ 
             marginBottom: '24px', 
-            color: '#1e293b',
+            color: themeColors.text,
             fontSize: '32px',
             fontWeight: '800',
-            background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+            background: themeColors.primaryGradient,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
             letterSpacing: '-0.025em',
           }}>{t('waitlist.youreOnTheList')}</h1>
           <div style={{
-            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(20, 184, 166, 0.1) 50%, rgba(6, 182, 212, 0.1) 100%)',
-            border: '2px solid rgba(16, 185, 129, 0.2)',
+            background: `linear-gradient(135deg, ${themeColors.primary}20 0%, ${themeColors.secondary}20 50%, ${themeColors.accent}20 100%)`,
+            border: `2px solid ${themeColors.primary}40`,
             borderRadius: '16px',
             padding: '36px',
             marginBottom: '24px',
             backdropFilter: 'blur(8px)',
           }}>
             <p style={{ 
-              color: '#64748b', 
+              color: themeColors.textSecondary, 
               marginBottom: '12px',
               fontSize: '16px',
               fontWeight: '600',
@@ -136,7 +138,7 @@ export function WaitlistForm({
             <div style={{
               fontSize: '56px',
               fontWeight: '900',
-              background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+              background: themeColors.primaryGradient,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -146,7 +148,7 @@ export function WaitlistForm({
             </div>
           </div>
           <p style={{ 
-            color: '#64748b',
+            color: themeColors.textSecondary,
             fontSize: '16px',
             fontWeight: '500',
             lineHeight: '1.6',
@@ -167,26 +169,26 @@ export function WaitlistForm({
         alignItems: 'center',
         minHeight: '100vh',
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-        background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+        background: themeColors.primaryGradient,
         ...style
       }}
     >
       <div style={{
-        background: 'rgba(255, 255, 255, 0.95)',
+        background: themeColors.backgroundGlass,
         borderRadius: '20px',
         padding: '48px',
         maxWidth: '480px',
         width: '100%',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2)',
+        boxShadow: themeColors.shadowLg,
         backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        border: `1px solid ${themeColors.borderLight}`,
       }}>
         <h1 style={{ 
           marginBottom: '12px', 
-          color: '#1e293b',
+          color: themeColors.text,
           fontSize: '32px',
           fontWeight: '800',
-          background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+          background: themeColors.primaryGradient,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
@@ -195,7 +197,7 @@ export function WaitlistForm({
           {t('waitlist.earlyAccess')}
         </h1>
         <p style={{ 
-          color: '#64748b',
+          color: themeColors.textSecondary,
           marginBottom: '36px',
           fontSize: '16px',
           fontWeight: '500',
@@ -216,38 +218,39 @@ export function WaitlistForm({
                 width: '100%',
                 padding: '16px 20px',
                 fontSize: '16px',
-                border: '2px solid #e2e8f0',
+                border: `2px solid ${themeColors.inputBorder}`,
                 borderRadius: '12px',
                 outline: 'none',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 boxSizing: 'border-box',
                 fontFamily: 'inherit',
                 fontWeight: '500',
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                backgroundColor: themeColors.inputBackground,
                 backdropFilter: 'blur(8px)',
+                color: themeColors.text,
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#10b981';
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+                e.currentTarget.style.borderColor = themeColors.borderFocus;
+                e.currentTarget.style.boxShadow = `0 0 0 3px ${themeColors.inputFocus}`;
+                e.currentTarget.style.backgroundColor = themeColors.background;
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.borderColor = themeColors.inputBorder;
                 e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                e.currentTarget.style.backgroundColor = themeColors.inputBackground;
               }}
             />
           </div>
 
           {error && (
-            <p             style={{ 
-              color: '#ef4444',
+            <p style={{ 
+              color: themeColors.error,
               marginBottom: '24px',
               fontSize: '14px',
               fontWeight: '500',
               padding: '12px 16px',
-              backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
+              backgroundColor: `${themeColors.error}20`,
+              border: `1px solid ${themeColors.error}40`,
               borderRadius: '8px',
             }}>
               {error}
@@ -264,7 +267,7 @@ export function WaitlistForm({
               fontWeight: '700',
               background: isSubmitting 
                 ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)' 
-                : 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+                : themeColors.primaryGradient,
               color: 'white',
               border: 'none',
               borderRadius: '12px',
@@ -274,18 +277,18 @@ export function WaitlistForm({
               letterSpacing: '0.025em',
               boxShadow: isSubmitting 
                 ? 'none'
-                : '0 10px 25px -5px rgba(16, 185, 129, 0.4), 0 4px 6px -2px rgba(16, 185, 129, 0.1)',
+                : themeColors.shadow,
             }}
             onMouseOver={(e) => {
               if (!isSubmitting) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 20px 40px -5px rgba(16, 185, 129, 0.5), 0 8px 16px -4px rgba(16, 185, 129, 0.2)';
+                e.currentTarget.style.boxShadow = `0 20px 40px -5px ${themeColors.primary}80, 0 8px 16px -4px ${themeColors.primary}40`;
               }
             }}
             onMouseOut={(e) => {
               if (!isSubmitting) {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(16, 185, 129, 0.4), 0 4px 6px -2px rgba(16, 185, 129, 0.1)';
+                e.currentTarget.style.boxShadow = themeColors.shadow;
               }
             }}
           >
@@ -296,7 +299,7 @@ export function WaitlistForm({
         <p style={{
           marginTop: '24px',
           textAlign: 'center',
-          color: '#94a3b8',
+          color: themeColors.textMuted,
           fontSize: '14px',
           fontWeight: '500',
         }}>

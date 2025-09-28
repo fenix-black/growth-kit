@@ -1,11 +1,13 @@
 import React from 'react';
 import { NextRequest, NextFetchEvent } from 'next/server';
 
+type GrowthKitTheme = 'light' | 'dark' | 'auto';
 interface GrowthKitConfig {
     apiKey: string;
     apiUrl?: string;
     debug?: boolean;
     language?: 'en' | 'es';
+    theme?: GrowthKitTheme;
 }
 interface GrowthKitPolicy {
     referralCredits: number;
@@ -67,6 +69,7 @@ interface GrowthKitActions {
     shouldShowSoftPaywall: () => boolean;
     canPerformAction: (action?: string) => boolean;
     track: (eventName: string, properties?: Record<string, any>) => void;
+    setTheme: (theme: GrowthKitTheme) => void;
 }
 interface ShareOptions {
     title?: string;
@@ -122,9 +125,92 @@ interface WaitlistResponse {
     reason?: string;
     message?: string;
 }
+interface TrackedEvent {
+    eventName: string;
+    properties?: Record<string, any>;
+    timestamp: number;
+}
+interface TrackContext {
+    browser: string;
+    os: string;
+    device: 'desktop' | 'mobile' | 'tablet';
+    screenResolution: string;
+    viewport: string;
+    url: string;
+    referrer: string;
+    userAgent: string;
+}
 type GrowthKitHook = GrowthKitState & GrowthKitActions;
 
 declare function useGrowthKit(): GrowthKitHook;
+
+interface ThemeColors {
+    background: string;
+    backgroundSecondary: string;
+    backgroundGlass: string;
+    text: string;
+    textSecondary: string;
+    textMuted: string;
+    border: string;
+    borderLight: string;
+    borderFocus: string;
+    primary: string;
+    primaryGradient: string;
+    secondary: string;
+    accent: string;
+    success: string;
+    warning: string;
+    error: string;
+    magenta: string;
+    purple: string;
+    violet: string;
+    orange: string;
+    pink: string;
+    shadow: string;
+    shadowSm: string;
+    shadowLg: string;
+    hover: string;
+    active: string;
+    inputBackground: string;
+    inputBorder: string;
+    inputPlaceholder: string;
+    inputFocus: string;
+    overlay: string;
+}
+declare const lightTheme: ThemeColors;
+declare const darkTheme: ThemeColors;
+/**
+ * Get the effective theme, resolving 'auto' to 'light' or 'dark'
+ */
+declare function getEffectiveTheme(theme: GrowthKitTheme): 'light' | 'dark';
+/**
+ * Get theme colors based on the theme type
+ */
+declare function getThemeColors(theme: GrowthKitTheme): ThemeColors;
+/**
+ * Create CSS custom properties for theming
+ * Useful for applying themes to components
+ */
+declare function createThemeVariables(theme: GrowthKitTheme): Record<string, string>;
+/**
+ * Listen to system theme changes
+ */
+declare function onSystemThemeChange(callback: (isDark: boolean) => void): () => void;
+/**
+ * Utility to create focus styles for inputs
+ */
+declare function getFocusStyles(theme: ThemeColors): {
+    borderColor: string;
+    boxShadow: string;
+    backgroundColor: string;
+};
+/**
+ * Utility to create hover styles for buttons
+ */
+declare function getButtonHoverStyles(theme: ThemeColors): {
+    transform: string;
+    boxShadow: string;
+};
 
 type Language = 'en' | 'es';
 interface Translations {
@@ -357,6 +443,6 @@ declare function createGrowthKitServer(): GrowthKitServer;
 declare function getFingerprint(): Promise<string>;
 declare function clearFingerprintCache(): void;
 
-declare const VERSION = "0.2.0";
+declare const VERSION = "0.2.1";
 
-export { APIResponse, ClaimResponse, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, Language, MeResponse, ShareOptions, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, getFingerprint, getFingerprintFromRequest, getReferralClaimFromRequest, growthKitMiddleware, useGrowthKit, useLocalization, useTranslation };
+export { APIResponse, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };

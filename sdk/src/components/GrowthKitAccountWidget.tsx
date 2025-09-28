@@ -6,7 +6,7 @@ import { useGrowthKit } from '../useGrowthKit';
 import { WaitlistForm } from './WaitlistForm';
 import { CreditExhaustionModal } from './CreditExhaustionModal';
 import type { CreditExhaustionModalRef } from './CreditExhaustionModal';
-import type { GrowthKitConfig } from '../types';
+import type { GrowthKitConfig, GrowthKitTheme } from '../types';
 import { useTranslation } from '../localization';
 
 interface GrowthKitAccountWidgetProps {
@@ -67,7 +67,7 @@ const AccountWidgetInternal = forwardRef<
   } = useGrowthKit();
 
   const { t } = useTranslation();
-  const { setLanguage } = useGrowthKitConfig();
+  const { setLanguage, themeColors } = useGrowthKitConfig();
 
   const creditModalRef = useRef<CreditExhaustionModalRef>(null);
   const [showProfileExpanded, setShowProfileExpanded] = useState(false);
@@ -142,8 +142,7 @@ const AccountWidgetInternal = forwardRef<
     setLanguage: setLanguage || (() => {}),
   }));
 
-  // Determine current theme colors
-  const themeColors = getThemeColors(theme);
+  // Use centralized theme colors from context
 
   // Show loading state
   if (loading || !initialized) {
@@ -172,7 +171,7 @@ const AccountWidgetInternal = forwardRef<
     const waitlistWidget = (
       <div style={{ ...getWidgetStyles(themeColors, compact), ...style }} className={className}>
         <div style={styles.waitlistWidget}>
-          <span style={styles.waitlistIcon}>⏳</span>
+          <span style={{ ...styles.waitlistIcon, backgroundColor: `${themeColors.warning}20`, color: themeColors.warning }}>⏳</span>
           <span style={{ ...styles.waitlistText, color: themeColors.text }}>{t('widget.waitlistActive')}</span>
         </div>
       </div>
@@ -431,63 +430,12 @@ function getPositionStyles(position: string): React.CSSProperties {
   }
 }
 
-function getThemeColors(theme: string) {
-  // Auto-detect system theme if needed
-  const effectiveTheme = theme === 'auto' 
-    ? (typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    : theme;
-
-  switch (effectiveTheme) {
-    case 'dark':
-      return {
-        background: '#1e293b',
-        text: '#f8fafc',
-        textSecondary: '#94a3b8',
-        border: '#334155',
-        primary: '#10b981',
-        primaryGradient: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
-        accent: '#d946ef',
-        success: '#10b981',
-        warning: '#f97316',
-        shadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
-        shadowSm: '0 4px 6px -1px rgba(0, 0, 0, 0.2)',
-      };
-    case 'minimal':
-      return {
-        background: '#ffffff',
-        text: '#1e293b',
-        textSecondary: '#64748b',
-        border: 'transparent',
-        primary: '#10b981',
-        primaryGradient: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
-        accent: '#d946ef',
-        success: '#10b981',
-        warning: '#f97316',
-        shadow: 'none',
-        shadowSm: 'none',
-      };
-    default: // light
-      return {
-        background: '#ffffff',
-        text: '#1e293b',
-        textSecondary: '#64748b',
-        border: '#e2e8f0',
-        primary: '#10b981',
-        primaryGradient: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
-        accent: '#d946ef',
-        success: '#10b981',
-        warning: '#f97316',
-        shadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        shadowSm: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-      };
-  }
-}
 
 function getWidgetStyles(themeColors: any, compact: boolean): React.CSSProperties {
   return {
     backgroundColor: themeColors.background,
     color: themeColors.text,
-    border: themeColors.border === 'transparent' ? 'none' : `1px solid ${themeColors.border}`,
+    border: `1px solid ${themeColors.border}`,
     borderRadius: compact ? '12px' : '16px',
     padding: compact ? '12px 16px' : '16px 20px',
     boxShadow: themeColors.shadow,
@@ -552,8 +500,6 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: '6px',
-    backgroundColor: '#f97316' + '20',
-    color: '#f97316',
   },
   waitlistText: {
     fontSize: '14px',

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useGrowthKit } from '../useGrowthKit';
+import { useGrowthKitConfig } from './GrowthKitProvider';
 import { useTranslation } from '../localization';
 
 interface CreditExhaustionModalProps {
@@ -28,6 +29,7 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
     policy
   } = useGrowthKit();
   
+  const { themeColors } = useGrowthKitConfig();
   const { t } = useTranslation();
   
   const [isOpen, setIsOpen] = useState(false);
@@ -99,19 +101,38 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
   }
 
   return (
-    <div style={styles.overlay} onClick={handleOverlayClick}>
-      <div style={styles.modal}>
-        <h2 style={styles.title}>{t('modal.earnCredits')}</h2>
-        <p style={styles.subtitle}>
+    <div style={{ ...styles.overlay, backgroundColor: themeColors.overlay }} onClick={handleOverlayClick}>
+      <div style={{ 
+        ...styles.modal, 
+        backgroundColor: themeColors.background, 
+        boxShadow: themeColors.shadowLg,
+        border: `1px solid ${themeColors.borderLight}`
+      }}>
+        <h2 style={{ 
+          ...styles.title, 
+          background: themeColors.primaryGradient,
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+        }}>{t('modal.earnCredits')}</h2>
+        <p style={{ ...styles.subtitle, color: themeColors.textSecondary }}>
           {creditsPaused 
             ? t('modal.creditsPausedMessage')
             : t('modal.completeTasks')}
         </p>
 
-        <div style={styles.tabs}>
+        <div style={{ ...styles.tabs, borderBottomColor: themeColors.border }}>
           {!hasClaimedName && (
             <button 
-              style={{...styles.tab, ...(activeTab === 'name' ? styles.activeTab : {})}}
+              style={{
+                ...styles.tab, 
+                color: activeTab === 'name' ? themeColors.primary : themeColors.textSecondary,
+                ...(activeTab === 'name' ? { 
+                  ...styles.activeTab, 
+                  borderBottomColor: themeColors.primary, 
+                  backgroundColor: `${themeColors.primary}10` 
+                } : {})
+              }}
               onClick={() => setActiveTab('name')}
             >
               {t('modal.nameTab')} {!creditsPaused && `(+${policy?.nameClaimCredits || 2})`}
@@ -119,7 +140,15 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
           )}
           {!hasClaimedEmail && (
             <button 
-              style={{...styles.tab, ...(activeTab === 'email' ? styles.activeTab : {})}}
+              style={{
+                ...styles.tab, 
+                color: activeTab === 'email' ? themeColors.primary : themeColors.textSecondary,
+                ...(activeTab === 'email' ? { 
+                  ...styles.activeTab, 
+                  borderBottomColor: themeColors.primary, 
+                  backgroundColor: `${themeColors.primary}10` 
+                } : {})
+              }}
               onClick={() => setActiveTab('email')}
             >
               {t('modal.emailTab')} {!creditsPaused && `(+${policy?.emailClaimCredits || 2})`}
@@ -127,7 +156,15 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
           )}
           {hasClaimedEmail && !hasVerifiedEmail && (
             <button 
-              style={{...styles.tab, ...(activeTab === 'verify' ? styles.activeTab : {})}}
+              style={{
+                ...styles.tab, 
+                color: activeTab === 'verify' ? themeColors.primary : themeColors.textSecondary,
+                ...(activeTab === 'verify' ? { 
+                  ...styles.activeTab, 
+                  borderBottomColor: themeColors.primary, 
+                  backgroundColor: `${themeColors.primary}10` 
+                } : {})
+              }}
               onClick={() => setActiveTab('verify')}
             >
               {t('modal.verifyTab')} {!creditsPaused && `(+${policy?.emailVerifyCredits || 5})`}
@@ -135,7 +172,15 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
           )}
           {!creditsPaused && (
             <button 
-              style={{...styles.tab, ...(activeTab === 'share' ? styles.activeTab : {})}}
+              style={{
+                ...styles.tab, 
+                color: activeTab === 'share' ? themeColors.primary : themeColors.textSecondary,
+                ...(activeTab === 'share' ? { 
+                  ...styles.activeTab, 
+                  borderBottomColor: themeColors.primary, 
+                  backgroundColor: `${themeColors.primary}10` 
+                } : {})
+              }}
               onClick={() => setActiveTab('share')}
             >
               {t('modal.shareTab')}
@@ -180,37 +225,39 @@ export const CreditExhaustionModal = forwardRef<CreditExhaustionModalRef, Credit
           )}
         </div>
 
-        <div style={styles.footer}>
+        <div style={{ ...styles.footer, borderTopColor: themeColors.border }}>
           <div style={{ 
-            backgroundColor: 'rgba(16, 185, 129, 0.1)', 
+            backgroundColor: `${themeColors.primary}20`, 
             padding: '12px 16px',
             borderRadius: '10px',
-            border: '2px solid rgba(16, 185, 129, 0.2)',
+            border: `2px solid ${themeColors.primary}40`,
           }}>
             <p style={{ 
               margin: 0, 
               fontSize: '14px', 
               fontWeight: '600', 
-              color: '#64748b' 
+              color: themeColors.textSecondary 
             }}>
-              {t('modal.currentCredits')} <span style={{ color: '#10b981', fontWeight: '700' }}>{credits}</span>
+              {t('modal.currentCredits')} <span style={{ color: themeColors.primary, fontWeight: '700' }}>{credits}</span>
             </p>
           </div>
           <button 
             onClick={() => setIsOpen(false)} 
             style={{
               ...styles.primaryButton,
+              background: themeColors.primaryGradient,
+              boxShadow: themeColors.shadow,
               width: 'auto',
               minWidth: '100px',
               marginTop: 0,
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 20px 40px -5px rgba(16, 185, 129, 0.5), 0 8px 16px -4px rgba(16, 185, 129, 0.2)';
+              e.currentTarget.style.boxShadow = `0 20px 40px -5px ${themeColors.primary}80, 0 8px 16px -4px ${themeColors.primary}40`;
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(16, 185, 129, 0.4), 0 4px 6px -2px rgba(16, 185, 129, 0.1)';
+              e.currentTarget.style.boxShadow = themeColors.shadow;
             }}
           >
             {t('modal.done')}
@@ -226,6 +273,7 @@ CreditExhaustionModal.displayName = 'CreditExhaustionModal';
 // Tab Components
 function NameTab({ onClaim, loading, setLoading, credits, creditsPaused, onSuccess }: any) {
   const { t } = useTranslation();
+  const { themeColors } = useGrowthKitConfig();
   const [name, setName] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -243,8 +291,8 @@ function NameTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucce
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{t('modal.enterYourName')}</h3>
-      <p style={{ color: '#64748b', fontSize: '15px', fontWeight: '500', lineHeight: '1.5' }}>
+      <h3 style={{ color: themeColors.text, fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{t('modal.enterYourName')}</h3>
+      <p style={{ color: themeColors.textSecondary, fontSize: '15px', fontWeight: '500', lineHeight: '1.5' }}>
         {creditsPaused ? t('modal.tellUsName') : t('modal.earnCreditsName', { credits })}
       </p>
       <input 
@@ -252,23 +300,28 @@ function NameTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucce
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder={t('modal.yourName')}
-        style={styles.input}
+        style={{ 
+          ...styles.input, 
+          backgroundColor: themeColors.inputBackground,
+          borderColor: themeColors.inputBorder,
+          color: themeColors.text
+        }}
         disabled={loading}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = '#10b981';
-          e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
-          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+          e.currentTarget.style.borderColor = themeColors.borderFocus;
+          e.currentTarget.style.boxShadow = `0 0 0 3px ${themeColors.inputFocus}`;
+          e.currentTarget.style.backgroundColor = themeColors.background;
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = '#e2e8f0';
+          e.currentTarget.style.borderColor = themeColors.inputBorder;
           e.currentTarget.style.boxShadow = 'none';
-          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+          e.currentTarget.style.backgroundColor = themeColors.inputBackground;
         }}
       />
       <button 
         type="submit" 
         disabled={loading || !name.trim()}
-        style={styles.primaryButton}
+        style={{ ...styles.primaryButton, background: themeColors.primaryGradient, boxShadow: themeColors.shadow }}
       >
         {loading ? t('modal.claiming') : t('modal.claimCredits', { credits })}
       </button>
@@ -278,6 +331,7 @@ function NameTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucce
 
 function EmailTab({ onClaim, loading, setLoading, credits, creditsPaused, onSuccess }: any) {
   const { t } = useTranslation();
+  const { themeColors } = useGrowthKitConfig();
   const [email, setEmail] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -295,8 +349,8 @@ function EmailTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucc
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{t('modal.enterYourEmail')}</h3>
-      <p style={{ color: '#64748b', fontSize: '15px', fontWeight: '500', lineHeight: '1.5' }}>
+      <h3 style={{ color: themeColors.text, fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>{t('modal.enterYourEmail')}</h3>
+      <p style={{ color: themeColors.textSecondary, fontSize: '15px', fontWeight: '500', lineHeight: '1.5' }}>
         {creditsPaused ? t('modal.provideEmail') : t('modal.earnCreditsEmail', { credits })}
       </p>
       <input 
@@ -304,23 +358,28 @@ function EmailTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucc
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder={t('modal.yourEmail')}
-        style={styles.input}
+        style={{ 
+          ...styles.input, 
+          backgroundColor: themeColors.inputBackground,
+          borderColor: themeColors.inputBorder,
+          color: themeColors.text
+        }}
         disabled={loading}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = '#10b981';
-          e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
-          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+          e.currentTarget.style.borderColor = themeColors.borderFocus;
+          e.currentTarget.style.boxShadow = `0 0 0 3px ${themeColors.inputFocus}`;
+          e.currentTarget.style.backgroundColor = themeColors.background;
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = '#e2e8f0';
+          e.currentTarget.style.borderColor = themeColors.inputBorder;
           e.currentTarget.style.boxShadow = 'none';
-          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+          e.currentTarget.style.backgroundColor = themeColors.inputBackground;
         }}
       />
       <button 
         type="submit" 
         disabled={loading || !email.trim()}
-        style={styles.primaryButton}
+        style={{ ...styles.primaryButton, background: themeColors.primaryGradient, boxShadow: themeColors.shadow }}
       >
         {loading ? t('modal.claiming') : t('modal.claimCredits', { credits })}
       </button>
@@ -330,19 +389,20 @@ function EmailTab({ onClaim, loading, setLoading, credits, creditsPaused, onSucc
 
 function VerifyTab({ credits, creditsPaused }: any) {
   const { t } = useTranslation();
+  const { themeColors } = useGrowthKitConfig();
   
   return (
     <div>
-      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '12px' }}>{t('modal.verifyYourEmail')}</h3>
-      <p style={{ color: '#64748b', fontSize: '16px', fontWeight: '500', lineHeight: '1.6', marginBottom: '16px' }}>{t('modal.checkInbox')}</p>
+      <h3 style={{ color: themeColors.text, fontSize: '20px', fontWeight: '700', marginBottom: '12px' }}>{t('modal.verifyYourEmail')}</h3>
+      <p style={{ color: themeColors.textSecondary, fontSize: '16px', fontWeight: '500', lineHeight: '1.6', marginBottom: '16px' }}>{t('modal.checkInbox')}</p>
       <div style={{ 
-        backgroundColor: 'rgba(16, 185, 129, 0.1)', 
-        border: '2px solid rgba(16, 185, 129, 0.2)', 
+        backgroundColor: `${themeColors.primary}20`, 
+        border: `2px solid ${themeColors.primary}40`, 
         borderRadius: '12px', 
         padding: '16px',
         marginTop: '20px'
       }}>
-        <p style={{ marginTop: 0, marginBottom: 0, fontSize: '14px', color: '#64748b', fontWeight: '500' }}>
+        <p style={{ marginTop: 0, marginBottom: 0, fontSize: '14px', color: themeColors.textSecondary, fontWeight: '500' }}>
           {creditsPaused 
             ? `✉️ ${t('modal.clickVerificationLink')}` 
             : `🎉 ${t('modal.earnVerificationCredits', { credits })}`}
@@ -354,6 +414,7 @@ function VerifyTab({ credits, creditsPaused }: any) {
 
 function ShareTab({ referralLink, onShare, referralCredits }: any) {
   const { t } = useTranslation();
+  const { themeColors } = useGrowthKitConfig();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -371,8 +432,8 @@ function ShareTab({ referralLink, onShare, referralCredits }: any) {
 
   return (
     <div>
-      <h3 style={{ color: '#1e293b', fontSize: '20px', fontWeight: '700', marginBottom: '12px' }}>{t('modal.shareAndEarn')}</h3>
-      <p style={{ color: '#64748b', fontSize: '16px', fontWeight: '500', lineHeight: '1.6', marginBottom: '20px' }}>{t('modal.earnCreditsEachFriend')}</p>
+      <h3 style={{ color: themeColors.text, fontSize: '20px', fontWeight: '700', marginBottom: '12px' }}>{t('modal.shareAndEarn')}</h3>
+      <p style={{ color: themeColors.textSecondary, fontSize: '16px', fontWeight: '500', lineHeight: '1.6', marginBottom: '20px' }}>{t('modal.earnCreditsEachFriend')}</p>
       
       <div style={styles.referralBox}>
         <input 
@@ -385,14 +446,17 @@ function ShareTab({ referralLink, onShare, referralCredits }: any) {
             marginBottom: 0,
             flexGrow: 1,
             cursor: 'pointer',
+            backgroundColor: themeColors.inputBackground,
+            borderColor: themeColors.inputBorder,
+            color: themeColors.text,
           }}
           onClick={(e) => (e.target as HTMLInputElement).select()}
           onFocus={(e) => {
-            e.currentTarget.style.borderColor = '#d946ef';
-            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(217, 70, 239, 0.1)';
+            e.currentTarget.style.borderColor = themeColors.magenta;
+            e.currentTarget.style.boxShadow = `0 0 0 3px ${themeColors.magenta}20`;
           }}
           onBlur={(e) => {
-            e.currentTarget.style.borderColor = '#e2e8f0';
+            e.currentTarget.style.borderColor = themeColors.inputBorder;
             e.currentTarget.style.boxShadow = 'none';
           }}
         />
@@ -400,9 +464,9 @@ function ShareTab({ referralLink, onShare, referralCredits }: any) {
           onClick={handleCopy} 
           style={{
             ...styles.secondaryButton,
-            backgroundColor: copied ? '#10b981' : '#f1f5f9',
-            color: copied ? 'white' : '#475569',
-            borderColor: copied ? '#10b981' : '#e2e8f0',
+            backgroundColor: copied ? themeColors.success : themeColors.backgroundSecondary,
+            color: copied ? 'white' : themeColors.textSecondary,
+            borderColor: copied ? themeColors.success : themeColors.border,
           }}
         >
           {copied ? t('modal.copied') : t('modal.copy')}
@@ -410,19 +474,19 @@ function ShareTab({ referralLink, onShare, referralCredits }: any) {
       </div>
       
       {typeof navigator !== 'undefined' && 'share' in navigator && (
-        <button onClick={handleShare} style={styles.primaryButton}>
+        <button onClick={handleShare} style={{ ...styles.primaryButton, background: themeColors.primaryGradient, boxShadow: themeColors.shadow }}>
           {t('modal.shareNow')}
         </button>
       )}
       
       <div style={{ 
-        backgroundColor: 'rgba(217, 70, 239, 0.1)', 
-        border: '2px solid rgba(217, 70, 239, 0.2)', 
+        backgroundColor: `${themeColors.magenta}20`, 
+        border: `2px solid ${themeColors.magenta}40`, 
         borderRadius: '12px', 
         padding: '16px',
         marginTop: '20px'
       }}>
-        <p style={{ marginTop: 0, marginBottom: 0, fontSize: '14px', color: '#64748b', fontWeight: '600' }}>
+        <p style={{ marginTop: 0, marginBottom: 0, fontSize: '14px', color: themeColors.textSecondary, fontWeight: '600' }}>
           💫 {t('modal.earnCreditsPerReferral', { credits: referralCredits })}
         </p>
       </div>
@@ -438,7 +502,6 @@ const styles: Record<string, React.CSSProperties> = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     backdropFilter: 'blur(8px)',
     display: 'flex',
     alignItems: 'center',
@@ -447,30 +510,23 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '20px',
   },
   modal: {
-    backgroundColor: 'white',
     padding: '32px',
     borderRadius: '20px',
     maxWidth: '520px',
     width: '100%',
     maxHeight: '90vh',
     overflow: 'auto',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
+    border: '1px solid', // Will be overridden by inline styles
     fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
   },
   title: {
     margin: '0 0 8px 0',
     fontSize: '28px',
     fontWeight: '800',
-    background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
     letterSpacing: '-0.025em',
   },
   subtitle: {
     margin: '0 0 24px 0',
-    color: '#64748b',
     fontSize: '16px',
     fontWeight: '500',
     lineHeight: '1.6',
@@ -479,7 +535,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     gap: '8px',
     marginBottom: '24px',
-    borderBottom: '2px solid #e2e8f0',
+    borderBottom: '2px solid',
     padding: '0 4px',
   },
   tab: {
@@ -487,7 +543,6 @@ const styles: Record<string, React.CSSProperties> = {
     border: 'none',
     background: 'none',
     cursor: 'pointer',
-    color: '#64748b',
     fontSize: '14px',
     fontWeight: '600',
     borderBottomWidth: '2px',
@@ -498,9 +553,7 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   },
   activeTab: {
-    color: '#10b981',
-    borderBottomColor: '#10b981',
-    backgroundColor: 'rgba(16, 185, 129, 0.05)',
+    borderBottomColor: 'inherit', // Will be overridden by inline styles
   },
   content: {
     minHeight: '220px',
@@ -509,14 +562,13 @@ const styles: Record<string, React.CSSProperties> = {
   input: {
     width: '100%',
     padding: '16px 20px',
-    border: '2px solid #e2e8f0',
+    border: '2px solid',
     borderRadius: '12px',
     marginTop: '16px',
     marginBottom: '16px',
     fontSize: '16px',
     fontFamily: 'inherit',
     fontWeight: '500',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     outline: 'none',
     boxSizing: 'border-box',
@@ -524,7 +576,6 @@ const styles: Record<string, React.CSSProperties> = {
   primaryButton: {
     width: '100%',
     padding: '16px 24px',
-    background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
     color: 'white',
     border: 'none',
     borderRadius: '12px',
@@ -535,13 +586,10 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     fontFamily: 'inherit',
     letterSpacing: '0.025em',
-    boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.4), 0 4px 6px -2px rgba(16, 185, 129, 0.1)',
   },
   secondaryButton: {
     padding: '12px 24px',
-    backgroundColor: '#f1f5f9',
-    color: '#475569',
-    border: '2px solid #e2e8f0',
+    border: '2px solid',
     borderRadius: '10px',
     fontSize: '15px',
     fontWeight: '600',
@@ -552,7 +600,7 @@ const styles: Record<string, React.CSSProperties> = {
   footer: {
     marginTop: '32px',
     paddingTop: '20px',
-    borderTop: '2px solid #e2e8f0',
+    borderTop: '2px solid',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',

@@ -8,7 +8,11 @@ export type {
   GrowthKitActions,
   GrowthKitHook,
   GrowthKitPolicy,
+  GrowthKitTheme,
   ShareOptions,
+  CompleteActionOptions,
+  TrackedEvent,
+  TrackContext,
   APIResponse,
   MeResponse,
   CompleteResponse,
@@ -17,6 +21,19 @@ export type {
   WaitlistResponse,
   WaitlistData,
 } from './types';
+
+// Theme system exports
+export type { ThemeColors } from './theme';
+export {
+  getEffectiveTheme,
+  getThemeColors,
+  createThemeVariables,
+  onSystemThemeChange,
+  getFocusStyles,
+  getButtonHoverStyles,
+  lightTheme,
+  darkTheme,
+} from './theme';
 
 // Component exports
 export {
@@ -59,4 +76,4 @@ export { useLocalization, useTranslation } from './localization';
 export type { Language, Translations } from './localization';
 
 // Version
-export const VERSION = '0.2.0';
+export const VERSION = '0.2.1';

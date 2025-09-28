@@ -8,11 +8,15 @@ import type { GrowthKitAccountWidgetRef } from '@growthkit/sdk';
 function MainApp({ 
   accountWidgetRef, 
   currentLanguage, 
-  onLanguageToggle 
+  currentTheme,
+  onLanguageToggle,
+  onThemeToggle
 }: { 
   accountWidgetRef: React.RefObject<GrowthKitAccountWidgetRef | null>;
   currentLanguage: 'en' | 'es';
+  currentTheme: 'light' | 'dark' | 'auto';
   onLanguageToggle: () => void;
+  onThemeToggle: () => void;
 }) {
   const { credits, completeAction, policy, track } = useGrowthKit();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -137,6 +141,18 @@ function MainApp({
             aria-label={`Switch to ${currentLanguage === 'en' ? 'Spanish' : 'English'}`}
           >
             🌍 {currentLanguage === 'en' ? 'ES' : 'EN'}
+          </button>
+          <button 
+            onClick={onThemeToggle}
+            style={{
+              ...styles.testButton,
+              background: currentTheme === 'dark' ? '#1e293b' : currentTheme === 'auto' ? '#d946ef' : '#f8fafc',
+              color: currentTheme === 'dark' ? '#f8fafc' : currentTheme === 'auto' ? 'white' : '#1e293b',
+              marginRight: '0.5rem',
+            }}
+            aria-label={`Switch theme from ${currentTheme}`}
+          >
+            {currentTheme === 'light' ? '☀️' : currentTheme === 'dark' ? '🌙' : '⚡'} {currentTheme.toUpperCase()}
           </button>
           <button 
             onClick={handleTestEarnCredits}
@@ -349,12 +365,14 @@ function MainApp({
 // Main Page Component - Now uses the new all-in-one widget
 export default function HomePage() {
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'es'>('en');
+  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark' | 'auto'>('auto');
   
   const config = {
     apiKey: process.env.NEXT_PUBLIC_GROWTHKIT_API_KEY || '',
     apiUrl: `${process.env.NEXT_PUBLIC_GROWTHKIT_SERVER_URL || 'https://growth.fenixblack.ai'}/api`,
     debug: process.env.NODE_ENV === 'development',
     language: currentLanguage,
+    theme: currentTheme,
   };
 
   const accountWidgetRef = useRef<GrowthKitAccountWidgetRef>(null);
@@ -370,13 +388,21 @@ export default function HomePage() {
     }, 100);
   };
 
+  // Function to handle theme switching
+  const handleThemeToggle = () => {
+    const themes: ('light' | 'dark' | 'auto')[] = ['light', 'dark', 'auto'];
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setCurrentTheme(themes[nextIndex]);
+  };
+
   return (
     <>
       <GrowthKitAccountWidget 
         config={config}
         ref={accountWidgetRef}
         position="top-right"
-        theme="auto"
+        theme={currentTheme}
         onCreditsChange={(credits: number) => {
           console.log('Credits updated:', credits);
         }}
@@ -385,9 +411,11 @@ export default function HomePage() {
         }}
       >
         <MainApp 
-          accountWidgetRef={accountWidgetRef} 
+          accountWidgetRef={accountWidgetRef}
           currentLanguage={currentLanguage}
+          currentTheme={currentTheme}
           onLanguageToggle={handleLanguageToggle}
+          onThemeToggle={handleThemeToggle}
         />
       </GrowthKitAccountWidget>
     </>

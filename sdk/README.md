@@ -23,13 +23,20 @@ import {
   WaitlistForm,
   GrowthKitAccountWidget,
   useTranslation,
-  useLocalization
+  useLocalization,
+  // Theme utilities
+  getThemeColors,
+  getEffectiveTheme,
+  lightTheme,
+  darkTheme
 } from '@fenixblack/growthkit';
 
 // TypeScript types
 import type { 
   Language, 
   Translations, 
+  GrowthKitTheme,
+  ThemeColors,
   GrowthKitAccountWidgetRef 
 } from '@fenixblack/growthkit';
 ```
@@ -175,7 +182,8 @@ Set the default language in your configuration:
 ```tsx
 const config = {
   apiKey: 'your-api-key',
-  language: 'es', // Set Spanish as default
+  language: 'es',      // Set Spanish as default
+  theme: 'dark',       // Set dark theme (options: 'light' | 'dark' | 'auto')
 };
 ```
 
@@ -187,7 +195,8 @@ import { useGrowthKit, GrowthKitAccountWidget } from '@fenixblack/growthkit';
 function App() {
   const config = {
     apiKey: 'your-api-key',
-    language: 'es', // Spanish by default
+    language: 'es',    // Spanish by default
+    theme: 'auto',     // Auto-detect system theme preference
   };
 
   return (
@@ -310,8 +319,132 @@ The `useGrowthKit` hook returns an object with the following properties:
   // Localization (when using translation hooks)
   language?: 'en' | 'es';       // Current language
   setLanguage?: (lang: 'en' | 'es') => void; // Change language
+  
+  // Theming
+  setTheme: (theme: 'light' | 'dark' | 'auto') => void; // Change theme
 }
 ```
+
+## Theming Support
+
+The SDK provides comprehensive theming support with light, dark, and auto modes that maintains the GrowthKit + FenixBlack brand identity.
+
+### Supported Themes
+
+- **Light Mode** (`light`): Clean, bright interface
+- **Dark Mode** (`dark`): Dark theme with proper contrast
+- **Auto Mode** (`auto`): Automatically follows system color scheme preference
+
+### Configuration
+
+Set the theme in your configuration:
+
+```tsx
+const config = {
+  apiKey: 'your-api-key',
+  theme: 'dark',  // Options: 'light' | 'dark' | 'auto'
+};
+```
+
+### Dynamic Theme Switching
+
+Change themes programmatically using the `setTheme` method:
+
+```tsx
+import { useGrowthKit } from '@fenixblack/growthkit';
+
+function ThemeToggle() {
+  const { setTheme } = useGrowthKit();
+  
+  return (
+    <button onClick={() => setTheme('dark')}>
+      Switch to Dark Theme
+    </button>
+  );
+}
+```
+
+### Complete Theme Example
+
+```tsx
+import { useState } from 'react';
+import { GrowthKitAccountWidget, useGrowthKit } from '@fenixblack/growthkit';
+
+function App() {
+  const [currentTheme, setCurrentTheme] = useState('auto');
+  
+  const config = {
+    apiKey: 'your-api-key',
+    theme: currentTheme,
+  };
+
+  return (
+    <GrowthKitAccountWidget config={config}>
+      <ThemeControls onThemeChange={setCurrentTheme} />
+      <YourApp />
+    </GrowthKitAccountWidget>
+  );
+}
+
+function ThemeControls({ onThemeChange }) {
+  const { setTheme } = useGrowthKit();
+  
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);        // Update SDK theme
+    onThemeChange(newTheme);   // Update app state
+  };
+  
+  return (
+    <div>
+      <button onClick={() => handleThemeChange('light')}>☀️ Light</button>
+      <button onClick={() => handleThemeChange('dark')}>🌙 Dark</button>
+      <button onClick={() => handleThemeChange('auto')}>⚡ Auto</button>
+    </div>
+  );
+}
+```
+
+### Theme System Exports
+
+For advanced theming needs, the SDK exports utility functions and types:
+
+```tsx
+import { 
+  getThemeColors, 
+  getEffectiveTheme,
+  lightTheme,
+  darkTheme,
+  createThemeVariables,
+  onSystemThemeChange 
+} from '@fenixblack/growthkit';
+
+// Get current theme colors
+const colors = getThemeColors('dark');
+
+// Resolve 'auto' to actual theme
+const effectiveTheme = getEffectiveTheme('auto'); // Returns 'light' or 'dark'
+
+// Access color palettes directly
+console.log(lightTheme.primary);  // '#10b981'
+console.log(darkTheme.background); // '#1e293b'
+
+// Generate CSS custom properties
+const cssVars = createThemeVariables('dark');
+
+// Listen to system theme changes
+const cleanup = onSystemThemeChange((isDark) => {
+  console.log('System theme changed:', isDark ? 'dark' : 'light');
+});
+```
+
+### Features
+
+- **Brand Consistency**: Maintains GrowthKit + FenixBlack aesthetic in all themes
+- **Accessibility**: Proper contrast ratios for all theme variants
+- **System Integration**: Auto mode follows OS color scheme preferences
+- **Smooth Transitions**: Seamless theme switching without page refresh
+- **Component Coverage**: All SDK components support theming
+- **TypeScript Support**: Full type safety for theme-related APIs
 
 ## Components
 

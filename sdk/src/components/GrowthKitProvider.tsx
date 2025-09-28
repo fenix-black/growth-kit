@@ -1,13 +1,18 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { GrowthKitConfig } from '../types';
+import { GrowthKitConfig, GrowthKitTheme } from '../types';
 import { GrowthKitStateProvider } from './GrowthKitStateProvider';
 import { LocalizationContext, getTranslations, type Language } from '../localization';
+import { getEffectiveTheme, onSystemThemeChange, type ThemeColors, getThemeColors } from '../theme';
 
 const GrowthKitContext = createContext<{ 
   config: GrowthKitConfig;
   setLanguage?: (language: Language) => void;
+  theme: GrowthKitTheme;
+  effectiveTheme: 'light' | 'dark';
+  themeColors: ThemeColors;
+  setTheme?: (theme: GrowthKitTheme) => void;
 } | undefined>(undefined);
 
 interface GrowthKitProviderProps {
@@ -19,6 +24,12 @@ export function GrowthKitProvider({ children, config }: GrowthKitProviderProps) 
   // Initialize language from config, defaulting to 'en'
   const [currentLanguage, setCurrentLanguage] = useState<Language>(config.language || 'en');
   
+  // Initialize theme from config, defaulting to 'auto'
+  const [currentTheme, setCurrentTheme] = useState<GrowthKitTheme>(config.theme || 'auto');
+  const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>(() => 
+    getEffectiveTheme(config.theme || 'auto')
+  );
+  
   // Update language when config changes
   useEffect(() => {
     if (config.language && config.language !== currentLanguage) {
@@ -26,16 +37,51 @@ export function GrowthKitProvider({ children, config }: GrowthKitProviderProps) 
     }
   }, [config.language, currentLanguage]);
   
+  // Update theme when config changes
+  useEffect(() => {
+    if (config.theme && config.theme !== currentTheme) {
+      setCurrentTheme(config.theme);
+      setEffectiveTheme(getEffectiveTheme(config.theme));
+    }
+  }, [config.theme, currentTheme]);
+  
+  // Listen to system theme changes when using 'auto'
+  useEffect(() => {
+    if (currentTheme !== 'auto') return;
+    
+    const cleanup = onSystemThemeChange((isDark) => {
+      setEffectiveTheme(isDark ? 'dark' : 'light');
+    });
+    
+    return cleanup;
+  }, [currentTheme]);
+  
   // Function to update language programmatically
   const setLanguage = (language: Language) => {
     setCurrentLanguage(language);
   };
   
+  // Function to update theme programmatically
+  const setTheme = (theme: GrowthKitTheme) => {
+    setCurrentTheme(theme);
+    setEffectiveTheme(getEffectiveTheme(theme));
+  };
+  
   // Get translations for current language
   const translations = getTranslations(currentLanguage);
   
+  // Get theme colors for current theme
+  const themeColors = getThemeColors(currentTheme);
+  
   return (
-    <GrowthKitContext.Provider value={{ config, setLanguage }}>
+    <GrowthKitContext.Provider value={{ 
+      config, 
+      setLanguage,
+      theme: currentTheme,
+      effectiveTheme,
+      themeColors,
+      setTheme
+    }}>
       <LocalizationContext.Provider value={{ 
         language: currentLanguage, 
         t: translations, 
@@ -56,3 +102,4 @@ export function useGrowthKitConfig() {
   }
   return context;
 }
+

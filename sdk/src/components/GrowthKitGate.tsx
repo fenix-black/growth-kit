@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useGrowthKit } from '../useGrowthKit';
+import { useGrowthKitConfig } from './GrowthKitProvider';
 import { WaitlistForm } from './WaitlistForm';
 import { CreditExhaustionModal } from './CreditExhaustionModal';
 import type { CreditExhaustionModalRef } from './CreditExhaustionModal';
@@ -21,6 +22,7 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
     waitlistEnabled 
   } = useGrowthKit();
   
+  const { themeColors } = useGrowthKitConfig();
   const { t } = useTranslation();
   const creditModalRef = useRef<CreditExhaustionModalRef>(null);
 
@@ -44,22 +46,22 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
             alignItems: 'center', 
             height: '100vh',
             fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-            background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+            background: themeColors.primaryGradient,
           }}>
             <div style={{
-              background: 'rgba(255, 255, 255, 0.95)',
+              background: themeColors.backgroundGlass,
               borderRadius: '20px',
               padding: '48px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2)',
+              boxShadow: themeColors.shadowLg,
               backdropFilter: 'blur(16px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              border: `1px solid ${themeColors.borderLight}`,
               textAlign: 'center',
             }}>
               <div style={{
                 width: '40px',
                 height: '40px',
-                border: '3px solid #e2e8f0',
-                borderTop: '3px solid #10b981',
+                border: `3px solid ${themeColors.border}`,
+                borderTop: `3px solid ${themeColors.primary}`,
                 borderRadius: '50%',
                 animation: 'spin 1s linear infinite',
                 margin: '0 auto 24px auto',
@@ -68,8 +70,8 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
                 margin: 0, 
                 fontSize: '18px', 
                 fontWeight: '600',
-                color: '#1e293b',
-                background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)',
+                color: themeColors.text,
+                background: themeColors.primaryGradient,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',

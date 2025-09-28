@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.2.1] - 2025-09-28
+
+### Added
+- **Complete Dark Theme Support**: Full theming system with light, dark, and auto modes
+  - Added `theme` option to `GrowthKitConfig`: `'light' | 'dark' | 'auto'`
+  - Auto mode automatically detects and follows system color scheme preferences
+  - All SDK components (WaitlistForm, CreditExhaustionModal, GrowthKitAccountWidget, GrowthKitGate) now support dynamic theming
+  
+- **Dynamic Theme Switching**: Runtime theme control capabilities
+  - Added `setTheme()` method to `useGrowthKit` hook for programmatic theme changes
+  - Theme changes apply immediately to all SDK components without page refresh
+  - System theme change detection for auto mode
+  
+- **Enhanced Color System**: Comprehensive theming infrastructure
+  - Maintains GrowthKit + FenixBlack brand identity in both light and dark themes
+  - Proper contrast ratios for accessibility in both themes
+  - Smooth transitions between theme states
+  
+- **New Theme System Exports**:
+  - `ThemeColors` type for custom theming
+  - `getEffectiveTheme()`, `getThemeColors()` utility functions
+  - `lightTheme`, `darkTheme` color palette objects
+  - `createThemeVariables()` for CSS custom properties
+  - `onSystemThemeChange()` for system preference listening
+
+### Enhanced
+- **Improved Input Contrast**: Better visual feedback and accessibility in both themes
+- **Modal Theming**: CreditExhaustionModal now properly adapts to all theme modes
+- **Widget Theming**: GrowthKitAccountWidget enhanced with better dark mode support
+
+### Technical
+- **Centralized Theme Management**: New theme context system for consistent theming across components
+- **Type Safety**: Full TypeScript support for all theme-related features
+- **SSR Compatibility**: Theme system works with server-side rendering
+
 ## [0.2.0] - 2025-09-28
 
 ### Added
