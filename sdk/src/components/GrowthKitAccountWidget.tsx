@@ -14,7 +14,7 @@ interface GrowthKitAccountWidgetProps {
   children: React.ReactNode;
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'inline';
   theme?: GrowthKitTheme;
-  compact?: boolean;
+  slim?: boolean;
   showName?: boolean;
   showEmail?: boolean;
   showCredits?: boolean;
@@ -40,7 +40,7 @@ const AccountWidgetInternal = forwardRef<
 >(({
   children,
   position = 'top-right',
-  compact = false,
+  slim = false,
   showName = true,
   showEmail = true,
   showCredits = true,
@@ -146,7 +146,7 @@ const AccountWidgetInternal = forwardRef<
   // Show loading state
   if (loading || !initialized) {
     const loadingWidget = (
-      <div style={{ ...getWidgetStyles(themeColors, compact), ...style }} className={className}>
+      <div style={{ ...getWidgetStyles(themeColors, slim), ...style }} className={className}>
         <div style={styles.loading}>
           <div style={{ ...styles.spinner, borderTopColor: themeColors.primary }} />
           <span style={{ ...styles.loadingText, color: themeColors.textSecondary }}>{t('widget.loading')}</span>
@@ -157,7 +157,7 @@ const AccountWidgetInternal = forwardRef<
     return (
       <>
         {position !== 'inline' ? (
-          <div style={getPositionStyles(position)}>
+          <div style={getPositionStyles(position, slim)}>
             {loadingWidget}
           </div>
         ) : loadingWidget}
@@ -168,7 +168,7 @@ const AccountWidgetInternal = forwardRef<
   // Show waitlist if required
   if (shouldShowWaitlist) {
     const waitlistWidget = (
-      <div style={{ ...getWidgetStyles(themeColors, compact), ...style }} className={className}>
+      <div style={{ ...getWidgetStyles(themeColors, slim), ...style }} className={className}>
         <div style={styles.waitlistWidget}>
           <span style={{ ...styles.waitlistIcon, backgroundColor: `${themeColors.warning}20`, color: themeColors.warning }}>⏳</span>
           <span style={{ ...styles.waitlistText, color: themeColors.text }}>{t('widget.waitlistActive')}</span>
@@ -180,7 +180,7 @@ const AccountWidgetInternal = forwardRef<
       <>
         <WaitlistForm />
         {position !== 'inline' ? (
-          <div style={getPositionStyles(position)}>
+          <div style={getPositionStyles(position, slim)}>
             {waitlistWidget}
           </div>
         ) : waitlistWidget}
@@ -192,33 +192,33 @@ const AccountWidgetInternal = forwardRef<
   const mainWidget = (
     <div 
       style={{ 
-        ...getWidgetStyles(themeColors, compact), 
+        ...getWidgetStyles(themeColors, slim), 
         ...style,
-        cursor: compact ? 'pointer' : 'default',
+        cursor: slim ? 'pointer' : 'default',
         position: position === 'inline' ? 'relative' : 'relative',
       }} 
       className={className}
-      onClick={() => compact && setShowProfileExpanded(!showProfileExpanded)}
-      onMouseEnter={() => !compact && setShowProfileExpanded(true)}
-      onMouseLeave={() => !compact && setShowProfileExpanded(false)}
+      onClick={() => slim && setShowProfileExpanded(!showProfileExpanded)}
+      onMouseEnter={() => setShowProfileExpanded(true)}
+      onMouseLeave={() => setShowProfileExpanded(false)}
     >
       {/* Compact View */}
-      <div style={styles.compactContent}>
+      <div style={slim ? styles.slimContent : styles.compactContent}>
         {showCredits && (
-          <div style={styles.creditsSection}>
+          <div style={slim ? styles.slimCreditsSection : styles.creditsSection}>
             <div style={{
-              ...styles.creditsIcon,
+              ...(slim ? styles.slimCreditsIcon : styles.creditsIcon),
               background: themeColors.primaryGradient,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}>●</div>
-            <span style={{ ...styles.creditsValue, color: themeColors.text }}>{credits}</span>
-            <span style={{ ...styles.creditsLabel, color: themeColors.textSecondary }}>{t('widget.credits')}</span>
+            <span style={{ ...(slim ? styles.slimCreditsValue : styles.creditsValue), color: themeColors.text }}>{credits}</span>
+            {!slim && <span style={{ ...styles.creditsLabel, color: themeColors.textSecondary }}>{t('widget.credits')}</span>}
             {creditsPaused && (
               <div 
                 style={{
-                  ...styles.pausedIcon,
+                  ...(slim ? styles.slimPausedIcon : styles.pausedIcon),
                   backgroundColor: themeColors.warning + '20',
                   color: themeColors.warning,
                 }} 
@@ -230,7 +230,7 @@ const AccountWidgetInternal = forwardRef<
           </div>
         )}
         
-        {(showName || showEmail) && (
+{(showName || showEmail) && !slim && (
           <div style={styles.profileSection}>
             <div style={{
               ...styles.profileIcon,
@@ -259,8 +259,17 @@ const AccountWidgetInternal = forwardRef<
             )}
           </div>
         )}
+        
+        {/* Show verification badge in slim mode, but only next to credits */}
+        {slim && showEmail && hasClaimedEmail && hasVerifiedEmail && (
+          <div style={{
+            ...styles.slimVerifiedBadge,
+            backgroundColor: themeColors.success + '20',
+            color: themeColors.success,
+          }}>✓</div>
+        )}
 
-        {credits === 0 && (
+{credits === 0 && !slim && (
           <button
             style={{ 
               ...styles.earnButton, 
@@ -283,12 +292,38 @@ const AccountWidgetInternal = forwardRef<
             {t('widget.earnCredits')}
           </button>
         )}
+        
+        {/* Slim mode: show a tiny earn button when credits are 0 */}
+        {credits === 0 && slim && (
+          <button
+            style={{ 
+              ...styles.slimEarnButton, 
+              background: themeColors.primaryGradient,
+              boxShadow: themeColors.shadowSm,
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              creditModalRef.current?.open();
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = themeColors.shadow;
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = themeColors.shadowSm;
+            }}
+            title={t('widget.earnCredits')}
+          >
+            +
+          </button>
+        )}
       </div>
 
       {/* Expanded View (on hover/click) */}
-      {showProfileExpanded && !compact && (
+      {showProfileExpanded && (
         <div style={{ 
-          ...styles.expandedContent, 
+          ...getExpandedContentStyles(position, slim), 
           backgroundColor: themeColors.background,
           borderColor: themeColors.border,
           boxShadow: themeColors.shadow,
@@ -359,7 +394,7 @@ const AccountWidgetInternal = forwardRef<
       {position === 'inline' ? (
         mainWidget
       ) : (
-        <div style={getPositionStyles(position)}>
+        <div style={getPositionStyles(position, slim)}>
           {mainWidget}
         </div>
       )}
@@ -412,40 +447,42 @@ export const GrowthKitAccountWidget = forwardRef<
 GrowthKitAccountWidget.displayName = 'GrowthKitAccountWidget';
 
 // Helper functions
-function getPositionStyles(position: string): React.CSSProperties {
+function getPositionStyles(position: string, slim: boolean = false): React.CSSProperties {
   const baseStyles: React.CSSProperties = {
     position: 'fixed',
     zIndex: 1000,
   };
 
+  const margin = slim ? 10 : 20;
+
   switch (position) {
     case 'top-left':
-      return { ...baseStyles, top: 20, left: 20 };
+      return { ...baseStyles, top: margin, left: margin };
     case 'top-right':
-      return { ...baseStyles, top: 20, right: 20 };
+      return { ...baseStyles, top: margin, right: margin };
     case 'bottom-left':
-      return { ...baseStyles, bottom: 20, left: 20 };
+      return { ...baseStyles, bottom: margin, left: margin };
     case 'bottom-right':
-      return { ...baseStyles, bottom: 20, right: 20 };
+      return { ...baseStyles, bottom: margin, right: margin };
     default:
       return baseStyles;
   }
 }
 
 
-function getWidgetStyles(themeColors: any, compact: boolean): React.CSSProperties {
+function getWidgetStyles(themeColors: any, slim: boolean): React.CSSProperties {
   return {
     backgroundColor: themeColors.background,
     color: themeColors.text,
     border: `1px solid ${themeColors.border}`,
-    borderRadius: compact ? '12px' : '16px',
-    padding: compact ? '12px 16px' : '16px 20px',
-    boxShadow: themeColors.shadow,
-    fontSize: compact ? '14px' : '16px',
+    borderRadius: slim ? '20px' : '16px',
+    padding: slim ? '4px 8px' : '16px 20px',
+    boxShadow: slim ? themeColors.shadowSm : themeColors.shadow,
+    fontSize: slim ? '12px' : '16px',
     fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     fontWeight: '500',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    minWidth: compact ? 'auto' : '200px',
+    minWidth: slim ? 'auto' : '200px',
     backdropFilter: 'blur(8px)',
   };
 }
@@ -467,6 +504,59 @@ function getNotificationStyles(themeColors: any, type: 'success' | 'error'): Rea
     zIndex: 1002,
     border: 'none',
     backdropFilter: 'blur(8px)',
+  };
+}
+
+function getExpandedContentStyles(position: string, slim: boolean): React.CSSProperties {
+  const baseStyles: React.CSSProperties = {
+    position: 'absolute',
+    borderTop: 'none',
+    borderRadius: '0 0 16px 16px',
+    padding: '16px 20px',
+    marginTop: '2px',
+    zIndex: 1001,
+    backdropFilter: 'blur(8px)',
+    minWidth: '200px',
+  };
+
+  // In slim mode, adjust positioning to prevent going off-screen
+  if (slim) {
+    const isRightSide = position.includes('right');
+    const isBottomSide = position.includes('bottom');
+    
+    if (isRightSide) {
+      // For right-side positions, make sure content doesn't overflow right
+      return {
+        ...baseStyles,
+        left: 'auto',
+        right: 0,
+        top: isBottomSide ? 'auto' : '100%',
+        bottom: isBottomSide ? '100%' : 'auto',
+        borderRadius: isBottomSide ? '16px 16px 0 0' : '0 0 16px 16px',
+        marginTop: isBottomSide ? 0 : '2px',
+        marginBottom: isBottomSide ? '2px' : 0,
+      };
+    } else {
+      // For left-side positions, anchor to left
+      return {
+        ...baseStyles,
+        left: 0,
+        right: 'auto',
+        top: isBottomSide ? 'auto' : '100%',
+        bottom: isBottomSide ? '100%' : 'auto',
+        borderRadius: isBottomSide ? '16px 16px 0 0' : '0 0 16px 16px',
+        marginTop: isBottomSide ? 0 : '2px',
+        marginBottom: isBottomSide ? '2px' : 0,
+      };
+    }
+  }
+
+  // Normal mode - dropdown below
+  return {
+    ...baseStyles,
+    top: '100%',
+    left: 0,
+    right: 0,
   };
 }
 
@@ -513,10 +603,21 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '16px',
     flexWrap: 'wrap',
   },
+  slimContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    flexWrap: 'nowrap',
+  },
   creditsSection: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
+  },
+  slimCreditsSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
   },
   creditsIcon: {
     fontSize: '12px',
@@ -525,9 +626,20 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
   },
+  slimCreditsIcon: {
+    fontSize: '8px',
+    fontWeight: '900',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   creditsValue: {
     fontWeight: '700',
     fontSize: '18px',
+  },
+  slimCreditsValue: {
+    fontWeight: '700',
+    fontSize: '14px',
   },
   creditsLabel: {
     fontSize: '13px',
@@ -538,6 +650,17 @@ const styles: Record<string, React.CSSProperties> = {
     width: '20px',
     height: '20px',
     borderRadius: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'help',
+    fontWeight: '600',
+  },
+  slimPausedIcon: {
+    fontSize: '8px',
+    width: '14px',
+    height: '14px',
+    borderRadius: '3px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -583,6 +706,16 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
   },
+  slimVerifiedBadge: {
+    fontSize: '8px',
+    fontWeight: '700',
+    width: '12px',
+    height: '12px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   earnButton: {
     color: 'white',
     border: 'none',
@@ -593,6 +726,21 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     letterSpacing: '0.025em',
+  },
+  slimEarnButton: {
+    color: 'white',
+    border: 'none',
+    borderRadius: '50%',
+    width: '20px',
+    height: '20px',
+    fontSize: '12px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0',
   },
   expandedContent: {
     position: 'absolute',

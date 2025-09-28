@@ -358,7 +358,7 @@ interface GrowthKitAccountWidgetProps {
     children: React.ReactNode;
     position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'inline';
     theme?: GrowthKitTheme;
-    compact?: boolean;
+    slim?: boolean;
     showName?: boolean;
     showEmail?: boolean;
     showCredits?: boolean;

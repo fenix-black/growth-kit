@@ -400,6 +400,7 @@ export default function HomePage() {
       <GrowthKitAccountWidget 
         config={config}
         ref={accountWidgetRef}
+        slim={true}
         position="top-right"
         theme={currentTheme}
         onCreditsChange={(credits: number) => {
