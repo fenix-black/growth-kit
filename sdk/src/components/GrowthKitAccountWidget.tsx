@@ -8,6 +8,7 @@ import { CreditExhaustionModal } from './CreditExhaustionModal';
 import type { CreditExhaustionModalRef } from './CreditExhaustionModal';
 import type { GrowthKitConfig, GrowthKitTheme } from '../types';
 import { useTranslation } from '../localization';
+import { GROWTHKIT_LOGO_ICON_BASE64 } from '../assets';
 
 interface GrowthKitAccountWidgetProps {
   config: GrowthKitConfig;
@@ -19,6 +20,7 @@ interface GrowthKitAccountWidgetProps {
   showName?: boolean;
   showEmail?: boolean;
   showCredits?: boolean;
+  showLogo?: boolean;
   autoOpenCreditModal?: boolean;
   onCreditsChange?: (credits: number) => void;
   onProfileChange?: (profile: { name?: string; email?: string; verified?: boolean }) => void;
@@ -46,6 +48,7 @@ const AccountWidgetInternal = forwardRef<
   showName = true,
   showEmail = true,
   showCredits = true,
+  showLogo = true,
   autoOpenCreditModal = true,
   onCreditsChange,
   onProfileChange,
@@ -206,6 +209,15 @@ const AccountWidgetInternal = forwardRef<
     >
       {/* Compact View */}
       <div style={slim ? styles.slimContent : styles.compactContent}>
+        {/* GrowthKit Logo - only show in non-slim mode when showLogo is true */}
+        {!slim && showLogo && (
+          <img 
+            src={GROWTHKIT_LOGO_ICON_BASE64}
+            alt="GrowthKit"
+            style={styles.logo}
+          />
+        )}
+        
         {showCredits && (
           <div style={slim ? styles.slimCreditsSection : styles.creditsSection}>
             <div style={{
@@ -610,6 +622,13 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '6px',
     flexWrap: 'nowrap',
+  },
+  logo: {
+    width: '40px',
+    height: '40px',
+    flexShrink: 0,
+    opacity: 0.8,
+    transition: 'opacity 0.2s ease',
   },
   creditsSection: {
     display: 'flex',

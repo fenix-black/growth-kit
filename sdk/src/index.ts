@@ -68,6 +68,10 @@ export type { GrowthKitServerConfig } from './server';
 // Client-side utilities
 export { getFingerprint, clearFingerprintCache } from './fingerprint';
 
+// Assets exports
+export { GROWTHKIT_LOGO_ICON_BASE64 } from './assets';
+export type { LogoProps } from './assets';
+
 // API client export (for advanced users)
 export { GrowthKitAPI } from './api';
 

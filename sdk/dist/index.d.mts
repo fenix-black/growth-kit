@@ -1,4 +1,4 @@
-import React from 'react';
+import React$1 from 'react';
 import { NextRequest, NextFetchEvent } from 'next/server';
 
 type GrowthKitTheme = 'light' | 'dark' | 'auto';
@@ -291,10 +291,10 @@ declare function useTranslation(): {
 };
 
 interface GrowthKitProviderProps {
-    children: React.ReactNode;
+    children: React$1.ReactNode;
     config: GrowthKitConfig;
 }
-declare function GrowthKitProvider({ children, config }: GrowthKitProviderProps): React.JSX.Element;
+declare function GrowthKitProvider({ children, config }: GrowthKitProviderProps): React$1.JSX.Element;
 
 declare class GrowthKitAPI {
     private apiKey;
@@ -323,10 +323,10 @@ declare class GrowthKitAPI {
 }
 
 interface GrowthKitGateProps {
-    children: React.ReactNode;
-    loadingComponent?: React.ReactNode;
+    children: React$1.ReactNode;
+    loadingComponent?: React$1.ReactNode;
 }
-declare function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps): React.JSX.Element;
+declare function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps): React$1.JSX.Element;
 
 interface CreditExhaustionModalProps {
 }
@@ -335,13 +335,13 @@ interface CreditExhaustionModalRef {
     close: () => void;
     isOpen: () => boolean;
 }
-declare const CreditExhaustionModal: React.ForwardRefExoticComponent<CreditExhaustionModalProps & React.RefAttributes<CreditExhaustionModalRef>>;
+declare const CreditExhaustionModal: React$1.ForwardRefExoticComponent<CreditExhaustionModalProps & React$1.RefAttributes<CreditExhaustionModalRef>>;
 
 interface WaitlistFormProps {
     message?: string;
     onSuccess?: (position: number) => void;
     className?: string;
-    style?: React.CSSProperties;
+    style?: React$1.CSSProperties;
 }
 /**
  * Default waitlist form component
@@ -351,11 +351,11 @@ interface WaitlistFormProps {
  * <WaitlistForm message="Join our exclusive waitlist!" />
  * ```
  */
-declare function WaitlistForm({ message, onSuccess, className, style }: WaitlistFormProps): React.JSX.Element;
+declare function WaitlistForm({ message, onSuccess, className, style }: WaitlistFormProps): React$1.JSX.Element;
 
 interface GrowthKitAccountWidgetProps {
     config: GrowthKitConfig;
-    children: React.ReactNode;
+    children: React$1.ReactNode;
     position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'inline';
     theme?: GrowthKitTheme;
     slim?: boolean;
@@ -363,6 +363,7 @@ interface GrowthKitAccountWidgetProps {
     showName?: boolean;
     showEmail?: boolean;
     showCredits?: boolean;
+    showLogo?: boolean;
     autoOpenCreditModal?: boolean;
     onCreditsChange?: (credits: number) => void;
     onProfileChange?: (profile: {
@@ -371,7 +372,7 @@ interface GrowthKitAccountWidgetProps {
         verified?: boolean;
     }) => void;
     className?: string;
-    style?: React.CSSProperties;
+    style?: React$1.CSSProperties;
 }
 interface GrowthKitAccountWidgetRef {
     openEarnCreditsModal: () => void;
@@ -384,7 +385,7 @@ interface GrowthKitAccountWidgetRef {
     };
     setLanguage: (language: 'en' | 'es') => void;
 }
-declare const GrowthKitAccountWidget: React.ForwardRefExoticComponent<GrowthKitAccountWidgetProps & React.RefAttributes<GrowthKitAccountWidgetRef>>;
+declare const GrowthKitAccountWidget: React$1.ForwardRefExoticComponent<GrowthKitAccountWidgetProps & React$1.RefAttributes<GrowthKitAccountWidgetRef>>;
 
 interface GrowthKitMiddlewareConfig {
     apiKey: string;
@@ -446,6 +447,23 @@ declare function createGrowthKitServer(): GrowthKitServer;
 declare function getFingerprint(): Promise<string>;
 declare function clearFingerprintCache(): void;
 
+/**
+ * Static assets for GrowthKit SDK
+ * Embedded as base64 to ensure they're always available
+ */
+declare const GROWTHKIT_LOGO_ICON_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAGKADAAQAAAABAAAAGAAAAADiNXWtAAACDElEQVRIDe1Qz2sTQRR+M/szm2yVloKgELyUxranBq0eRb0rTUFQKNpb/wHRSxC8iAqCHioIgmgxKnoRT1It4qmWFq1YFRGhYhqr2TRNZvNmZ0wPgWXoJpF6UTqXed+8733fmw9g6/yzCZzzxoYyMqO1+oDeiqD2c3XRqeLui2Uhh5P57Xvq/TWVE8Z/ZJCRWfNegU50uPYo98Sy7kvz7xlIICtf3UuOGxsteRTMmvzuFmg5vO1Gdds/OPDhRpqZ2rj4qYF04oA19mAyfRI3Eg2/0TBoVle5O4Cyi/rQCaUiXajXV9f5Bz8/Sw7OzBhRs5EG++dyOwfnn+xrDAbc+YboAmPWMgZWZrUqtL2L05crnD61E8xu8NQ7MqI1Ht/FNXu6b/b5Q8r88526+bJQhiWC5BSTHTHdMV7pZqJXrJbe9AwsVVThBo40ENz6EvhmhSYSxwMdj+R/1MYtIxjh6P4ShvECUe8OyhoQZjy6T0aChqB6R0b0duhQvj78WFRtEMzqEsS9jSWHc988AWRbt6w5IFZqU7ZHr6iiYRxpsE4iqJ+VRT4HQRwkOgYG9gXwjX7JTJAe3oqje/T14bQXFlRroj6ouC+3sAMteh202DHpV4oawifQyeT74VTTzVWdpjgLWdp7d/FMz52Pfv/N+dNNyZtppibejaWuzSY3o9HGrGwZaxsiW5T/KYHfjWfJJrEJnEEAAAAASUVORK5CYII=";
+/**
+ * Logo component as React element
+ * @param size - Size in pixels (both width and height)
+ * @param className - Optional CSS class
+ * @param style - Optional CSS styles
+ */
+interface LogoProps {
+    size?: number;
+    className?: string;
+    style?: React.CSSProperties;
+}
+
 declare const VERSION = "0.3.1";
 
-export { APIResponse, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };
+export { APIResponse, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GROWTHKIT_LOGO_ICON_BASE64, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, LogoProps, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };
