@@ -69,7 +69,7 @@ function LandingPageTracker({ children }: { children: React.ReactNode }) {
 
 export default function LandingPageProvider({ children }: { children: React.ReactNode }) {
   const config = {
-    apiKey: 'gk_eYZyMPFVSwZZ_o40u0HJRN-qGgjzhtYzB4hW-wruuCQ',
+    // No apiKey needed - uses secure proxy mode automatically via middleware
     debug: process.env.NODE_ENV === 'development',
     language: 'en' as const,
     theme: 'auto' as const,
@@ -78,8 +78,9 @@ export default function LandingPageProvider({ children }: { children: React.Reac
   return (
     <GrowthKitAccountWidget 
       config={config}
-      position="top-right"
+      position="bottom-right"
       slim={true}
+      slim_labels={false}
       showName={true}
       showEmail={true}
       theme="auto"
