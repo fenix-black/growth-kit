@@ -176,6 +176,7 @@ export class GrowthKitAPI {
       '/v1/track': '/public/track',
       '/v1/waitlist': '/public/waitlist/join',
       '/v1/referral/visit': '/public/referral/check',
+      '/v1/referral/check': '/public/referral/check',
       // Keep other endpoints as-is for now (may need mapping later)
     };
 
@@ -410,6 +411,19 @@ export class GrowthKitAPI {
     return this.request('/v1/track', {
       method: 'POST',
       body: JSON.stringify({ events, context, sessionId }),
+    });
+  }
+
+  async checkReferral(
+    fingerprint: string,
+    referralCode: string
+  ): Promise<APIResponse<any>> {
+    return this.request('/v1/referral/check', {
+      method: 'POST',
+      body: JSON.stringify({
+        fingerprint,
+        referralCode,
+      }),
     });
   }
 }

@@ -74,10 +74,30 @@ export function useGrowthKit(): GrowthKitHook {
       if (configRef.current.debug && refClaim) {
         console.log('[GrowthKit] Referral claim found in URL:', refClaim);
       }
+
+      // Process referral claim first if present
+      if (refClaim) {
+        try {
+          const referralResponse = await apiRef.current.checkReferral(fingerprint, refClaim);
+          if (configRef.current.debug) {
+            console.log('[GrowthKit] Referral processed:', referralResponse);
+          }
+          
+          // Clean up URL after processing referral
+          if (typeof window !== 'undefined' && window.history?.replaceState) {
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.searchParams.delete('ref');
+            window.history.replaceState({}, '', cleanUrl.toString());
+          }
+        } catch (error) {
+          if (configRef.current.debug) {
+            console.log('[GrowthKit] Referral processing failed:', error);
+          }
+        }
+      }
       
-      // Fetch user data, passing the claim if present
-      // The /v1/me endpoint will apply referral credits if the claim is valid
-      const response = await apiRef.current.getMe(fingerprint, refClaim || undefined);
+      // Fetch user data
+      const response = await apiRef.current.getMe(fingerprint);
       
       if (configRef.current.debug) {
         console.log('[GrowthKit] API Response Data:', response);
@@ -139,12 +159,7 @@ export function useGrowthKit(): GrowthKitHook {
         });
       }
       
-      // Clean up URL by removing the ref parameter
-      if (refClaim && typeof window !== 'undefined' && window.history?.replaceState) {
-        const cleanUrl = new URL(window.location.href);
-        cleanUrl.searchParams.delete('ref');
-        window.history.replaceState({}, '', cleanUrl.toString());
-      }
+      // URL cleanup is now handled in the referral processing section above
 
       // Parse waitlist data
       const waitlistData = data.waitlist;
@@ -513,9 +528,9 @@ export function useGrowthKit(): GrowthKitHook {
   const getReferralLink = useCallback((): string => {
     if (!state.referralCode) return '';
     
-    // Always use the app's domain for referral links, not the API URL
+    // Use simple query parameter approach - no middleware needed
     const baseUrl = window.location.origin;
-    return `${baseUrl}/r/${state.referralCode}`;
+    return `${baseUrl}/?ref=${state.referralCode}`;
   }, [state.referralCode]);
 
   // Share functionality

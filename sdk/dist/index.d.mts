@@ -335,6 +335,7 @@ declare class GrowthKitAPI {
     }>, context?: any, sessionId?: string): Promise<APIResponse<{
         tracked: boolean;
     }>>;
+    checkReferral(fingerprint: string, referralCode: string): Promise<APIResponse<any>>;
 }
 
 interface GrowthKitGateProps {
