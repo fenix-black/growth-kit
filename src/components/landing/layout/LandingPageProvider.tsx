@@ -15,52 +15,20 @@ function LandingPageTracker({ children }: { children: React.ReactNode }) {
       referrer: document.referrer
     });
 
-    // Track scroll behavior
-    let scrollTimeout: NodeJS.Timeout;
-    const handleScroll = () => {
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        const scrollPercentage = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
-        if (scrollPercentage > 0) {
-          track('landing_page_scrolled', { 
-            percentage: scrollPercentage,
-            section: getCurrentSection()
-          });
-        }
-      }, 1000);
-    };
-
-    const getCurrentSection = () => {
-      const sections = ['hero', 'features', 'examples', 'integration', 'get-started'];
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          if (rect.top <= 100 && rect.bottom >= 100) {
-            return section;
-          }
-        }
-      }
-      return 'unknown';
-    };
 
     // Track time spent on page
     const startTime = Date.now();
     const handleBeforeUnload = () => {
       const timeSpent = Date.now() - startTime;
       track('landing_page_exit', { 
-        timeSpent: Math.floor(timeSpent / 1000),
-        lastSection: getCurrentSection()
+        timeSpent: Math.floor(timeSpent / 1000)
       });
     };
 
-    window.addEventListener('scroll', handleScroll);
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      clearTimeout(scrollTimeout);
     };
   }, [track]);
 
