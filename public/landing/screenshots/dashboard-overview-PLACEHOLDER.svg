@@ -1,0 +1,82 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f9fafb"/>
+      <stop offset="100%" stop-color="#e5e7eb"/>
+    </linearGradient>
+    <linearGradient id="primary" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#14b8a6"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#d946ef"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#bg)"/>
+  
+  <!-- Header -->
+  <rect width="800" height="60" fill="#ffffff"/>
+  <rect x="20" y="15" width="120" height="30" rx="6" fill="url(#primary)"/>
+  <text x="30" y="33" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">GrowthKit</text>
+  
+  <!-- Navigation -->
+  <rect x="160" y="20" width="60" height="20" rx="4" fill="#e5e7eb"/>
+  <rect x="240" y="20" width="80" height="20" rx="4" fill="#e5e7eb"/>
+  <rect x="340" y="20" width="70" height="20" rx="4" fill="#e5e7eb"/>
+  
+  <!-- Main Stats Cards -->
+  <rect x="20" y="80" width="180" height="120" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="30" y="90" width="40" height="40" rx="8" fill="url(#primary)"/>
+  <text x="85" y="105" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">Total Users</text>
+  <text x="85" y="125" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#111827">12,847</text>
+  <text x="85" y="145" font-family="Arial, sans-serif" font-size="12" fill="#10b981">+23% this month</text>
+  
+  <rect x="220" y="80" width="180" height="120" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="230" y="90" width="40" height="40" rx="8" fill="url(#purple)"/>
+  <text x="285" y="105" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">Referrals</text>
+  <text x="285" y="125" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#111827">3,921</text>
+  <text x="285" y="145" font-family="Arial, sans-serif" font-size="12" fill="#a855f7">+45% this month</text>
+  
+  <rect x="420" y="80" width="180" height="120" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="430" y="90" width="40" height="40" rx="8" fill="#f97316"/>
+  <text x="485" y="105" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">Credits Earned</text>
+  <text x="485" y="125" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#111827">89.2K</text>
+  <text x="485" y="145" font-family="Arial, sans-serif" font-size="12" fill="#f97316">+67% this month</text>
+  
+  <rect x="620" y="80" width="160" height="120" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="630" y="90" width="40" height="40" rx="8" fill="#ec4899"/>
+  <text x="685" y="105" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">Conversion</text>
+  <text x="685" y="125" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#111827">24.8%</text>
+  <text x="685" y="145" font-family="Arial, sans-serif" font-size="12" fill="#ec4899">+12% this month</text>
+  
+  <!-- Chart Area -->
+  <rect x="20" y="220" width="560" height="300" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="30" y="245" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#111827">User Growth Analytics</text>
+  
+  <!-- Mock Chart -->
+  <polyline points="40,480 120,450 200,420 280,380 360,350 440,320 520,290 560,270" 
+            fill="none" stroke="url(#primary)" stroke-width="3"/>
+  <polyline points="40,490 120,470 200,440 280,410 360,380 440,360 520,340 560,320" 
+            fill="none" stroke="url(#purple)" stroke-width="3"/>
+  
+  <!-- Recent Apps -->
+  <rect x="600" y="220" width="180" height="300" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="610" y="245" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#111827">Recent Apps</text>
+  
+  <rect x="610" y="260" width="160" height="40" rx="6" fill="#f9fafb"/>
+  <circle cx="625" cy="280" r="8" fill="url(#primary)"/>
+  <text x="645" y="275" font-family="Arial, sans-serif" font-size="12" font-weight="medium" fill="#111827">TaskFlow Pro</text>
+  <text x="645" y="290" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">Active • 2,341 users</text>
+  
+  <rect x="610" y="310" width="160" height="40" rx="6" fill="#f9fafb"/>
+  <circle cx="625" cy="330" r="8" fill="url(#purple)"/>
+  <text x="645" y="325" font-family="Arial, sans-serif" font-size="12" font-weight="medium" fill="#111827">PixelCraft</text>
+  <text x="645" y="340" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">Active • 1,892 users</text>
+  
+  <!-- Placeholder Label -->
+  <rect x="300" y="550" width="200" height="30" rx="4" fill="#f3f4f6" stroke="#d1d5db"/>
+  <text x="400" y="568" font-family="Arial, sans-serif" font-size="12" font-weight="medium" fill="#6b7280" text-anchor="middle">PLACEHOLDER - Dashboard Overview</text>
+</svg>

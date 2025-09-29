@@ -15,6 +15,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FenixBlack.ai GrowthKit",
   description: "Powering growth with intelligent waitlist management and referral systems",
+  icons: {
+    icon: [
+      { url: '/growthkit-logo-icon-24px.png', sizes: '24x24', type: 'image/png' },
+      { url: '/growthkit-logo-icon-alpha.png', sizes: '32x32', type: 'image/png' },
+      { url: '/growthkit-logo-icon.png', sizes: '64x64', type: 'image/png' },
+    ],
+    apple: { url: '/growthkit-logo-icon.png', sizes: '180x180', type: 'image/png' },
+    shortcut: { url: '/favicon.ico', type: 'image/x-icon' },
+  },
 };
 
 export default function RootLayout({
