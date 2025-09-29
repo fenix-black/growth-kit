@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { successResponse, errors } from '@/lib/utils/response';
 import { generateInvitationCode } from '@/lib/utils/invitationCode';
 import { sendInvitationEmail } from '@/lib/email/send';
+import { buildAppUrl } from '@/lib/utils/url';
 
 export async function POST(request: NextRequest) {
   try {
@@ -106,14 +107,14 @@ export async function POST(request: NextRequest) {
       await sendInvitationEmail(app, email, {
         invitationCode: code,
         invitationLink: app.domain ? 
-          `https://${app.domain}/invite/${code}` : 
-          `https://your-app.com/invite/${code}`,
+          buildAppUrl(app.domain, `/?invitation=${code}`) : 
+          `https://your-app.com/?invitation=${code}`,
         masterCode: appWithMaster.masterReferralCode || '',
         credits: invitationCredits,
         expiresAt: expiresAt,
         referralLink: app.domain ? 
-          `https://${app.domain}/r/${code}` : 
-          `https://your-app.com/r/${code}`,
+          buildAppUrl(app.domain, `/?ref=${code}`) : 
+          `https://your-app.com/?ref=${code}`,
       });
       
       console.log(`Invitation email sent to ${email} with code ${code}`);

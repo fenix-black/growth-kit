@@ -4,6 +4,7 @@ import { verifyServiceKey } from '@/lib/security/auth';
 import { successResponse, errors } from '@/lib/utils/response';
 import { sendInvitationEmail } from '@/lib/email/send';
 import { generateInvitationCode } from '@/lib/utils/invitationCode';
+import { buildAppUrl } from '@/lib/utils/url';
 
 export async function POST(request: NextRequest) {
   try {
@@ -95,13 +96,13 @@ export async function POST(request: NextRequest) {
         await sendInvitationEmail(app, entry.email, {
           invitationCode,
           invitationLink: app.domain ? 
-            `https://${app.domain}/?invitation=${invitationCode}` : 
+            buildAppUrl(app.domain, `/?invitation=${invitationCode}`) : 
             `https://your-app.com/?invitation=${invitationCode}`,
           masterCode: appWithMaster.masterReferralCode || '',
           credits: invitationCredits,
           expiresAt: codeExpiresAt,
           referralLink: app.domain ? 
-            `https://${app.domain}/?ref=${invitationCode}` : 
+            buildAppUrl(app.domain, `/?ref=${invitationCode}`) : 
             `https://your-app.com/?ref=${invitationCode}`,
         });
         

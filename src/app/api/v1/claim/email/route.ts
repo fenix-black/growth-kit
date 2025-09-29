@@ -7,6 +7,7 @@ import { withCorsHeaders } from '@/lib/middleware/cors';
 import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { successResponse, errors } from '@/lib/utils/response';
 import { corsErrors } from '@/lib/utils/corsResponse';
+import { buildAppUrl } from '@/lib/utils/url';
 import { isValidFingerprint, isValidEmail } from '@/lib/utils/validation';
 import { sendVerificationEmail } from '@/lib/email/send';
 
@@ -293,7 +294,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send verification email with query parameter (no middleware needed)
-    const verificationLink = `https://${authContext.app.domain}/?verify=${verifyToken}`;
+    const verificationLink = buildAppUrl(authContext.app.domain, `/?verify=${verifyToken}`);
     
     try {
       await sendVerificationEmail(authContext.app, normalizedEmail, {

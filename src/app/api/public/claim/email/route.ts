@@ -7,6 +7,7 @@ import { successResponse } from '@/lib/utils/response';
 import { withCorsHeaders } from '@/lib/middleware/cors';
 import { sendVerificationEmail } from '@/lib/email/send';
 import { generateVerificationToken } from '@/lib/security/hmac';
+import { buildAppUrl } from '@/lib/utils/url';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -111,7 +112,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Send verification email
-    const verificationLink = `https://${appSettings?.domain}/?verify=${verifyToken}`;
+    const verificationLink = appSettings?.domain ? 
+      buildAppUrl(appSettings.domain, `/?verify=${verifyToken}`) : 
+      '';
     
     try {
       await sendVerificationEmail(
