@@ -10,7 +10,7 @@ export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
 }
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin');
   
   try {
@@ -26,6 +26,13 @@ export async function GET(request: NextRequest) {
     if (origin && app.corsOrigins.length > 0 && !app.corsOrigins.includes(origin)) {
       return corsErrors.forbidden(origin);
     }
+
+    // Parse request body (for compatibility with original /v1/me endpoint)
+    const body = await request.json();
+    const { claim } = body; // Optional claim parameter like the original endpoint
+
+    // TODO: Handle referral claims in public mode if needed
+    // For now, we'll skip claim processing to keep it simple
 
     // Get user data for this fingerprint
     const [credits, lead, referrals] = await Promise.all([
