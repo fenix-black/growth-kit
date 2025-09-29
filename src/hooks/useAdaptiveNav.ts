@@ -30,8 +30,8 @@ export function useAdaptiveNav() {
           const sectionId = entry.target.id;
           const isDarkSection = sectionId === 'get-started' || 
                                entry.target.classList.contains('dark-section') ||
-                               entry.target.querySelector('.bg-gradient-to-r.from-gray-900') ||
-                               entry.target.querySelector('[style*="gray-900"]');
+                               !!entry.target.querySelector('.bg-gradient-to-r.from-gray-900') ||
+                               !!entry.target.querySelector('[style*="gray-900"]');
           
           setNavTheme({
             isDark: isDarkSection,

@@ -5,10 +5,12 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { ArrowRight, Sparkles, TrendingUp, Users, Zap } from 'lucide-react';
 import Link from 'next/link';
+import { useGrowthKit } from '@fenixblack/growthkit';
 
 export default function HeroSection() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const transformWords = ['Transform', 'Supercharge', 'Accelerate', 'Amplify'];
+  const { track } = useGrowthKit();
 
   // Animated word cycling
   useEffect(() => {
@@ -18,16 +20,21 @@ export default function HeroSection() {
     return () => clearInterval(interval);
   }, []);
 
-  // Floating animation variants for background elements
-  const floatingVariants = {
-    float: {
-      y: [-20, 20],
-      transition: {
-        duration: 4,
-        repeat: Infinity,
-        repeatType: "reverse" as const,
-        ease: "easeInOut"
-      }
+  // Track hero section view
+  useEffect(() => {
+    track('hero_section_viewed', {
+      timestamp: Date.now(),
+      userAgent: navigator.userAgent
+    });
+  }, [track]);
+
+  // Floating animation for background elements
+  const floatingAnimation = {
+    y: [-20, 20],
+    transition: {
+      duration: 4,
+      repeat: Infinity,
+      repeatType: "reverse" as const,
     }
   };
 
@@ -50,7 +57,6 @@ export default function HeroSection() {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: [0.25, 0.25, 0, 1],
       }
     }
   };
@@ -61,20 +67,27 @@ export default function HeroSection() {
       <div className="absolute inset-0 overflow-hidden">
         {/* Gradient orbs */}
         <motion.div
-          variants={floatingVariants}
-          animate="float"
+          animate={floatingAnimation}
           className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl"
         />
         <motion.div
-          variants={floatingVariants}
-          animate="float"
-          style={{ animationDelay: '1s' }}
+          animate={{
+            ...floatingAnimation,
+            transition: {
+              ...floatingAnimation.transition,
+              delay: 1
+            }
+          }}
           className="absolute top-40 right-10 w-96 h-96 bg-gradient-to-r from-fenix-purple/15 to-fenix-magenta/15 rounded-full blur-3xl"
         />
         <motion.div
-          variants={floatingVariants}
-          animate="float"
-          style={{ animationDelay: '2s' }}
+          animate={{
+            ...floatingAnimation,
+            transition: {
+              ...floatingAnimation.transition,
+              delay: 2
+            }
+          }}
           className="absolute bottom-20 left-1/3 w-64 h-64 bg-gradient-to-r from-fenix-orange/20 to-fenix-pink/20 rounded-full blur-3xl"
         />
 
@@ -209,6 +222,11 @@ export default function HeroSection() {
               style={{
                 background: 'linear-gradient(to right, #10b981, #14b8a6)',
               }}
+              onClick={() => track('hero_cta_clicked', { 
+                button: 'start_building', 
+                section: 'hero',
+                destination: 'get-started'
+              })}
             >
               <span>Start Building Today</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
@@ -216,6 +234,11 @@ export default function HeroSection() {
             <Link
               href="#features"
               className="group bg-white border-2 border-primary/30 text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg hover:border-primary hover:bg-gray-50 hover:shadow-xl transition-all duration-300 hover:scale-105 shadow-lg"
+              onClick={() => track('hero_cta_clicked', { 
+                button: 'see_how_it_works', 
+                section: 'hero',
+                destination: 'features'
+              })}
             >
               See How It Works
             </Link>

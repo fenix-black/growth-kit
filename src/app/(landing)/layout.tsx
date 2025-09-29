@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import LandingNav from '@/components/landing/layout/LandingNav';
 import LandingFooter from '@/components/landing/layout/LandingFooter';
+import LandingPageProvider from '@/components/landing/layout/LandingPageProvider';
 
 export const metadata: Metadata = {
   title: 'GrowthKit - Transform Any App Into a Viral Growth Engine',
@@ -66,12 +67,14 @@ export default function LandingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-white">
-      <LandingNav />
-      <main className="pt-16">
-        {children}
-      </main>
-      <LandingFooter />
-    </div>
+    <LandingPageProvider>
+      <div className="min-h-screen bg-white">
+        <LandingNav />
+        <main className="pt-16">
+          {children}
+        </main>
+        <LandingFooter />
+      </div>
+    </LandingPageProvider>
   );
 }

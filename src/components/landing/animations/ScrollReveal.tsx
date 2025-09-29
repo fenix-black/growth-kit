@@ -65,7 +65,6 @@ export default function ScrollReveal({
       transition={{
         duration,
         delay,
-        ease: [0.25, 0.25, 0, 1], // Custom easing for smooth animation
       }}
       className={className}
     >
@@ -118,51 +117,26 @@ export function StaggerItem({
   distance?: number;
   duration?: number;
 }) {
-  const getVariants = () => {
-    const initial = (() => {
-      switch (direction) {
-        case 'up':
-          return { opacity: 0, y: distance };
-        case 'down':
-          return { opacity: 0, y: -distance };
-        case 'left':
-          return { opacity: 0, x: distance };
-        case 'right':
-          return { opacity: 0, x: -distance };
-        case 'fade':
-        default:
-          return { opacity: 0 };
-      }
-    })();
-
-    const animate = (() => {
-      switch (direction) {
-        case 'up':
-        case 'down':
-          return { opacity: 1, y: 0 };
-        case 'left':
-        case 'right':
-          return { opacity: 1, x: 0 };
-        case 'fade':
-        default:
-          return { opacity: 1 };
-      }
-    })();
-
-    return {
-      hidden: initial,
-      visible: {
-        ...animate,
-        transition: {
-          duration,
-          ease: [0.25, 0.25, 0, 1],
-        },
-      },
-    };
+  const variants = {
+    hidden: {
+      opacity: 0,
+      y: direction === 'up' ? distance : direction === 'down' ? -distance : 0,
+      x: direction === 'left' ? distance : direction === 'right' ? -distance : 0,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      x: 0,
+    },
   };
 
   return (
-    <motion.div variants={getVariants()}>
+    <motion.div 
+      variants={variants}
+      transition={{
+        duration,
+      }}
+    >
       {children}
     </motion.div>
   );

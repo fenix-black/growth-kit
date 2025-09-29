@@ -17,6 +17,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@fenixblack/growthkit": "file:sdk",
     "@prisma/client": "^6.16.2",
     "@radix-ui/react-slot": "^1.2.3",
     "@react-email/render": "^1.2.3",

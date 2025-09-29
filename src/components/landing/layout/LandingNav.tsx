@@ -6,10 +6,12 @@ import { Menu, X, ExternalLink, Github } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAdaptiveNav } from '@/hooks/useAdaptiveNav';
+import { useGrowthKit } from '@fenixblack/growthkit';
 
 export default function LandingNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navTheme = useAdaptiveNav();
+  const { track } = useGrowthKit();
 
   const navItems = [
     { href: '#features', label: 'Features' },
@@ -83,6 +85,10 @@ export default function LandingNav() {
               className={`font-medium flex items-center space-x-1 transition-all duration-500 hover:text-primary ${
                 navTheme.isDark ? 'text-gray-200' : 'text-gray-600'
               }`}
+              onClick={() => track('nav_dashboard_clicked', { 
+                section: navTheme.isDark ? 'dark' : 'light',
+                source: 'header'
+              })}
             >
               <span>Dashboard</span>
               <ExternalLink className="w-4 h-4" />
@@ -97,6 +103,11 @@ export default function LandingNav() {
               style={!navTheme.isDark ? {
                 background: 'linear-gradient(to right, #10b981, #14b8a6)',
               } : {}}
+              onClick={() => track('nav_get_started_clicked', { 
+                section: navTheme.isDark ? 'dark' : 'light',
+                source: 'header',
+                navStyle: navTheme.isDark ? 'dark_mode' : 'light_mode'
+              })}
             >
               Get Started
             </Link>
