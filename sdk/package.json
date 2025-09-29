@@ -1,6 +1,6 @@
 {
   "name": "@fenixblack/growthkit",
-  "version": "0.4.14",
+  "version": "0.5.0",
   "description": "React SDK for GrowthKit - Intelligent waitlist and referral management",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -21,7 +21,7 @@
     },
     "./middleware": {
       "import": "./dist/middleware.mjs",
-      "require": "./dist/middleware.js", 
+      "require": "./dist/middleware.js",
       "types": "./dist/middleware.d.ts"
     },
     "./server": {
@@ -45,7 +45,9 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "@rajesh896/broprint.js": "^2.1.1"
+    "@rajesh896/broprint.js": "^2.1.1",
+    "@types/jsonwebtoken": "^9.0.10",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

@@ -40,6 +40,7 @@ interface AppDetails {
   corsOrigins: string[];
   redirectUrl: string;
   policyJson: any;
+  publicKey?: string;
   waitlistEnabled: boolean;
   autoApproveWaitlist: boolean;
   invitationQuota: number;
@@ -77,7 +78,7 @@ const tabs = [
   { id: 'users-leads', name: 'Users & Leads', icon: Users },
   { id: 'waitlist', name: 'Waitlist', icon: Users },
   { id: 'analytics', name: 'Analytics', icon: BarChart3 },
-  { id: 'api-keys', name: 'API Keys', icon: Key },
+  { id: 'api-keys', name: 'API Tokens', icon: Key },
   { id: 'emails', name: 'Email Templates', icon: Mail },
 ];
 
@@ -307,6 +308,16 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
     router.push('/admin/login');
   };
 
+  const handleCopyToClipboard = async (text: string, type: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setShowCopySuccess(type);
+      setTimeout(() => setShowCopySuccess(null), 2000);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+    }
+  };
+
   if (loading || !app) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -509,7 +520,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                 </dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">API Keys</dt>
+                <dt className="text-sm text-gray-500">API Tokens</dt>
                 <dd className="text-sm font-medium">{app._count.apiKeys}</dd>
               </div>
               <div>
@@ -850,7 +861,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
 
       {activeTab === 'api-keys' && (
         <ContentCard 
-          title="API Keys"
+          title="API Tokens"
           actions={
             <Button
               variant="primary"
@@ -862,6 +873,44 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
             </Button>
           }
         >
+          {/* Public Key Section */}
+          <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-sm font-medium text-emerald-800 dark:text-emerald-200">Public Key</h3>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                  Safe for client-side usage. Use this in your widget initialization.
+                </p>
+              </div>
+            </div>
+            {app.publicKey ? (
+              <div className="flex items-center space-x-2">
+                <code className="flex-1 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 rounded border font-mono">
+                  {app.publicKey}
+                </code>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<Copy size={16} />}
+                  onClick={() => handleCopyToClipboard(app.publicKey!, 'publicKey')}
+                  className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-900/30"
+                >
+                  {showCopySuccess === 'publicKey' ? <CheckCircle size={16} /> : <Copy size={16} />}
+                </Button>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-500 italic">No public key generated yet</div>
+            )}
+          </div>
+
+          {/* Private API Keys Section */}
+          <div className="mb-4">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Private API Keys</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+              These keys have full access to your app data. Keep them secure and never expose them in client-side code.
+            </p>
+          </div>
+
           {app.apiKeys && app.apiKeys.length > 0 ? (
             <div className="space-y-3">
               {app.apiKeys.map((apiKey) => (

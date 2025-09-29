@@ -1,27 +1,46 @@
 # @fenixblack/growthkit
 
-React SDK for GrowthKit - Intelligent waitlist and referral management system with Next.js middleware support.
+React SDK for GrowthKit - Intelligent waitlist and referral management system with client-side and middleware support.
 
-## ⚡ Quick Start (30 seconds)
+## ⚡ Quick Start (10 seconds)
 
-### Option 1: Automated Setup (Recommended)
+### Option 1: Client-Side Only (Recommended for most apps)
+```bash
+npm install @fenixblack/growthkit
+```
+
+**That's it!** Just use your public key:
+
+```tsx
+import { useGrowthKit } from '@fenixblack/growthkit';
+
+function App() {
+  const gk = useGrowthKit({
+    publicKey: 'pk_your_public_key_here' // Get this from your dashboard
+  });
+  
+  return <div>Credits: {gk.credits}</div>;
+}
+```
+
+✅ **Works with**: Static sites, SPAs, GitHub Pages, Netlify, Vercel, CodePen  
+✅ **No backend required**: Direct secure communication with GrowthKit  
+✅ **Safe for client-side**: Public keys are designed to be exposed  
+
+### Option 2: Next.js with Middleware (Advanced)
 ```bash
 npx @fenixblack/growthkit setup
 ```
+**For full-stack Next.js apps that need:**
+- Server-side API key security
+- Custom referral link routing  
+- Advanced middleware features
+
 **That's it!** The CLI will automatically:
 - Detect your Next.js project
 - Create `middleware.ts` with auto-middleware
 - Set up environment variables
 - Provide next steps
-
-### Option 2: Manual Setup
-1. **Install**: `npm install @fenixblack/growthkit`
-2. **Add middleware**: Create `middleware.ts` with one line:
-   ```ts
-   export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
-   ```
-3. **Set env vars**: Add your API key to `.env.local`
-4. **Done!** 🎉
 
 ## Installation
 
@@ -30,6 +49,91 @@ npm install @fenixblack/growthkit
 # or
 yarn add @fenixblack/growthkit
 ```
+
+## 🌍 Integration Examples
+
+### React SPA (Create React App, Vite, etc.)
+```tsx
+import { useGrowthKit, GrowthKitProvider } from '@fenixblack/growthkit';
+
+function App() {
+  return (
+    <GrowthKitProvider config={{ publicKey: 'pk_your_key_here' }}>
+      <MyApp />
+    </GrowthKitProvider>
+  );
+}
+
+function MyApp() {
+  const { track, credits, share } = useGrowthKit();
+  
+  return (
+    <div>
+      <h1>Credits: {credits}</h1>
+      <button onClick={() => track('feature_used')}>Use Feature</button>
+      <button onClick={() => share()}>Share & Earn</button>
+    </div>
+  );
+}
+```
+
+### Static Sites (Vanilla JavaScript)
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://unpkg.com/@fenixblack/growthkit@latest/dist/index.js"></script>
+</head>
+<body>
+    <div id="credits">Loading...</div>
+    <button onclick="useFeature()">Use Feature</button>
+
+    <script>
+        const gk = new GrowthKit({
+            publicKey: 'pk_your_key_here'
+        });
+
+        gk.initialize().then(() => {
+            document.getElementById('credits').textContent = `Credits: ${gk.credits}`;
+        });
+
+        function useFeature() {
+            gk.track('feature_used');
+        }
+    </script>
+</body>
+</html>
+```
+
+### Next.js App Router (Client Components)
+```tsx
+'use client';
+
+import { useGrowthKit } from '@fenixblack/growthkit';
+
+export default function ClientWidget() {
+  const gk = useGrowthKit({
+    publicKey: 'pk_your_key_here'
+  });
+  
+  return (
+    <div className="p-4 border rounded">
+      <h3>Credits: {gk.credits}</h3>
+      <button onClick={() => gk.track('action')}>
+        Track Action
+      </button>
+    </div>
+  );
+}
+```
+
+### Getting Your Public Key
+
+1. Go to your GrowthKit admin dashboard
+2. Navigate to **API Tokens** tab in your app settings
+3. Copy your **Public Key** (starts with `pk_`)
+
+> **🔒 Security**: Public keys are safe to use in client-side code. They generate time-limited tokens that are scoped to individual users.
 
 ## Import Paths
 
@@ -227,8 +331,8 @@ import toast from 'react-hot-toast';
 
 function App() {
   const gk = useGrowthKit({
-    apiKey: 'your-api-key',
-    apiUrl: 'https://growth.fenixblack.ai/api', // Optional
+    publicKey: 'pk_your_key_here', // Get from dashboard → API Tokens
+    debug: true,                   // Optional: Enable debug mode
   });
 
   // Handle email verification redirects from middleware
@@ -292,9 +396,16 @@ Set the default language in your configuration:
 
 ```tsx
 const config = {
-  apiKey: 'your-api-key',
-  language: 'es',      // Set Spanish as default
-  theme: 'dark',       // Set dark theme (options: 'light' | 'dark' | 'auto')
+  publicKey: 'pk_your_key_here', // Use public key for client-side
+  language: 'es',                // Set Spanish as default
+  theme: 'dark',                 // Set dark theme (options: 'light' | 'dark' | 'auto')
+};
+
+// Or for middleware mode:
+const middlewareConfig = {
+  // No keys needed - handled by middleware
+  language: 'es',
+  theme: 'dark',
 };
 ```
 
@@ -305,9 +416,9 @@ import { useGrowthKit, GrowthKitAccountWidget } from '@fenixblack/growthkit';
 
 function App() {
   const config = {
-    apiKey: 'your-api-key',
-    language: 'es',    // Spanish by default
-    theme: 'auto',     // Auto-detect system theme preference
+    publicKey: 'pk_your_key_here', // Public key for client-side
+    language: 'es',                // Spanish by default
+    theme: 'auto',                 // Auto-detect system theme preference
   };
 
   return (
@@ -317,6 +428,61 @@ function App() {
   );
 }
 ```
+
+## 🔧 Configuration Modes
+
+GrowthKit supports three integration modes to fit different application architectures:
+
+### 1. Public Key Mode (Recommended)
+**Best for**: Static sites, SPAs, client-side apps, prototypes
+
+```tsx
+const config = {
+  publicKey: 'pk_your_key_here', // Get from dashboard → API Tokens
+  debug: true,                   // Optional: Enable debug mode
+  language: 'en',                // Optional: Set language
+  theme: 'auto',                 // Optional: Set theme
+};
+```
+
+**Features:**
+- ✅ No backend required
+- ✅ Secure token-based authentication
+- ✅ Works everywhere JavaScript runs
+- ✅ Perfect for static site generators
+
+### 2. Proxy Mode (Middleware)
+**Best for**: Next.js full-stack apps with custom routing needs
+
+```tsx
+const config = {
+  // No keys needed - middleware handles everything
+  debug: process.env.NODE_ENV === 'development',
+  language: 'en',
+  theme: 'auto',
+};
+```
+
+**Setup**: Run `npx @fenixblack/growthkit setup`
+
+**Features:**
+- ✅ Maximum security (API key server-side only)
+- ✅ Custom referral link routing
+- ✅ Advanced middleware features
+- ✅ Zero client-side configuration
+
+### 3. Direct API Mode (Legacy)
+**Best for**: Advanced use cases with custom security requirements
+
+```tsx
+const config = {
+  apiKey: 'gk_your_private_key', // Private API key
+  apiUrl: 'https://growth.fenixblack.ai/api',
+  debug: true,
+};
+```
+
+**⚠️ Warning**: Private API keys should not be exposed in client-side code in production.
 
 ### Programmatic Language Switching
 
@@ -565,7 +731,7 @@ Protect content behind waitlist or paywall:
 ```tsx
 import { GrowthKitGate } from '@fenixblack/growthkit';
 
-<GrowthKitGate config={{ apiKey: 'your-api-key' }}>
+<GrowthKitGate config={{ publicKey: 'pk_your_key_here' }}>
   {/* Protected content */}
   <YourApp />
 </GrowthKitGate>
@@ -579,7 +745,7 @@ import { GrowthKitAccountWidget } from '@fenixblack/growthkit';
 
 <GrowthKitAccountWidget 
   config={{ 
-    apiKey: 'your-api-key',
+    publicKey: 'pk_your_key_here',
     language: 'es' // Optional: Set language
   }}
   position="top-right"

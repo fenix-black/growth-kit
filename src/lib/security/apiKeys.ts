@@ -14,6 +14,14 @@ export function generateApiKey(): { key: string; hint: string } {
 }
 
 /**
+ * Generate a new public key for client-side usage
+ * Returns a public key that's safe to expose in client code
+ */
+export function generatePublicKey(): string {
+  return `pk_${crypto.randomBytes(16).toString('base64url')}`;
+}
+
+/**
  * Hash an API key using bcrypt
  */
 export async function hashApiKey(key: string): Promise<string> {

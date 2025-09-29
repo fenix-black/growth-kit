@@ -29,6 +29,7 @@ model App {
   policyJson                  Json
   emailTemplates              Json?
   isActive                    Boolean       @default(true)
+  publicKey                   String?       @unique
   createdAt                   DateTime      @default(now())
   updatedAt                   DateTime      @updatedAt
   autoInviteEnabled           Boolean       @default(false)

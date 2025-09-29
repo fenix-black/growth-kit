@@ -42,9 +42,10 @@ export function useGrowthKit(): GrowthKitHook {
   // Initialize API client
   useEffect(() => {
     // In proxy mode, no API key is required (it's handled server-side)
+    // In public mode, public key is required
     // In direct mode, API key is required
-    apiRef.current = new GrowthKitAPI(config.apiKey, config.apiUrl, config.debug);
-  }, [config.apiKey, config.apiUrl, config.debug]);
+    apiRef.current = new GrowthKitAPI(config.apiKey, config.publicKey, config.apiUrl, config.debug);
+  }, [config.apiKey, config.publicKey, config.apiUrl, config.debug]);
 
   // Initialize fingerprint and fetch user data
   const initialize = useCallback(async () => {

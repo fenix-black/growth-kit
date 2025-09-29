@@ -37,6 +37,18 @@ export async function GET(
             waitlist: true,
           },
         },
+        apiKeys: {
+          select: {
+            id: true,
+            name: true,
+            keyHint: true,
+            scope: true,
+            isActive: true,
+            createdAt: true,
+            lastUsedAt: true,
+            expiresAt: true,
+          },
+        },
       },
     });
 
@@ -229,6 +241,18 @@ export async function PUT(
             referrals: true,
             leads: true,
             waitlist: true,
+          },
+        },
+        apiKeys: {
+          select: {
+            id: true,
+            name: true,
+            keyHint: true,
+            scope: true,
+            isActive: true,
+            createdAt: true,
+            lastUsedAt: true,
+            expiresAt: true,
           },
         },
       },

@@ -9,24 +9,30 @@ import type {
 
 export class GrowthKitAPI {
   private apiKey: string | null;
+  private publicKey: string | null;
   private apiUrl: string;
   private fingerprint: string | null = null;
   private isProxyMode: boolean;
+  private isPublicMode: boolean;
   private debug: boolean = false;
+  private token: string | null = null;
+  private tokenExpiry: Date | null = null;
 
-  constructor(apiKey?: string, apiUrl: string = '', debug: boolean = false) {
-    // Default to proxy mode (secure) unless apiKey is explicitly provided
-    this.isProxyMode = !apiKey;
+  constructor(apiKey?: string, publicKey?: string, apiUrl: string = '', debug: boolean = false) {
+    // Determine mode: proxy (default), public key, or private API key
+    this.isPublicMode = !!publicKey;
+    this.isProxyMode = !apiKey && !publicKey;
     this.apiKey = apiKey || null;
+    this.publicKey = publicKey || null;
     this.apiUrl = this.isProxyMode ? this.detectProxyUrl() : (apiUrl || this.detectApiUrl());
     this.debug = debug;
     
     if (this.isProxyMode && typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
       console.log('[GrowthKit] Using secure proxy mode via middleware - API key is handled server-side');
-    }
-    
-    if (!this.isProxyMode && typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
-      console.warn('[GrowthKit] Using direct API mode with client-side API key. Consider upgrading to proxy mode for better security by removing the apiKey parameter.');
+    } else if (this.isPublicMode && typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.log('[GrowthKit] Using public key mode - secure for client-side usage');
+    } else if (!this.isProxyMode && typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+      console.warn('[GrowthKit] Using direct API mode with client-side API key. Consider upgrading to proxy mode or public key mode for better security.');
     }
   }
 
@@ -57,15 +63,148 @@ export class GrowthKitAPI {
     this.fingerprint = fingerprint;
   }
 
+  private isTokenValid(): boolean {
+    return !!(this.token && this.tokenExpiry && this.tokenExpiry > new Date());
+  }
+
+  private async getStoredToken(): Promise<{token: string; expiry: Date} | null> {
+    if (typeof window === 'undefined') return null;
+    
+    try {
+      const stored = localStorage.getItem('growthkit_token');
+      if (!stored) return null;
+      
+      const parsed = JSON.parse(stored);
+      const expiry = new Date(parsed.expiresAt);
+      
+      if (expiry > new Date()) {
+        return { token: parsed.token, expiry };
+      } else {
+        localStorage.removeItem('growthkit_token');
+        return null;
+      }
+    } catch {
+      localStorage.removeItem('growthkit_token');
+      return null;
+    }
+  }
+
+  private storeToken(token: string, expiresAt: string) {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem('growthkit_token', JSON.stringify({
+        token,
+        expiresAt
+      }));
+    } catch (error) {
+      if (this.debug) {
+        console.warn('[GrowthKit] Failed to store token:', error);
+      }
+    }
+  }
+
+  private async requestToken(): Promise<boolean> {
+    if (!this.isPublicMode || !this.publicKey || !this.fingerprint) {
+      return false;
+    }
+
+    try {
+      const url = `${this.apiUrl}/public/auth/token`;
+      
+      if (this.debug) {
+        console.log('[GrowthKit] Requesting new token...');
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          publicKey: this.publicKey,
+          fingerprint: this.fingerprint,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Token request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const tokenData = data.data || data;
+      
+      this.token = tokenData.token;
+      this.tokenExpiry = new Date(tokenData.expiresAt);
+      this.storeToken(tokenData.token, tokenData.expiresAt);
+      
+      if (this.debug) {
+        console.log('[GrowthKit] Token obtained successfully');
+      }
+      
+      return true;
+    } catch (error) {
+      if (this.debug) {
+        console.error('[GrowthKit] Token request failed:', error);
+      }
+      return false;
+    }
+  }
+
+  private async ensureValidToken(): Promise<boolean> {
+    if (!this.isPublicMode) return true;
+    
+    // Check current token
+    if (this.isTokenValid()) return true;
+    
+    // Try to load from storage
+    const stored = await this.getStoredToken();
+    if (stored) {
+      this.token = stored.token;
+      this.tokenExpiry = stored.expiry;
+      return true;
+    }
+    
+    // Request new token
+    return await this.requestToken();
+  }
+
+  private transformEndpointForPublic(endpoint: string): string {
+    // Map existing endpoints to new public endpoints
+    const endpointMap: Record<string, string> = {
+      '/v1/me': '/public/user',
+      '/v1/track': '/public/track',
+      '/v1/waitlist': '/public/waitlist/join',
+      '/v1/referral/visit': '/public/referral/check',
+      // Keep other endpoints as-is for now (may need mapping later)
+    };
+
+    return endpointMap[endpoint] || endpoint;
+  }
+
   private async request<T = any>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<APIResponse<T>> {
-    const url = `${this.apiUrl}${endpoint}`;
+    // For public mode, ensure we have a valid token
+    if (this.isPublicMode) {
+      const hasToken = await this.ensureValidToken();
+      if (!hasToken) {
+        return {
+          success: false,
+          error: 'Failed to obtain authentication token',
+        };
+      }
+    }
+
+    // Transform endpoint for public mode
+    const finalEndpoint = this.isPublicMode ? this.transformEndpointForPublic(endpoint) : endpoint;
+    const url = `${this.apiUrl}${finalEndpoint}`;
     
     if (this.debug) {
       console.log('[GrowthKit API] Request starting:', {
         endpoint,
+        finalEndpoint,
         url,
         method: options.method || 'GET',
         hasBody: !!options.body,
@@ -77,7 +216,7 @@ export class GrowthKitAPI {
     try {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        ...(this.fingerprint && { 'X-Fingerprint': this.fingerprint }),
+        ...(this.fingerprint && !this.isPublicMode && { 'X-Fingerprint': this.fingerprint }),
       };
 
       // Safely merge additional headers
@@ -86,8 +225,10 @@ export class GrowthKitAPI {
         Object.assign(headers, additionalHeaders);
       }
 
-      // Only add Authorization header in direct API mode
-      if (!this.isProxyMode && this.apiKey) {
+      // Add Authorization header based on mode
+      if (this.isPublicMode && this.token) {
+        headers['Authorization'] = `Bearer ${this.token}`;
+      } else if (!this.isProxyMode && this.apiKey) {
         headers['Authorization'] = `Bearer ${this.apiKey}`;
       }
 

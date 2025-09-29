@@ -1,5 +1,61 @@
 # Changelog
 
+## [0.5.0] - 2025-09-29
+
+### 🚀 **Major Feature: Client-Side Public Key Authentication**
+- **✨ New Public Key Mode**: Enable client-side only integration without requiring backend middleware
+  - Add `publicKey` configuration option for direct API access from browser environments
+  - Automatic JWT token management with secure 30-minute expiration and refresh
+  - localStorage-based token caching with automatic cleanup and rotation
+  - Direct communication with GrowthKit servers bypassing middleware requirements
+
+### 🌟 **Enhanced Developer Experience**
+- **🎯 Simplified Integration**: One-line setup for static sites and SPAs
+  ```tsx
+  const growthkit = useGrowthKit({ publicKey: 'pk_your_key_here' });
+  ```
+- **📱 Universal Compatibility**: Works seamlessly with:
+  - Static sites (GitHub Pages, Netlify, Vercel)
+  - Single Page Applications (React, Vue, vanilla JS)
+  - No-backend environments and serverless deployments
+  - CodePen, JSFiddle, and other online editors
+
+### 🔒 **Security & Performance**
+- **🛡️ Enhanced Security Model**: Public keys are safe for client-side exposure
+  - Fingerprint-scoped tokens prevent cross-user access
+  - Origin validation ensures requests come from authorized domains
+  - Short-lived tokens (30min) with automatic refresh minimize exposure risk
+  - Server-side validation for all credit-earning activities
+- **⚡ Improved Performance**: Direct API calls eliminate middleware overhead
+- **🚦 Smart Rate Limiting**: Optimized limits (50 events/min) for public endpoints
+
+### 🔧 **API Architecture Updates**
+- **🆕 New Public Endpoints**: Secure token-based API endpoints for client-side usage
+  - `/api/public/auth/token` - JWT token generation and management
+  - `/api/public/track` - Activity tracking with enhanced security
+  - `/api/public/user` - User data retrieval with scoped access
+  - `/api/public/referral/check` - Referral processing and validation
+  - `/api/public/waitlist/join` - Waitlist management with credit allocation
+- **🔄 Backward Compatibility**: Existing middleware-based integrations continue working unchanged
+- **🎨 Intelligent Endpoint Mapping**: Automatic routing between middleware and public endpoints
+
+### 🎛️ **Configuration Enhancements**
+- **📋 Three Integration Modes**:
+  1. **Proxy Mode** (existing): `useGrowthKit({})` - Uses middleware with private API keys
+  2. **Public Key Mode** (new): `useGrowthKit({ publicKey })` - Direct client-side integration
+  3. **Direct API Mode** (existing): `useGrowthKit({ apiKey })` - Private key client-side usage
+- **🐛 Enhanced Debug Mode**: Comprehensive logging for token management and API interactions
+- **🌍 Error Handling**: Graceful degradation when tokens can't be obtained
+
+### 📖 **Documentation & Migration**
+- **📚 Complete Migration Guide**: Step-by-step instructions for adopting public key mode
+- **💡 Integration Examples**: React SPA, vanilla JS, Next.js, and static site examples
+- **🔍 Troubleshooting Guide**: Common issues and debugging techniques
+- **⚡ Performance Tips**: Best practices for optimal client-side integration
+
+### 🔄 **Breaking Changes**
+- None - This release is fully backward compatible
+
 ## [0.4.14] - 2025-09-29
 
 ### 🛡️ Resilience & Error Handling

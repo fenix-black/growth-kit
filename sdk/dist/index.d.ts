@@ -4,6 +4,7 @@ import { NextRequest, NextFetchEvent } from 'next/server';
 type GrowthKitTheme = 'light' | 'dark' | 'auto';
 interface GrowthKitConfig {
     apiKey?: string;
+    publicKey?: string;
     apiUrl?: string;
     debug?: boolean;
     language?: 'en' | 'es';
@@ -301,14 +302,24 @@ declare function GrowthKitProvider({ children, config }: GrowthKitProviderProps)
 
 declare class GrowthKitAPI {
     private apiKey;
+    private publicKey;
     private apiUrl;
     private fingerprint;
     private isProxyMode;
+    private isPublicMode;
     private debug;
-    constructor(apiKey?: string, apiUrl?: string, debug?: boolean);
+    private token;
+    private tokenExpiry;
+    constructor(apiKey?: string, publicKey?: string, apiUrl?: string, debug?: boolean);
     private detectApiUrl;
     private detectProxyUrl;
     setFingerprint(fingerprint: string): void;
+    private isTokenValid;
+    private getStoredToken;
+    private storeToken;
+    private requestToken;
+    private ensureValidToken;
+    private transformEndpointForPublic;
     private request;
     getMe(fingerprint: string, claim?: string): Promise<APIResponse<MeResponse>>;
     completeAction(fingerprint: string, action?: string, creditsRequired?: number, usdValue?: number, metadata?: any): Promise<APIResponse<CompleteResponse>>;
@@ -469,6 +480,6 @@ interface LogoProps {
     style?: React.CSSProperties;
 }
 
-declare const VERSION = "0.3.1";
+declare const VERSION = "0.5.0";
 
 export { APIResponse, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GROWTHKIT_LOGO_ICON_BASE64, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, LogoProps, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };
