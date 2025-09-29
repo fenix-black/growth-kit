@@ -1,8 +1,8 @@
 'use client';
 
-import { GrowthKitAccountWidget, useGrowthKit } from '@growthkit/sdk';
+import { GrowthKitAccountWidget, useGrowthKit } from '@fenixblack/growthkit';
 import { useState, useRef, useEffect } from 'react';
-import type { GrowthKitAccountWidgetRef } from '@growthkit/sdk';
+import type { GrowthKitAccountWidgetRef } from '@fenixblack/growthkit';
 
 // Main App Component (now completely GrowthKit-agnostic)
 function MainApp({ 
@@ -166,7 +166,7 @@ function MainApp({
 
       {/* Marketing Message */}
       <div style={styles.hero}>
-        <h2 style={styles.heroTitle}>Welcome to Example App</h2>
+        <h2 style={styles.heroTitle}>Welcome to GrowthKit Example App</h2>
         <p style={styles.heroText}>Each action uses 1 credit. Earn credits through various actions!</p>
         <p style={styles.heroSubtext}>Check your account widget to see your balance and earn more credits</p>
         <p style={{
@@ -176,7 +176,16 @@ function MainApp({
           fontWeight: '600',
           marginTop: '1rem',
         }}>
-          🌍 Try the language toggle! The SDK widgets now support English and Spanish.
+          ✨ Now using Public Key Mode - No backend required! Just one line of config.
+        </p>
+        <p style={{
+          ...styles.heroSubtext,
+          fontSize: '0.9rem',
+          color: '#d946ef',
+          fontWeight: '600',
+          marginTop: '0.5rem',
+        }}>
+          🌍 Try the language toggle! The SDK widgets support English and Spanish.
         </p>
       </div>
 
@@ -344,19 +353,40 @@ function MainApp({
 
       {/* Developer Info */}
       <div style={styles.devInfo}>
-        <h4 style={styles.devTitle}>🎯 GrowthKit Account Widget</h4>
+        <h4 style={styles.devTitle}>🚀 GrowthKit v0.5.0 - Public Key Mode</h4>
         <p style={styles.devText}>
-          Notice the account widget in the top-right corner! It shows your:
+          This example app now uses the new <strong>Public Key Mode</strong> - the simplest way to integrate GrowthKit!
         </p>
         <ul style={styles.devList}>
-          <li>Current credits balance</li>
-          <li>Profile completion status</li>
-          <li>Easy access to earn more credits</li>
-          <li>Automatic flow management (waitlist, credit exhaustion)</li>
+          <li><strong>✨ One-line setup:</strong> Just add your public key to config</li>
+          <li><strong>🌍 Universal:</strong> Works with static sites, SPAs, any JavaScript environment</li>
+          <li><strong>🔒 Secure:</strong> Public keys are safe to expose, tokens are scoped and time-limited</li>
+          <li><strong>⚡ No backend required:</strong> Direct communication with GrowthKit servers</li>
         </ul>
         <p style={styles.devText}>
-          This widget is part of the GrowthKit SDK and can be easily integrated into any app.
+          Notice the account widget in the top-right corner! It automatically handles:
         </p>
+        <ul style={styles.devList}>
+          <li>Token management and refresh</li>
+          <li>Credit balance and profile display</li>
+          <li>Earning credits modal</li>
+          <li>Automatic flow management</li>
+        </ul>
+        <p style={styles.devText}>
+          <strong>Setup:</strong> Get your public key from the GrowthKit dashboard → API Tokens tab, then just:
+        </p>
+        <code style={{
+          display: 'block',
+          background: '#f8f9fa',
+          padding: '0.75rem',
+          borderRadius: '4px',
+          fontSize: '0.85rem',
+          fontFamily: 'Monaco, Menlo, monospace',
+          border: '1px solid #e9ecef',
+          marginTop: '0.5rem',
+        }}>
+          {`const config = { publicKey: 'pk_your_key_here' };`}
+        </code>
       </div>
     </div>
   );
@@ -368,7 +398,10 @@ export default function HomePage() {
   const [currentTheme, setCurrentTheme] = useState<'light' | 'dark' | 'auto'>('auto');
   
   const config = {
-    // No apiKey needed - uses secure proxy mode automatically
+    // Use public key for client-side integration (safe to expose)
+    publicKey: process.env.NEXT_PUBLIC_GROWTHKIT_PUBLIC_KEY!,
+    // Default to production URL, can be overridden via environment variable
+    apiUrl: process.env.NEXT_PUBLIC_GROWTHKIT_API_URL || 'https://growth.fenixblack.ai/api',
     debug: process.env.NODE_ENV === 'development',
     language: currentLanguage,
     theme: currentTheme,

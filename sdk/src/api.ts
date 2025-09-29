@@ -264,13 +264,19 @@ export class GrowthKitAPI {
         if (this.debug) {
           console.error('[GrowthKit API] Request failed with error response:', {
             endpoint,
+            finalEndpoint,
             status: response.status,
             statusText: response.statusText,
             errorData: data,
             timestamp: new Date().toISOString()
           });
+          
+          // Special handling for common deployment issues
+          if (response.status === 405) {
+            console.error('[GrowthKit] 405 Method Not Allowed - This usually means the server needs to be redeployed with the latest code');
+          }
         }
-        throw new Error(data.message || data.error || 'Request failed');
+        throw new Error(data.message || data.error || `Request failed (${response.status})`);
       }
 
       if (this.debug) {
@@ -304,12 +310,15 @@ export class GrowthKitAPI {
   }
 
   async getMe(fingerprint: string, claim?: string): Promise<APIResponse<MeResponse>> {
+    // In public mode, we don't need to send fingerprint (it's in the token)
+    // But we still need to send it for other modes
+    const bodyData = this.isPublicMode 
+      ? { ...(claim && { claim }) }  // Only send claim if present
+      : { fingerprint, ...(claim && { claim }) }; // Send fingerprint for other modes
+
     return this.request<MeResponse>('/v1/me', {
       method: 'POST',
-      body: JSON.stringify({ 
-        fingerprint,
-        ...(claim && { claim })
-      }),
+      body: JSON.stringify(bodyData),
     });
   }
 

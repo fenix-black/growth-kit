@@ -79,6 +79,10 @@ export function useGrowthKit(): GrowthKitHook {
       // The /v1/me endpoint will apply referral credits if the claim is valid
       const response = await apiRef.current.getMe(fingerprint, refClaim || undefined);
       
+      if (configRef.current.debug) {
+        console.log('[GrowthKit] API Response Data:', response);
+      }
+      
       if (!response.success) {
         // Log detailed error information for debugging
         if (configRef.current.debug) {
@@ -123,6 +127,17 @@ export function useGrowthKit(): GrowthKitHook {
       }
 
       const data = response.data!;
+      
+      if (configRef.current.debug) {
+        console.log('[GrowthKit] Raw API response structure:', {
+          fullResponse: response,
+          data: data,
+          dataKeys: Object.keys(data || {}),
+          nameValue: data.name,
+          emailValue: data.email,
+          hasClaimedNameValue: data.hasClaimedName,
+        });
+      }
       
       // Clean up URL by removing the ref parameter
       if (refClaim && typeof window !== 'undefined' && window.history?.replaceState) {
