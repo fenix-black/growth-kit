@@ -34,63 +34,82 @@ export async function POST(request: NextRequest) {
     // TODO: Handle referral claims in public mode if needed
     // For now, we'll skip claim processing to keep it simple
 
-    // Get user data for this fingerprint
-    const [credits, lead, referrals] = await Promise.all([
-      // Get total credits
-      prisma.credit.aggregate({
-        where: { fingerprintId: fingerprint.id },
-        _sum: { amount: true },
+    // Get user data for this fingerprint - match original /v1/me format exactly
+    const [fingerprintRecord, lead, usage] = await Promise.all([
+      // Get fingerprint with credits and usage (matches original)
+      prisma.fingerprint.findUnique({
+        where: { id: fingerprint.id },
+        include: {
+          credits: {
+            orderBy: { createdAt: 'desc' },
+          },
+          usage: {
+            orderBy: { createdAt: 'desc' },
+          },
+        },
       }),
       
       // Get lead information if exists
       prisma.lead.findFirst({
         where: { fingerprintId: fingerprint.id },
         select: {
-          id: true,
           name: true,
           email: true,
           emailVerified: true,
-          createdAt: true,
         },
       }),
       
-      // Get referral stats
-      prisma.referral.findMany({
-        where: { referrerId: fingerprint.id },
-        select: {
-          id: true,
-          claimedAt: true,
-          referred: {
-            select: {
-              id: true,
-            },
-          },
-        },
+      // Get usage count
+      prisma.usage.count({
+        where: { fingerprintId: fingerprint.id },
       }),
     ]);
 
-    const totalCredits = credits._sum.amount || 0;
-    const totalReferrals = referrals.length;
-    const claimedReferrals = referrals.filter(r => r.claimedAt && r.referred).length;
+    if (!fingerprintRecord) {
+      return corsErrors.notFound(origin);
+    }
 
-    // Get referral code for this fingerprint
-    const referralCode = fingerprint.fingerprint; // Using fingerprint as referral code
+    // Calculate total credits
+    const totalCredits = fingerprintRecord.credits.reduce(
+      (sum, credit) => sum + credit.amount,
+      0
+    );
 
-    const userData = {
-      fingerprintId: fingerprint.id,
-      credits: totalCredits,
-      referrals: {
-        total: totalReferrals,
-        claimed: claimedReferrals,
-        pending: totalReferrals - claimedReferrals,
+    // Get app settings for creditsPaused
+    const appSettings = await prisma.app.findUnique({
+      where: { id: app.id },
+      select: {
+        creditsPaused: true,
+        policyJson: true,
       },
-      referralCode,
-      profile: lead ? {
-        name: lead.name,
-        email: lead.email,
-        emailVerified: lead.emailVerified,
-        joinedAt: lead.createdAt,
-      } : null,
+    });
+
+    // Build response to match original /v1/me format exactly
+    const userData = {
+      fingerprint: fingerprintRecord.fingerprint,
+      referralCode: fingerprintRecord.referralCode,
+      credits: totalCredits,
+      usage: usage,
+      creditsPaused: appSettings?.creditsPaused || false,
+      // User profile data (flat structure to match original)
+      name: lead?.name || null,
+      email: lead?.email || null,
+      hasClaimedName: !!lead?.name,
+      hasClaimedEmail: !!lead?.email,
+      hasVerifiedEmail: lead?.emailVerified || false,
+      // Use actual policy from app or defaults
+      policy: (appSettings?.policyJson as any) || {
+        referralCredits: 5,
+        referredCredits: 3,
+        nameClaimCredits: 2,
+        emailClaimCredits: 2,
+        emailVerifyCredits: 5,
+        dailyReferralCap: 10,
+        actions: {
+          default: { creditsRequired: 1 },
+          generate: { creditsRequired: 1 },
+        }
+      },
     };
 
     return withCorsHeaders(
