@@ -24,10 +24,10 @@ export interface MiniAppExample {
 // Real mini-app examples using GrowthKit
 export const miniAppExamples: MiniAppExample[] = [
   {
-    id: 'saas-productivity',
-    name: 'TaskFlow Pro',
-    description: 'Team productivity suite with advanced project management and collaboration features',
-    category: 'SaaS & Productivity',
+    id: 'restore-photos',
+    name: 'Restore Photos',
+    description: 'Breathe new life into your old photographs. Correct, restore, and animate your memories in a few clicks.',
+    category: 'SaaS & AI',
     metrics: {
       userGrowth: '300%',
       viralCoefficient: '0.45',
@@ -35,12 +35,12 @@ export const miniAppExamples: MiniAppExample[] = [
       creditsEarned: '15K',
       timeframe: '3 months'
     },
-    screenshot: '/landing/examples/taskflow-pro-placeholder.svg',
-    tags: ['SaaS', 'Productivity', 'Teams', 'Collaboration'],
+    screenshot: '/landing/examples/restore-demo.jpg',
+    tags: ['SaaS', 'AI', 'Photography'],
     testimonial: {
       quote: "GrowthKit transformed our user acquisition. The referral system alone increased our signups by 300% in just 3 months.",
-      author: "Sarah Chen",
-      role: "Co-founder, TaskFlow Pro"
+      author: "Pablo Schaffner",
+      role: "Co-founder, Restore Photos"
     }
   },
   {
