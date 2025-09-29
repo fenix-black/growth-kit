@@ -53,11 +53,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find the referrer by their referral code (fingerprint)
+    // Find the referrer by their referral code
     const referrer = await prisma.fingerprint.findFirst({
       where: {
         appId: app.id,
-        fingerprint: referralCode,
+        referralCode: referralCode,
       },
     });
 

@@ -95,14 +95,14 @@ export async function POST(request: NextRequest) {
         await sendInvitationEmail(app, entry.email, {
           invitationCode,
           invitationLink: app.domain ? 
-            `https://${app.domain}/invite/${invitationCode}` : 
-            `https://your-app.com/invite/${invitationCode}`,
+            `https://${app.domain}/?invitation=${invitationCode}` : 
+            `https://your-app.com/?invitation=${invitationCode}`,
           masterCode: appWithMaster.masterReferralCode || '',
           credits: invitationCredits,
           expiresAt: codeExpiresAt,
           referralLink: app.domain ? 
-            `https://${app.domain}/r/${invitationCode}` : 
-            `https://your-app.com/r/${invitationCode}`,
+            `https://${app.domain}/?ref=${invitationCode}` : 
+            `https://your-app.com/?ref=${invitationCode}`,
         });
         
         console.log(`Invitation email sent to ${entry.email} with code ${invitationCode}`);

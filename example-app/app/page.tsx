@@ -353,7 +353,7 @@ function MainApp({
 
       {/* Developer Info */}
       <div style={styles.devInfo}>
-        <h4 style={styles.devTitle}>🚀 GrowthKit v0.5.0 - Public Key Mode</h4>
+        <h4 style={styles.devTitle}>🚀 GrowthKit v0.5.1 - Public Key Mode</h4>
         <p style={styles.devText}>
           This example app now uses the new <strong>Public Key Mode</strong> - the simplest way to integrate GrowthKit!
         </p>

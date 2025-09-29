@@ -67,32 +67,69 @@ export function useGrowthKit(): GrowthKitHook {
         console.log('[GrowthKit] Fingerprint obtained:', fingerprint.substring(0, 10) + '...');
       }
 
-      // Check for referral claim in URL parameters
+      // Check for URL parameters
       const urlParams = new URLSearchParams(window.location.search);
       const refClaim = urlParams.get('ref');
+      const invitation = urlParams.get('invitation');
+      const verifyToken = urlParams.get('verify');
       
-      if (configRef.current.debug && refClaim) {
-        console.log('[GrowthKit] Referral claim found in URL:', refClaim);
+      if (configRef.current.debug) {
+        if (refClaim) console.log('[GrowthKit] Referral claim found in URL:', refClaim);
+        if (invitation) console.log('[GrowthKit] Invitation code found in URL:', invitation);
+        if (verifyToken) console.log('[GrowthKit] Verification token found in URL:', verifyToken);
       }
 
-      // Process referral claim first if present
+      // Process parameters
       if (refClaim) {
         try {
           const referralResponse = await apiRef.current.checkReferral(fingerprint, refClaim);
           if (configRef.current.debug) {
             console.log('[GrowthKit] Referral processed:', referralResponse);
           }
-          
-          // Clean up URL after processing referral
-          if (typeof window !== 'undefined' && window.history?.replaceState) {
-            const cleanUrl = new URL(window.location.href);
-            cleanUrl.searchParams.delete('ref');
-            window.history.replaceState({}, '', cleanUrl.toString());
-          }
         } catch (error) {
           if (configRef.current.debug) {
             console.log('[GrowthKit] Referral processing failed:', error);
           }
+        }
+      }
+
+      if (invitation) {
+        try {
+          // Process invitation code (different from referral)
+          const invitationResponse = await apiRef.current.redeemInvitation(fingerprint, invitation);
+          if (configRef.current.debug) {
+            console.log('[GrowthKit] Invitation processed:', invitationResponse);
+          }
+        } catch (error) {
+          if (configRef.current.debug) {
+            console.log('[GrowthKit] Invitation processing failed:', error);
+          }
+        }
+      }
+
+      if (verifyToken) {
+        try {
+          const verifyResponse = await apiRef.current.verifyEmail(fingerprint, verifyToken);
+          if (configRef.current.debug) {
+            console.log('[GrowthKit] Email verification processed:', verifyResponse);
+          }
+        } catch (error) {
+          if (configRef.current.debug) {
+            console.log('[GrowthKit] Email verification failed:', error);
+          }
+        }
+      }
+
+      // Clean up URL after processing
+      if (typeof window !== 'undefined' && window.history?.replaceState) {
+        const cleanUrl = new URL(window.location.href);
+        if (refClaim) cleanUrl.searchParams.delete('ref');
+        if (invitation) cleanUrl.searchParams.delete('invitation');
+        if (verifyToken) cleanUrl.searchParams.delete('verify');
+        
+        // Only update if we actually removed something
+        if (refClaim || invitation || verifyToken) {
+          window.history.replaceState({}, '', cleanUrl.toString());
         }
       }
       

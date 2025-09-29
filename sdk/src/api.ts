@@ -177,6 +177,8 @@ export class GrowthKitAPI {
       '/v1/waitlist': '/public/waitlist/join',
       '/v1/referral/visit': '/public/referral/check',
       '/v1/referral/check': '/public/referral/check',
+      '/v1/invitation/redeem': '/public/invitation/redeem',
+      '/v1/verify/email': '/public/verify/email',
       // Keep other endpoints as-is for now (may need mapping later)
     };
 
@@ -423,6 +425,19 @@ export class GrowthKitAPI {
       body: JSON.stringify({
         fingerprint,
         referralCode,
+      }),
+    });
+  }
+
+  async redeemInvitation(
+    fingerprint: string,
+    invitationCode: string
+  ): Promise<APIResponse<any>> {
+    return this.request('/v1/invitation/redeem', {
+      method: 'POST',
+      body: JSON.stringify({
+        fingerprint,
+        invitationCode,
       }),
     });
   }

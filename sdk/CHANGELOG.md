@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.5.1] - 2025-09-29
+
+### 🔧 **Universal Link Processing Fixes**
+- **✅ Fixed Referral Links**: Now use `?ref=code` format for universal compatibility
+  - Updated `getReferralLink()` to use `window.location.origin/?ref=${referralCode}`
+  - Works with static sites, SPAs, and any environment (no middleware required)
+  - Automatic URL cleanup after processing referral parameters
+  
+### 🎯 **Invitation System Improvements**
+- **✅ Proper Invitation Processing**: Created dedicated `/public/invitation/redeem` endpoint
+  - Separate from referral processing with invitation-specific logic
+  - Validates invitation codes against waitlist table
+  - Updates waitlist status to ACCEPTED and marks email as verified
+  - Awards invitation credits (not referral credits)
+  - Handles expiration and prevents reuse correctly
+- **✅ Universal Invitation Links**: Admin now generates `?invitation=code` format
+  - Email invitations work with any app type
+  - No middleware dependencies for invitation redemption
+
+### 📧 **Email Verification Updates**
+- **✅ Universal Verification Links**: Updated to use `?verify=token` format
+  - Email verification links work with static sites and SPAs
+  - Created `/public/verify/email` endpoint for client-side verification
+  - Automatic token cleanup and credit allocation
+
+### 🎮 **Enhanced Widget Processing**
+- **✅ Smart Parameter Detection**: Widget automatically handles multiple URL parameters
+  - `?ref=code` → Processes referrals via `/public/referral/check`
+  - `?invitation=code` → Processes invitations via `/public/invitation/redeem`
+  - `?verify=token` → Processes email verification via `/public/verify/email`
+- **✅ Clean URL Management**: Automatically removes processed parameters from URL
+- **✅ Enhanced Debug Logging**: Better visibility into parameter processing
+
+### 🌍 **Universal Compatibility**
+- **✅ No Middleware Dependencies**: All flows work without backend routing
+- **✅ Static Site Ready**: Perfect for GitHub Pages, Netlify, Vercel static deployments
+- **✅ SPA Compatible**: Works with React, Vue, Angular single-page applications
+
+### 🔄 **Breaking Changes**
+- None - All changes maintain backward compatibility with existing middleware-based flows
+
 ## [0.5.0] - 2025-09-29
 
 ### 🚀 **Major Feature: Client-Side Public Key Authentication**

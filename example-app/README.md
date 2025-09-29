@@ -1,6 +1,6 @@
 # GrowthKit Example App - Public Key Mode
 
-This is a comprehensive Next.js example showcasing **GrowthKit v0.5.0** with the new **Public Key Mode** - the simplest way to integrate GrowthKit into any application.
+This is a comprehensive Next.js example showcasing **GrowthKit v0.5.1** with the new **Public Key Mode** - the simplest way to integrate GrowthKit into any application.
 
 ## ✨ Key Features
 
@@ -145,10 +145,16 @@ const config = {
 - **🎯 Admin Dashboard**: Get your public key from API Tokens tab
 - **🆘 Support**: Check browser console with `debug: true` enabled
 
-## 🎉 What's New in v0.5.0
+## 🎉 What's New in v0.5.1
 
+- ✨ **Universal Links**: Referrals, invitations, and verification all use query parameters
+- 🌍 **No Middleware Needed**: All flows work with static sites and SPAs
+- 🔧 **Fixed Processing**: Proper endpoints for referrals vs invitations vs verification
+- ⚡ **Auto URL Cleanup**: Widget removes processed parameters automatically
+- 📱 **Enhanced Debug**: Better logging for all parameter processing
+
+### Previous v0.5.0 Features:
 - ✨ **Public Key Mode**: Client-side only integration
-- 🌍 **Universal Compatibility**: Works everywhere JavaScript runs
 - 🔒 **Enhanced Security**: Safe public keys + JWT tokens
 - ⚡ **Better Performance**: Direct API calls
 - 📱 **Improved DX**: 10-second setup vs 30+ minutes

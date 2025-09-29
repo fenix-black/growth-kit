@@ -292,8 +292,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Send verification email
-    const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}`;
+    // Send verification email with query parameter (no middleware needed)
+    const verificationLink = `https://${authContext.app.domain}/?verify=${verifyToken}`;
     
     try {
       await sendVerificationEmail(authContext.app, normalizedEmail, {
