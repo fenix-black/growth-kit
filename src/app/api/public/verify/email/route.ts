@@ -77,7 +77,11 @@ export async function POST(request: NextRequest) {
 
     if (!appSettings?.creditsPaused) {
       const policy = appSettings?.policyJson as any;
-      creditsAwarded = policy?.emailVerifyCredits || 5;
+      creditsAwarded = policy?.emailVerifyCredits;
+      
+      if (!creditsAwarded) {
+        return corsErrors.serverError('App policy not configured properly', origin);
+      }
 
       await prisma.credit.create({
         data: {

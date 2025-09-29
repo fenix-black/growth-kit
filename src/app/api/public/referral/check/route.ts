@@ -70,6 +70,23 @@ export async function POST(request: NextRequest) {
       return corsErrors.badRequest('Cannot refer yourself', origin);
     }
 
+    // Get app policy for credit amounts
+    const appSettings = await prisma.app.findUnique({
+      where: { id: app.id },
+      select: {
+        policyJson: true,
+        creditsPaused: true,
+      },
+    });
+
+    const policy = appSettings?.policyJson as any;
+    const referralCredits = policy?.referralCredits;
+    const referredCredits = policy?.referredCredits;
+
+    if (!referralCredits || !referredCredits) {
+      return corsErrors.serverError('App policy not configured properly', origin);
+    }
+
     // Create the referral relationship
     const referral = await prisma.referral.create({
       data: {
@@ -82,20 +99,35 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Award credits to the referrer (default 10 credits, but could be configurable)
-    const referralCredits = app.id ? 10 : 10; // TODO: Make this configurable per app
-    
-    await prisma.credit.create({
-      data: {
-        fingerprintId: referrer.id,
-        amount: referralCredits,
-        reason: 'referral_bonus',
-        metadata: {
-          referredFingerprintId: fingerprint.id,
-          referralId: referral.id,
+    // Award credits to BOTH users (if credits not paused)
+    if (!appSettings?.creditsPaused) {
+      // Award credits to the referrer
+      await prisma.credit.create({
+        data: {
+          fingerprintId: referrer.id,
+          amount: referralCredits,
+          reason: 'referral',
+          metadata: {
+            referredId: fingerprint.id,
+            referralId: referral.id,
+          },
         },
-      },
-    });
+      });
+
+      // Award credits to the referred user
+      await prisma.credit.create({
+        data: {
+          fingerprintId: fingerprint.id,
+          amount: referredCredits,
+          reason: 'referral',
+          metadata: {
+            referrerId: referrer.id,
+            referralCode: referralCode,
+            referralId: referral.id,
+          },
+        },
+      });
+    }
 
     return withCorsHeaders(
       successResponse({

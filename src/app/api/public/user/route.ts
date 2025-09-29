@@ -97,19 +97,8 @@ export async function POST(request: NextRequest) {
       hasClaimedName: !!lead?.name,
       hasClaimedEmail: !!lead?.email,
       hasVerifiedEmail: lead?.emailVerified || false,
-      // Use actual policy from app or defaults
-      policy: (appSettings?.policyJson as any) || {
-        referralCredits: 5,
-        referredCredits: 3,
-        nameClaimCredits: 2,
-        emailClaimCredits: 2,
-        emailVerifyCredits: 5,
-        dailyReferralCap: 10,
-        actions: {
-          default: { creditsRequired: 1 },
-          generate: { creditsRequired: 1 },
-        }
-      },
+      // Use actual policy from app
+      policy: appSettings?.policyJson,
     };
 
     return withCorsHeaders(

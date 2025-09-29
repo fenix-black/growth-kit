@@ -264,6 +264,30 @@ export class GrowthKitAPI {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle 401 Unauthorized in public mode - token might be invalid
+        if (response.status === 401 && this.isPublicMode) {
+          if (this.debug) {
+            console.log('[GrowthKit] 401 Unauthorized - Token may be invalid, clearing and retrying...');
+          }
+          
+          // Clear invalid token
+          this.token = null;
+          this.tokenExpiry = null;
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('growthkit_token');
+          }
+          
+          // Retry once with a fresh token
+          const hasNewToken = await this.ensureValidToken();
+          if (hasNewToken) {
+            if (this.debug) {
+              console.log('[GrowthKit] Retrying request with new token...');
+            }
+            // Recursive retry - but prevent infinite loop
+            return this.request(endpoint, { ...options, headers: { ...options.headers, 'X-Retry': 'true' } });
+          }
+        }
+        
         if (this.debug) {
           console.error('[GrowthKit API] Request failed with error response:', {
             endpoint,

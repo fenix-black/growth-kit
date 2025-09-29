@@ -113,23 +113,39 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Award credits for joining waitlist
-    await prisma.credit.create({
-      data: {
-        fingerprintId: fingerprint.id,
-        amount: 5, // TODO: Make this configurable per app
-        reason: 'waitlist_join',
-        metadata: {
-          waitlistId: waitlistEntry.id,
-        },
+    // Award credits for joining waitlist (if configured)
+    let creditsAwarded = 0;
+    const appSettings = await prisma.app.findUnique({
+      where: { id: app.id },
+      select: {
+        policyJson: true,
+        creditsPaused: true,
       },
     });
+
+    if (!appSettings?.creditsPaused) {
+      const policy = appSettings?.policyJson as any;
+      creditsAwarded = policy?.waitlistJoinCredits || 0;
+
+      if (creditsAwarded > 0) {
+        await prisma.credit.create({
+          data: {
+            fingerprintId: fingerprint.id,
+            amount: creditsAwarded,
+            reason: 'waitlist_join',
+            metadata: {
+              waitlistId: waitlistEntry.id,
+            },
+          },
+        });
+      }
+    }
 
     return withCorsHeaders(
       successResponse({
         joinedWaitlist: true,
         position: nextPosition,
-        creditsAwarded: 5,
+        creditsAwarded,
         message: appWithWaitlist.waitlistMessage || 'Successfully joined the waitlist!',
       }),
       origin,
