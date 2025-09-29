@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.5.2] - 2025-09-29
+
+### 🐛 **Critical Bug Fixes**
+- **✅ Fixed Referral Code Generation**: New fingerprints now automatically receive a referral code
+  - Resolved issue where new users had `referralCode: null`
+  - Enables sharing functionality for all users from first visit
+  
+- **✅ Fixed Referral Credit Allocation**: Both users now receive credits correctly
+  - Referrer receives credits based on app policy (`referralCredits`)
+  - Referred user receives welcome credits based on app policy (`referredCredits`)
+  - Fixed incorrect database field query (was searching `fingerprint` instead of `referralCode`)
+
+- **✅ Fixed Profile Management in Public Mode**: Added missing public endpoints
+  - Created `/public/claim/name` for name claiming
+  - Created `/public/claim/email` for email claiming with verification
+  - SDK now properly routes claim requests in public mode
+
+- **✅ Automatic Token Recovery**: Enhanced resilience for JWT token mismatches
+  - SDK automatically detects 401 errors from invalid tokens
+  - Clears invalid tokens and requests fresh ones
+  - Retries failed requests with new token
+  - Handles JWT_SECRET changes on server without manual intervention
+
+### 🔧 **Technical Improvements**
+- **✅ Removed Hardcoded Defaults**: All public endpoints now use app policy configuration
+  - Referral credits from `policyJson.referralCredits`
+  - Invitation credits from `policyJson.invitationCredits`
+  - Name/email credits from policy settings
+  - Returns proper error if policy not configured
+  
+- **✅ Enhanced Error Messages**: Better debugging for deployment issues
+  - Clear messages for 405 Method Not Allowed errors
+  - Specific logging for token refresh attempts
+  - Improved error context in debug mode
+
 ## [0.5.1] - 2025-09-29
 
 ### 🔧 **Universal Link Processing Fixes**
