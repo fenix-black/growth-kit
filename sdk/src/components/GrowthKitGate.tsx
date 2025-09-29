@@ -17,6 +17,7 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
   const { 
     loading, 
     initialized, 
+    error,
     shouldShowWaitlist,
     credits,
     waitlistEnabled 
@@ -83,6 +84,12 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
         )}
       </>
     );
+  }
+
+  // Handle error state: Allow children to render but log the error
+  if (error && initialized) {
+    console.warn('[GrowthKit] Gate is in error state but allowing content to load:', error.message);
+    // Continue to render children - don't block the app due to GrowthKit errors
   }
 
   // Show waitlist if required

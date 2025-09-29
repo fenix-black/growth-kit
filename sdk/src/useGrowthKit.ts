@@ -43,8 +43,8 @@ export function useGrowthKit(): GrowthKitHook {
   useEffect(() => {
     // In proxy mode, no API key is required (it's handled server-side)
     // In direct mode, API key is required
-    apiRef.current = new GrowthKitAPI(config.apiKey, config.apiUrl);
-  }, [config.apiKey, config.apiUrl]);
+    apiRef.current = new GrowthKitAPI(config.apiKey, config.apiUrl, config.debug);
+  }, [config.apiKey, config.apiUrl, config.debug]);
 
   // Initialize fingerprint and fetch user data
   const initialize = useCallback(async () => {
@@ -54,20 +54,71 @@ export function useGrowthKit(): GrowthKitHook {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
+      if (configRef.current.debug) {
+        console.log('[GrowthKit] Starting initialization...');
+      }
+
       // Get browser fingerprint
       const fingerprint = await getFingerprint();
       apiRef.current.setFingerprint(fingerprint);
 
+      if (configRef.current.debug) {
+        console.log('[GrowthKit] Fingerprint obtained:', fingerprint.substring(0, 10) + '...');
+      }
+
       // Check for referral claim in URL parameters
       const urlParams = new URLSearchParams(window.location.search);
       const refClaim = urlParams.get('ref');
+      
+      if (configRef.current.debug && refClaim) {
+        console.log('[GrowthKit] Referral claim found in URL:', refClaim);
+      }
       
       // Fetch user data, passing the claim if present
       // The /v1/me endpoint will apply referral credits if the claim is valid
       const response = await apiRef.current.getMe(fingerprint, refClaim || undefined);
       
       if (!response.success) {
-        throw new Error(response.error || 'Failed to fetch user data');
+        // Log detailed error information for debugging
+        if (configRef.current.debug) {
+          console.error('[GrowthKit] API Error Details:', {
+            endpoint: '/v1/me',
+            fingerprint: fingerprint.substring(0, 10) + '...',
+            claim: refClaim,
+            error: response.error,
+            timestamp: new Date().toISOString(),
+            apiUrl: apiRef.current ? 'set' : 'not set'
+          });
+        }
+
+        // Graceful degradation: Set minimal state instead of throwing
+        console.warn('[GrowthKit] Failed to fetch user data, using fallback state:', response.error || 'Unknown error');
+        
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          initialized: true,
+          error: new Error(response.error || 'Failed to fetch user data'),
+          fingerprint,
+          // Set minimal default state
+          credits: 0,
+          usage: 0,
+          referralCode: null,
+          creditsPaused: false,
+          policy: null,
+          name: null,
+          email: null,
+          hasClaimedName: false,
+          hasClaimedEmail: false,
+          hasVerifiedEmail: false,
+          waitlistEnabled: false,
+          waitlistStatus: 'none',
+          waitlistPosition: null,
+          waitlistMessage: undefined,
+          shouldShowWaitlist: false,
+        }));
+        
+        return; // Exit gracefully without throwing
       }
 
       const data = response.data!;
@@ -122,18 +173,54 @@ export function useGrowthKit(): GrowthKitHook {
       });
 
       if (configRef.current.debug) {
-        console.log('GrowthKit initialized:', data);
+        console.log('[GrowthKit] Successfully initialized with data:', {
+          credits: data.credits,
+          hasName: !!data.name,
+          hasEmail: !!data.email,
+          verified: data.hasVerifiedEmail,
+          waitlistEnabled: waitlistEnabled,
+          waitlistStatus: waitlistStatus,
+          referralCode: data.referralCode?.substring(0, 8) + '...' || 'none'
+        });
       }
     } catch (error) {
+      // Enhanced error logging for debugging
+      if (configRef.current.debug) {
+        console.error('[GrowthKit] Initialization Error Details:', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          timestamp: new Date().toISOString(),
+          fingerprint: state.fingerprint?.substring(0, 10) + '...' || 'not set',
+          apiUrl: apiRef.current ? 'configured' : 'not configured',
+          initAttempted: initRef.current
+        });
+      }
+
+      // Graceful degradation: Set error state but allow widget to continue in minimal mode
+      console.warn('[GrowthKit] Initialization failed, widget will run in minimal mode:', error instanceof Error ? error.message : 'Unknown error');
+      
       setState(prev => ({
         ...prev,
         loading: false,
+        initialized: true, // Still mark as initialized to allow minimal functionality
         error: error instanceof Error ? error : new Error('Unknown error'),
+        // Set minimal default state
+        credits: 0,
+        usage: 0,
+        referralCode: null,
+        creditsPaused: false,
+        policy: null,
+        name: null,
+        email: null,
+        hasClaimedName: false,
+        hasClaimedEmail: false,
+        hasVerifiedEmail: false,
+        waitlistEnabled: false,
+        waitlistStatus: 'none',
+        waitlistPosition: null,
+        waitlistMessage: undefined,
+        shouldShowWaitlist: false,
       }));
-      
-      if (configRef.current.debug) {
-        console.error('GrowthKit initialization error:', error);
-      }
     }
   }, []); // No deps to avoid re-creation
 
@@ -144,9 +231,18 @@ export function useGrowthKit(): GrowthKitHook {
 
   // Refresh user data
   const refresh = useCallback(async () => {
-    if (!apiRef.current || !state.fingerprint) return;
+    if (!apiRef.current || !state.fingerprint) {
+      if (configRef.current.debug) {
+        console.warn('[GrowthKit] Refresh skipped: API or fingerprint not available');
+      }
+      return;
+    }
 
     try {
+      if (configRef.current.debug) {
+        console.log('[GrowthKit] Refreshing user data...');
+      }
+
       const response = await apiRef.current.getMe(state.fingerprint);
       
       if (response.success && response.data) {
@@ -182,9 +278,33 @@ export function useGrowthKit(): GrowthKitHook {
           waitlistMessage,
           shouldShowWaitlist,
         }));
+
+        if (configRef.current.debug) {
+          console.log('[GrowthKit] Refresh successful, credits:', data.credits);
+        }
+      } else {
+        // Log detailed error information for debugging
+        if (configRef.current.debug) {
+          console.error('[GrowthKit] Refresh API Error Details:', {
+            endpoint: '/v1/me',
+            fingerprint: state.fingerprint.substring(0, 10) + '...',
+            error: response.error,
+            timestamp: new Date().toISOString()
+          });
+        }
+        console.warn('[GrowthKit] Refresh failed:', response.error || 'Unknown error');
       }
     } catch (error) {
-      console.error('Refresh failed:', error);
+      // Enhanced error logging for debugging
+      if (configRef.current.debug) {
+        console.error('[GrowthKit] Refresh Error Details:', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          fingerprint: state.fingerprint.substring(0, 10) + '...',
+          timestamp: new Date().toISOString()
+        });
+      }
+      console.warn('[GrowthKit] Refresh failed:', error instanceof Error ? error.message : 'Unknown error');
     }
   }, [state.fingerprint]);
 
@@ -193,7 +313,12 @@ export function useGrowthKit(): GrowthKitHook {
     action: string = 'default',
     optionsOrMetadata?: CompleteActionOptions | any
   ): Promise<boolean> => {
-    if (!apiRef.current || !state.fingerprint) return false;
+    if (!apiRef.current || !state.fingerprint) {
+      if (configRef.current.debug) {
+        console.warn('[GrowthKit] completeAction skipped: API or fingerprint not available');
+      }
+      return false;
+    }
 
     // Handle both old (metadata) and new (options) signatures
     let creditsRequired: number | undefined;
@@ -213,6 +338,15 @@ export function useGrowthKit(): GrowthKitHook {
     }
 
     try {
+      if (configRef.current.debug) {
+        console.log('[GrowthKit] Completing action:', {
+          action,
+          creditsRequired,
+          usdValue,
+          hasMetadata: !!metadata
+        });
+      }
+
       const response = await apiRef.current.completeAction(
         state.fingerprint,
         action,
@@ -225,11 +359,33 @@ export function useGrowthKit(): GrowthKitHook {
         // Refresh from server to get the latest state for all components
         await refresh();
         
+        if (configRef.current.debug) {
+          console.log('[GrowthKit] Action completed successfully:', action);
+        }
+        
         return true;
+      } else {
+        if (configRef.current.debug) {
+          console.error('[GrowthKit] Action API Error Details:', {
+            action,
+            endpoint: '/v1/complete',
+            error: response.error,
+            timestamp: new Date().toISOString()
+          });
+        }
+        console.warn('[GrowthKit] Action failed:', response.error || 'Unknown error');
+        return false;
       }
-      return false;
     } catch (error) {
-      console.error('Complete action failed:', error);
+      if (configRef.current.debug) {
+        console.error('[GrowthKit] Action Error Details:', {
+          action,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          timestamp: new Date().toISOString()
+        });
+      }
+      console.warn('[GrowthKit] Complete action failed:', error instanceof Error ? error.message : 'Unknown error');
       return false;
     }
   }, [state.fingerprint]);

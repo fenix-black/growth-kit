@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.4.14] - 2025-09-29
+
+### 🛡️ Resilience & Error Handling
+- **Enhanced SDK Error Resilience**: Widget no longer crashes client apps on API failures
+  - Graceful handling of 404 errors and network timeouts on `/v1/me` and other endpoints
+  - Widget continues to function in minimal mode when API calls fail
+  - Host web applications load normally even when GrowthKit API is unavailable
+  - Non-blocking error states with retry functionality for transient failures
+
+### 🐛 Debug & Monitoring
+- **Comprehensive Debug Logging**: Enhanced error tracing when `debug: true` is enabled
+  - Detailed API request/response logging with timestamps and performance metrics
+  - Structured error logging with stack traces and context information  
+  - Enhanced debugging for initialization, refresh, and action failures
+  - API layer logging with request timing and detailed error responses
+- **Production-Safe Warnings**: Clear console warnings for debugging without cluttering production logs
+
+### 🎨 User Experience
+- **Error State UI**: Professional error handling with user-friendly messaging
+  - Minimal error display for slim widgets ("Offline")
+  - Full error state with retry button for standard widgets  
+  - Bilingual error messages (English/Spanish) with proper internationalization
+  - Graceful degradation maintains core functionality during outages
+
+### 🔧 Technical Improvements
+- **Graceful Degradation**: SDK sets sensible defaults when API calls fail instead of throwing exceptions
+- **Enhanced Error Classification**: Proper handling of fatal vs non-fatal errors
+- **Improved State Management**: Error states properly managed alongside loading and initialized states
+- **API Layer Enhancements**: Debug mode now includes comprehensive request/response tracing
+
 ## [0.4.3] - 2025-09-28
 
 ### ✨ Features

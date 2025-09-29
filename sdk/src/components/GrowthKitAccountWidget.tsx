@@ -76,6 +76,7 @@ const AccountWidgetInternal = forwardRef<
   const {
     loading,
     initialized,
+    error,
     credits,
     creditsPaused,
     shouldShowWaitlist,
@@ -187,6 +188,58 @@ const AccountWidgetInternal = forwardRef<
             {loadingWidget}
           </div>
         ) : loadingWidget}
+      </>
+    );
+  }
+
+  // Show error state with minimal widget (when initialized but with error)
+  if (error && initialized) {
+    const errorWidget = (
+      <div style={{ ...getWidgetStyles(themeColors, slim), ...style }} className={className}>
+        <div style={styles.errorState}>
+          <div style={{
+            ...styles.errorIcon,
+            backgroundColor: themeColors.warning + '20',
+            color: themeColors.warning,
+          }}>⚠</div>
+          <span style={{ ...styles.errorText, color: themeColors.textSecondary }}>
+            {slim ? t('widget.errorMinimal') : t('widget.errorOffline')}
+          </span>
+          {!slim && (
+            <button
+              style={{
+                ...styles.retryButton,
+                background: themeColors.primaryGradient,
+                boxShadow: themeColors.shadowSm,
+              }}
+              onClick={async (e) => {
+                e.stopPropagation();
+                await refresh();
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = themeColors.shadow;
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = themeColors.shadowSm;
+              }}
+            >
+              {t('widget.retry')}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+
+    return (
+      <>
+        {children}
+        {position !== 'inline' ? (
+          <div style={getPositionStyles(position, slim)}>
+            {errorWidget}
+          </div>
+        ) : errorWidget}
       </>
     );
   }
@@ -666,6 +719,39 @@ const styles: Record<string, React.CSSProperties> = {
   loadingText: {
     fontSize: '14px',
     fontWeight: '500',
+  },
+  errorState: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    flexWrap: 'wrap',
+  },
+  errorIcon: {
+    fontSize: '16px',
+    width: '24px',
+    height: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '6px',
+    fontWeight: '600',
+  },
+  errorText: {
+    fontSize: '14px',
+    fontWeight: '500',
+    flex: 1,
+    minWidth: '120px',
+  },
+  retryButton: {
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '6px 12px',
+    fontSize: '12px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    letterSpacing: '0.025em',
   },
   waitlistWidget: {
     display: 'flex',

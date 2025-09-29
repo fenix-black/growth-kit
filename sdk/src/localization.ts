@@ -38,6 +38,9 @@ export interface Translations {
     emailVerifiedSuccess: string;
     noVerificationToken: string;
     verificationFailed: string;
+    errorMinimal: string;
+    errorOffline: string;
+    retry: string;
   };
   
   // CreditExhaustionModal translations
@@ -108,6 +111,9 @@ const enTranslations: Translations = {
     emailVerifiedSuccess: "Email verified successfully! +5 credits earned",
     noVerificationToken: "No verification token provided",
     verificationFailed: "Verification failed. The token may be invalid or expired.",
+    errorMinimal: "Offline",
+    errorOffline: "Connection failed - running in minimal mode",
+    retry: "Retry",
   },
   modal: {
     earnCredits: "Earn Credits",
@@ -176,6 +182,9 @@ const esTranslations: Translations = {
     emailVerifiedSuccess: "¡Correo verificado con éxito! +5 créditos ganados",
     noVerificationToken: "No se proporcionó token de verificación",
     verificationFailed: "Error en la verificación. El token puede ser inválido o haber expirado.",
+    errorMinimal: "Desconectado",
+    errorOffline: "Conexión fallida - ejecutando en modo mínimo",
+    retry: "Reintentar",
   },
   modal: {
     earnCredits: "Ganar Créditos",

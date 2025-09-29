@@ -12,12 +12,14 @@ export class GrowthKitAPI {
   private apiUrl: string;
   private fingerprint: string | null = null;
   private isProxyMode: boolean;
+  private debug: boolean = false;
 
-  constructor(apiKey?: string, apiUrl: string = '') {
+  constructor(apiKey?: string, apiUrl: string = '', debug: boolean = false) {
     // Default to proxy mode (secure) unless apiKey is explicitly provided
     this.isProxyMode = !apiKey;
     this.apiKey = apiKey || null;
     this.apiUrl = this.isProxyMode ? this.detectProxyUrl() : (apiUrl || this.detectApiUrl());
+    this.debug = debug;
     
     if (this.isProxyMode && typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
       console.log('[GrowthKit] Using secure proxy mode via middleware - API key is handled server-side');
@@ -61,6 +63,17 @@ export class GrowthKitAPI {
   ): Promise<APIResponse<T>> {
     const url = `${this.apiUrl}${endpoint}`;
     
+    if (this.debug) {
+      console.log('[GrowthKit API] Request starting:', {
+        endpoint,
+        url,
+        method: options.method || 'GET',
+        hasBody: !!options.body,
+        bodyLength: options.body ? String(options.body).length : 0,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
     try {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -78,16 +91,54 @@ export class GrowthKitAPI {
         headers['Authorization'] = `Bearer ${this.apiKey}`;
       }
 
+      if (this.debug) {
+        console.log('[GrowthKit API] Request headers:', {
+          ...headers,
+          Authorization: headers.Authorization ? 'Bearer [REDACTED]' : undefined
+        });
+      }
+
+      const startTime = Date.now();
       const response = await fetch(url, {
         ...options,
         headers,
         credentials: 'include', // For cookies
       });
+      const responseTime = Date.now() - startTime;
+
+      if (this.debug) {
+        console.log('[GrowthKit API] Response received:', {
+          endpoint,
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+          responseTime: `${responseTime}ms`,
+          timestamp: new Date().toISOString()
+        });
+      }
 
       const data = await response.json();
 
       if (!response.ok) {
+        if (this.debug) {
+          console.error('[GrowthKit API] Request failed with error response:', {
+            endpoint,
+            status: response.status,
+            statusText: response.statusText,
+            errorData: data,
+            timestamp: new Date().toISOString()
+          });
+        }
         throw new Error(data.message || data.error || 'Request failed');
+      }
+
+      if (this.debug) {
+        console.log('[GrowthKit API] Request successful:', {
+          endpoint,
+          hasData: !!data,
+          dataKeys: data && typeof data === 'object' ? Object.keys(data) : [],
+          timestamp: new Date().toISOString()
+        });
       }
 
       return {
@@ -95,6 +146,15 @@ export class GrowthKitAPI {
         data: data.data || data,
       };
     } catch (error) {
+      if (this.debug) {
+        console.error('[GrowthKit API] Request failed with exception:', {
+          endpoint,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          timestamp: new Date().toISOString()
+        });
+      }
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',

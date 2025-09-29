@@ -244,6 +244,9 @@ interface Translations {
         emailVerifiedSuccess: string;
         noVerificationToken: string;
         verificationFailed: string;
+        errorMinimal: string;
+        errorOffline: string;
+        retry: string;
     };
     modal: {
         earnCredits: string;
@@ -301,7 +304,8 @@ declare class GrowthKitAPI {
     private apiUrl;
     private fingerprint;
     private isProxyMode;
-    constructor(apiKey?: string, apiUrl?: string);
+    private debug;
+    constructor(apiKey?: string, apiUrl?: string, debug?: boolean);
     private detectApiUrl;
     private detectProxyUrl;
     setFingerprint(fingerprint: string): void;
