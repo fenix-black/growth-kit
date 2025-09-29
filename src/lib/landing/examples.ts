@@ -35,7 +35,7 @@ export const miniAppExamples: MiniAppExample[] = [
       creditsEarned: '15K',
       timeframe: '3 months'
     },
-    screenshot: '/landing/examples/restore-demo.jpg',
+    screenshot: '/landing/examples/restore-demo2.jpg',
     tags: ['SaaS', 'AI', 'Photography'],
     testimonial: {
       quote: "GrowthKit transformed our user acquisition. The referral system alone increased our signups by 300% in just 3 months.",
