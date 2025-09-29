@@ -5,6 +5,7 @@ import { corsErrors } from '@/lib/utils/corsResponse';
 import { successResponse } from '@/lib/utils/response';
 import { withCorsHeaders } from '@/lib/middleware/cors';
 import jwt from 'jsonwebtoken';
+import { generateReferralCode } from '@/lib/security/hmac';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -61,10 +62,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (!fingerprintRecord) {
+      const referralCode = generateReferralCode();
+      
       fingerprintRecord = await prisma.fingerprint.create({
         data: {
           appId: app.id,
           fingerprint,
+          referralCode,
           lastActiveAt: new Date(),
         },
       });

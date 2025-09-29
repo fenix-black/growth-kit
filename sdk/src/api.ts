@@ -179,6 +179,8 @@ export class GrowthKitAPI {
       '/v1/referral/check': '/public/referral/check',
       '/v1/invitation/redeem': '/public/invitation/redeem',
       '/v1/verify/email': '/public/verify/email',
+      '/v1/claim/name': '/public/claim/name',
+      '/v1/claim/email': '/public/claim/email',
       // Keep other endpoints as-is for now (may need mapping later)
     };
 
