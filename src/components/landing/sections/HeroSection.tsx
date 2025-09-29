@@ -35,6 +35,7 @@ export default function HeroSection() {
       duration: 4,
       repeat: Infinity,
       repeatType: "reverse" as const,
+      ease: "easeInOut" as any, // Smooth floating animation
     }
   };
 
@@ -57,6 +58,7 @@ export default function HeroSection() {
       y: 0,
       transition: {
         duration: 0.6,
+        ease: [0.25, 0.25, 0, 1] as any, // Smooth cubic-bezier for quality animations
       }
     }
   };

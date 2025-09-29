@@ -65,6 +65,7 @@ export default function ScrollReveal({
       transition={{
         duration,
         delay,
+        ease: [0.25, 0.25, 0, 1] as any, // Custom cubic-bezier for smooth animation
       }}
       className={className}
     >
@@ -135,6 +136,7 @@ export function StaggerItem({
       variants={variants}
       transition={{
         duration,
+        ease: [0.25, 0.25, 0, 1] as any, // Smooth cubic-bezier easing
       }}
     >
       {children}
