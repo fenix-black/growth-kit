@@ -126,7 +126,8 @@ export async function POST(request: NextRequest) {
               acceptedAt: waitlistEntry.acceptedAt?.toISOString() || null,
               email: lead.email,
               emailVerified: lead.emailVerified,
-              requiresWaitlist: true,
+              // Only ACCEPTED users don't require waitlist
+              requiresWaitlist: waitlistEntry.status !== 'ACCEPTED',
             };
           } else {
             // No waitlist entry yet
