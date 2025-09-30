@@ -67,7 +67,6 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedEntries, setSelectedEntries] = useState<Set<string>>(new Set());
-  const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null);
   const [deletingBulk, setDeletingBulk] = useState(false);
 
   useEffect(() => {
@@ -252,38 +251,6 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
     }
   };
 
-  const handleDeleteEntry = async (entryId: string, email: string) => {
-    if (!confirm(`Are you sure you want to delete ${email} from the waitlist? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      setDeletingEntryId(entryId);
-      const response = await fetch('/api/v1/admin/waitlist', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-        body: JSON.stringify({
-          appId,
-          entryId,
-        }),
-      });
-
-      if (response.ok) {
-        fetchWaitlistData();
-      } else {
-        alert('Failed to delete waitlist entry');
-      }
-    } catch (error) {
-      console.error('Error deleting entry:', error);
-      alert('Failed to delete waitlist entry');
-    } finally {
-      setDeletingEntryId(null);
-    }
-  };
-
   const handleDeleteSelected = async () => {
     if (selectedEntries.size === 0) {
       alert('Please select entries to delete');
@@ -440,11 +407,13 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
                       <th className="px-6 py-3 text-left">
                         <input
                           type="checkbox"
-                          checked={selectedEntries.size > 0 && selectedEntries.size === entries.length}
+                          checked={selectedEntries.size > 0 && selectedEntries.size === entries.filter(e => e.status !== 'ACCEPTED').length}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              const allIds = entries.map(e => e.id);
-                              setSelectedEntries(new Set(allIds));
+                              const nonAcceptedIds = entries
+                                .filter(e => e.status !== 'ACCEPTED')
+                                .map(e => e.id);
+                              setSelectedEntries(new Set(nonAcceptedIds));
                             } else {
                               setSelectedEntries(new Set());
                             }
@@ -484,6 +453,7 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
                           <input
                             type="checkbox"
                             checked={selectedEntries.has(entry.id)}
+                            disabled={entry.status === 'ACCEPTED'}
                             onChange={(e) => {
                               const newSelected = new Set(selectedEntries);
                               if (e.target.checked) {
@@ -586,14 +556,6 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
                                 Invite
                               </button>
                             )}
-                            <button
-                              onClick={() => handleDeleteEntry(entry.id, entry.email)}
-                              disabled={deletingEntryId === entry.id}
-                              className="text-xs px-2 py-1 text-red-600 hover:bg-red-50 rounded flex items-center space-x-1 disabled:opacity-50"
-                            >
-                              <Trash2 size={14} />
-                              <span>{deletingEntryId === entry.id ? 'Deleting...' : 'Delete'}</span>
-                            </button>
                           </div>
                         </td>
                       </tr>
