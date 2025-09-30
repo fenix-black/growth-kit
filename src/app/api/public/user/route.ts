@@ -75,14 +75,81 @@ export async function POST(request: NextRequest) {
       0
     );
 
-    // Get app settings for creditsPaused
+    // Get app settings including waitlist configuration
     const appSettings = await prisma.app.findUnique({
       where: { id: app.id },
       select: {
         creditsPaused: true,
         policyJson: true,
+        waitlistEnabled: true,
+        waitlistEnabledAt: true,
+        waitlistMessage: true,
       },
     });
+
+    // Check if user should be grandfathered
+    let isGrandfathered = false;
+    if (appSettings?.waitlistEnabled && appSettings.waitlistEnabledAt) {
+      isGrandfathered = fingerprintRecord.createdAt < appSettings.waitlistEnabledAt;
+    }
+
+    // Check waitlist status
+    let waitlistData = null;
+    if (appSettings?.waitlistEnabled) {
+      if (isGrandfathered) {
+        // User existed before waitlist - grant access
+        waitlistData = {
+          enabled: true,
+          status: 'accepted',
+          position: null,
+          requiresWaitlist: false,
+          grandfathered: true,
+        };
+      } else {
+        // Check if user has email and waitlist entry
+        if (lead && lead.email) {
+          const waitlistEntry = await prisma.waitlist.findUnique({
+            where: {
+              appId_email: {
+                appId: app.id,
+                email: lead.email,
+              },
+            },
+          });
+
+          if (waitlistEntry) {
+            waitlistData = {
+              enabled: true,
+              status: waitlistEntry.status.toLowerCase(),
+              position: waitlistEntry.position,
+              invitedAt: waitlistEntry.invitedAt?.toISOString() || null,
+              acceptedAt: waitlistEntry.acceptedAt?.toISOString() || null,
+              email: lead.email,
+              emailVerified: lead.emailVerified,
+              requiresWaitlist: true,
+            };
+          } else {
+            // No waitlist entry yet
+            waitlistData = {
+              enabled: true,
+              status: 'none',
+              position: null,
+              requiresWaitlist: true,
+              message: appSettings.waitlistMessage || 'Join our exclusive waitlist for early access',
+            };
+          }
+        } else {
+          // No email registered yet
+          waitlistData = {
+            enabled: true,
+            status: 'none',
+            position: null,
+            requiresWaitlist: true,
+            message: appSettings.waitlistMessage || 'Join our exclusive waitlist for early access',
+          };
+        }
+      }
+    }
 
     // Build response to match original /v1/me format exactly
     const userData = {
@@ -99,6 +166,8 @@ export async function POST(request: NextRequest) {
       hasVerifiedEmail: lead?.emailVerified || false,
       // Use actual policy from app
       policy: appSettings?.policyJson,
+      // Include waitlist data if applicable
+      ...(waitlistData && { waitlist: waitlistData }),
     };
 
     return withCorsHeaders(
