@@ -38,14 +38,21 @@ export class GrowthKitAPI {
   }
 
   private detectApiUrl(): string {
-    // Auto-detect based on current environment for direct API mode
+    // In public key mode, always default to production URL
+    // Users can override via apiUrl parameter if needed
+    if (this.isPublicMode) {
+      return 'https://growth.fenixblack.ai/api';
+    }
+    
+    // For direct API mode only, detect localhost for development
     if (typeof window !== 'undefined') {
       const { hostname } = window.location;
       if (hostname === 'localhost' || hostname === '127.0.0.1') {
         return 'http://localhost:3000/api';
       }
     }
-    // Default to production URL (update this when deployed)
+    
+    // Default to production URL
     return 'https://growth.fenixblack.ai/api';
   }
 

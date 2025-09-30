@@ -37,7 +37,7 @@ function LandingPageTracker({ children }: { children: React.ReactNode }) {
 
 export default function LandingPageProvider({ children }: { children: React.ReactNode }) {
   const config = {
-    // ✨ New: Client-side only approach with public key
+    // ✨ Client-side only with public key - SDK auto-detects production API
     publicKey: process.env.NEXT_PUBLIC_GROWTHKIT_PUBLIC_KEY!,
     debug: process.env.NODE_ENV === 'development',
     language: 'en' as const,
