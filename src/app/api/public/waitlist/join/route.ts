@@ -5,6 +5,7 @@ import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { corsErrors } from '@/lib/utils/corsResponse';
 import { successResponse } from '@/lib/utils/response';
 import { withCorsHeaders } from '@/lib/middleware/cors';
+import { sendWaitlistConfirmationEmail } from '@/lib/email/send';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -141,9 +142,29 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Send confirmation email
+    try {
+      const appFullData = await prisma.app.findUnique({
+        where: { id: app.id },
+      });
+
+      if (appFullData) {
+        await sendWaitlistConfirmationEmail(appFullData, email, {
+          position: nextPosition,
+          name: name || undefined,
+        });
+        
+        console.log('✅ Waitlist confirmation email sent to:', email);
+      }
+    } catch (emailError) {
+      console.error('Failed to send waitlist confirmation email:', emailError);
+      // Continue even if email fails
+    }
+
     return withCorsHeaders(
       successResponse({
         joinedWaitlist: true,
+        joined: true,
         position: nextPosition,
         creditsAwarded,
         message: appWithWaitlist.waitlistMessage || 'Successfully joined the waitlist!',

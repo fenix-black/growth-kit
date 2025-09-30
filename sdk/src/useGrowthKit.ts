@@ -547,11 +547,8 @@ export function useGrowthKit(): GrowthKitHook {
       );
 
       if (response.success && response.data?.joined) {
-        setState(prev => ({
-          ...prev,
-          waitlistStatus: 'waiting',
-          waitlistPosition: response.data!.position || null,
-        }));
+        // Refresh user data from server to get updated credits and email
+        await refresh();
         return true;
       }
       return false;
@@ -559,7 +556,7 @@ export function useGrowthKit(): GrowthKitHook {
       console.error('Join waitlist failed:', error);
       return false;
     }
-  }, [state.fingerprint, state.waitlistStatus]);
+  }, [state.fingerprint, state.waitlistStatus, refresh]);
 
   // Get referral link
   const getReferralLink = useCallback((): string => {
