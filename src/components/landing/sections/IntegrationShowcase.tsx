@@ -14,63 +14,48 @@ import {
 import ScrollReveal, { ScrollRevealStagger, StaggerItem } from '@/components/landing/animations/ScrollReveal';
 
 export default function IntegrationShowcase() {
+  const [activeTab, setActiveTab] = useState<'quick' | 'advanced'>('quick');
   const [activeStep, setActiveStep] = useState(0);
   const [typingText, setTypingText] = useState('');
   const [showCopied, setShowCopied] = useState(false);
 
   const installCommand = 'npm install @fenixblack/growthkit';
+  const setupCommand = 'npx @fenixblack/growthkit setup';
 
   // Typing animation effect
   useEffect(() => {
     if (activeStep === 0) {
+      const command = activeTab === 'quick' ? installCommand : setupCommand;
       let i = 0;
+      setTypingText('');
       const interval = setInterval(() => {
-        setTypingText(installCommand.slice(0, i));
+        setTypingText(command.slice(0, i));
         i++;
-        if (i > installCommand.length) {
+        if (i > command.length) {
           clearInterval(interval);
         }
       }, 50);
       return () => clearInterval(interval);
     }
-  }, [activeStep]);
+  }, [activeStep, activeTab]);  // Re-run when tab or step changes
 
-  const integrationSteps = [
+  const quickStartSteps = [
     {
       step: '01',
       title: 'Install the SDK',
-      description: 'One command to add viral growth to any Next.js app',
+      description: 'Works with React, Vue, Svelte, vanilla JS, anywhere',
       code: installCommand,
       language: 'bash'
     },
     {
-      step: '02', 
-      title: 'Add Middleware',
-      description: 'Zero-config middleware handles referrals and verification',
-      code: `// middleware.ts
-export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
-
-// That's it! 🚀`,
-      language: 'typescript'
-    },
-    {
-      step: '03',
-      title: 'Set Environment Variables',
-      description: 'Secure API key configuration',
-      code: `# .env.local
-GROWTHKIT_API_KEY=gk_your_api_key_here
-GROWTHKIT_API_URL=https://growth.fenixblack.ai/api`,
-      language: 'bash'
-    },
-    {
-      step: '04',
-      title: 'Use the Hook',
-      description: 'React hook provides all growth features instantly',
+      step: '02',
+      title: 'Use Your Public Key',
+      description: 'That\'s it! No backend, no config files needed',
       code: `import { useGrowthKit } from '@fenixblack/growthkit';
 
 function App() {
   const gk = useGrowthKit({
-    debug: process.env.NODE_ENV === 'development'
+    publicKey: 'pk_your_public_key_here' // From dashboard
   });
   
   return (
@@ -85,6 +70,30 @@ function App() {
       language: 'tsx'
     }
   ];
+
+  const advancedSteps = [
+    {
+      step: '01',
+      title: 'Run Setup Command',
+      description: 'One command does everything automatically',
+      code: setupCommand,
+      language: 'bash'
+    },
+    {
+      step: '02',
+      title: 'That\'s it! Setup is complete',
+      description: 'CLI automatically created middleware and env vars',
+      code: `// middleware.ts - Auto-generated ✨
+export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
+
+// .env.local - Auto-configured 🔒
+// GROWTHKIT_API_KEY=gk_your_api_key_here
+// GROWTHKIT_API_URL=https://growth.fenixblack.ai/api`,
+      language: 'typescript'
+    }
+  ];
+
+  const integrationSteps = activeTab === 'quick' ? quickStartSteps : advancedSteps;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -113,13 +122,56 @@ function App() {
                 backgroundClip: 'text'
               }}
             >
-              4 simple steps
+              2 simple steps
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Our SDK is designed for developers who value simplicity without sacrificing power. 
-            Get enterprise-grade growth features running in under 30 seconds.
+            Choose your setup: <span className="font-semibold text-primary">Quick Start</span> works everywhere instantly, 
+            or <span className="font-semibold text-fenix-purple">Advanced</span> adds Next.js superpowers.
           </p>
+          
+          {/* Tab Switcher */}
+          <div className="flex justify-center mt-8">
+            <div className="inline-flex bg-white/80 backdrop-blur-sm p-1.5 rounded-2xl border border-gray-200/50 shadow-lg">
+              <button
+                onClick={() => {
+                  setActiveTab('quick');
+                  setActiveStep(0);
+                }}
+                className={`px-8 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center space-x-2 ${
+                  activeTab === 'quick'
+                    ? 'bg-primary text-white shadow-lg'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                style={activeTab === 'quick' ? {
+                  background: 'linear-gradient(to right, #10b981, #14b8a6)'
+                } : {}}
+              >
+                <Zap className="w-4 h-4" />
+                <span>Quick Start (10s)</span>
+                {activeTab === 'quick' && (
+                  <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">Recommended</span>
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('advanced');
+                  setActiveStep(0);
+                }}
+                className={`px-8 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center space-x-2 ${
+                  activeTab === 'advanced'
+                    ? 'bg-fenix-purple text-white shadow-lg'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                style={activeTab === 'advanced' ? {
+                  background: 'linear-gradient(to right, #a855f7, #d946ef)'
+                } : {}}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Advanced (Next.js)</span>
+              </button>
+            </div>
+          </div>
         </ScrollReveal>
 
         {/* Integration Steps */}
@@ -221,7 +273,7 @@ function App() {
                               className="text-green-400"
                             >
                               $ {typingText}
-                              {typingText.length === installCommand.length && (
+                              {typingText.length === (activeTab === 'quick' ? installCommand : setupCommand).length && (
                                 <motion.span
                                   animate={{ opacity: [1, 0] }}
                                   transition={{ duration: 0.8, repeat: Infinity }}
@@ -231,6 +283,10 @@ function App() {
                                 </motion.span>
                               )}
                             </motion.span>
+                          ) : integrationSteps[activeStep].language === 'bash' ? (
+                            <span className="text-green-400">
+                              {integrationSteps[activeStep].code}
+                            </span>
                           ) : (
                             integrationSteps[activeStep].code
                           )}
@@ -259,35 +315,63 @@ function App() {
 
             {/* Features Highlight */}
             <ScrollReveal delay={0.2} className="mt-8">
-              <div className="bg-gradient-to-r from-white/95 to-purple-50/50 p-6 rounded-2xl border border-primary/20 shadow-lg">
-                <div className="flex items-center space-x-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  <h3 className="text-lg font-semibold text-gray-900">What you get instantly:</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    'User fingerprinting',
-                    'Viral referral system', 
-                    'Credit management',
-                    'Waitlist features',
-                    'Real-time analytics',
-                    'Anti-abuse protection',
-                    'Email verification',
-                    'TypeScript support'
-                  ].map((feature, index) => (
-                    <motion.div
-                      key={feature}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="flex items-center space-x-2 text-sm text-gray-600"
-                    >
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0"></div>
-                      <span>{feature}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className={`p-6 rounded-2xl border shadow-lg ${
+                    activeTab === 'quick'
+                      ? 'bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20'
+                      : 'bg-gradient-to-r from-fenix-purple/5 to-fenix-magenta/5 border-fenix-purple/20'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2 mb-4">
+                    {activeTab === 'quick' ? (
+                      <Zap className="w-5 h-5 text-primary" />
+                    ) : (
+                      <Sparkles className="w-5 h-5 text-fenix-purple" />
+                    )}
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {activeTab === 'quick' ? '✅ Works everywhere:' : '⚡ Advanced features:'}
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {(activeTab === 'quick' ? [
+                      { icon: '✨', text: 'No backend required' },
+                      { icon: '🚀', text: 'Any JavaScript framework' },
+                      { icon: '📦', text: 'Static site generators' },
+                      { icon: '🎨', text: 'CodePen/CodeSandbox' },
+                      { icon: '🌐', text: 'GitHub Pages ready' },
+                      { icon: '⚡', text: 'Instant deployment' },
+                      { icon: '🔒', text: 'Secure public keys' },
+                      { icon: '📱', text: 'Works anywhere JS runs' }
+                    ] : [
+                      { icon: '🔐', text: 'Server-side API keys' },
+                      { icon: '🛣️', text: 'Custom referral routing' },
+                      { icon: '🔄', text: 'API proxying' },
+                      { icon: '✉️', text: 'Email verification flow' },
+                      { icon: '🎯', text: 'Advanced middleware' },
+                      { icon: '⚙️', text: 'Custom configuration' },
+                      { icon: '🏗️', text: 'Full-stack features' },
+                      { icon: '🚀', text: 'Maximum security' }
+                    ]).map((feature, index) => (
+                      <motion.div
+                        key={feature.text}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="flex items-start space-x-2 text-sm"
+                      >
+                        <span className="text-lg flex-shrink-0" style={{ marginTop: '-2px' }}>{feature.icon}</span>
+                        <span className="text-gray-700 leading-relaxed">{feature.text}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
             </ScrollReveal>
           </div>
         </div>

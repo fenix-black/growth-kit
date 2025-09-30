@@ -165,7 +165,7 @@ export default function HeroSection() {
         <motion.div variants={itemVariants} className="mb-8">
           <div className="inline-flex items-center space-x-2 bg-white/90 backdrop-blur-sm border border-primary/30 rounded-full px-6 py-3 text-sm font-medium text-gray-800 shadow-lg shadow-primary/10">
             <Zap className="w-4 h-4 text-primary" />
-            <span>Enterprise-grade growth features for any app</span>
+            <span>No backend required • Works everywhere • 10 second setup</span>
           </div>
         </motion.div>
 
@@ -189,7 +189,7 @@ export default function HeroSection() {
               {transformWords[currentWordIndex]}
             </motion.span>
             <br />
-            <span className="text-gray-900">any app into a</span>
+<span className="text-gray-900">any app into a</span>
             <br />
             <span 
               className="text-fenix-magenta"
@@ -208,10 +208,10 @@ export default function HeroSection() {
         {/* Subtitle */}
         <motion.div variants={itemVariants} className="mb-12">
           <p className="text-xl sm:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Add referrals, credits, and waitlists to your mini-app in{' '}
-            <span className="font-semibold text-primary">minutes, not months</span>.
+            Add referrals, credits, and waitlists to{' '}
+            <span className="font-semibold text-primary">any JavaScript app</span> in seconds.
             <br />
-            Built for developers who want enterprise-grade growth features without the complexity.
+            <span className="font-semibold text-gray-900">No backend. No framework lock-in. No complexity.</span>
           </p>
         </motion.div>
 
@@ -260,9 +260,9 @@ export default function HeroSection() {
                   backgroundClip: 'text'
                 }}
               >
-                300%+
+                0 backend
               </div>
-              <div className="text-gray-600 text-sm font-medium">Average User Growth</div>
+              <div className="text-gray-600 text-sm font-medium">Infrastructure Required</div>
             </div>
             <div className="text-center">
               <div 
@@ -274,7 +274,7 @@ export default function HeroSection() {
                   backgroundClip: 'text'
                 }}
               >
-                3 lines
+                2 steps
               </div>
               <div className="text-gray-600 text-sm font-medium">To Add Viral Growth</div>
             </div>
@@ -288,9 +288,9 @@ export default function HeroSection() {
                   backgroundClip: 'text'
                 }}
               >
-                &lt;30s
+                ∞ platforms
               </div>
-              <div className="text-gray-600 text-sm font-medium">Setup Time</div>
+              <div className="text-gray-600 text-sm font-medium">React, Vue, Static Sites...</div>
             </div>
           </div>
         </motion.div>

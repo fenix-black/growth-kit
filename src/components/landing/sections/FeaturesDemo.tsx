@@ -96,8 +96,28 @@ export default function FeaturesDemo() {
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             From anonymous user tracking to viral referral systems - get enterprise-grade growth features 
-            that integrate seamlessly with any app.
+            that work <span className="font-semibold text-primary">anywhere JavaScript runs</span>.
           </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            {[
+              '🌐 Static Sites',
+              '⚛️ React/Vue/Svelte',
+              '🚀 Next.js',
+              '📄 GitHub Pages',
+              '🎨 CodePen',
+              '☁️ Any Platform'
+            ].map((platform) => (
+              <motion.div
+                key={platform}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-primary/20 rounded-full text-sm font-medium text-gray-700 shadow-sm"
+              >
+                {platform}
+              </motion.div>
+            ))}
+          </div>
         </ScrollReveal>
 
         {/* Interactive Features Grid */}

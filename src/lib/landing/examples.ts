@@ -142,7 +142,7 @@ export const featureDetails = [
       'Seamless user experience'
     ],
     codeExample: `const gk = useGrowthKit({
-  apiKey: 'your-api-key'
+  publicKey: 'pk_your_public_key'
 });
 // Automatically generates unique fingerprint
 // and tracks user across sessions`
