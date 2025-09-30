@@ -23,6 +23,7 @@ todo:
 - admin, add a way of grouping apps with a single apikey, so they share credits consumption and earnings (like a passport by topic)
 - admin. add app description field and keywords, to have better insights as to why a user wanted to use them (tracking)
 - sdk: add localization support for widget, and expose method so the client can switch the active language (for example, if the client app handles the locale) - DONE
-- add public token generation so we can use the widget without exposing the apikey and without needing a middleware (to use it on simple static reactjs webapps or other web based apps later)
+- add public token generation so we can use the widget without exposing the apikey and without needing a middleware (to use it on simple static reactjs webapps or other web based apps later) - DONE
 - add support for showing widget as a chat bot box.
 - hide 'Offline' label if slim_labels is false.
+- improve the waitlist screen to show the app title and description and the growthkit logo.

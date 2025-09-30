@@ -3,6 +3,9 @@ import { getCurrentBrowserFingerPrint } from '@rajesh896/broprint.js';
 
 let cachedFingerprint: string | null = null;
 
+// Storage key for persistent fingerprint
+const FINGERPRINT_STORAGE_KEY = 'growthkit_fingerprint';
+
 export async function getFingerprint(): Promise<string> {
   // Return cached fingerprint if available
   if (cachedFingerprint) {
@@ -13,6 +16,19 @@ export async function getFingerprint(): Promise<string> {
   if (typeof window === 'undefined') {
     // Return a placeholder during SSR that will be replaced on client
     return 'ssr_placeholder_' + Math.random().toString(36).substring(7);
+  }
+
+  // Try to get stored fingerprint first (persists across page reloads)
+  try {
+    const stored = localStorage.getItem(FINGERPRINT_STORAGE_KEY);
+    if (stored) {
+      cachedFingerprint = stored;
+      console.log('[GrowthKit] Using stored fingerprint:', stored.substring(0, 10) + '...');
+      return stored;
+    }
+  } catch (error) {
+    // localStorage might be blocked (Safari private mode, etc.)
+    console.warn('[GrowthKit] Could not access localStorage for fingerprint:', error);
   }
 
   try {
@@ -60,10 +76,17 @@ export async function getFingerprint(): Promise<string> {
       throw new Error('Empty fingerprint generated');
     }
 
-    // Cache the fingerprint for the session
+    // Cache the fingerprint in memory
     cachedFingerprint = fingerprint;
     
-    console.log('[GrowthKit] Fingerprint generated successfully:', fingerprint.substring(0, 10) + '...');
+    // Store fingerprint in localStorage for persistence across page reloads
+    try {
+      localStorage.setItem(FINGERPRINT_STORAGE_KEY, fingerprint);
+      console.log('[GrowthKit] Fingerprint generated and stored:', fingerprint.substring(0, 10) + '...');
+    } catch (error) {
+      console.warn('[GrowthKit] Could not store fingerprint:', error);
+      console.log('[GrowthKit] Fingerprint generated (not stored):', fingerprint.substring(0, 10) + '...');
+    }
     
     return fingerprint;
   } catch (error) {
@@ -73,6 +96,13 @@ export async function getFingerprint(): Promise<string> {
     // Generate a fallback fingerprint using available browser properties
     const fallback = generateFallbackFingerprint();
     cachedFingerprint = fallback;
+    
+    // Store fallback fingerprint too
+    try {
+      localStorage.setItem(FINGERPRINT_STORAGE_KEY, fallback);
+    } catch (storageError) {
+      // Silent fail if localStorage is unavailable
+    }
     
     return fallback;
   }
@@ -112,4 +142,11 @@ function generateFallbackFingerprint(): string {
 
 export function clearFingerprintCache(): void {
   cachedFingerprint = null;
+  
+  // Also clear from localStorage
+  try {
+    localStorage.removeItem(FINGERPRINT_STORAGE_KEY);
+  } catch (error) {
+    // Silent fail if localStorage is unavailable
+  }
 }
