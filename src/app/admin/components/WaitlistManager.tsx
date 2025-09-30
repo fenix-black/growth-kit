@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import InvitationTracker from './InvitationTracker';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { Trash2 } from 'lucide-react';
 
 interface WaitlistEntry {
   id: string;
@@ -66,6 +67,8 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedEntries, setSelectedEntries] = useState<Set<string>>(new Set());
+  const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null);
+  const [deletingBulk, setDeletingBulk] = useState(false);
 
   useEffect(() => {
     fetchWaitlistData();
@@ -249,6 +252,79 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
     }
   };
 
+  const handleDeleteEntry = async (entryId: string, email: string) => {
+    if (!confirm(`Are you sure you want to delete ${email} from the waitlist? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setDeletingEntryId(entryId);
+      const response = await fetch('/api/v1/admin/waitlist', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+        body: JSON.stringify({
+          appId,
+          entryId,
+        }),
+      });
+
+      if (response.ok) {
+        fetchWaitlistData();
+      } else {
+        alert('Failed to delete waitlist entry');
+      }
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      alert('Failed to delete waitlist entry');
+    } finally {
+      setDeletingEntryId(null);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedEntries.size === 0) {
+      alert('Please select entries to delete');
+      return;
+    }
+
+    const count = selectedEntries.size;
+    if (!confirm(`Are you sure you want to delete ${count} selected ${count === 1 ? 'entry' : 'entries'} from the waitlist? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setDeletingBulk(true);
+      const response = await fetch('/api/v1/admin/waitlist', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+        body: JSON.stringify({
+          appId,
+          waitlistIds: Array.from(selectedEntries),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`Successfully deleted ${data.data.count} ${data.data.count === 1 ? 'entry' : 'entries'}!`);
+        fetchWaitlistData();
+        setSelectedEntries(new Set());
+      } else {
+        alert('Failed to delete waitlist entries');
+      }
+    } catch (error) {
+      console.error('Error deleting entries:', error);
+      alert('Failed to delete waitlist entries');
+    } finally {
+      setDeletingBulk(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const colors = {
       WAITING: 'bg-yellow-100 text-yellow-800',
@@ -338,13 +414,23 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
                     Accepted: {entries.filter(e => e.status === 'ACCEPTED').length}
                   </span>
                 </div>
-                <button
-                  onClick={handleInviteSelected}
-                  disabled={selectedEntries.size === 0}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
-                >
-                  Invite Selected ({selectedEntries.size})
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={handleDeleteSelected}
+                    disabled={selectedEntries.size === 0 || deletingBulk}
+                    className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:bg-gray-400 flex items-center space-x-2"
+                  >
+                    <Trash2 size={16} />
+                    <span>Delete Selected ({selectedEntries.size})</span>
+                  </button>
+                  <button
+                    onClick={handleInviteSelected}
+                    disabled={selectedEntries.size === 0}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+                  >
+                    Invite Selected ({selectedEntries.size})
+                  </button>
+                </div>
               </div>
 
               <div className="overflow-x-auto">
@@ -354,12 +440,11 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
                       <th className="px-6 py-3 text-left">
                         <input
                           type="checkbox"
+                          checked={selectedEntries.size > 0 && selectedEntries.size === entries.length}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              const waitingIds = entries
-                                .filter(e => e.status === 'WAITING')
-                                .map(e => e.id);
-                              setSelectedEntries(new Set(waitingIds));
+                              const allIds = entries.map(e => e.id);
+                              setSelectedEntries(new Set(allIds));
                             } else {
                               setSelectedEntries(new Set());
                             }
@@ -399,7 +484,6 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
                           <input
                             type="checkbox"
                             checked={selectedEntries.has(entry.id)}
-                            disabled={entry.status !== 'WAITING'}
                             onChange={(e) => {
                               const newSelected = new Set(selectedEntries);
                               if (e.target.checked) {
@@ -502,6 +586,14 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
                                 Invite
                               </button>
                             )}
+                            <button
+                              onClick={() => handleDeleteEntry(entry.id, entry.email)}
+                              disabled={deletingEntryId === entry.id}
+                              className="text-xs px-2 py-1 text-red-600 hover:bg-red-50 rounded flex items-center space-x-1 disabled:opacity-50"
+                            >
+                              <Trash2 size={14} />
+                              <span>{deletingEntryId === entry.id ? 'Deleting...' : 'Delete'}</span>
+                            </button>
                           </div>
                         </td>
                       </tr>

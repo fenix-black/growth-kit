@@ -153,3 +153,77 @@ export async function PATCH(request: NextRequest) {
     return errors.serverError();
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    // Get auth token
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return errors.unauthorized();
+    }
+
+    const token = authHeader.substring(7);
+    const expectedToken = process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025';
+    
+    if (token !== expectedToken) {
+      return errors.forbidden();
+    }
+
+    const body = await request.json();
+    const { appId, entryId, waitlistIds } = body;
+
+    if (!appId) {
+      return errors.badRequest('appId is required');
+    }
+
+    // Support both single and bulk deletion
+    const idsToDelete = waitlistIds && Array.isArray(waitlistIds) ? waitlistIds : (entryId ? [entryId] : []);
+
+    if (idsToDelete.length === 0) {
+      return errors.badRequest('Either entryId or waitlistIds array is required');
+    }
+
+    // Verify all entries exist and belong to the app
+    const entries = await prisma.waitlist.findMany({
+      where: {
+        id: { in: idsToDelete },
+        appId,
+      },
+    });
+
+    if (entries.length !== idsToDelete.length) {
+      return errors.badRequest('One or more waitlist entries not found or do not belong to this app');
+    }
+
+    // Delete the entries
+    const result = await prisma.waitlist.deleteMany({
+      where: {
+        id: { in: idsToDelete },
+        appId,
+      },
+    });
+
+    // Log the deletion
+    await prisma.eventLog.create({
+      data: {
+        appId,
+        event: 'admin.waitlist_deleted',
+        entityType: 'waitlist',
+        entityId: idsToDelete[0], // Log first ID for reference
+        metadata: {
+          deletedCount: result.count,
+          entryIds: idsToDelete,
+          emails: entries.map(e => e.email),
+        },
+      },
+    });
+
+    return successResponse({
+      deleted: true,
+      count: result.count,
+    });
+  } catch (error) {
+    console.error('Error deleting waitlist entries:', error);
+    return errors.serverError();
+  }
+}
