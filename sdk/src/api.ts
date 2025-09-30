@@ -17,6 +17,7 @@ export class GrowthKitAPI {
   private debug: boolean = false;
   private token: string | null = null;
   private tokenExpiry: Date | null = null;
+  private retryingRequest: boolean = false;
 
   constructor(apiKey?: string, publicKey?: string, apiUrl: string = '', debug: boolean = false) {
     // Determine mode: proxy (default), public key, or private API key
@@ -267,7 +268,7 @@ export class GrowthKitAPI {
 
       if (!response.ok) {
         // Handle 401 Unauthorized in public mode - token might be invalid
-        if (response.status === 401 && this.isPublicMode) {
+        if (response.status === 401 && this.isPublicMode && !this.retryingRequest) {
           if (this.debug) {
             console.log('[GrowthKit] 401 Unauthorized - Token may be invalid, clearing and retrying...');
           }
@@ -279,15 +280,22 @@ export class GrowthKitAPI {
             localStorage.removeItem('growthkit_token');
           }
           
+          // Set retry flag to prevent infinite loops
+          this.retryingRequest = true;
+          
           // Retry once with a fresh token
           const hasNewToken = await this.ensureValidToken();
           if (hasNewToken) {
             if (this.debug) {
               console.log('[GrowthKit] Retrying request with new token...');
             }
-            // Recursive retry - but prevent infinite loop
-            return this.request(endpoint, { ...options, headers: { ...options.headers, 'X-Retry': 'true' } });
+            // Recursive retry - original options will pick up the new token
+            const result = await this.request(endpoint, options);
+            this.retryingRequest = false; // Reset flag after retry
+            return result;
           }
+          
+          this.retryingRequest = false; // Reset flag if retry failed
         }
         
         if (this.debug) {

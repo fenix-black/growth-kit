@@ -310,6 +310,7 @@ declare class GrowthKitAPI {
     private debug;
     private token;
     private tokenExpiry;
+    private retryingRequest;
     constructor(apiKey?: string, publicKey?: string, apiUrl?: string, debug?: boolean);
     private detectApiUrl;
     private detectProxyUrl;
