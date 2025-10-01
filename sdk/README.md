@@ -2,6 +2,22 @@
 
 React SDK for GrowthKit - Intelligent waitlist and referral management system with client-side and middleware support.
 
+## ✨ What's New in v0.6.1
+
+**🎨 Branded Waitlist Screens** - Create beautiful, on-brand waitlist experiences:
+- **App Logo Support**: Upload your logo or use a URL (PNG/JPG/WebP)
+- **Custom Branding**: Your app name, description, and brand color automatically applied
+- **3 Modern Layouts**: Centered, Split, or Minimal - choose what fits your app
+- **Smart Fallbacks**: Works beautifully even without customization
+- **Zero Config**: Configure once in admin, works everywhere automatically
+
+```tsx
+// That's it! The waitlist automatically shows your branding
+<WaitlistForm message="Join our exclusive beta" />
+```
+
+[See Waitlist Branding Documentation →](#waitlistform)
+
 ## ⚡ Quick Start (10 seconds)
 
 ### Option 1: Client-Side Only (Recommended for most apps)
@@ -162,7 +178,9 @@ import type {
   Translations, 
   GrowthKitTheme,
   ThemeColors,
-  GrowthKitAccountWidgetRef 
+  GrowthKitAccountWidgetRef,
+  AppBranding,        // v0.6.1+
+  WaitlistFormProps   // v0.6.1+
 } from '@fenixblack/growthkit';
 ```
 
@@ -589,6 +607,7 @@ The `useGrowthKit` hook returns an object with the following properties:
   // App State
   loading: boolean;             // Initial loading state
   initialized: boolean;         // Whether SDK is initialized
+  app?: AppBranding;            // App branding information (v0.6.1+)
   error: Error | null;          // Any error that occurred
   policy: GrowthKitPolicy;      // App credit policy
   refresh: () => Promise<void>; // Refresh user data
@@ -776,16 +795,147 @@ Features:
 - **Programmatic language switching** via ref
 
 ### WaitlistForm
-Customizable waitlist signup:
+Modern, brandable waitlist screen with three layout options and full app branding support.
+
+#### Basic Usage
 
 ```tsx
 import { WaitlistForm } from '@fenixblack/growthkit';
 
 <WaitlistForm
-  growthKit={gk}
   message="Join our exclusive beta"
   onSuccess={(position) => console.log(`Position: ${position}`)}
 />
+```
+
+#### App Branding (v0.6.1+)
+
+The waitlist screen automatically displays your app's branding when configured in the GrowthKit admin:
+
+**Configurable in Admin Dashboard:**
+- **App Logo**: PNG/JPG/WebP (upload or URL)
+- **App Description**: Shown prominently below app name
+- **Brand Color**: Applied to buttons, accents, and messages
+- **Custom Message**: Highlighted in your brand color
+- **Layout Style**: Choose from 3 modern designs
+
+**The SDK automatically receives and displays:**
+
+```tsx
+// No additional code needed! The SDK receives app branding from the API
+const gk = useGrowthKit({ publicKey: 'pk_your_key' });
+
+// App branding is automatically available in gk.app
+{
+  name: "MyApp",
+  description: "Build things faster",
+  logoUrl: "https://...",
+  primaryColor: "#6366f1",
+  waitlistLayout: "centered" // or "split" or "minimal"
+}
+```
+
+#### Layout Options
+
+**Centered Layout (Default)**
+- Full-screen centered card with glassmorphic design
+- App logo prominently displayed at top
+- App name and description
+- Custom waitlist message in brand color
+- Modern gradient background with animations
+- Perfect for: Dedicated waitlist pages
+
+**Split Layout**
+- Left side: Large app branding and messaging
+- Right side: Clean signup form
+- Best for: Marketing pages, landing pages
+- Professional layout for product launches
+
+**Minimal Layout**
+- Clean, simple design
+- Small logo and minimal text
+- Perfect for: Embedded forms, subtle integrations
+- Great for: Apps that need waitlist without fanfare
+
+#### Advanced Customization
+
+```tsx
+<WaitlistForm
+  message="Custom override message"
+  onSuccess={(position) => {
+    console.log(`You're #${position} on the waitlist!`);
+    // Track conversion, show celebration, etc.
+  }}
+  className="custom-class"
+  style={{ /* custom styles */ }}
+/>
+```
+
+#### Branding Features
+
+**Automatic Display:**
+- ✅ App logo (or initials fallback if no logo)
+- ✅ App name with gradient styling
+- ✅ App description
+- ✅ Custom waitlist message in brand color
+- ✅ Brand color applied to:
+  - CTA buttons with gradient effects
+  - Focus states and interactions
+  - Logo shadows and accents
+  - Position counter
+- ✅ "Powered by GrowthKit" footer (configurable)
+
+**Smart Fallbacks:**
+- No logo? Shows initials from app name
+- No color? Uses GrowthKit default green
+- No description? Shows generic message
+- Works beautifully with or without customization
+
+#### Success State
+
+When user joins the waitlist, shows:
+- ✨ Celebration animation
+- Position counter with brand-colored gradient
+- Confirmation message
+- Email notification promise
+
+```tsx
+// Success state is handled automatically
+// But you can hook into it:
+<WaitlistForm
+  onSuccess={(position) => {
+    // Track analytics
+    analytics.track('waitlist_joined', { position });
+    
+    // Show custom celebration
+    showConfetti();
+    
+    // Update UI
+    setUserOnWaitlist(true);
+  }}
+/>
+```
+
+#### TypeScript Support
+
+```tsx
+import { WaitlistFormProps, AppBranding } from '@fenixblack/growthkit';
+
+// Full type safety
+const props: WaitlistFormProps = {
+  message: "Join our beta",
+  onSuccess: (position: number) => console.log(position),
+};
+
+// Access app branding type
+const branding: AppBranding = {
+  name: "MyApp",
+  description: "Build faster",
+  logoUrl: "https://...",
+  primaryColor: "#6366f1",
+  waitlistLayout: "centered",
+  hideGrowthKitBranding: false,
+};
 ```
 
 ## Server-Side Usage

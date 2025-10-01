@@ -68,6 +68,11 @@ export async function POST(
       return errors.badRequest('File must be under 5MB');
     }
 
+    // Check if Vercel Blob is configured
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return errors.serverError('Vercel Blob storage is not configured. Please set BLOB_READ_WRITE_TOKEN environment variable or use the URL option instead.');
+    }
+
     // Upload to Vercel Blob
     const filename = `app-logos/${id}-${Date.now()}.${file.type.split('/')[1]}`;
     const blob = await put(filename, file, {

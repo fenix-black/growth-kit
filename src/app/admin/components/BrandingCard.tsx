@@ -79,9 +79,17 @@ export default function BrandingCard({
       if (response.ok) {
         const data = await response.json();
         setEditedLogoUrl(data.data.logoUrl);
+        setUploadError(null);
       } else {
         const error = await response.json();
-        setUploadError(error.message || 'Failed to upload logo');
+        const errorMessage = error.message || 'Failed to upload logo';
+        
+        // Show helpful message if Blob is not configured
+        if (errorMessage.includes('Vercel Blob')) {
+          setUploadError('File upload is not configured on this server. Please use the URL option below to add a logo hosted externally.');
+        } else {
+          setUploadError(errorMessage);
+        }
       }
     } catch (error) {
       setUploadError('Error uploading file. Please try again.');
