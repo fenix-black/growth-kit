@@ -34,6 +34,18 @@ export function WaitlistForm({
   const brandColor = app?.primaryColor || themeColors.primary;
   const displayMessage = message || growthKit.waitlistMessage || (app?.description ? null : 'Join our exclusive waitlist for early access');
 
+  // Debug logging
+  console.log('🎨 WaitlistForm Debug:', {
+    hasApp: !!app,
+    appName: app?.name,
+    logoUrl: app?.logoUrl,
+    description: app?.description,
+    primaryColor: app?.primaryColor,
+    waitlistLayout: app?.waitlistLayout,
+    waitlistMessage: growthKit.waitlistMessage,
+    fullGrowthKitState: Object.keys(growthKit),
+  });
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
