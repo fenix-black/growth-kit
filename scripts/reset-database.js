@@ -35,6 +35,7 @@ async function getRecordCounts(appId = null) {
     referrals: await prisma.referral.count({ where: whereClause }),
     credits: await prisma.credit.count(),
     usage: await prisma.usage.count(),
+    activities: await prisma.activity.count({ where: whereClause }),
     eventLogs: await prisma.eventLog.count({ where: whereClause }),
     apps: await prisma.app.count(),
     apiKeys: await prisma.apiKey.count(),
@@ -69,6 +70,7 @@ async function resetDatabase() {
     console.log(`  Referrals: ${beforeCounts.referrals}`);
     console.log(`  Credits: ${beforeCounts.credits}`);
     console.log(`  Usage Records: ${beforeCounts.usage}`);
+    console.log(`  Activities: ${beforeCounts.activities}`);
     console.log(`  Event Logs: ${beforeCounts.eventLogs}`);
     console.log('');
     
@@ -81,6 +83,7 @@ async function resetDatabase() {
       console.log(`  - ${beforeCounts.referrals} referrals`);
       console.log(`  - ${beforeCounts.credits} credits`);
       console.log(`  - ${beforeCounts.usage} usage records`);
+      console.log(`  - ${beforeCounts.activities} activities`);
       if (!keepEvents) {
         console.log(`  - ${beforeCounts.eventLogs} event logs`);
       }
@@ -103,7 +106,13 @@ async function resetDatabase() {
     
     // Delete in order to respect foreign key constraints
     
-    // 1. Delete Credits (depends on Fingerprint)
+    // 1. Delete Activities (depends on Fingerprint)
+    const activitiesResult = await prisma.activity.deleteMany({
+      where: whereClause
+    });
+    console.log(`✓ Deleted ${activitiesResult.count} activities`);
+    
+    // 2. Delete Credits and Usage (depends on Fingerprint)
     if (specificAppId) {
       // For app-specific reset, we need to find fingerprints first
       const fingerprints = await prisma.fingerprint.findMany({
@@ -132,31 +141,31 @@ async function resetDatabase() {
       console.log(`✓ Deleted ${usageResult.count} usage records`);
     }
     
-    // 2. Delete Referrals
+    // 3. Delete Referrals
     const referralResult = await prisma.referral.deleteMany({
       where: whereClause
     });
     console.log(`✓ Deleted ${referralResult.count} referrals`);
     
-    // 3. Delete Leads
+    // 4. Delete Leads
     const leadResult = await prisma.lead.deleteMany({
       where: whereClause
     });
     console.log(`✓ Deleted ${leadResult.count} leads`);
     
-    // 4. Delete Waitlist entries
+    // 5. Delete Waitlist entries
     const waitlistResult = await prisma.waitlist.deleteMany({
       where: whereClause
     });
     console.log(`✓ Deleted ${waitlistResult.count} waitlist entries`);
     
-    // 5. Delete Fingerprints (this will cascade delete related records if any remain)
+    // 6. Delete Fingerprints (this will cascade delete related records if any remain)
     const fingerprintResult = await prisma.fingerprint.deleteMany({
       where: fingerprintWhereClause
     });
     console.log(`✓ Deleted ${fingerprintResult.count} fingerprints`);
     
-    // 6. Optionally delete Event Logs
+    // 7. Optionally delete Event Logs
     if (!keepEvents) {
       const eventResult = await prisma.eventLog.deleteMany({
         where: whereClause
@@ -179,6 +188,7 @@ async function resetDatabase() {
     console.log(`  Referrals: ${afterCounts.referrals}`);
     console.log(`  Credits: ${afterCounts.credits}`);
     console.log(`  Usage Records: ${afterCounts.usage}`);
+    console.log(`  Activities: ${afterCounts.activities}`);
     if (keepEvents) {
       console.log(`  Event Logs: ${afterCounts.eventLogs} (preserved)`);
     } else {
