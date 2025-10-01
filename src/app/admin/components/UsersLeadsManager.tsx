@@ -18,7 +18,9 @@ import {
   Filter,
   ArrowUpDown,
   Trash2,
-  User
+  User,
+  Fingerprint,
+  MapPin
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { cn } from '@/components/ui/utils';
@@ -37,6 +39,9 @@ interface User {
   lastActiveAt: string;
   createdAt: string;
   referralCode: string;
+  browser: string | null;
+  device: string | null;
+  location: { city: string | null; country: string | null; region: string | null } | null;
 }
 
 interface UserDetails extends User {
@@ -289,12 +294,15 @@ export default function UsersLeadsManager({
   };
 
   const exportToCSV = () => {
-    const headers = ['Fingerprint ID', 'Name', 'Email', 'Verified', 'Credits', 'Referrals', 'Last Active', 'Created'];
+    const headers = ['Fingerprint ID', 'Name', 'Email', 'Verified', 'Browser', 'Device', 'Location', 'Credits', 'Referrals', 'Last Active', 'Created'];
     const rows = users.map(user => [
       user.fingerprintId,
       user.name || '',
       user.email || '',
       user.emailVerified ? 'Yes' : 'No',
+      user.browser || '',
+      user.device || '',
+      user.location?.city || user.location?.country || '',
       user.creditBalance.toString(),
       user.referralCount.toString(),
       new Date(user.lastActiveAt).toLocaleDateString(),
@@ -414,6 +422,9 @@ export default function UsersLeadsManager({
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   User
                 </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Location
+                </th>
                 <th 
                   className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSort('credits')}
@@ -449,45 +460,69 @@ export default function UsersLeadsManager({
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                     Loading users...
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                     No users found
                   </td>
                 </tr>
               ) : (
-                users.map((user) => (
+                users.map((user) => {
+                  const displayName = user.name || `fp_${user.fingerprintId.substring(0, 8)}`;
+                  const isActive = new Date(user.lastActiveAt).getTime() > Date.now() - 5 * 60 * 1000; // Active if within 5 min
+                  
+                  return (
                   <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-4 py-4">
-                      <div className="space-y-1">
-                        {user.name && (
-                          <div className="flex items-center space-x-1">
-                            <User size={14} className="text-gray-400" />
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
-                              {user.name}
-                            </span>
-                          </div>
-                        )}
-                        {user.email && (
-                          <div className="flex items-center space-x-1 group">
-                            <div className="relative">
-                              <Mail size={14} className="text-gray-400" />
-                              <div className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                {user.email}
-                              </div>
-                            </div>
-                            {user.emailVerified && (
-                              <CheckCircle size={14} className="text-green-500" />
-                            )}
-                          </div>
-                        )}
-                        <div className="text-xs text-gray-400 dark:text-gray-500">
-                          {user.fingerprintId.substring(0, 8)}...
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-shrink-0">
+                          <Fingerprint className="w-10 h-10 text-teal-500" />
                         </div>
+                        <div className="space-y-1">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            {displayName}
+                          </div>
+                          {user.browser && user.device && (
+                            <div className="text-xs text-gray-500">
+                              {user.browser} • {user.device}
+                            </div>
+                          )}
+                          {user.email && (
+                            <div className="flex items-center space-x-1">
+                              <Mail size={12} className="text-gray-400" />
+                              <span className="text-xs text-gray-500">{user.email}</span>
+                              {user.emailVerified && (
+                                <CheckCircle size={12} className="text-green-500" />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="space-y-1">
+                        {user.location?.city || user.location?.country ? (
+                          <>
+                            <div className="flex items-center space-x-1 text-sm text-gray-900 dark:text-white">
+                              <MapPin size={14} className="text-gray-400" />
+                              <span>{user.location.city || user.location.country}</span>
+                            </div>
+                            <div className={cn(
+                              "text-xs px-2 py-0.5 rounded-full inline-block",
+                              isActive 
+                                ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" 
+                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                            )}>
+                              {isActive ? 'Active' : 'Inactive'}
+                            </div>
+                          </>
+                        ) : (
+                          <span className="text-sm text-gray-400">-</span>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-4">
@@ -537,7 +572,8 @@ export default function UsersLeadsManager({
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>

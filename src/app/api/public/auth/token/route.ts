@@ -6,6 +6,8 @@ import { successResponse } from '@/lib/utils/response';
 import { withCorsHeaders } from '@/lib/middleware/cors';
 import jwt from 'jsonwebtoken';
 import { generateReferralCode } from '@/lib/security/hmac';
+import { getClientIp } from '@/lib/middleware/rateLimitSafe';
+import { getGeolocation, detectBrowser, detectDevice } from '@/lib/utils/geolocation';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -16,7 +18,16 @@ export async function POST(request: NextRequest) {
   
   try {
     const body = await request.json();
-    const { publicKey, fingerprint } = body;
+    const { publicKey, fingerprint, context } = body;
+    
+    // Extract browser context from headers (primary) or request body (fallback)
+    const clientIp = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || '';
+    
+    // Use context from SDK if available, otherwise detect from headers
+    const browser = context?.browser || detectBrowser(userAgent);
+    const device = context?.device || detectDevice(userAgent);
+    const location = getGeolocation(clientIp);
 
     if (!publicKey || !fingerprint) {
       return corsErrors.badRequest('publicKey and fingerprint are required', origin);
@@ -70,13 +81,27 @@ export async function POST(request: NextRequest) {
           fingerprint,
           referralCode,
           lastActiveAt: new Date(),
+          browser,
+          device,
+          location: location.city || location.country ? location : undefined,
         },
       });
     } else {
-      // Update last active timestamp
+      // Update last active timestamp and browser context if changed
+      const shouldUpdateContext = 
+        fingerprintRecord.browser !== browser || 
+        fingerprintRecord.device !== device;
+      
       await prisma.fingerprint.update({
         where: { id: fingerprintRecord.id },
-        data: { lastActiveAt: new Date() },
+        data: { 
+          lastActiveAt: new Date(),
+          ...(shouldUpdateContext && {
+            browser,
+            device,
+            ...(location.city || location.country ? { location } : {}),
+          }),
+        },
       });
     }
 

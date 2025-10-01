@@ -6,6 +6,7 @@ import type {
   VerifyResponse,
   WaitlistResponse,
 } from './types';
+import { getBrowserContext } from './context';
 
 export class GrowthKitAPI {
   private apiKey: string | null;
@@ -124,14 +125,20 @@ export class GrowthKitAPI {
         console.log('[GrowthKit] Requesting new token...');
       }
 
+      // Get browser context to send with token request
+      const context = getBrowserContext();
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          // User-Agent is automatically included by the browser
+          // We're getting additional context for better tracking
         },
         body: JSON.stringify({
           publicKey: this.publicKey,
           fingerprint: this.fingerprint,
+          context, // Include browser context
         }),
       });
 
@@ -354,11 +361,14 @@ export class GrowthKitAPI {
   }
 
   async getMe(fingerprint: string, claim?: string): Promise<APIResponse<MeResponse>> {
+    // Get browser context for better tracking
+    const context = getBrowserContext();
+    
     // In public mode, we don't need to send fingerprint (it's in the token)
     // But we still need to send it for other modes
     const bodyData = this.isPublicMode 
-      ? { ...(claim && { claim }) }  // Only send claim if present
-      : { fingerprint, ...(claim && { claim }) }; // Send fingerprint for other modes
+      ? { ...(claim && { claim }), context }  // Send claim and context
+      : { fingerprint, ...(claim && { claim }), context }; // Send fingerprint, claim, and context
 
     return this.request<MeResponse>('/v1/me', {
       method: 'POST',

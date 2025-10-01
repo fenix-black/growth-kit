@@ -92,6 +92,9 @@ model Fingerprint {
   updatedAt      DateTime   @updatedAt
   lastDailyGrant DateTime?
   lastActiveAt   DateTime?
+  browser        String?
+  device         String?
+  location       Json?
   credits      Credit[]
   app          App        @relation(fields: [appId], references: [id], onDelete: Cascade)
   leads        Lead[]

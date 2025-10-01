@@ -5,8 +5,10 @@ import { checkRateLimit, getClientIp } from '@/lib/middleware/rateLimitSafe';
 import { withCorsHeaders } from '@/lib/middleware/cors';
 import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { successResponse, errors } from '@/lib/utils/response';
-import { corsErrors } from '@/lib/utils/corsResponse';import { isValidFingerprint } from '@/lib/utils/validation';
+import { corsErrors } from '@/lib/utils/corsResponse';
+import { isValidFingerprint } from '@/lib/utils/validation';
 import { isInvitationCode, isCodeExpired } from '@/lib/utils/invitationCode';
+import { getGeolocation, detectBrowser, detectDevice } from '@/lib/utils/geolocation';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -114,12 +116,22 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Extract browser context for tracking
+      const clientIp = getClientIp(request.headers);
+      const userAgent = request.headers.get('user-agent') || '';
+      const browser = detectBrowser(userAgent);
+      const device = detectDevice(userAgent);
+      const location = getGeolocation(clientIp);
+      
       // Create fingerprint record
       fingerprintRecord = await prisma.fingerprint.create({
         data: {
           appId: authContext.app.id,
           fingerprint,
           referralCode: referralCode!,
+          browser,
+          device,
+          location: location.city || location.country ? location : undefined,
         },
       });
     }

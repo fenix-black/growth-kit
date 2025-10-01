@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.7] - 2025-09-30
+
+### Added
+- Browser context tracking: SDK now sends browser and device information with token requests
+- Automatic browser detection (Chrome, Firefox, Safari, Edge, Opera)
+- Device type detection (Desktop, Mobile, Tablet)
+- Fallback to server-side detection if client data is unavailable
+
+### Changed
+- Token request now includes `context` field with browser/device information
+- Enhanced user tracking for better analytics in admin dashboard
+
 ## [0.5.2] - 2025-09-29
 
 ### 🐛 **Critical Bug Fixes**

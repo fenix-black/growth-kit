@@ -24,6 +24,16 @@ todo:
 - admin. add app description field and keywords, to have better insights as to why a user wanted to use them (tracking)
 - sdk: add localization support for widget, and expose method so the client can switch the active language (for example, if the client app handles the locale) - DONE
 - add public token generation so we can use the widget without exposing the apikey and without needing a middleware (to use it on simple static reactjs webapps or other web based apps later) - DONE
-- add support for showing widget as a chat bot box.
+- add support for showing widget as a chat bot box (prop on widget 'mode'):
+    - each app could define a knowledge DB to use as a RAG with chromaDB or upstash vector
+        - when starting the chat, we should send as context the info the user is seeing on the page.
+        - all messages to the bot should be sent to our backend, and our backend  perform the calls to the AI model (groq probably)
+    - each chat session, should extract metadata from each conversation and attach it as the activities of that user. Then on the dashboard we should be able to search users interested in x things, to send them an email.
+    - we should be able from the 'Users & Leads' option, to initiate a chat with the active user.
+
 - hide 'Offline' label if slim_labels is false.
 - improve the waitlist screen to show the app title and description and the growthkit logo.
+- add location info from user fingerprint data being tracked - DONE ✅
+    - Added browser, device, and location tracking using geoip-lite
+    - Updated Users & Leads UI with fingerprint icon, browser/device info, and location column
+    - Privacy-friendly: city-level location only, no invasive tracking

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body (for compatibility with original /v1/me endpoint)
     const body = await request.json();
-    const { claim } = body; // Optional claim parameter like the original endpoint
+    const { claim, context } = body; // Optional claim parameter and browser context
 
     // Get user data for this fingerprint - match original /v1/me format exactly
     let [fingerprintRecord, lead, usage] = await Promise.all([

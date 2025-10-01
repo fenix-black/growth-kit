@@ -9,6 +9,7 @@ import { successResponse, errors } from '@/lib/utils/response';
 import { corsErrors } from '@/lib/utils/corsResponse';
 import { isValidFingerprint } from '@/lib/utils/validation';
 import { isInvitationCode, isCodeExpired } from '@/lib/utils/invitationCode';
+import { getGeolocation, detectBrowser, detectDevice } from '@/lib/utils/geolocation';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -31,9 +32,9 @@ export async function POST(request: NextRequest) {
       return rateLimitCheck.response!;
     }
 
-    // Get fingerprint and optional claim from request body
+    // Get fingerprint, optional claim, and browser context from request body
     const body = await request.json();
-    const { fingerprint, claim } = body;
+    const { fingerprint, claim, context } = body;
 
     if (!fingerprint || !isValidFingerprint(fingerprint)) {
       return corsErrors.badRequest('Invalid or missing fingerprint', origin);
@@ -70,11 +71,21 @@ export async function POST(request: NextRequest) {
     if (!fingerprintRecord) {
       const referralCode = generateReferralCode();
       
+      // Extract browser context for tracking
+      // Prefer context from SDK (if available), fallback to server-side detection
+      const userAgent = request.headers.get('user-agent') || '';
+      const browser = context?.browser || detectBrowser(userAgent);
+      const device = context?.device || detectDevice(userAgent);
+      const location = getGeolocation(clientIp);
+      
       fingerprintRecord = await prisma.fingerprint.create({
         data: {
           appId: authContext.app.id,
           fingerprint,
           referralCode,
+          browser,
+          device,
+          location: location.city || location.country ? location : undefined,
         },
         include: {
           credits: true,

@@ -102,6 +102,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         lastActiveAt: fp.lastActiveAt || fp.createdAt,
         createdAt: fp.createdAt,
         referralCode: fp.referralCode,
+        browser: fp.browser,
+        device: fp.device,
+        location: fp.location,
       };
     });
 
