@@ -618,6 +618,7 @@ export async function POST(request: NextRequest) {
             acceptedAt: waitlistEntry.acceptedAt?.toISOString() || null,
             email: lead.email,
             emailVerified: lead.emailVerified,
+            message: appWithWaitlist.waitlistMessage,
             // App requires waitlist membership - SDK will handle access based on status
             requiresWaitlist: true,
           };
@@ -628,7 +629,7 @@ export async function POST(request: NextRequest) {
             status: 'none',
             position: null,
             requiresWaitlist: true,
-            message: appWithWaitlist.waitlistMessage || 'Join our exclusive waitlist for early access',
+            message: appWithWaitlist.waitlistMessage,
           };
         }
         } else {
@@ -638,7 +639,7 @@ export async function POST(request: NextRequest) {
           status: 'none',
           position: null,
           requiresWaitlist: true,
-          message: appWithWaitlist.waitlistMessage || 'Join our exclusive waitlist for early access',
+          message: appWithWaitlist.waitlistMessage,
           };
         }
       } // Close the else block for non-grandfathered users
@@ -695,6 +696,15 @@ export async function POST(request: NextRequest) {
         actions: {
           default: { creditsRequired: 1 }
         }
+      },
+      // App branding for SDK widget
+      app: {
+        name: app.name,
+        description: app.description,
+        logoUrl: app.logoUrl,
+        primaryColor: app.primaryColor,
+        waitlistLayout: app.waitlistLayout,
+        hideGrowthKitBranding: app.hideGrowthKitBranding,
       },
       ...(waitlistData && { waitlist: waitlistData }),
     });

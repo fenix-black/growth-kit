@@ -24,6 +24,9 @@ interface FormData {
   name: string;
   domain: string;
   description: string;
+  logoUrl: string;
+  primaryColor: string;
+  waitlistLayout: string;
   
   // CORS & Security
   corsOrigins: string;
@@ -105,6 +108,9 @@ export default function AppCreationWizard() {
     name: '',
     domain: '',
     description: '',
+    logoUrl: '',
+    primaryColor: '#10b981',
+    waitlistLayout: 'centered',
     corsOrigins: '',
     redirectUrl: '',
     requireAuth: false,
@@ -208,6 +214,10 @@ export default function AppCreationWizard() {
         body: JSON.stringify({
           name: formData.name,
           domain: formData.domain,
+          description: formData.description,
+          logoUrl: formData.logoUrl || null,
+          primaryColor: formData.primaryColor,
+          waitlistLayout: formData.waitlistLayout,
           corsOrigins: corsOriginsArray,
           redirectUrl: formData.redirectUrl,
           policyJson,
@@ -290,6 +300,71 @@ export default function AppCreationWizard() {
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 placeholder="Brief description of your app"
               />
+              <p className="mt-1 text-sm text-gray-500">
+                This will be shown on your waitlist screen
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Logo URL (optional)
+              </label>
+              <input
+                type="url"
+                value={formData.logoUrl}
+                onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                placeholder="https://example.com/logo.png"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                PNG, JPG, or WebP. You can upload later in settings.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Brand Color
+              </label>
+              <div className="flex gap-3 items-center">
+                <input
+                  type="color"
+                  value={formData.primaryColor}
+                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  className="h-10 w-20 rounded border border-gray-300 cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={formData.primaryColor}
+                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  className="block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="#10b981"
+                />
+                <div 
+                  className="h-10 w-10 rounded-lg border border-gray-300"
+                  style={{ backgroundColor: formData.primaryColor }}
+                />
+              </div>
+              <p className="mt-1 text-sm text-gray-500">
+                Used for buttons and accents in the waitlist screen
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Waitlist Layout
+              </label>
+              <select
+                value={formData.waitlistLayout}
+                onChange={(e) => setFormData({ ...formData, waitlistLayout: e.target.value })}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="centered">Centered (Default)</option>
+                <option value="split">Split Layout</option>
+                <option value="minimal">Minimal</option>
+              </select>
+              <p className="mt-1 text-sm text-gray-500">
+                Choose how the waitlist screen will be displayed
+              </p>
             </div>
 
             {/* Templates */}

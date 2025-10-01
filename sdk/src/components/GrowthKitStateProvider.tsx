@@ -25,6 +25,7 @@ const initialState: GrowthKitState = {
   shouldShowWaitlist: false,
   waitlistPosition: null,
   waitlistMessage: undefined,
+  app: undefined,
 };
 
 interface GrowthKitStateContextValue {

@@ -18,6 +18,10 @@ export async function POST(request: NextRequest) {
       id,
       name, 
       domain, 
+      description,
+      logoUrl,
+      primaryColor,
+      waitlistLayout = 'centered',
       corsOrigins = [], 
       redirectUrl, 
       policyJson,
@@ -54,6 +58,10 @@ export async function POST(request: NextRequest) {
         data: {
           name,
           domain,
+          description,
+          logoUrl,
+          primaryColor,
+          waitlistLayout,
           corsOrigins,
           redirectUrl,
           policyJson,
@@ -66,6 +74,10 @@ export async function POST(request: NextRequest) {
         data: {
           name,
           domain,
+          description,
+          logoUrl,
+          primaryColor,
+          waitlistLayout,
           corsOrigins,
           redirectUrl,
           policyJson,
@@ -155,6 +167,11 @@ export async function PUT(request: NextRequest) {
       id,
       waitlistEnabled,
       waitlistMessage,
+      waitlistLayout,
+      description,
+      logoUrl,
+      primaryColor,
+      hideGrowthKitBranding,
       autoInviteEnabled,
       dailyInviteQuota,
       inviteTime,
@@ -170,6 +187,11 @@ export async function PUT(request: NextRequest) {
     const updateData: any = {};
     if (waitlistEnabled !== undefined) updateData.waitlistEnabled = waitlistEnabled;
     if (waitlistMessage !== undefined) updateData.waitlistMessage = waitlistMessage;
+    if (waitlistLayout !== undefined) updateData.waitlistLayout = waitlistLayout;
+    if (description !== undefined) updateData.description = description;
+    if (logoUrl !== undefined) updateData.logoUrl = logoUrl;
+    if (primaryColor !== undefined) updateData.primaryColor = primaryColor;
+    if (hideGrowthKitBranding !== undefined) updateData.hideGrowthKitBranding = hideGrowthKitBranding;
     if (autoInviteEnabled !== undefined) updateData.autoInviteEnabled = autoInviteEnabled;
     if (dailyInviteQuota !== undefined) updateData.dailyInviteQuota = dailyInviteQuota;
     if (inviteTime !== undefined) updateData.inviteTime = inviteTime;

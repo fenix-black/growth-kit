@@ -20,6 +20,7 @@ export type {
   VerifyResponse,
   WaitlistResponse,
   WaitlistData,
+  AppBranding,
 } from './types';
 
 // Theme system exports
@@ -80,4 +81,4 @@ export { useLocalization, useTranslation } from './localization';
 export type { Language, Translations } from './localization';
 
 // Version
-export const VERSION = '0.5.2';
+export const VERSION = '0.6.1';

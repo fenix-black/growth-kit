@@ -238,6 +238,8 @@ export function useGrowthKit(): GrowthKitHook {
         waitlistPosition,
         waitlistMessage,
         shouldShowWaitlist,
+        // App branding
+        app: data.app,
       });
 
       if (configRef.current.debug) {
@@ -345,6 +347,8 @@ export function useGrowthKit(): GrowthKitHook {
           waitlistPosition,
           waitlistMessage,
           shouldShowWaitlist,
+          // App branding
+          app: data.app,
         }));
 
         if (configRef.current.debug) {

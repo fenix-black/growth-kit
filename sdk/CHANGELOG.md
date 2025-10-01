@@ -1,5 +1,93 @@
 # Changelog
 
+## [0.6.1] - 2025-10-01
+
+### ✨ Features
+- **App Branding for Waitlist**: Complete waitlist screen customization with app branding
+  - App logo display with automatic initials fallback
+  - App name and description prominently displayed
+  - Custom waitlist message support with brand color highlighting
+  - Primary brand color theming throughout the waitlist UI
+  - Three configurable layouts: `centered` (default), `split`, and `minimal`
+  - Optional GrowthKit branding footer (configurable via `hideGrowthKitBranding`)
+
+### 🎨 Waitlist Screen Redesign
+- **Modern Glass Morphism UI**: Premium design with glassmorphic effects
+  - Animated gradient backgrounds with smooth transitions
+  - Backdrop blur effects and subtle shadows
+  - Smooth fade-in animations on load
+  - Responsive design for all screen sizes
+  
+- **Three Layout Options**:
+  - **Centered**: Full-screen centered card with app branding and form
+  - **Split**: Left side app branding, right side form (great for marketing pages)
+  - **Minimal**: Clean, simple layout for subtle integrations
+  
+- **Dynamic Brand Colors**: App's primary color applied to:
+  - CTA buttons with gradient effects
+  - Focus states and hover interactions
+  - Custom waitlist message text
+  - Logo shadows and accents
+
+### 🔧 Backend Integration
+- **New App Fields** (requires database migration):
+  - `description` - App tagline/description
+  - `logoUrl` - URL to app logo (PNG/JPG/WebP supported, NO SVG)
+  - `primaryColor` - Brand color in hex format
+  - `waitlistLayout` - Layout preference (centered/split/minimal)
+  - `hideGrowthKitBranding` - Option to hide GrowthKit footer (for future paid plans)
+
+- **Logo Upload System**:
+  - New `/api/v1/admin/app/[id]/logo` endpoint for logo uploads
+  - Client-side image compression using `browser-image-compression`
+  - Vercel Blob storage integration
+  - Support for external logo URLs
+  - Automatic optimization to 512x512px WebP format
+  - Security: SVG files rejected to prevent XSS attacks
+
+- **Enhanced API Responses**:
+  - `/api/v1/me` now returns full app branding data
+  - All admin app endpoints support new branding fields
+  - Fixed bug: description field was collected but not saved (now saved correctly)
+
+### 🎛️ Admin UI Enhancements
+- **App Creation Wizard**: Enhanced Step 1 with branding fields
+  - Logo URL input with helpful hints
+  - Description textarea with character guidance
+  - Color picker with live preview swatch
+  - Layout selector dropdown
+  - All fields optional for quick setup
+
+- **App Settings**: New "Branding & Waitlist Display" card
+  - Drag & drop logo upload or URL input
+  - Live logo preview with remove option
+  - Description editor
+  - Color picker with hex input
+  - Layout selector
+  - Instant save functionality
+
+### 📦 New Dependencies
+- `@vercel/blob` - Secure file storage
+- `browser-image-compression` - Client-side image optimization
+
+### 🔄 TypeScript Updates
+- New `AppBranding` interface exported from SDK
+- Enhanced `GrowthKitState` to include app branding data
+- Full type safety for all new features
+
+### 🎯 User Experience Improvements
+- **Better Conversion**: Custom message prominently displayed in brand color
+- **Brand Trust**: Clear app identity builds user confidence
+- **Professional Design**: Modern, premium UI that reflects well on the app
+- **Flexibility**: Three layout options to match different use cases
+- **GrowthKit Discovery**: Subtle "Powered by GrowthKit" attribution
+
+### 📝 Migration Notes
+- Database migration required: `20251001_add_app_branding_fields`
+- Fully backward compatible - existing apps work without any changes
+- New branding features are optional enhancements
+- Default fallbacks ensure good UX even without custom branding
+
 ## [0.6.0] - 2025-10-01
 
 ### Changed

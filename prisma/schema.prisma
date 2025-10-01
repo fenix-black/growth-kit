@@ -40,6 +40,11 @@ model App {
   waitlistEnabled             Boolean       @default(false)
   waitlistEnabledAt           DateTime?
   waitlistMessage             String?
+  waitlistLayout              String        @default("centered")
+  description                 String?
+  logoUrl                     String?
+  primaryColor                String?
+  hideGrowthKitBranding       Boolean       @default(false)
   trackUsdValue               Boolean       @default(false)
   allowCustomCredits          Boolean       @default(true)
   maxCustomCredits            Int           @default(100)

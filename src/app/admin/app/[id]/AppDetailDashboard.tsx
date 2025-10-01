@@ -10,6 +10,7 @@ import WaitlistManager from '../../components/WaitlistManager';
 import EmailTemplateEditor from '../../components/EmailTemplateEditor';
 import UsersLeadsManager from '../../components/UsersLeadsManager';
 import ActivityAnalytics from '../../components/ActivityAnalytics';
+import BrandingCard from '../../components/BrandingCard';
 import { cn } from '@/components/ui/utils';
 import { 
   Settings,
@@ -36,6 +37,11 @@ interface AppDetails {
   id: string;
   name: string;
   domain: string;
+  description?: string;
+  logoUrl?: string;
+  primaryColor?: string;
+  waitlistLayout?: string;
+  hideGrowthKitBranding?: boolean;
   isActive: boolean;
   corsOrigins: string[];
   redirectUrl: string;
@@ -831,6 +837,18 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
               )}
             </div>
           </ContentCard>
+
+          <div className="col-span-2">
+            <BrandingCard
+              appId={appId}
+              description={app.description}
+              logoUrl={app.logoUrl}
+              primaryColor={app.primaryColor}
+              waitlistLayout={app.waitlistLayout}
+              hideGrowthKitBranding={app.hideGrowthKitBranding}
+              onUpdate={fetchAppDetails}
+            />
+          </div>
         </div>
       )}
 

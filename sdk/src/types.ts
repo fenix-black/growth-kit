@@ -30,6 +30,15 @@ export interface WaitlistData {
   email?: string;
 }
 
+export interface AppBranding {
+  name: string;
+  description?: string;
+  logoUrl?: string;
+  primaryColor?: string;
+  waitlistLayout?: 'centered' | 'split' | 'minimal';
+  hideGrowthKitBranding: boolean;
+}
+
 export interface GrowthKitState {
   loading: boolean;
   initialized: boolean;
@@ -52,6 +61,8 @@ export interface GrowthKitState {
   waitlistPosition: number | null;
   waitlistMessage?: string;
   shouldShowWaitlist: boolean;
+  // App branding
+  app?: AppBranding;
 }
 
 export interface CompleteActionOptions {
@@ -102,6 +113,7 @@ export interface MeResponse {
   hasClaimedEmail: boolean;
   hasVerifiedEmail: boolean;
   waitlist?: WaitlistData;
+  app?: AppBranding;
 }
 
 export interface CompleteResponse {
