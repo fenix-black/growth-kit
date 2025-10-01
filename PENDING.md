@@ -28,6 +28,7 @@ todo:
     - each app could define a knowledge DB to use as a RAG with chromaDB or upstash vector
         - when starting the chat, we should send as context the info the user is seeing on the page.
         - all messages to the bot should be sent to our backend, and our backend  perform the calls to the AI model (groq probably)
+        - think a way of integrating the chat with a calendar account, maybe cal.com or using zapier mcp, so if the app has scheduling capabilities, for example, for showing a demo, scheduling a consulting, or service about the page, we can schedule slots through the chat, checking availability first.
     - each chat session, should extract metadata from each conversation and attach it as the activities of that user. Then on the dashboard we should be able to search users interested in x things, to send them an email.
     - we should be able from the 'Users & Leads' option, to initiate a chat with the active user.
 

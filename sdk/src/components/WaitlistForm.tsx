@@ -186,24 +186,42 @@ export function WaitlistForm({
           </p>
 
           {!app?.hideGrowthKitBranding && (
-            <div style={{
-              marginTop: '32px',
-              paddingTop: '24px',
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontSize: '12px',
-              fontWeight: '500',
-            }}>
-              <span>Powered by</span>
-              <span style={{ 
-                color: '#10b981',
-                fontWeight: '700',
-              }}>GrowthKit</span>
-            </div>
+            <a
+              href="https://growth.fenixblack.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                marginTop: '32px',
+                paddingTop: '24px',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                textDecoration: 'none',
+                transition: 'opacity 0.2s ease',
+                cursor: 'pointer',
+              }}
+              onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              <img 
+                src="https://growth.fenixblack.ai/growthkit-logo-dark-alpha.png"
+                alt="GrowthKit"
+                style={{
+                  height: '24px',
+                  width: 'auto',
+                }}
+              />
+              <span style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '11px',
+                fontWeight: '500',
+              }}>
+                Powered by GrowthKit
+              </span>
+            </a>
           )}
         </div>
       </div>
@@ -250,33 +268,43 @@ export function WaitlistForm({
       }}>
         {/* Logo */}
         {app?.logoUrl ? (
-          <img 
-            src={app.logoUrl} 
-            alt={app.name}
-            style={{ 
-              width: '80px', 
-              height: '80px', 
-              borderRadius: '50%',
-              margin: '0 auto 24px',
-              display: 'block',
-              objectFit: 'cover',
-              boxShadow: `0 8px 24px ${brandColor}40`,
-            }}
-          />
+          <div style={{
+            width: '96px',
+            height: '96px',
+            borderRadius: '20px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            padding: '12px',
+            margin: '0 auto 32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: `0 12px 32px ${brandColor}30, 0 0 0 1px rgba(255, 255, 255, 0.1)`,
+          }}>
+            <img 
+              src={app.logoUrl} 
+              alt={app.name}
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
+          </div>
         ) : app?.name ? (
           <div style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '50%',
+            width: '96px',
+            height: '96px',
+            borderRadius: '20px',
             background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '32px',
+            fontSize: '36px',
             fontWeight: '700',
             color: 'white',
-            margin: '0 auto 24px',
-            boxShadow: `0 8px 24px ${brandColor}40`,
+            margin: '0 auto 32px',
+            boxShadow: `0 12px 32px ${brandColor}40, 0 0 0 1px rgba(255, 255, 255, 0.1)`,
           }}>
             {getLogoFallback()}
           </div>
@@ -441,24 +469,42 @@ export function WaitlistForm({
         </p>
 
         {!app?.hideGrowthKitBranding && (
-          <div style={{
-            marginTop: '32px',
-            paddingTop: '24px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontSize: '12px',
-            fontWeight: '500',
-          }}>
-            <span>Powered by</span>
-            <span style={{ 
-              color: '#10b981',
-              fontWeight: '700',
-            }}>GrowthKit</span>
-          </div>
+          <a
+            href="https://growth.fenixblack.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              marginTop: '32px',
+              paddingTop: '24px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+              textDecoration: 'none',
+              transition: 'opacity 0.2s ease',
+              cursor: 'pointer',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
+            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            <img 
+              src="https://growth.fenixblack.ai/growthkit-logo-dark-alpha.png"
+              alt="GrowthKit"
+              style={{
+                height: '24px',
+                width: 'auto',
+              }}
+            />
+            <span style={{
+              color: 'rgba(255, 255, 255, 0.5)',
+              fontSize: '11px',
+              fontWeight: '500',
+            }}>
+              Powered by GrowthKit
+            </span>
+          </a>
         )}
       </div>
     </div>
@@ -615,19 +661,41 @@ export function WaitlistForm({
         </form>
 
         {!app?.hideGrowthKitBranding && (
-          <div style={{
-            marginTop: '48px',
-            paddingTop: '24px',
-            borderTop: '1px solid #e5e7eb',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            color: '#9ca3af',
-            fontSize: '12px',
-          }}>
-            <span>Powered by</span>
-            <span style={{ color: '#10b981', fontWeight: '700' }}>GrowthKit</span>
-          </div>
+          <a
+            href="https://growth.fenixblack.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              marginTop: '48px',
+              paddingTop: '24px',
+              borderTop: '1px solid #e5e7eb',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '12px',
+              textDecoration: 'none',
+              transition: 'opacity 0.2s ease',
+              cursor: 'pointer',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '0.7'}
+            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            <img 
+              src="https://growth.fenixblack.ai/growthkit-logo-alpha.png"
+              alt="GrowthKit"
+              style={{
+                height: '24px',
+                width: 'auto',
+              }}
+            />
+            <span style={{
+              color: '#9ca3af',
+              fontSize: '11px',
+              fontWeight: '500',
+            }}>
+              Powered by GrowthKit
+            </span>
+          </a>
         )}
       </div>
     </div>
@@ -735,16 +803,41 @@ export function WaitlistForm({
         </form>
 
         {!app?.hideGrowthKitBranding && (
-          <div style={{
-            marginTop: '24px',
-            paddingTop: '16px',
-            borderTop: '1px solid #e5e7eb',
-            textAlign: 'center',
-            color: '#9ca3af',
-            fontSize: '11px',
-          }}>
-            Powered by <span style={{ color: '#10b981', fontWeight: '600' }}>GrowthKit</span>
-          </div>
+          <a
+            href="https://growth.fenixblack.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              marginTop: '24px',
+              paddingTop: '16px',
+              borderTop: '1px solid #e5e7eb',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px',
+              textDecoration: 'none',
+              transition: 'opacity 0.2s ease',
+              cursor: 'pointer',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '0.7'}
+            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            <img 
+              src="https://growth.fenixblack.ai/growthkit-logo-alpha.png"
+              alt="GrowthKit"
+              style={{
+                height: '20px',
+                width: 'auto',
+              }}
+            />
+            <span style={{
+              color: '#9ca3af',
+              fontSize: '10px',
+              fontWeight: '500',
+            }}>
+              Powered by GrowthKit
+            </span>
+          </a>
         )}
       </div>
     </div>
