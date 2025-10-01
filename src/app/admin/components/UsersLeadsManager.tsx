@@ -473,10 +473,18 @@ export default function UsersLeadsManager({
               ) : (
                 users.map((user) => {
                   const displayName = user.name || `fp_${user.fingerprintId.substring(0, 8)}`;
-                  const isActive = new Date(user.lastActiveAt).getTime() > Date.now() - 5 * 60 * 1000; // Active if within 5 min
+                  // User is "Active" if they were active within the last 5 minutes
+                  const isActive = new Date(user.lastActiveAt).getTime() > Date.now() - 5 * 60 * 1000;
                   
                   return (
-                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <tr 
+                    key={user.id} 
+                    className={cn(
+                      isActive 
+                        ? "bg-green-50/50 hover:bg-green-100/50 dark:bg-green-900/10 dark:hover:bg-green-900/20" 
+                        : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                    )}
+                  >
                     <td className="px-4 py-4">
                       <div className="flex items-center space-x-3">
                         <div className="flex-shrink-0">
@@ -504,26 +512,18 @@ export default function UsersLeadsManager({
                       </div>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="space-y-1">
-                        {user.location?.city || user.location?.country ? (
-                          <>
-                            <div className="flex items-center space-x-1 text-sm text-gray-900 dark:text-white">
-                              <MapPin size={14} className="text-gray-400" />
-                              <span>{user.location.city || user.location.country}</span>
-                            </div>
-                            <div className={cn(
-                              "text-xs px-2 py-0.5 rounded-full inline-block",
-                              isActive 
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" 
-                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
-                            )}>
-                              {isActive ? 'Active' : 'Inactive'}
-                            </div>
-                          </>
-                        ) : (
-                          <span className="text-sm text-gray-400">-</span>
-                        )}
-                      </div>
+                      {user.location?.city || user.location?.country ? (
+                        <div className="flex items-center space-x-1 text-sm text-gray-900 dark:text-white">
+                          <MapPin size={14} className="text-gray-400" />
+                          <span>
+                            {user.location.city && user.location.country 
+                              ? `${user.location.city}, ${user.location.country}`
+                              : user.location.city || user.location.country}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center space-x-2">
