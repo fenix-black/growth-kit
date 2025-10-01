@@ -49,16 +49,20 @@ Enhanced the Users & Leads table with browser context and location tracking to p
 - **CSV Export:** Now includes Browser, Device, and Location columns
 
 ## Technology Stack
-- **geoip-lite**: Free, offline IP geolocation (no API limits)
+- **Vercel Geolocation Headers**: Built-in, free, no downloads required
+  - Uses `x-vercel-ip-city`, `x-vercel-ip-country`, `x-vercel-ip-country-region`
+  - Automatically available on Vercel production deployments
+  - Gracefully returns null for local development
 - **Prisma**: Database ORM for schema updates
 - **Lucide React**: Icons (Fingerprint, MapPin)
 - **Tailwind CSS**: Styling
 
 ## Privacy Considerations
 - Only city-level location is stored (not precise coordinates)
-- Local IPs (127.0.0.1, 192.168.x, 10.x) are skipped
+- Uses Vercel's infrastructure (no third-party geolocation services)
 - No tracking cookies or invasive methods
 - Data is only captured on authentication/fingerprint creation
+- Gracefully handles missing data (e.g., local development, VPN users)
 
 ## Migration
 The migration file is located at:

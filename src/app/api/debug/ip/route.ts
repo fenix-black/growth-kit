@@ -5,7 +5,7 @@ import { successResponse } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
   const clientIp = getClientIp(request.headers);
-  const location = getGeolocation(clientIp);
+  const location = getGeolocation(clientIp, request.headers);
   
   // Get all IP-related headers
   const headers: Record<string, string | null> = {

@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       const clientIp = getClientIp(request.headers);
       const userAgent = request.headers.get('user-agent') || '';
       const { getGeolocation, detectBrowser, detectDevice } = await import('@/lib/utils/geolocation');
-      const location = getGeolocation(clientIp);
+      const location = getGeolocation(clientIp, request.headers);
       const browser = context?.browser || detectBrowser(userAgent);
       const device = context?.device || detectDevice(userAgent);
       

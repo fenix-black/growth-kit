@@ -7,42 +7,28 @@ export interface GeolocationData {
 
 /**
  * Get geolocation data from IP address
+ * Uses Vercel's built-in geolocation headers (free, no downloads)
+ * For local development, gracefully returns null (location not critical for localhost)
  */
-export function getGeolocation(ip: string): GeolocationData {
-  console.log('[Geolocation] Input IP:', ip);
-  
-  // Skip localhost/private IPs
-  if (!ip || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')) {
-    console.log('[Geolocation] Skipping private/localhost IP');
-    return { city: null, country: null, region: null };
-  }
-
-  try {
-    // Dynamic import to avoid loading during build time
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const geoip = require('geoip-lite');
-    const geo = geoip.lookup(ip);
+export function getGeolocation(ip: string, headers?: Headers): GeolocationData {
+  // Use Vercel's geolocation headers (available in production on Vercel)
+  if (headers) {
+    const city = headers.get('x-vercel-ip-city');
+    const country = headers.get('x-vercel-ip-country');
+    const region = headers.get('x-vercel-ip-country-region');
     
-    console.log('[Geolocation] Lookup result:', geo);
-    
-    if (!geo) {
-      console.log('[Geolocation] No geo data found for IP:', ip);
-      return { city: null, country: null, region: null };
+    if (city || country) {
+      return {
+        city: city || null,
+        country: country || null,
+        region: region || null,
+      };
     }
-
-    const result = {
-      city: geo.city || null,
-      country: geo.country || null,
-      region: geo.region || null,
-    };
-    
-    console.log('[Geolocation] Returning:', result);
-    return result;
-  } catch (error) {
-    // Fallback if geoip-lite fails to load
-    console.error('[Geolocation] Failed to load geoip-lite:', error);
-    return { city: null, country: null, region: null };
   }
+  
+  // For localhost/private IPs or missing headers, return null
+  // Location is not critical for development environments
+  return { city: null, country: null, region: null };
 }
 
 /**

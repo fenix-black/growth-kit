@@ -27,10 +27,7 @@ export async function POST(request: NextRequest) {
     // Use context from SDK if available, otherwise detect from headers
     const browser = context?.browser || detectBrowser(userAgent);
     const device = context?.device || detectDevice(userAgent);
-    const location = getGeolocation(clientIp);
-    
-    // Debug logging for production
-    console.log('[Token] IP:', clientIp, 'Location:', location, 'Browser:', browser, 'Device:', device);
+    const location = getGeolocation(clientIp, request.headers);
 
     if (!publicKey || !fingerprint) {
       return corsErrors.badRequest('publicKey and fingerprint are required', origin);

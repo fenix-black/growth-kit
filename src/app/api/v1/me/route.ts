@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       const userAgent = request.headers.get('user-agent') || '';
       const browser = context?.browser || detectBrowser(userAgent);
       const device = context?.device || detectDevice(userAgent);
-      const location = getGeolocation(clientIp);
+      const location = getGeolocation(clientIp, request.headers);
       
       fingerprintRecord = await prisma.fingerprint.create({
         data: {
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       // For existing fingerprints, update location if missing
       if (!fingerprintRecord.location) {
         const userAgent = request.headers.get('user-agent') || '';
-        const geoLocation = getGeolocation(clientIp);
+        const geoLocation = getGeolocation(clientIp, request.headers);
         const browserInfo = context?.browser || detectBrowser(userAgent);
         const deviceInfo = context?.device || detectDevice(userAgent);
         
