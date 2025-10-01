@@ -1,6 +1,6 @@
 {
   "name": "@fenixblack/growthkit",
-  "version": "0.5.7",
+  "version": "0.6.0",
   "description": "React SDK for GrowthKit - Intelligent waitlist and referral management",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -45,7 +45,7 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "@rajesh896/broprint.js": "^2.1.1",
+    "@fingerprintjs/fingerprintjs": "^4.6.2",
     "@types/jsonwebtoken": "^9.0.10",
     "jsonwebtoken": "^9.0.2"
   },

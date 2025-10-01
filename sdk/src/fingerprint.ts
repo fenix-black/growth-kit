@@ -1,7 +1,7 @@
-// @ts-ignore - broprint.js doesn't have TypeScript definitions
-import { getCurrentBrowserFingerPrint } from '@rajesh896/broprint.js';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 let cachedFingerprint: string | null = null;
+let fpAgent: any = null;
 
 // Storage key for persistent fingerprint
 const FINGERPRINT_STORAGE_KEY = 'growthkit_fingerprint';
@@ -43,34 +43,16 @@ export async function getFingerprint(): Promise<string> {
       });
     }
 
-    // Get browser fingerprint using broprint.js
-    const fingerprintResult: any = await getCurrentBrowserFingerPrint();
-    
-    console.log('[GrowthKit] Fingerprint result type:', typeof fingerprintResult);
-    
-    let fingerprint: string;
-    
-    // Handle different possible return formats from broprint.js
-    if (fingerprintResult && typeof fingerprintResult === 'object') {
-      // The library might return an object with the fingerprint as a property
-      if ('hash' in fingerprintResult) {
-        fingerprint = String(fingerprintResult.hash);
-      } else if ('fingerprint' in fingerprintResult) {
-        fingerprint = String(fingerprintResult.fingerprint);
-      } else if ('id' in fingerprintResult) {
-        fingerprint = String(fingerprintResult.id);
-      } else {
-        // If it's an object but we don't know the structure, stringify it
-        fingerprint = JSON.stringify(fingerprintResult);
-      }
-    } else if (fingerprintResult && typeof fingerprintResult === 'string') {
-      fingerprint = fingerprintResult;
-    } else if (fingerprintResult && typeof fingerprintResult === 'number') {
-      fingerprint = fingerprintResult.toString();
-    } else {
-      // If the result is not valid, throw an error to trigger fallback
-      throw new Error(`Invalid fingerprint type: ${typeof fingerprintResult}`);
+    // Initialize FingerprintJS agent (only once)
+    if (!fpAgent) {
+      fpAgent = await FingerprintJS.load();
     }
+
+    // Get browser fingerprint using FingerprintJS
+    const result = await fpAgent.get();
+    const fingerprint = result.visitorId;
+    
+    console.log('[GrowthKit] FingerprintJS generated:', fingerprint.substring(0, 10) + '...');
     
     if (!fingerprint || fingerprint.length === 0) {
       throw new Error('Empty fingerprint generated');
@@ -82,15 +64,14 @@ export async function getFingerprint(): Promise<string> {
     // Store fingerprint in localStorage for persistence across page reloads
     try {
       localStorage.setItem(FINGERPRINT_STORAGE_KEY, fingerprint);
-      console.log('[GrowthKit] Fingerprint generated and stored:', fingerprint.substring(0, 10) + '...');
+      console.log('[GrowthKit] Fingerprint stored in localStorage');
     } catch (error) {
       console.warn('[GrowthKit] Could not store fingerprint:', error);
-      console.log('[GrowthKit] Fingerprint generated (not stored):', fingerprint.substring(0, 10) + '...');
     }
     
     return fingerprint;
   } catch (error) {
-    // Fallback to a simple fingerprint if broprint.js fails
+    // Fallback to a simple fingerprint if FingerprintJS fails
     console.warn('[GrowthKit] Fingerprint generation failed, using fallback:', error);
     
     // Generate a fallback fingerprint using available browser properties

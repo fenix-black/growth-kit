@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0] - 2025-10-01
+
+### Changed
+- **BREAKING IMPROVEMENT**: Replaced broprint.js with @fingerprintjs/fingerprintjs
+  - More stable and reliable fingerprint generation
+  - Better cross-browser support, especially Safari/iOS
+  - Industry-standard fingerprinting solution
+  - Improved persistence across sessions
+- **Important**: Existing users will get new fingerprints on first visit with this version
+  - localStorage keys remain the same for smooth transition
+  - Consider migration strategy for production apps
+
 ## [0.5.7] - 2025-09-30
 
 ### Added
