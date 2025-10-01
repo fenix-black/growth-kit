@@ -83,6 +83,11 @@ export interface PublicAuthContext {
   app: {
     id: string;
     name: string;
+    description: string | null;
+    logoUrl: string | null;
+    primaryColor: string | null;
+    waitlistLayout: string | null;
+    hideGrowthKitBranding: boolean | null;
     corsOrigins: string[];
     isActive: boolean;
   };
@@ -128,6 +133,11 @@ export async function verifyPublicToken(headers: Headers): Promise<PublicAuthCon
         select: {
           id: true,
           name: true,
+          description: true,
+          logoUrl: true,
+          primaryColor: true,
+          waitlistLayout: true,
+          hideGrowthKitBranding: true,
           corsOrigins: true,
           isActive: true,
         },

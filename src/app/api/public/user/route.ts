@@ -95,6 +95,12 @@ export async function POST(request: NextRequest) {
     const appWithWaitlist = await prisma.app.findUnique({
       where: { id: app.id },
       select: {
+        name: true,
+        description: true,
+        logoUrl: true,
+        primaryColor: true,
+        waitlistLayout: true,
+        hideGrowthKitBranding: true,
         creditsPaused: true,
         policyJson: true,
         waitlistEnabled: true,
@@ -528,6 +534,7 @@ export async function POST(request: NextRequest) {
               acceptedAt: waitlistEntry.acceptedAt?.toISOString() || null,
               email: lead.email,
               emailVerified: lead.emailVerified,
+              message: appWithWaitlist?.waitlistMessage,
               requiresWaitlist: waitlistEntry.status !== 'ACCEPTED',
             };
           } else {
@@ -537,7 +544,7 @@ export async function POST(request: NextRequest) {
               status: 'none',
               position: null,
               requiresWaitlist: true,
-              message: appWithWaitlist.waitlistMessage || 'Join our exclusive waitlist for early access',
+              message: appWithWaitlist?.waitlistMessage,
             };
           }
         } else {
@@ -547,7 +554,7 @@ export async function POST(request: NextRequest) {
             status: 'none',
             position: null,
             requiresWaitlist: true,
-            message: appWithWaitlist.waitlistMessage || 'Join our exclusive waitlist for early access',
+            message: appWithWaitlist?.waitlistMessage,
           };
         }
       }
@@ -580,12 +587,12 @@ export async function POST(request: NextRequest) {
       },
       // App branding for SDK widget
       app: {
-        name: app.name,
-        description: app.description,
-        logoUrl: app.logoUrl,
-        primaryColor: app.primaryColor,
-        waitlistLayout: app.waitlistLayout,
-        hideGrowthKitBranding: app.hideGrowthKitBranding,
+        name: appWithWaitlist?.name || app.name,
+        description: appWithWaitlist?.description,
+        logoUrl: appWithWaitlist?.logoUrl,
+        primaryColor: appWithWaitlist?.primaryColor,
+        waitlistLayout: appWithWaitlist?.waitlistLayout,
+        hideGrowthKitBranding: appWithWaitlist?.hideGrowthKitBranding || false,
       },
       // Include waitlist data if applicable
       ...(waitlistData && { waitlist: waitlistData }),
