@@ -105,6 +105,41 @@ export async function POST(request: NextRequest) {
           userAgent: request.headers.get('user-agent'),
         },
       });
+    } else {
+      // For existing fingerprints, update location if missing
+      if (!fingerprintRecord.location) {
+        const userAgent = request.headers.get('user-agent') || '';
+        const geoLocation = getGeolocation(clientIp);
+        const browserInfo = context?.browser || detectBrowser(userAgent);
+        const deviceInfo = context?.device || detectDevice(userAgent);
+        
+        if (geoLocation.city || geoLocation.country) {
+          await prisma.fingerprint.update({
+            where: { id: fingerprintRecord.id },
+            data: {
+              browser: browserInfo,
+              device: deviceInfo,
+              location: geoLocation,
+            },
+          });
+          
+          // Refresh the record
+          const updatedRecord = await prisma.fingerprint.findUnique({
+            where: { id: fingerprintRecord.id },
+            include: {
+              credits: {
+                orderBy: { createdAt: 'desc' },
+              },
+              usage: {
+                orderBy: { createdAt: 'desc' },
+              },
+            },
+          });
+          if (updatedRecord) {
+            fingerprintRecord = updatedRecord;
+          }
+        }
+      }
     }
 
     // Check if user should be grandfathered BEFORE processing any claims

@@ -69,6 +69,27 @@ export async function POST(request: NextRequest) {
     if (!fingerprintRecord) {
       return corsErrors.notFound(origin);
     }
+    
+    // For existing fingerprints, backfill location if missing
+    if (!fingerprintRecord.location) {
+      const clientIp = getClientIp(request.headers);
+      const userAgent = request.headers.get('user-agent') || '';
+      const { getGeolocation, detectBrowser, detectDevice } = await import('@/lib/utils/geolocation');
+      const location = getGeolocation(clientIp);
+      const browser = context?.browser || detectBrowser(userAgent);
+      const device = context?.device || detectDevice(userAgent);
+      
+      if (location.city || location.country) {
+        await prisma.fingerprint.update({
+          where: { id: fingerprintRecord.id },
+          data: {
+            browser,
+            device,
+            location,
+          },
+        });
+      }
+    }
 
     // Get app settings (need to refetch to get all fields)
     const appWithWaitlist = await prisma.app.findUnique({

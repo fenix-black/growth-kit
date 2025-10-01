@@ -28,6 +28,9 @@ export async function POST(request: NextRequest) {
     const browser = context?.browser || detectBrowser(userAgent);
     const device = context?.device || detectDevice(userAgent);
     const location = getGeolocation(clientIp);
+    
+    // Debug logging for production
+    console.log('[Token] IP:', clientIp, 'Location:', location, 'Browser:', browser, 'Device:', device);
 
     if (!publicKey || !fingerprint) {
       return corsErrors.badRequest('publicKey and fingerprint are required', origin);
@@ -88,20 +91,33 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // Update last active timestamp and browser context if changed
-      const shouldUpdateContext = 
+      const shouldUpdateBrowserDevice = 
         fingerprintRecord.browser !== browser || 
         fingerprintRecord.device !== device;
       
+      // Always update location if it's missing or if browser/device changed
+      const shouldUpdateLocation = 
+        !fingerprintRecord.location || 
+        shouldUpdateBrowserDevice;
+      
+      const updateData: any = { 
+        lastActiveAt: new Date(),
+      };
+      
+      // Update browser/device if changed
+      if (shouldUpdateBrowserDevice) {
+        updateData.browser = browser;
+        updateData.device = device;
+      }
+      
+      // Update location if missing or context changed
+      if (shouldUpdateLocation && (location.city || location.country)) {
+        updateData.location = location;
+      }
+      
       await prisma.fingerprint.update({
         where: { id: fingerprintRecord.id },
-        data: { 
-          lastActiveAt: new Date(),
-          ...(shouldUpdateContext && {
-            browser,
-            device,
-            ...(location.city || location.country ? { location } : {}),
-          }),
-        },
+        data: updateData,
       });
     }
 
