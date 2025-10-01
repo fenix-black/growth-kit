@@ -9,8 +9,11 @@ export interface GeolocationData {
  * Get geolocation data from IP address
  */
 export function getGeolocation(ip: string): GeolocationData {
+  console.log('[Geolocation] Input IP:', ip);
+  
   // Skip localhost/private IPs
   if (!ip || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')) {
+    console.log('[Geolocation] Skipping private/localhost IP');
     return { city: null, country: null, region: null };
   }
 
@@ -20,18 +23,24 @@ export function getGeolocation(ip: string): GeolocationData {
     const geoip = require('geoip-lite');
     const geo = geoip.lookup(ip);
     
+    console.log('[Geolocation] Lookup result:', geo);
+    
     if (!geo) {
+      console.log('[Geolocation] No geo data found for IP:', ip);
       return { city: null, country: null, region: null };
     }
 
-    return {
+    const result = {
       city: geo.city || null,
       country: geo.country || null,
       region: geo.region || null,
     };
+    
+    console.log('[Geolocation] Returning:', result);
+    return result;
   } catch (error) {
     // Fallback if geoip-lite fails to load
-    console.warn('[Geolocation] Failed to load geoip-lite:', error);
+    console.error('[Geolocation] Failed to load geoip-lite:', error);
     return { city: null, country: null, region: null };
   }
 }

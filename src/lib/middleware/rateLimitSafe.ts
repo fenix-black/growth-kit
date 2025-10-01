@@ -226,22 +226,33 @@ export async function checkRateLimitLegacy(
  * Get client IP from headers
  */
 export function getClientIp(headers: Headers): string {
+  // Try Vercel-specific header first
+  const vercelIp = headers.get('x-vercel-forwarded-for');
+  if (vercelIp) {
+    console.log('[IP] Found Vercel IP:', vercelIp);
+    return vercelIp.split(',')[0].trim();
+  }
+  
   // Check various headers that might contain the real IP
   const forwardedFor = headers.get('x-forwarded-for');
   if (forwardedFor) {
+    console.log('[IP] Found X-Forwarded-For:', forwardedFor);
     return forwardedFor.split(',')[0].trim();
   }
   
   const realIp = headers.get('x-real-ip');
   if (realIp) {
+    console.log('[IP] Found X-Real-IP:', realIp);
     return realIp.trim();
   }
   
   const cfConnectingIp = headers.get('cf-connecting-ip');
   if (cfConnectingIp) {
+    console.log('[IP] Found CF-Connecting-IP:', cfConnectingIp);
     return cfConnectingIp.trim();
   }
   
   // Fallback to a default
+  console.log('[IP] No IP header found, using fallback 127.0.0.1');
   return '127.0.0.1';
 }
