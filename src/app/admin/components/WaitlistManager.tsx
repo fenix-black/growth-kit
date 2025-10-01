@@ -27,7 +27,7 @@ interface WaitlistEntry {
 
 interface WaitlistConfig {
   waitlistEnabled: boolean;
-  waitlistMessage: string | null;
+  waitlistMessages: string[];
   autoInviteEnabled: boolean;
   dailyInviteQuota: number;
   inviteTime: string;
@@ -57,7 +57,7 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
   const invitationModalRef = useFocusTrap(showInviteModal);
   const [config, setConfig] = useState<WaitlistConfig>({
     waitlistEnabled: false,
-    waitlistMessage: '',
+    waitlistMessages: [],
     autoInviteEnabled: false,
     dailyInviteQuota: 10,
     inviteTime: '09:00',
@@ -112,7 +112,7 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
         const app = data.data.app;
         setConfig({
           waitlistEnabled: app.waitlistEnabled,
-          waitlistMessage: app.waitlistMessage || '',
+          waitlistMessages: app.waitlistMessages || [],
           autoInviteEnabled: app.autoInviteEnabled,
           dailyInviteQuota: app.dailyInviteQuota,
           inviteTime: app.inviteTime,
@@ -587,18 +587,7 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
                     </label>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Waitlist Message (optional)
-                    </label>
-                    <textarea
-                      value={config.waitlistMessage || ''}
-                      onChange={(e) => setConfig({ ...config, waitlistMessage: e.target.value })}
-                      rows={3}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      placeholder="Join our exclusive waitlist to get early access..."
-                    />
-                  </div>
+                  {/* Waitlist messages are now managed in the Branding & Waitlist Display card */}
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700">

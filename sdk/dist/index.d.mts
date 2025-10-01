@@ -27,9 +27,11 @@ interface WaitlistData {
     position: number | null;
     requiresWaitlist?: boolean;
     message?: string;
+    messages?: string[];
     invitedAt?: string;
     acceptedAt?: string;
     email?: string;
+    count?: number;
 }
 interface AppBranding {
     name: string;
@@ -59,6 +61,7 @@ interface GrowthKitState {
     waitlistPosition: number | null;
     waitlistMessage?: string;
     shouldShowWaitlist: boolean;
+    waitlist?: WaitlistData;
     app?: AppBranding;
 }
 interface CompleteActionOptions {

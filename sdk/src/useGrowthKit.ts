@@ -238,6 +238,7 @@ export function useGrowthKit(): GrowthKitHook {
         waitlistPosition,
         waitlistMessage,
         shouldShowWaitlist,
+        waitlist: waitlistData, // Full waitlist data including count
         // App branding
         app: data.app,
       });
@@ -347,6 +348,7 @@ export function useGrowthKit(): GrowthKitHook {
           waitlistPosition,
           waitlistMessage,
           shouldShowWaitlist,
+          waitlist: waitlistData, // Full waitlist data including count
           // App branding
           app: data.app,
         }));

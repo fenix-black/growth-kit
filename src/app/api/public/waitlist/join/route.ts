@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       where: { id: app.id },
       select: {
         waitlistEnabled: true,
-        waitlistMessage: true,
+        waitlistMessages: true,
       },
     });
 
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
         joined: true,
         position: nextPosition,
         creditsAwarded,
-        message: appWithWaitlist.waitlistMessage || 'Successfully joined the waitlist!',
+        messages: appWithWaitlist.waitlistMessages || [],
       }),
       origin,
       app.corsOrigins

@@ -39,7 +39,7 @@ model App {
   masterReferralCredits       Int           @default(10)
   waitlistEnabled             Boolean       @default(false)
   waitlistEnabledAt           DateTime?
-  waitlistMessage             String?
+  waitlistMessages            String[]      @default([])
   waitlistLayout              String        @default("centered")
   description                 String?
   logoUrl                     String?

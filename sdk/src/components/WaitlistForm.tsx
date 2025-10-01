@@ -32,7 +32,27 @@ export function WaitlistForm({
   const { app } = growthKit;
   const layout = app?.waitlistLayout || 'centered';
   const brandColor = app?.primaryColor || themeColors.primary;
-  const displayMessage = message || growthKit.waitlistMessage || (app?.description ? null : 'Join our exclusive waitlist for early access');
+  
+  // Get custom message from props, messages array, or fallback
+  const getCustomMessage = () => {
+    if (message) return message; // Props message takes priority
+    
+    // Check if we have messages array from waitlist data
+    const messages = growthKit.waitlist?.messages || [];
+    if (messages.length > 0) {
+      // Randomly select a message from the array
+      const randomIndex = Math.floor(Math.random() * messages.length);
+      return messages[randomIndex];
+    }
+    
+    // Backwards compatibility: check for single message
+    if (growthKit.waitlistMessage) return growthKit.waitlistMessage;
+    
+    // Final fallback
+    return app?.description ? null : 'Join our exclusive waitlist for early access';
+  };
+  
+  const displayMessage = getCustomMessage();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -228,6 +248,23 @@ export function WaitlistForm({
     );
   }
 
+  // Get smart waitlist message based on count
+  const getWaitlistMessage = () => {
+    const waitlistCount = growthKit.waitlist?.count || 0;
+    const threshold = 500;
+    
+    // If count is significant, show it
+    if (waitlistCount >= threshold) {
+      if (waitlistCount >= 1000) {
+        return `Join ${waitlistCount.toLocaleString()} others on the waitlist`;
+      }
+      return `Join over ${Math.floor(waitlistCount / 100) * 100} on the waitlist`;
+    }
+    
+    // Otherwise show value-driven message
+    return displayMessage || 'Be among the first to get access';
+  };
+
   // Join form - render based on layout
   const renderCenteredLayout = () => (
     <div 
@@ -241,6 +278,7 @@ export function WaitlistForm({
         background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
         backgroundSize: '200% 200%',
         animation: 'gradientShift 15s ease infinite',
+        padding: '24px',
         ...style
       }}
     >
@@ -253,259 +291,278 @@ export function WaitlistForm({
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes logoFloat {
+          from { opacity: 0; transform: translateY(-20px) scale(0.9); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
       `}</style>
 
+      {/* Floating Logo Container */}
       <div style={{
-        background: 'rgba(255, 255, 255, 0.05)',
-        borderRadius: '24px',
-        padding: '56px',
+        position: 'relative',
         maxWidth: '520px',
         width: '100%',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        animation: 'fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
       }}>
-        {/* Logo */}
-        {app?.logoUrl ? (
+        {/* Logo - Floating above card */}
+        {app?.logoUrl || app?.name ? (
           <div style={{
-            width: '96px',
-            height: '96px',
-            borderRadius: '20px',
-            background: 'rgba(255, 255, 255, 0.95)',
-            padding: '12px',
-            margin: '0 auto 32px',
+            position: 'relative',
+            zIndex: 2,
+            marginBottom: '-70px', // Overlap with card
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: `0 12px 32px ${brandColor}30, 0 0 0 1px rgba(255, 255, 255, 0.1)`,
+            animation: 'logoFloat 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}>
-            <img 
-              src={app.logoUrl} 
-              alt={app.name}
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                objectFit: 'contain',
-                display: 'block',
-              }}
-            />
-          </div>
-        ) : app?.name ? (
-          <div style={{
-            width: '96px',
-            height: '96px',
-            borderRadius: '20px',
-            background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '36px',
-            fontWeight: '700',
-            color: 'white',
-            margin: '0 auto 32px',
-            boxShadow: `0 12px 32px ${brandColor}40, 0 0 0 1px rgba(255, 255, 255, 0.1)`,
-          }}>
-            {getLogoFallback()}
+            {app?.logoUrl ? (
+              <div style={{
+                width: '140px',
+                height: '140px',
+                borderRadius: '28px',
+                background: 'rgba(255, 255, 255, 0.98)',
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: `0 20px 60px ${brandColor}40, 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2)`,
+                backdropFilter: 'blur(10px)',
+              }}>
+                <img 
+                  src={app.logoUrl} 
+                  alt={app.name}
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'contain',
+                    display: 'block',
+                  }}
+                />
+              </div>
+            ) : (
+              <div style={{
+                width: '140px',
+                height: '140px',
+                borderRadius: '28px',
+                background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '48px',
+                fontWeight: '800',
+                color: 'white',
+                boxShadow: `0 20px 60px ${brandColor}50, 0 8px 24px rgba(0, 0, 0, 0.3)`,
+                letterSpacing: '-0.02em',
+              }}>
+                {getLogoFallback()}
+              </div>
+            )}
           </div>
         ) : null}
 
-        {/* App Name */}
-        <h1 style={{ 
-          marginBottom: '12px', 
-          color: 'white',
-          fontSize: '36px',
-          fontWeight: '900',
-          background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          letterSpacing: '-0.03em',
-          textAlign: 'center',
-          lineHeight: '1.2',
+        {/* Main Card */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '24px',
+          padding: app?.logoUrl || app?.name ? '90px 64px 64px' : '64px',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          animation: 'fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          position: 'relative',
+          zIndex: 1,
         }}>
-          {app?.name || 'Early Access'}
-        </h1>
-        
-        {/* App Description */}
-        {app?.description && (
-          <p style={{ 
-            color: 'rgba(255, 255, 255, 0.9)',
-            marginBottom: '24px',
-            fontSize: '18px',
-            fontWeight: '500',
-            lineHeight: '1.6',
+          {/* App Name */}
+          <h1 style={{ 
+            marginBottom: '16px', 
+            color: 'white',
+            fontSize: '40px',
+            fontWeight: '900',
+            background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            letterSpacing: '-0.03em',
             textAlign: 'center',
-            opacity: 0.9,
+            lineHeight: '1.1',
           }}>
-            {app.description}
-          </p>
-        )}
-
-        {/* Divider */}
-        {displayMessage && (
-          <div style={{
-            height: '1px',
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
-            margin: '24px 0',
-          }}/>
-        )}
-
-        {/* Custom Waitlist Message */}
-        {displayMessage && (
-          <p style={{
-            color: brandColor,
-            fontSize: '20px',
-            fontWeight: '700',
-            lineHeight: '1.5',
-            textAlign: 'center',
-            marginBottom: '36px',
-          }}>
-            {displayMessage}
-          </p>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <input
-              type="email"
-              placeholder={t('waitlist.enterYourEmail')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isSubmitting}
-              style={{
-                width: '100%',
-                padding: '18px 24px',
-                fontSize: '16px',
-                border: '2px solid rgba(255, 255, 255, 0.15)',
-                borderRadius: '16px',
-                outline: 'none',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxSizing: 'border-box',
-                fontFamily: 'inherit',
-                fontWeight: '500',
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                backdropFilter: 'blur(10px)',
-                color: 'white',
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = brandColor;
-                e.currentTarget.style.boxShadow = `0 0 0 4px ${brandColor}20`;
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.12)';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            />
-          </div>
-
-          {error && (
+            {app?.name || 'Early Access'}
+          </h1>
+          
+          {/* App Description */}
+          {app?.description && (
             <p style={{ 
-              color: '#ef4444',
-              marginBottom: '24px',
-              fontSize: '14px',
+              color: 'rgba(255, 255, 255, 0.85)',
+              marginBottom: '32px',
+              fontSize: '17px',
               fontWeight: '500',
-              padding: '12px 16px',
-              backgroundColor: 'rgba(239, 68, 68, 0.2)',
-              border: '1px solid rgba(239, 68, 68, 0.4)',
-              borderRadius: '12px',
+              lineHeight: '1.6',
               textAlign: 'center',
             }}>
-              {error}
+              {app.description}
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            style={{
-              width: '100%',
-              padding: '20px 32px',
-              fontSize: '18px',
+          {/* Waitlist Context Message */}
+          <div style={{
+            background: `linear-gradient(135deg, ${brandColor}15 0%, ${brandColor}08 100%)`,
+            border: `1px solid ${brandColor}30`,
+            borderRadius: '16px',
+            padding: '20px 24px',
+            marginBottom: '32px',
+            textAlign: 'center',
+          }}>
+            <p style={{
+              color: brandColor,
+              fontSize: '16px',
               fontWeight: '700',
-              background: isSubmitting 
-                ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)' 
-                : `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
-              color: 'white',
-              border: 'none',
-              borderRadius: '16px',
-              cursor: isSubmitting ? 'not-allowed' : 'pointer',
-              transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              fontFamily: 'inherit',
-              letterSpacing: '0.025em',
-              boxShadow: isSubmitting 
-                ? 'none'
-                : `0 10px 30px ${brandColor}40, 0 0 0 1px rgba(255, 255, 255, 0.1) inset`,
-            }}
-            onMouseOver={(e) => {
-              if (!isSubmitting) {
-                e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
-                e.currentTarget.style.boxShadow = `0 20px 50px ${brandColor}60, 0 0 0 1px rgba(255, 255, 255, 0.2) inset`;
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!isSubmitting) {
-                e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                e.currentTarget.style.boxShadow = `0 10px 30px ${brandColor}40, 0 0 0 1px rgba(255, 255, 255, 0.1) inset`;
-              }
-            }}
-          >
-            {isSubmitting ? t('waitlist.joining') : t('waitlist.joinWaitlist')}
-          </button>
-        </form>
-
-        <p style={{
-          marginTop: '24px',
-          textAlign: 'center',
-          color: 'rgba(255, 255, 255, 0.5)',
-          fontSize: '14px',
-          fontWeight: '500',
-        }}>
-          {t('waitlist.noSpam')}
-        </p>
-
-        {!app?.hideGrowthKitBranding && (
-          <a
-            href="https://growth.fenixblack.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              marginTop: '32px',
-              paddingTop: '24px',
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '12px',
-              textDecoration: 'none',
-              transition: 'opacity 0.2s ease',
-              cursor: 'pointer',
-            }}
-            onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
-            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-          >
-            <img 
-              src="https://growth.fenixblack.ai/growthkit-logo-dark-alpha.png"
-              alt="GrowthKit"
-              style={{
-                height: '24px',
-                width: 'auto',
-              }}
-            />
-            <span style={{
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontSize: '11px',
-              fontWeight: '500',
+              lineHeight: '1.5',
+              margin: 0,
             }}>
-              Powered by GrowthKit
-            </span>
-          </a>
-        )}
+              {getWaitlistMessage()}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: '20px' }}>
+              <input
+                type="email"
+                placeholder={t('waitlist.enterYourEmail')}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
+                style={{
+                  width: '100%',
+                  padding: '18px 24px',
+                  fontSize: '16px',
+                  border: '2px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '16px',
+                  outline: 'none',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxSizing: 'border-box',
+                  fontFamily: 'inherit',
+                  fontWeight: '500',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(10px)',
+                  color: 'white',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = brandColor;
+                  e.currentTarget.style.boxShadow = `0 0 0 4px ${brandColor}20`;
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.12)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              />
+            </div>
+
+            {error && (
+              <p style={{ 
+                color: '#ef4444',
+                marginBottom: '24px',
+                fontSize: '14px',
+                fontWeight: '500',
+                padding: '12px 16px',
+                backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                border: '1px solid rgba(239, 68, 68, 0.4)',
+                borderRadius: '12px',
+                textAlign: 'center',
+              }}>
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                width: '100%',
+                padding: '20px 32px',
+                fontSize: '18px',
+                fontWeight: '700',
+                background: isSubmitting 
+                  ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)' 
+                  : `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
+                color: 'white',
+                border: 'none',
+                borderRadius: '16px',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                fontFamily: 'inherit',
+                letterSpacing: '0.025em',
+                boxShadow: isSubmitting 
+                  ? 'none'
+                  : `0 10px 30px ${brandColor}40, 0 0 0 1px rgba(255, 255, 255, 0.1) inset`,
+              }}
+              onMouseOver={(e) => {
+                if (!isSubmitting) {
+                  e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
+                  e.currentTarget.style.boxShadow = `0 20px 50px ${brandColor}60, 0 0 0 1px rgba(255, 255, 255, 0.2) inset`;
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!isSubmitting) {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.boxShadow = `0 10px 30px ${brandColor}40, 0 0 0 1px rgba(255, 255, 255, 0.1) inset`;
+                }
+              }}
+            >
+              {isSubmitting ? t('waitlist.joining') : t('waitlist.joinWaitlist')}
+            </button>
+          </form>
+
+          <p style={{
+            marginTop: '24px',
+            textAlign: 'center',
+            color: 'rgba(255, 255, 255, 0.5)',
+            fontSize: '14px',
+            fontWeight: '500',
+          }}>
+            {t('waitlist.noSpam')}
+          </p>
+
+          {!app?.hideGrowthKitBranding && (
+            <a
+              href="https://growth.fenixblack.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                marginTop: '40px',
+                paddingTop: '32px',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                textDecoration: 'none',
+                transition: 'opacity 0.2s ease',
+                cursor: 'pointer',
+              }}
+              onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              <img 
+                src="https://growth.fenixblack.ai/growthkit-logo-dark-alpha.png"
+                alt="GrowthKit"
+                style={{
+                  height: '24px',
+                  width: 'auto',
+                }}
+              />
+              <span style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '11px',
+                fontWeight: '500',
+              }}>
+                Powered by GrowthKit
+              </span>
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

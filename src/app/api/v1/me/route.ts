@@ -573,6 +573,14 @@ export async function POST(request: NextRequest) {
     // Check waitlist status if enabled for this app
     let waitlistData = null;
     if (appWithWaitlist.waitlistEnabled) {
+      // Get total waitlist count for display
+      const totalWaitlistCount = await prisma.waitlist.count({
+        where: {
+          appId: authContext.app.id,
+          status: 'WAITING',
+        },
+      });
+
       // Use the isGrandfathered check we already did above
       if (isGrandfathered) {
         // User existed before waitlist was enabled, grant access
@@ -582,6 +590,7 @@ export async function POST(request: NextRequest) {
           position: null,
           requiresWaitlist: false, // Important: don't require waitlist for grandfathered users
           grandfathered: true,
+          count: totalWaitlistCount,
         };
       } else {
         // Not grandfathered - check waitlist status
@@ -618,9 +627,10 @@ export async function POST(request: NextRequest) {
             acceptedAt: waitlistEntry.acceptedAt?.toISOString() || null,
             email: lead.email,
             emailVerified: lead.emailVerified,
-            message: appWithWaitlist.waitlistMessage,
+            messages: appWithWaitlist.waitlistMessages || [],
             // App requires waitlist membership - SDK will handle access based on status
             requiresWaitlist: true,
+            count: totalWaitlistCount,
           };
         } else {
           // No waitlist entry yet
@@ -629,7 +639,8 @@ export async function POST(request: NextRequest) {
             status: 'none',
             position: null,
             requiresWaitlist: true,
-            message: appWithWaitlist.waitlistMessage,
+            messages: appWithWaitlist.waitlistMessages || [],
+            count: totalWaitlistCount,
           };
         }
         } else {
@@ -639,7 +650,8 @@ export async function POST(request: NextRequest) {
           status: 'none',
           position: null,
           requiresWaitlist: true,
-          message: appWithWaitlist.waitlistMessage,
+          messages: appWithWaitlist.waitlistMessages || [],
+          count: totalWaitlistCount,
           };
         }
       } // Close the else block for non-grandfathered users

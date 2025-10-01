@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
         policyJson: true,
         waitlistEnabled: true,
         waitlistEnabledAt: true,
-        waitlistMessage: true,
+        waitlistMessages: true,
         masterReferralCode: true,
         masterReferralCredits: true,
         initialCreditsPerDay: true,
@@ -534,7 +534,7 @@ export async function POST(request: NextRequest) {
               acceptedAt: waitlistEntry.acceptedAt?.toISOString() || null,
               email: lead.email,
               emailVerified: lead.emailVerified,
-              message: appWithWaitlist?.waitlistMessage,
+              messages: appWithWaitlist?.waitlistMessages || [],
               requiresWaitlist: waitlistEntry.status !== 'ACCEPTED',
             };
           } else {
@@ -544,7 +544,7 @@ export async function POST(request: NextRequest) {
               status: 'none',
               position: null,
               requiresWaitlist: true,
-              message: appWithWaitlist?.waitlistMessage,
+              messages: appWithWaitlist?.waitlistMessages || [],
             };
           }
         } else {
@@ -554,7 +554,7 @@ export async function POST(request: NextRequest) {
             status: 'none',
             position: null,
             requiresWaitlist: true,
-            message: appWithWaitlist?.waitlistMessage,
+            messages: appWithWaitlist?.waitlistMessages || [],
           };
         }
       }

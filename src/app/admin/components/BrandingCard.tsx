@@ -12,6 +12,7 @@ interface BrandingCardProps {
   logoUrl?: string;
   primaryColor?: string;
   waitlistLayout?: string;
+  waitlistMessages?: string[];
   hideGrowthKitBranding?: boolean;
   onUpdate: () => void;
 }
@@ -22,6 +23,7 @@ export default function BrandingCard({
   logoUrl,
   primaryColor,
   waitlistLayout,
+  waitlistMessages,
   hideGrowthKitBranding,
   onUpdate,
 }: BrandingCardProps) {
@@ -29,6 +31,8 @@ export default function BrandingCard({
   const [editedLogoUrl, setEditedLogoUrl] = useState(logoUrl || '');
   const [editedPrimaryColor, setEditedPrimaryColor] = useState(primaryColor || '#10b981');
   const [editedWaitlistLayout, setEditedWaitlistLayout] = useState(waitlistLayout || 'centered');
+  const [editedWaitlistMessages, setEditedWaitlistMessages] = useState<string[]>(waitlistMessages || []);
+  const [newMessage, setNewMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -102,6 +106,17 @@ export default function BrandingCard({
     setEditedLogoUrl('');
   };
 
+  const handleAddMessage = () => {
+    if (newMessage.trim()) {
+      setEditedWaitlistMessages([...editedWaitlistMessages, newMessage.trim()]);
+      setNewMessage('');
+    }
+  };
+
+  const handleRemoveMessage = (index: number) => {
+    setEditedWaitlistMessages(editedWaitlistMessages.filter((_, i) => i !== index));
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -117,6 +132,7 @@ export default function BrandingCard({
           logoUrl: editedLogoUrl || null,
           primaryColor: editedPrimaryColor,
           waitlistLayout: editedWaitlistLayout,
+          waitlistMessages: editedWaitlistMessages,
         }),
       });
 
@@ -264,6 +280,60 @@ export default function BrandingCard({
           <p className="mt-2 text-sm text-gray-500">
             Choose how the waitlist screen will be displayed
           </p>
+        </div>
+
+        {/* Waitlist Messages */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Waitlist Messages
+          </label>
+          <p className="text-sm text-gray-500 mb-3">
+            Add custom messages that will be randomly shown on the waitlist screen. 
+            If count &lt; 500, messages are shown. If count ≥ 500, count is displayed instead.
+          </p>
+          
+          {/* Message List */}
+          {editedWaitlistMessages.length > 0 && (
+            <div className="space-y-2 mb-3">
+              {editedWaitlistMessages.map((msg, index) => (
+                <div key={index} className="flex items-center gap-2 bg-gray-50 p-3 rounded-md">
+                  <span className="flex-1 text-sm text-gray-700">{msg}</span>
+                  <button
+                    onClick={() => handleRemoveMessage(index)}
+                    className="text-red-500 hover:text-red-700 transition"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add Message Input */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddMessage()}
+              className="block flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+              placeholder="e.g., Get exclusive early access"
+            />
+            <Button
+              variant="secondary"
+              onClick={handleAddMessage}
+              disabled={!newMessage.trim()}
+              size="sm"
+            >
+              Add
+            </Button>
+          </div>
+          
+          {editedWaitlistMessages.length === 0 && (
+            <p className="mt-2 text-sm text-gray-400 italic">
+              No messages added. A default message will be shown.
+            </p>
+          )}
         </div>
 
         {/* Save Button */}

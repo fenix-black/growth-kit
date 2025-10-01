@@ -166,7 +166,7 @@ export async function PUT(request: NextRequest) {
     const { 
       id,
       waitlistEnabled,
-      waitlistMessage,
+      waitlistMessages,
       waitlistLayout,
       description,
       logoUrl,
@@ -186,7 +186,7 @@ export async function PUT(request: NextRequest) {
     // Build update data object
     const updateData: any = {};
     if (waitlistEnabled !== undefined) updateData.waitlistEnabled = waitlistEnabled;
-    if (waitlistMessage !== undefined) updateData.waitlistMessage = waitlistMessage;
+    if (waitlistMessages !== undefined) updateData.waitlistMessages = waitlistMessages;
     if (waitlistLayout !== undefined) updateData.waitlistLayout = waitlistLayout;
     if (description !== undefined) updateData.description = description;
     if (logoUrl !== undefined) updateData.logoUrl = logoUrl;

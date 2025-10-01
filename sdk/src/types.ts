@@ -24,10 +24,12 @@ export interface WaitlistData {
   status: 'none' | 'waiting' | 'invited' | 'accepted';
   position: number | null;
   requiresWaitlist?: boolean;
-  message?: string;
+  message?: string; // Deprecated: single message for backwards compatibility
+  messages?: string[]; // Array of custom messages from app settings
   invitedAt?: string;
   acceptedAt?: string;
   email?: string;
+  count?: number; // Total waitlist count for display
 }
 
 export interface AppBranding {
@@ -61,6 +63,7 @@ export interface GrowthKitState {
   waitlistPosition: number | null;
   waitlistMessage?: string;
   shouldShowWaitlist: boolean;
+  waitlist?: WaitlistData; // Full waitlist data including count
   // App branding
   app?: AppBranding;
 }

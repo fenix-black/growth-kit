@@ -41,6 +41,7 @@ interface AppDetails {
   logoUrl?: string;
   primaryColor?: string;
   waitlistLayout?: string;
+  waitlistMessages?: string[];
   hideGrowthKitBranding?: boolean;
   isActive: boolean;
   corsOrigins: string[];
@@ -845,6 +846,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
               logoUrl={app.logoUrl}
               primaryColor={app.primaryColor}
               waitlistLayout={app.waitlistLayout}
+              waitlistMessages={app.waitlistMessages}
               hideGrowthKitBranding={app.hideGrowthKitBranding}
               onUpdate={fetchAppDetails}
             />
