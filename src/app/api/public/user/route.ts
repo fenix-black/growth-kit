@@ -578,6 +578,15 @@ export async function POST(request: NextRequest) {
           default: { creditsRequired: 1 }
         }
       },
+      // App branding for SDK widget
+      app: {
+        name: app.name,
+        description: app.description,
+        logoUrl: app.logoUrl,
+        primaryColor: app.primaryColor,
+        waitlistLayout: app.waitlistLayout,
+        hideGrowthKitBranding: app.hideGrowthKitBranding,
+      },
       // Include waitlist data if applicable
       ...(waitlistData && { waitlist: waitlistData }),
     };
