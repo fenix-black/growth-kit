@@ -34,14 +34,71 @@ export default function BrandingCard({
   const [editedDescription, setEditedDescription] = useState(description || '');
   const [editedLogoUrl, setEditedLogoUrl] = useState(logoUrl || '');
   const [editedPrimaryColor, setEditedPrimaryColor] = useState(primaryColor || '#10b981');
-  const [editedBackgroundColor, setEditedBackgroundColor] = useState(backgroundColor || '#0f172a');
-  const [editedCardBackgroundColor, setEditedCardBackgroundColor] = useState(cardBackgroundColor || 'rgba(255, 255, 255, 0.05)');
+  
+  // Parse existing colors or use defaults
+  const parseBackgroundColor = (color: string | undefined) => {
+    if (!color) return { color1: '#0f172a', color2: '#1e293b', useGradient: true };
+    if (color.includes('gradient')) {
+      const matches = color.match(/#[0-9a-f]{6}/gi);
+      return {
+        color1: matches?.[0] || '#0f172a',
+        color2: matches?.[1] || '#1e293b',
+        useGradient: true
+      };
+    }
+    return { color1: color, color2: '#1e293b', useGradient: false };
+  };
+  
+  const parseCardColor = (color: string | undefined) => {
+    if (!color) return { color: '#ffffff', opacity: 5 };
+    if (color.includes('rgba')) {
+      const match = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
+      if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const a = parseFloat(match[4]);
+        const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+        return { color: hex, opacity: Math.round(a * 100) };
+      }
+    }
+    return { color: color, opacity: 100 };
+  };
+  
+  const bgParsed = parseBackgroundColor(backgroundColor);
+  const cardParsed = parseCardColor(cardBackgroundColor);
+  
+  const [bgColor1, setBgColor1] = useState(bgParsed.color1);
+  const [bgColor2, setBgColor2] = useState(bgParsed.color2);
+  const [useGradient, setUseGradient] = useState(bgParsed.useGradient);
+  const [cardColor, setCardColor] = useState(cardParsed.color);
+  const [cardOpacity, setCardOpacity] = useState(cardParsed.opacity);
+  
   const [editedWaitlistLayout, setEditedWaitlistLayout] = useState(waitlistLayout || 'centered');
   const [editedWaitlistMessages, setEditedWaitlistMessages] = useState<string[]>(waitlistMessages || []);
   const [newMessage, setNewMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  
+  // Generate CSS strings from controls
+  const generateBackgroundColor = () => {
+    if (useGradient) {
+      return `linear-gradient(135deg, ${bgColor1} 0%, ${bgColor2} 100%)`;
+    }
+    return bgColor1;
+  };
+  
+  const generateCardColor = () => {
+    if (cardOpacity < 100) {
+      const hex = cardColor.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${(cardOpacity / 100).toFixed(2)})`;
+    }
+    return cardColor;
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -137,8 +194,8 @@ export default function BrandingCard({
           description: editedDescription,
           logoUrl: editedLogoUrl || null,
           primaryColor: editedPrimaryColor,
-          backgroundColor: editedBackgroundColor,
-          cardBackgroundColor: editedCardBackgroundColor,
+          backgroundColor: generateBackgroundColor(),
+          cardBackgroundColor: generateCardColor(),
           waitlistLayout: editedWaitlistLayout,
           waitlistMessages: editedWaitlistMessages,
         }),
@@ -242,74 +299,227 @@ export default function BrandingCard({
           </div>
         </div>
 
+        {/* Color Presets */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Quick Presets
+          </label>
+          <div className="grid grid-cols-4 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setBgColor1('#0f172a');
+                setBgColor2('#1e293b');
+                setUseGradient(true);
+                setCardColor('#ffffff');
+                setCardOpacity(5);
+                setEditedPrimaryColor('#10b981');
+              }}
+              className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
+              title="Dark (Default)"
+            >
+              <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }} />
+              <p className="text-xs mt-1 text-center text-gray-600">Dark</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setBgColor1('#ffffff');
+                setBgColor2('#f3f4f6');
+                setUseGradient(true);
+                setCardColor('#ffffff');
+                setCardOpacity(100);
+                setEditedPrimaryColor('#1874ec');
+              }}
+              className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
+              title="Light"
+            >
+              <div className="h-8 rounded border border-gray-200" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%)' }} />
+              <p className="text-xs mt-1 text-center text-gray-600">Light</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setBgColor1('#1e3a8a');
+                setBgColor2('#312e81');
+                setUseGradient(true);
+                setCardColor('#ffffff');
+                setCardOpacity(10);
+                setEditedPrimaryColor('#60a5fa');
+              }}
+              className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
+              title="Ocean"
+            >
+              <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #312e81 100%)' }} />
+              <p className="text-xs mt-1 text-center text-gray-600">Ocean</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setBgColor1('#7c2d12');
+                setBgColor2('#991b1b');
+                setUseGradient(true);
+                setCardColor('#ffffff');
+                setCardOpacity(10);
+                setEditedPrimaryColor('#fb923c');
+              }}
+              className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
+              title="Sunset"
+            >
+              <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #991b1b 100%)' }} />
+              <p className="text-xs mt-1 text-center text-gray-600">Sunset</p>
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-gray-500">
+            Click a preset to quickly apply a theme, then customize below.
+          </p>
+        </div>
+
         {/* Colors */}
-        <div className="space-y-4">
-          {/* Primary Color */}
+        <div className="space-y-6">
+          {/* Accent Color */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Accent Color (Buttons & Text)
+              Accent Color (Buttons & Highlights)
             </label>
             <div className="flex gap-3 items-center">
               <input
                 type="color"
                 value={editedPrimaryColor}
                 onChange={(e) => setEditedPrimaryColor(e.target.value)}
-                className="h-10 w-20 rounded border border-gray-300 cursor-pointer"
+                className="h-12 w-16 rounded-lg border border-gray-300 cursor-pointer"
               />
-              <input
-                type="text"
-                value={editedPrimaryColor}
-                onChange={(e) => setEditedPrimaryColor(e.target.value)}
-                className="block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="#10b981"
-              />
-              <div
-                className="h-10 w-10 rounded-lg border border-gray-300"
-                style={{ backgroundColor: editedPrimaryColor }}
-              />
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={editedPrimaryColor}
+                  onChange={(e) => setEditedPrimaryColor(e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                  placeholder="#10b981"
+                />
+              </div>
             </div>
           </div>
 
           {/* Background Color */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Background Color
+              Background
             </label>
-            <div className="flex gap-3 items-center">
+            
+            <div className="flex items-center gap-2 mb-3">
               <input
-                type="color"
-                value={editedBackgroundColor.startsWith('#') ? editedBackgroundColor : '#0f172a'}
-                onChange={(e) => setEditedBackgroundColor(e.target.value)}
-                className="h-10 w-20 rounded border border-gray-300 cursor-pointer"
+                type="checkbox"
+                id="useGradient"
+                checked={useGradient}
+                onChange={(e) => setUseGradient(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <input
-                type="text"
-                value={editedBackgroundColor}
-                onChange={(e) => setEditedBackgroundColor(e.target.value)}
-                className="block flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"
-              />
+              <label htmlFor="useGradient" className="text-sm text-gray-600">
+                Use gradient (two colors)
+              </label>
             </div>
-            <p className="mt-1 text-xs text-gray-500">
-              Supports solid colors (#hex) or gradients. Default: linear-gradient(135deg, #0f172a 0%, #1e293b 100%)
-            </p>
+            
+            <div className="space-y-3">
+              <div className="flex gap-3 items-center">
+                <input
+                  type="color"
+                  value={bgColor1}
+                  onChange={(e) => setBgColor1(e.target.value)}
+                  className="h-12 w-16 rounded-lg border border-gray-300 cursor-pointer"
+                />
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={bgColor1}
+                    onChange={(e) => setBgColor1(e.target.value)}
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                    placeholder="#0f172a"
+                  />
+                  {!useGradient && <p className="text-xs text-gray-500 mt-1">Solid background color</p>}
+                  {useGradient && <p className="text-xs text-gray-500 mt-1">Start color</p>}
+                </div>
+              </div>
+              
+              {useGradient && (
+                <div className="flex gap-3 items-center">
+                  <input
+                    type="color"
+                    value={bgColor2}
+                    onChange={(e) => setBgColor2(e.target.value)}
+                    className="h-12 w-16 rounded-lg border border-gray-300 cursor-pointer"
+                  />
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={bgColor2}
+                      onChange={(e) => setBgColor2(e.target.value)}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                      placeholder="#1e293b"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">End color</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Background Preview */}
+            <div className="mt-3 p-4 rounded-lg border border-gray-200" style={{ background: generateBackgroundColor() }}>
+              <p className="text-center text-sm text-white font-medium drop-shadow">Preview</p>
+            </div>
           </div>
 
-          {/* Card Background Color */}
+          {/* Card Color */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Card Background Color
+              Card Background
             </label>
-            <input
-              type="text"
-              value={editedCardBackgroundColor}
-              onChange={(e) => setEditedCardBackgroundColor(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="rgba(255, 255, 255, 0.05)"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Supports rgba(), solid colors, or gradients. Use rgba for transparency + blur effect.
-            </p>
+            
+            <div className="space-y-3">
+              <div className="flex gap-3 items-center">
+                <input
+                  type="color"
+                  value={cardColor}
+                  onChange={(e) => setCardColor(e.target.value)}
+                  className="h-12 w-16 rounded-lg border border-gray-300 cursor-pointer"
+                />
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={cardColor}
+                    onChange={(e) => setCardColor(e.target.value)}
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                    placeholder="#ffffff"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Card color</p>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm text-gray-600">Opacity</label>
+                  <span className="text-sm font-medium text-gray-900">{cardOpacity}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={cardOpacity}
+                  onChange={(e) => setCardOpacity(parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Lower opacity creates a glass/blur effect (recommended: 5-15%)
+                </p>
+              </div>
+            </div>
+            
+            {/* Card Preview */}
+            <div className="mt-3 p-8 rounded-lg" style={{ background: generateBackgroundColor() }}>
+              <div className="p-4 rounded-lg shadow-lg" style={{ background: generateCardColor(), backdropFilter: cardOpacity < 100 ? 'blur(10px)' : 'none' }}>
+                <p className="text-center text-sm text-white font-medium">Card Preview</p>
+              </div>
+            </div>
           </div>
         </div>
 
