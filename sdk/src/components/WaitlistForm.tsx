@@ -582,75 +582,136 @@ export function WaitlistForm({
       {/* Left side - Branding */}
       <div style={{
         flex: '1',
-        background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
+        background: bgColor,
+        backgroundSize: bgColor.includes('gradient') ? '200% 200%' : 'auto',
         padding: '80px 60px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'flex-start',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
-        {app?.logoUrl && (
-          <img 
-            src={app.logoUrl} 
-            alt={app.name}
-            style={{ 
-              width: '120px', 
-              height: '120px', 
-              borderRadius: '24px',
-              marginBottom: '32px',
-              objectFit: 'cover',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
-            }}
-          />
-        )}
+        {/* Logo */}
+        {app?.logoUrl ? (
+          <div style={{
+            width: '140px',
+            height: '140px',
+            borderRadius: '28px',
+            background: 'rgba(255, 255, 255, 0.98)',
+            padding: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '48px',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.2)',
+          }}>
+            <img 
+              src={app.logoUrl} 
+              alt={app.name}
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'contain',
+              }}
+            />
+          </div>
+        ) : app?.name ? (
+          <div style={{
+            width: '140px',
+            height: '140px',
+            borderRadius: '28px',
+            background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '48px',
+            fontWeight: '800',
+            color: 'white',
+            marginBottom: '48px',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+            letterSpacing: '-0.02em',
+          }}>
+            {getLogoFallback()}
+          </div>
+        ) : null}
+
         <h1 style={{
-          fontSize: '48px',
+          fontSize: '56px',
           fontWeight: '900',
           color: 'white',
-          marginBottom: '16px',
+          marginBottom: '24px',
           lineHeight: '1.1',
+          letterSpacing: '-0.03em',
+          textShadow: '0 2px 20px rgba(0, 0, 0, 0.2)',
         }}>
           {app?.name || 'Join the Waitlist'}
         </h1>
+        
         {app?.description && (
           <p style={{
-            fontSize: '24px',
-            color: 'rgba(255, 255, 255, 0.9)',
-            lineHeight: '1.5',
-            marginBottom: '24px',
+            fontSize: '20px',
+            color: 'rgba(255, 255, 255, 0.95)',
+            lineHeight: '1.6',
+            marginBottom: '32px',
+            fontWeight: '500',
+            maxWidth: '500px',
           }}>
             {app.description}
           </p>
         )}
-        {displayMessage && (
+
+        {/* Waitlist Message Box */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.15)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '16px',
+          padding: '20px 28px',
+          marginTop: '16px',
+          maxWidth: '500px',
+        }}>
           <p style={{
-            fontSize: '20px',
-            color: 'rgba(255, 255, 255, 0.95)',
-            fontWeight: '600',
+            fontSize: '18px',
+            color: 'white',
+            fontWeight: '700',
+            margin: 0,
+            lineHeight: '1.5',
           }}>
-            {displayMessage}
+            {getWaitlistMessage()}
           </p>
-        )}
+        </div>
       </div>
 
       {/* Right side - Form */}
       <div style={{
         flex: '1',
-        background: '#ffffff',
+        background: cardBgColor,
         padding: '80px 60px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
       }}>
-        <form onSubmit={handleSubmit} style={{ maxWidth: '400px' }}>
+        <form onSubmit={handleSubmit} style={{ maxWidth: '440px', width: '100%' }}>
           <h2 style={{
-            fontSize: '28px',
-            fontWeight: '700',
-            color: '#1f2937',
-            marginBottom: '32px',
+            fontSize: '36px',
+            fontWeight: '800',
+            color: cardBgColor.includes('rgba') || cardBgColor.includes('0.') ? 'white' : '#1f2937',
+            marginBottom: '12px',
+            letterSpacing: '-0.02em',
+            lineHeight: '1.2',
           }}>
             Get Early Access
           </h2>
+          
+          <p style={{
+            fontSize: '16px',
+            color: cardBgColor.includes('rgba') || cardBgColor.includes('0.') ? 'rgba(255, 255, 255, 0.8)' : '#6b7280',
+            marginBottom: '40px',
+            lineHeight: '1.6',
+          }}>
+            Enter your email to join the waitlist
+          </p>
 
           <input
             type="email"
@@ -660,31 +721,42 @@ export function WaitlistForm({
             disabled={isSubmitting}
             style={{
               width: '100%',
-              padding: '16px 20px',
+              padding: '18px 24px',
               fontSize: '16px',
-              border: '2px solid #e5e7eb',
-              borderRadius: '12px',
+              border: cardBgColor.includes('rgba') ? '2px solid rgba(255, 255, 255, 0.2)' : '2px solid #e5e7eb',
+              borderRadius: '16px',
               outline: 'none',
-              marginBottom: '16px',
+              marginBottom: '20px',
               boxSizing: 'border-box',
               fontFamily: 'inherit',
-              transition: 'all 0.2s ease',
+              fontWeight: '500',
+              backgroundColor: cardBgColor.includes('rgba') ? 'rgba(255, 255, 255, 0.1)' : 'white',
+              color: cardBgColor.includes('rgba') ? 'white' : '#1f2937',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
             onFocus={(e) => {
               e.currentTarget.style.borderColor = brandColor;
-              e.currentTarget.style.boxShadow = `0 0 0 3px ${brandColor}20`;
+              e.currentTarget.style.boxShadow = `0 0 0 4px ${brandColor}20`;
+              e.currentTarget.style.transform = 'translateY(-2px)';
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.borderColor = cardBgColor.includes('rgba') ? 'rgba(255, 255, 255, 0.2)' : '#e5e7eb';
               e.currentTarget.style.boxShadow = 'none';
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
           />
 
           {error && (
             <p style={{ 
               color: '#ef4444',
-              marginBottom: '16px',
+              marginBottom: '24px',
               fontSize: '14px',
+              fontWeight: '500',
+              padding: '12px 16px',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '12px',
+              textAlign: 'center',
             }}>
               {error}
             </p>
@@ -695,25 +767,45 @@ export function WaitlistForm({
             disabled={isSubmitting}
             style={{
               width: '100%',
-              padding: '16px 24px',
-              fontSize: '16px',
+              padding: '20px 32px',
+              fontSize: '18px',
               fontWeight: '700',
-              background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
+              background: isSubmitting 
+                ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)' 
+                : `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
               color: 'white',
               border: 'none',
-              borderRadius: '12px',
+              borderRadius: '16px',
               cursor: isSubmitting ? 'not-allowed' : 'pointer',
-              opacity: isSubmitting ? 0.6 : 1,
+              transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              fontFamily: 'inherit',
+              letterSpacing: '0.025em',
+              boxShadow: isSubmitting 
+                ? 'none'
+                : `0 10px 30px ${brandColor}40, 0 0 0 1px rgba(255, 255, 255, 0.1) inset`,
+            }}
+            onMouseOver={(e) => {
+              if (!isSubmitting) {
+                e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
+                e.currentTarget.style.boxShadow = `0 20px 50px ${brandColor}60, 0 0 0 1px rgba(255, 255, 255, 0.2) inset`;
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!isSubmitting) {
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.boxShadow = `0 10px 30px ${brandColor}40, 0 0 0 1px rgba(255, 255, 255, 0.1) inset`;
+              }
             }}
           >
             {isSubmitting ? t('waitlist.joining') : t('waitlist.joinWaitlist')}
           </button>
 
           <p style={{
-            marginTop: '16px',
+            marginTop: '24px',
             textAlign: 'center',
-            color: '#6b7280',
+            color: cardBgColor.includes('rgba') || cardBgColor.includes('0.') ? 'rgba(255, 255, 255, 0.6)' : '#6b7280',
             fontSize: '14px',
+            fontWeight: '500',
           }}>
             {t('waitlist.noSpam')}
           </p>
@@ -726,8 +818,8 @@ export function WaitlistForm({
             rel="noopener noreferrer"
             style={{
               marginTop: '48px',
-              paddingTop: '24px',
-              borderTop: '1px solid #e5e7eb',
+              paddingTop: '32px',
+              borderTop: cardBgColor.includes('rgba') ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e5e7eb',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -736,11 +828,13 @@ export function WaitlistForm({
               transition: 'opacity 0.2s ease',
               cursor: 'pointer',
             }}
-            onMouseOver={(e) => e.currentTarget.style.opacity = '0.7'}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
             onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
           >
             <img 
-              src="https://growth.fenixblack.ai/growthkit-logo-alpha.png"
+              src={cardBgColor.includes('rgba') || cardBgColor.includes('0.') 
+                ? "https://growth.fenixblack.ai/growthkit-logo-dark-alpha.png"
+                : "https://growth.fenixblack.ai/growthkit-logo-alpha.png"}
               alt="GrowthKit"
               style={{
                 height: '24px',
@@ -748,7 +842,7 @@ export function WaitlistForm({
               }}
             />
             <span style={{
-              color: '#9ca3af',
+              color: cardBgColor.includes('rgba') || cardBgColor.includes('0.') ? 'rgba(255, 255, 255, 0.5)' : '#9ca3af',
               fontSize: '11px',
               fontWeight: '500',
             }}>
