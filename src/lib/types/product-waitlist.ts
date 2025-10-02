@@ -45,8 +45,8 @@ export interface ProductWaitlistConfig {
   dailyInviteQuota: number;
   inviteTime: string;             // "HH:MM" format
   
-  // Email configuration
-  inviteEmailTemplate?: string;   // References email template ID
+  // Note: Email template is global (configured in Email Templates tab)
+  // Uses variables: {{productName}}, {{productDescription}}, {{productTag}}
   
   // Branding overrides (null = inherit from app)
   primaryColor?: string | null;

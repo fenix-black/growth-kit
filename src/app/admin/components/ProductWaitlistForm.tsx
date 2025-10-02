@@ -23,7 +23,6 @@ export default function ProductWaitlistForm({ appId, product, onCancel, onSave }
     autoInviteEnabled: false,
     dailyInviteQuota: 5,
     inviteTime: '10:00',
-    inviteEmailTemplate: '',
     primaryColor: null,
     logoUrl: null,
   });
@@ -258,26 +257,15 @@ export default function ProductWaitlistForm({ appId, product, onCancel, onSave }
               </div>
             </ContentCard>
 
-            {/* Email Configuration */}
+            {/* Email Note */}
             <ContentCard>
-              <h4 className="font-semibold text-gray-900 mb-4">Email Configuration</h4>
+              <h4 className="font-semibold text-gray-900 mb-4">Email Invitations</h4>
               
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Invitation Email Template
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.inviteEmailTemplate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, inviteEmailTemplate: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
-                    placeholder="product-invitation (leave empty for default)"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Create custom templates in the Email Templates tab
-                  </p>
-                </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-gray-700">
+                  <strong>Product invitations</strong> use the global template configured in the{' '}
+                  <strong>Email Templates</strong> tab. Variables like <code className="text-xs bg-white px-1 py-0.5 rounded">{'{{productName}}'}</code> will be automatically replaced with this product's information.
+                </p>
               </div>
             </ContentCard>
 

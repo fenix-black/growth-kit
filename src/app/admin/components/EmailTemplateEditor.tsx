@@ -12,6 +12,7 @@ interface EmailTemplates {
   verification?: EmailTemplate;
   invitation?: EmailTemplate;
   waitlist_confirmation?: EmailTemplate;
+  product_invitation?: EmailTemplate;
 }
 
 interface EmailTemplateEditorProps {
@@ -35,6 +36,10 @@ export default function EmailTemplateEditor({ appId, appName, onClose, embedded 
     referralCode: 'EARLYBIRD',
     credits: 10,
     position: 42,
+    // Product-specific variables
+    productName: 'Premium Plan',
+    productDescription: 'Get access to premium features and priority support',
+    productTag: 'premium-plan',
   });
 
   useEffect(() => {
@@ -163,6 +168,21 @@ export default function EmailTemplateEditor({ appId, appName, onClose, embedded 
 </div>
         `.trim(),
       },
+      product_invitation: {
+        subject: 'You\'re Invited to {{productName}}! 🎉',
+        html: `
+<div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto;">
+  <h1 style="color: #333;">{{productName}} is Ready for You!</h1>
+  <p>Hi {{userEmail}},</p>
+  <p>Great news! You've been selected from the <strong>{{productName}}</strong> waitlist.</p>
+  <p>{{productDescription}}</p>
+  <p>Click the link below to get started:</p>
+  <a href="{{invitationLink}}" style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Access {{productName}}</a>
+  <p style="color: #666; font-size: 14px; margin-top: 20px;">If you didn't join the {{productName}} waitlist, you can safely ignore this email.</p>
+  <p style="color: #999; font-size: 12px; margin-top: 30px;">Powered by {{appName}}</p>
+</div>
+        `.trim(),
+      },
     };
 
     return defaults[type] || defaults.invitation;
@@ -223,6 +243,16 @@ export default function EmailTemplateEditor({ appId, appName, onClose, embedded 
               >
                 Waitlist Confirmation
               </button>
+              <button
+                onClick={() => setActiveTemplate('product_invitation')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTemplate === 'product_invitation'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Product Invitation
+              </button>
             </nav>
         </div>
 
@@ -255,7 +285,15 @@ export default function EmailTemplateEditor({ appId, appName, onClose, embedded 
                   placeholder="HTML template..."
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Available variables: {'{{appName}}, {{userName}}, {{userEmail}}, {{credits}}, {{referralCode}}, {{invitationLink}}, {{verificationLink}}, {{position}}'}
+                  {activeTemplate === 'product_invitation' ? (
+                    <>
+                      Available variables: {'{{appName}}, {{userEmail}}, {{productName}}, {{productDescription}}, {{productTag}}, {{invitationLink}}'}
+                    </>
+                  ) : (
+                    <>
+                      Available variables: {'{{appName}}, {{userName}}, {{userEmail}}, {{credits}}, {{referralCode}}, {{invitationLink}}, {{verificationLink}}, {{position}}'}
+                    </>
+                  )}
                 </p>
               </div>
             </div>

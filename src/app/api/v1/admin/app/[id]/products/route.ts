@@ -152,7 +152,6 @@ export async function POST(
       autoInviteEnabled: body.autoInviteEnabled || false,
       dailyInviteQuota: body.dailyInviteQuota || 5,
       inviteTime: body.inviteTime || '10:00',
-      inviteEmailTemplate: body.inviteEmailTemplate || '',
       primaryColor: body.primaryColor || null,
       logoUrl: body.logoUrl || null,
       customFields: [], // Phase 2

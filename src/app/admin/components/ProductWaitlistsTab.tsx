@@ -217,10 +217,15 @@ export default function ProductWaitlistsTab({ appId, appName }: ProductWaitlists
               </div>
 
               {/* Auto-invite Status */}
-              {product.autoInviteEnabled && (
+              {product.autoInviteEnabled ? (
                 <div className="text-xs text-gray-600 mb-3 flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
                   Auto-invite: {product.dailyInviteQuota}/day at {product.inviteTime}
+                </div>
+              ) : (
+                <div className="text-xs text-gray-400 mb-3 flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-gray-300 rounded-full"></div>
+                  Auto-invite: Disabled
                 </div>
               )}
 
