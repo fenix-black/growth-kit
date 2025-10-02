@@ -164,7 +164,7 @@ export async function PUT(request: NextRequest) {
     // Parse request body
     const body = await request.json();
     const { 
-      id,
+      id, 
       waitlistEnabled,
       waitlistMessages,
       waitlistLayout,
@@ -179,6 +179,7 @@ export async function PUT(request: NextRequest) {
       inviteTime,
       masterReferralCode,
       masterReferralCredits,
+      metadata,
     } = body;
 
     if (!id) {
@@ -201,6 +202,19 @@ export async function PUT(request: NextRequest) {
     if (inviteTime !== undefined) updateData.inviteTime = inviteTime;
     if (masterReferralCode !== undefined) updateData.masterReferralCode = masterReferralCode;
     if (masterReferralCredits !== undefined) updateData.masterReferralCredits = masterReferralCredits;
+
+    // Handle metadata - merge with existing
+    if (metadata !== undefined) {
+      const existingApp = await prisma.app.findUnique({
+        where: { id },
+        select: { metadata: true },
+      });
+
+      updateData.metadata = {
+        ...(existingApp?.metadata as any || {}),
+        ...metadata,
+      };
+    }
 
     // Check if waitlist is being enabled (false -> true)
     if (updateData.waitlistEnabled === true) {

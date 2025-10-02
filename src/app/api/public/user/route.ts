@@ -113,6 +113,12 @@ export async function POST(request: NextRequest) {
         initialCreditsPerDay: true,
       },
     });
+    
+    // Get metadata separately to avoid type issues
+    const appMetadata = await prisma.app.findUnique({
+      where: { id: app.id },
+      select: { metadata: true } as any,
+    });
 
     // Check if user should be grandfathered BEFORE processing any claims
     let isGrandfathered = false;
@@ -636,6 +642,7 @@ export async function POST(request: NextRequest) {
         cardBackgroundColor: appWithWaitlist?.cardBackgroundColor,
         waitlistLayout: appWithWaitlist?.waitlistLayout,
         hideGrowthKitBranding: appWithWaitlist?.hideGrowthKitBranding || false,
+        metadata: appMetadata?.metadata,
       },
       // Include waitlist data if applicable
       ...(waitlistData && { waitlist: waitlistData }),

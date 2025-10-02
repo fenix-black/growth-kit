@@ -361,6 +361,7 @@ export default function AppCreationWizard() {
                 <option value="centered">Centered (Default)</option>
                 <option value="split">Split Layout</option>
                 <option value="minimal">Minimal</option>
+                <option value="embed">Embed (Widget Mode)</option>
               </select>
               <p className="mt-1 text-sm text-gray-500">
                 Choose how the waitlist screen will be displayed

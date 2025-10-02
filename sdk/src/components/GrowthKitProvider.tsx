@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { GrowthKitConfig, GrowthKitTheme } from '../types';
 import { GrowthKitStateProvider } from './GrowthKitStateProvider';
+import { AutoWaitlistInjector } from './AutoWaitlistInjector';
 import { LocalizationContext, getTranslations, type Language } from '../localization';
 import { getEffectiveTheme, onSystemThemeChange, type ThemeColors, getThemeColors } from '../theme';
 
@@ -88,6 +89,7 @@ export function GrowthKitProvider({ children, config }: GrowthKitProviderProps) 
         setLanguage 
       }}>
         <GrowthKitStateProvider>
+          <AutoWaitlistInjector />
           {children}
         </GrowthKitStateProvider>
       </LocalizationContext.Provider>

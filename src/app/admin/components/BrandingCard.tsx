@@ -15,6 +15,7 @@ interface BrandingCardProps {
   cardBackgroundColor?: string;
   waitlistLayout?: string;
   waitlistMessages?: string[];
+  waitlistTargetSelector?: string;
   hideGrowthKitBranding?: boolean;
   onUpdate: () => void;
 }
@@ -28,6 +29,7 @@ export default function BrandingCard({
   cardBackgroundColor,
   waitlistLayout,
   waitlistMessages,
+  waitlistTargetSelector,
   hideGrowthKitBranding,
   onUpdate,
 }: BrandingCardProps) {
@@ -76,6 +78,7 @@ export default function BrandingCard({
   
   const [editedWaitlistLayout, setEditedWaitlistLayout] = useState(waitlistLayout || 'centered');
   const [editedWaitlistMessages, setEditedWaitlistMessages] = useState<string[]>(waitlistMessages || []);
+  const [editedTargetSelector, setEditedTargetSelector] = useState(waitlistTargetSelector || '');
   const [newMessage, setNewMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -198,6 +201,9 @@ export default function BrandingCard({
           cardBackgroundColor: generateCardColor(),
           waitlistLayout: editedWaitlistLayout,
           waitlistMessages: editedWaitlistMessages,
+          metadata: {
+            waitlistTargetSelector: editedTargetSelector || null,
+          },
         }),
       });
 
@@ -536,11 +542,35 @@ export default function BrandingCard({
             <option value="centered">Centered (Default)</option>
             <option value="split">Split Layout</option>
             <option value="minimal">Minimal</option>
+            <option value="embed">Embed (Widget Mode)</option>
           </select>
           <p className="mt-2 text-sm text-gray-500">
-            Choose how the waitlist screen will be displayed
+            {editedWaitlistLayout === 'embed' 
+              ? 'Widget will auto-inject into the specified CSS selector on your page'
+              : 'Choose how the waitlist screen will be displayed'
+            }
           </p>
         </div>
+
+        {/* Target Selector (only for embed mode) */}
+        {editedWaitlistLayout === 'embed' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Target CSS Selector
+            </label>
+            <input
+              type="text"
+              value={editedTargetSelector}
+              onChange={(e) => setEditedTargetSelector(e.target.value)}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-sm"
+              placeholder="#waitlist-container or .hero-section"
+            />
+            <p className="mt-2 text-sm text-gray-500">
+              The SDK will automatically find this element and inject the waitlist widget there.
+              Examples: <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">#hero</code>, <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.waitlist</code>, <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">#main-content</code>
+            </p>
+          </div>
+        )}
 
         {/* Waitlist Messages */}
         <div>

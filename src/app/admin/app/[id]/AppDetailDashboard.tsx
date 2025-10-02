@@ -851,6 +851,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
               cardBackgroundColor={app.cardBackgroundColor}
               waitlistLayout={app.waitlistLayout}
               waitlistMessages={app.waitlistMessages}
+              waitlistTargetSelector={(app as any).metadata?.waitlistTargetSelector}
               hideGrowthKitBranding={app.hideGrowthKitBranding}
               onUpdate={fetchAppDetails}
             />
