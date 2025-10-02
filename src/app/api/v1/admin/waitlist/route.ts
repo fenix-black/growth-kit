@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { successResponse, errors } from '@/lib/utils/response';
+import { findProductByTag } from '@/lib/types/product-waitlist';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,19 +18,38 @@ export async function GET(request: NextRequest) {
       return errors.forbidden();
     }
 
-    // Get appId from query params
+    // Get appId and productTag from query params
     const { searchParams } = new URL(request.url);
     const appId = searchParams.get('appId');
+    const productTag = searchParams.get('productTag');
 
     if (!appId) {
       return errors.badRequest('appId is required');
     }
 
+    // Build where clause
+    const whereClause: any = { appId };
+    
+    if (productTag !== null && productTag !== undefined) {
+      // Filter by specific product (including null for app-level)
+      whereClause.productTag = productTag === '' ? null : productTag;
+    }
+
+    // Get product name if filtering by productTag
+    let productName: string | undefined;
+    if (productTag && productTag !== '') {
+      const app = await prisma.app.findUnique({
+        where: { id: appId },
+        select: { metadata: true },
+      });
+      
+      const product = findProductByTag(app?.metadata, productTag);
+      productName = product?.name;
+    }
+
     // Fetch waitlist entries
     const entries = await prisma.waitlist.findMany({
-      where: {
-        appId,
-      },
+      where: whereClause,
       orderBy: [
         { status: 'asc' },
         { position: 'asc' },
@@ -39,6 +59,8 @@ export async function GET(request: NextRequest) {
 
     return successResponse({
       entries,
+      productTag: productTag || null,
+      productName,
     });
   } catch (error) {
     console.error('Error fetching waitlist:', error);
@@ -62,7 +84,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { appId, email } = body;
+    const { appId, email, productTag } = body;
 
     if (!appId || !email) {
       return errors.badRequest('appId and email are required');
@@ -71,41 +93,47 @@ export async function POST(request: NextRequest) {
     // Check if already on waitlist
     const existing = await prisma.waitlist.findUnique({
       where: {
-        appId_email: {
+        appId_email_productTag: {
           appId,
           email,
+          productTag: productTag || null,
         },
-      },
+      } as any,
     });
 
     if (existing) {
-      return errors.badRequest('Email already on waitlist');
+      return errors.badRequest('Email already on this waitlist');
     }
 
-    // Get the next position
-    const lastInQueue = await prisma.waitlist.findFirst({
-      where: {
-        appId,
-        status: 'WAITING',
-      },
-      orderBy: {
-        position: 'desc',
-      },
-      select: {
-        position: true,
-      },
-    });
+    // Get the next position (only for app-level waitlists)
+    let position: number | null = null;
+    if (!productTag) {
+      const lastInQueue = await prisma.waitlist.findFirst({
+        where: {
+          appId,
+          status: 'WAITING',
+          productTag: null,
+        } as any,
+        orderBy: {
+          position: 'desc',
+        },
+        select: {
+          position: true,
+        },
+      });
 
-    const position = (lastInQueue?.position || 0) + 1;
+      position = (lastInQueue?.position || 0) + 1;
+    }
 
     // Add to waitlist
     const entry = await prisma.waitlist.create({
       data: {
         appId,
         email,
+        productTag: productTag || null,
         position,
         status: 'WAITING',
-      },
+      } as any,
     });
 
     return successResponse({ entry });

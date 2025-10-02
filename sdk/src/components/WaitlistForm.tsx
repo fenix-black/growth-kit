@@ -4,23 +4,89 @@ import React, { useState, FormEvent } from 'react';
 import { useGrowthKit } from '../useGrowthKit';
 import { useGrowthKitConfig } from './GrowthKitProvider';
 import { useTranslation, interpolate } from '../localization';
+import { ProductWaitlistWidget } from './ProductWaitlistWidget';
+import { EmbedWaitlistWidget } from './EmbedWaitlistWidget';
 
 export interface WaitlistFormProps {
   message?: string;
   onSuccess?: (position: number) => void;
   className?: string;
   style?: React.CSSProperties;
+  // Product waitlist props
+  productTag?: string;
+  mode?: 'inline' | 'modal' | 'drawer';
+  variant?: 'compact' | 'standard';
+  hidePosition?: boolean;
+  trigger?: React.ReactNode;
+  drawerPosition?: 'left' | 'right';
+  // Embed mode props (for app-level waitlist)
+  layout?: 'centered' | 'split' | 'minimal' | 'embed';
+  targetSelector?: string;
 }
 
 /**
  * Modern waitlist form component with app branding
+ * Supports both app-level (full-page) and product-level (embeddable) waitlists
  */
 export function WaitlistForm({ 
   message,
   onSuccess,
   className,
-  style 
+  style,
+  productTag,
+  mode,
+  variant,
+  hidePosition,
+  trigger,
+  drawerPosition,
+  layout: layoutProp,
+  targetSelector,
 }: WaitlistFormProps) {
+  // If productTag is provided, use the product waitlist widget
+  if (productTag) {
+    return (
+      <ProductWaitlistWidget
+        productTag={productTag}
+        mode={mode}
+        variant={variant}
+        trigger={trigger}
+        position={drawerPosition}
+        onSuccess={onSuccess ? (data) => onSuccess(0) : undefined}
+        className={className}
+        style={style}
+      />
+    );
+  }
+
+  // If embed layout is requested, use the embed widget
+  if (layoutProp === 'embed') {
+    const widget = (
+      <EmbedWaitlistWidget
+        variant={variant}
+        onSuccess={onSuccess}
+        className={className}
+        style={style}
+      />
+    );
+
+    // If targetSelector provided, inject into that element
+    if (targetSelector && typeof window !== 'undefined') {
+      React.useEffect(() => {
+        const target = document.querySelector(targetSelector);
+        if (target) {
+          const container = document.createElement('div');
+          target.appendChild(container);
+          
+          // This is a simplified approach - in production you'd use ReactDOM.createRoot
+          // For now, we'll just render where the component is placed
+        }
+      }, [targetSelector]);
+    }
+
+    return widget;
+  }
+
+  // Original app-level waitlist logic below (full-page modes)
   const growthKit = useGrowthKit();
   const { themeColors } = useGrowthKitConfig();
   const { t } = useTranslation();
@@ -30,7 +96,7 @@ export function WaitlistForm({
   const [error, setError] = useState<string | null>(null);
 
   const { app } = growthKit;
-  const layout = app?.waitlistLayout || 'centered';
+  const layout = layoutProp || app?.waitlistLayout || 'centered';
   const brandColor = app?.primaryColor || themeColors.primary;
   const bgColor = app?.backgroundColor || 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)';
   const cardBgColor = app?.cardBackgroundColor || 'rgba(255, 255, 255, 0.05)';

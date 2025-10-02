@@ -19,8 +19,11 @@ todo:
 - add some UI auto-branding support to sdk hook (since it has access to the rest of the webpage, it could grab the page colors and UI language) - add some growthkit default branding to the widget
 - admin, add a way to send an email to some/all users/leads that have emails, from the admin.
 - admin, add a way of seeing the fingerprint usage across apps
+    - add a way of nurturing an anonymous fingerprint of an app, using the info of that fingerprint from other apps...
 - admin, add admin users management owner of groups of apps
-- admin, add a way of grouping apps with a single apikey, so they share credits consumption and earnings (like a passport by topic)
+- add waitlist mode that doesn't replace the full page, but embeds it on an ID or generates the UI where you define. The widget could search and replace. Essentially a waitlist for a 'product' the dev can embed on a page.
+
+- admin, add a way of grouping apps with a single apikey or public token, so they share credits consumption and earnings (like a passport by group)
 - admin. add app description field and keywords, to have better insights as to why a user wanted to use them (tracking)
 - sdk: add localization support for widget, and expose method so the client can switch the active language (for example, if the client app handles the locale) - DONE
 - add public token generation so we can use the widget without exposing the apikey and without needing a middleware (to use it on simple static reactjs webapps or other web based apps later) - DONE
@@ -33,7 +36,7 @@ todo:
     - we should be able from the 'Users & Leads' option, to initiate a chat with the active user.
 
 - hide 'Offline' label if slim_labels is false.
-- improve the waitlist screen to show the app title and description and the growthkit logo.
+- improve the waitlist screen to show the app title and description and the growthkit logo. - DONE
 - add location info from user fingerprint data being tracked - DONE ✅
     - Added browser, device, and location tracking using geoip-lite
     - Updated Users & Leads UI with fingerprint icon, browser/device info, and location column

@@ -773,6 +773,39 @@ export function useGrowthKit(): GrowthKitHook {
     };
   }, [sendEvents]);
 
+  // Join product waitlist
+  const joinProductWaitlist = useCallback(async (
+    productTag: string,
+    email: string
+  ): Promise<boolean> => {
+    if (!apiRef.current) return false;
+
+    try {
+      const response = await apiRef.current.joinWaitlist(
+        email,
+        state.fingerprint || undefined,
+        undefined,
+        productTag
+      );
+
+      if (response.success) {
+        // Refresh to get updated product waitlist status
+        await refresh();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Join product waitlist failed:', error);
+      return false;
+    }
+  }, [state.fingerprint]);
+
+  // Get product waitlist status
+  const getProductWaitlistStatus = useCallback((productTag: string) => {
+    const products = (state.waitlist as any)?.products || {};
+    return products[productTag] || { isOnList: false, status: 'none' };
+  }, [state.waitlist]);
+
   // Combine state and actions
   const actions: GrowthKitActions = {
     refresh,
@@ -781,6 +814,8 @@ export function useGrowthKit(): GrowthKitHook {
     claimEmail,
     verifyEmail,
     joinWaitlist,
+    joinProductWaitlist,
+    getProductWaitlistStatus,
     acceptInvitation,
     share,
     getReferralLink,

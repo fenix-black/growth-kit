@@ -83,6 +83,8 @@ export interface GrowthKitActions {
   claimEmail: (email: string) => Promise<boolean>;
   verifyEmail: (token: string) => Promise<boolean>;
   joinWaitlist: (email: string, metadata?: any) => Promise<boolean>;
+  joinProductWaitlist: (productTag: string, email: string) => Promise<boolean>;
+  getProductWaitlistStatus: (productTag: string) => { isOnList: boolean; status: string };
   acceptInvitation: () => Promise<boolean>;
   share: (options?: ShareOptions) => Promise<boolean>;
   getReferralLink: () => string;

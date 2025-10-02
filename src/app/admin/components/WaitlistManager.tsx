@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import InvitationTracker from './InvitationTracker';
+import ProductWaitlistsTab from './ProductWaitlistsTab';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { Trash2 } from 'lucide-react';
 
@@ -45,7 +46,7 @@ interface WaitlistManagerProps {
 
 export default function WaitlistManager({ appId, appName, appDomain, onClose, embedded = false }: WaitlistManagerProps) {
   const focusTrapRef = useFocusTrap(!embedded);
-  const [activeTab, setActiveTab] = useState<'entries' | 'settings' | 'invitations'>('entries');
+  const [activeTab, setActiveTab] = useState<'entries' | 'settings' | 'invitations' | 'products'>('entries');
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
   const [entryNotes, setEntryNotes] = useState<{ [key: string]: string }>({});
@@ -344,7 +345,17 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                Waitlist Entries
+                App Waitlist
+              </button>
+              <button
+                onClick={() => setActiveTab('products')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'products'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Product Waitlists
               </button>
               <button
                 onClick={() => setActiveTab('invitations')}
@@ -567,6 +578,10 @@ export default function WaitlistManager({ appId, appName, appDomain, onClose, em
           ) : activeTab === 'invitations' ? (
             <div className="p-6">
               <InvitationTracker appId={appId} />
+            </div>
+          ) : activeTab === 'products' ? (
+            <div className="p-6">
+              <ProductWaitlistsTab appId={appId} appName={appName} />
             </div>
           ) : (
             <div className="p-6 space-y-6">

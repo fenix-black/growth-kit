@@ -6,6 +6,7 @@ import { corsErrors } from '@/lib/utils/corsResponse';
 import { successResponse } from '@/lib/utils/response';
 import { withCorsHeaders } from '@/lib/middleware/cors';
 import { sendWaitlistConfirmationEmail } from '@/lib/email/send';
+import { findProductByTag, isValidProductTag } from '@/lib/types/product-waitlist';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -29,33 +30,126 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { email, name, metadata } = body;
+    const { email, name, metadata, productTag } = body;
 
     if (!email) {
       return corsErrors.badRequest('Email is required', origin);
     }
 
-    // Check if app has waitlist enabled
+    // Validate productTag if provided
+    if (productTag) {
+      if (!isValidProductTag(productTag)) {
+        return corsErrors.badRequest('Invalid product tag format', origin);
+      }
+    }
+
+    // Get app data with metadata for product validation
     const appWithWaitlist = await prisma.app.findUnique({
       where: { id: app.id },
       select: {
         waitlistEnabled: true,
         waitlistMessages: true,
+        metadata: true,
       },
     });
 
+    // For product waitlists
+    if (productTag) {
+      // Find product configuration
+      const product = findProductByTag(appWithWaitlist?.metadata, productTag);
+      
+      if (!product) {
+        return corsErrors.badRequest('Product not found', origin);
+      }
+      
+      if (!product.enabled) {
+        return corsErrors.badRequest('This product waitlist is not currently accepting signups', origin);
+      }
+
+      // Check if user is already on this product waitlist
+      const existingEntry = await prisma.waitlist.findUnique({
+        where: {
+          appId_email_productTag: {
+            appId: app.id,
+            email,
+            productTag,
+          },
+        },
+      });
+
+      if (existingEntry) {
+        return withCorsHeaders(
+          successResponse({
+            alreadyOnWaitlist: true,
+            isOnList: true,
+            status: existingEntry.status,
+            message: `You are already on the ${product.name} waitlist`,
+          }),
+          origin,
+          app.corsOrigins
+        );
+      }
+
+      // Create product waitlist entry (no position for products)
+      await prisma.waitlist.create({
+        data: {
+          appId: app.id,
+          email,
+          productTag,
+          status: 'WAITING',
+          position: null, // No position tracking for product waitlists
+          fingerprintId: fingerprint.id,
+          metadata: metadata || null,
+        },
+      });
+
+      // Create or update lead record
+      await prisma.lead.upsert({
+        where: {
+          appId_fingerprintId: {
+            appId: app.id,
+            fingerprintId: fingerprint.id,
+          },
+        },
+        update: {
+          email,
+          name: name || undefined,
+        },
+        create: {
+          appId: app.id,
+          fingerprintId: fingerprint.id,
+          email,
+          name: name || null,
+        },
+      });
+
+      // No credits for product waitlists
+      return withCorsHeaders(
+        successResponse({
+          joinedWaitlist: true,
+          isOnList: true,
+          productTag,
+          message: product.successMessage || `You've joined the ${product.name} waitlist!`,
+        }),
+        origin,
+        app.corsOrigins
+      );
+    }
+
+    // App-level waitlist (existing behavior)
     if (!appWithWaitlist?.waitlistEnabled) {
       return corsErrors.badRequest('Waitlist is not enabled for this app', origin);
     }
 
-    // Check if user is already on waitlist
+    // Check if user is already on app-level waitlist
     const existingWaitlistEntry = await prisma.waitlist.findUnique({
       where: {
-        appId_email: {
+        appId_email_productTag: {
           appId: app.id,
           email,
+          productTag: null,
         },
-      },
+      } as any,
     });
 
     if (existingWaitlistEntry) {
@@ -80,11 +174,12 @@ export async function POST(request: NextRequest) {
 
     const nextPosition = (lastEntry?.position || 0) + 1;
 
-    // Create waitlist entry
+    // Create app-level waitlist entry
     const waitlistEntry = await prisma.waitlist.create({
       data: {
         appId: app.id,
         email,
+        productTag: null, // App-level waitlist
         status: 'WAITING',
         position: nextPosition,
         fingerprintId: fingerprint.id,

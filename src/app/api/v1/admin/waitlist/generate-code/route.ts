@@ -39,11 +39,12 @@ export async function POST(request: NextRequest) {
     // Check if email is already on waitlist
     let waitlistEntry = await prisma.waitlist.findUnique({
       where: {
-        appId_email: {
+        appId_email_productTag: {
           appId,
           email,
+          productTag: null, // App-level waitlist
         },
-      },
+      } as any,
     });
 
     // If not on waitlist, add them

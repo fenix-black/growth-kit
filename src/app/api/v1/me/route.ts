@@ -275,11 +275,12 @@ export async function POST(request: NextRequest) {
             if (lead && lead.email) {
               await prisma.waitlist.upsert({
                 where: {
-                  appId_email: {
+                  appId_email_productTag: {
                     appId: authContext.app.id,
                     email: lead.email,
+                    productTag: null,
                   },
-                },
+                } as any,
                 create: {
                   appId: authContext.app.id,
                   email: lead.email,
@@ -462,11 +463,12 @@ export async function POST(request: NextRequest) {
       if (lead && lead.email) {
         const waitlistEntry = await prisma.waitlist.findUnique({
           where: {
-            appId_email: {
+            appId_email_productTag: {
               appId: authContext.app.id,
               email: lead.email,
+              productTag: null,
             },
-          },
+          } as any,
           select: { status: true },
         });
         
@@ -611,11 +613,12 @@ export async function POST(request: NextRequest) {
           // Check waitlist status for this email
           const waitlistEntry = await prisma.waitlist.findUnique({
           where: {
-            appId_email: {
+            appId_email_productTag: {
               appId: authContext.app.id,
               email: lead.email,
+              productTag: null,
             },
-          },
+          } as any,
         });
 
         if (waitlistEntry) {

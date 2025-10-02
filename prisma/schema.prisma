@@ -28,6 +28,7 @@ model App {
   redirectUrl                 String
   policyJson                  Json
   emailTemplates              Json?
+  metadata                    Json?         // Product waitlists config and other metadata
   isActive                    Boolean       @default(true)
   publicKey                   String?       @unique
   createdAt                   DateTime      @default(now())
@@ -57,14 +58,14 @@ model App {
   maxCreditBalance            Int?
   creditsPaused               Boolean       @default(false)
   creditsPausedAt             DateTime?
-  apiKeys               ApiKey[]
-  tenant                Tenant?       @relation(fields: [tenantId], references: [id])
-  eventLogs             EventLog[]
-  fingerprints          Fingerprint[]
-  leads                 Lead[]
-  referrals             Referral[]
-  waitlist              Waitlist[]
-  activities            Activity[]
+  apiKeys                     ApiKey[]
+  tenant                      Tenant?       @relation(fields: [tenantId], references: [id])
+  eventLogs                   EventLog[]
+  fingerprints                Fingerprint[]
+  leads                       Lead[]
+  referrals                   Referral[]
+  waitlist                    Waitlist[]
+  activities                  Activity[]
 
   @@index([tenantId])
   @@index([domain])
@@ -102,13 +103,13 @@ model Fingerprint {
   browser        String?
   device         String?
   location       Json?
-  credits      Credit[]
-  app          App        @relation(fields: [appId], references: [id], onDelete: Cascade)
-  leads        Lead[]
-  referredBy   Referral?  @relation("Referred")
-  referrals    Referral[] @relation("Referrer")
-  usage        Usage[]
-  activities   Activity[]
+  credits        Credit[]
+  app            App        @relation(fields: [appId], references: [id], onDelete: Cascade)
+  leads          Lead[]
+  referredBy     Referral?  @relation("Referred")
+  referrals      Referral[] @relation("Referrer")
+  usage          Usage[]
+  activities     Activity[]
 
   @@unique([appId, fingerprint])
   @@index([appId])
@@ -199,11 +200,12 @@ model Waitlist {
   id              String    @id @default(cuid())
   appId           String
   email           String
+  productTag      String?   // Product identifier for product-specific waitlists (null = app-level)
   status          String    @default("WAITING")
   position        Int?
   invitedAt       DateTime?
   acceptedAt      DateTime?
-  metadata        Json?
+  metadata        Json?     // Custom field responses stored here
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   convertedAt     DateTime?
@@ -217,9 +219,10 @@ model Waitlist {
   useCount        Int       @default(0)
   app             App       @relation(fields: [appId], references: [id], onDelete: Cascade)
 
-  @@unique([appId, email])
+  @@unique([appId, email, productTag])
   @@unique([appId, invitationCode])
   @@index([appId])
+  @@index([appId, productTag])
   @@index([status])
   @@index([position])
   @@index([invitationCode])
@@ -255,10 +258,10 @@ model Activity {
   context       Json
   sessionId     String
   timestamp     DateTime @default(now())
-  
-  app           App          @relation(fields: [appId], references: [id], onDelete: Cascade)
-  fingerprint   Fingerprint  @relation(fields: [fingerprintId], references: [id], onDelete: Cascade)
-  
+
+  app         App         @relation(fields: [appId], references: [id], onDelete: Cascade)
+  fingerprint Fingerprint @relation(fields: [fingerprintId], references: [id], onDelete: Cascade)
+
   @@index([appId, timestamp])
   @@index([fingerprintId, timestamp])
   @@index([appId, eventName])
@@ -267,12 +270,12 @@ model Activity {
 
 model AdminActivity {
   id         String   @id @default(cuid())
-  action     String   // e.g., "app_created", "user_paused", "credits_issued"
-  targetType String?  // e.g., "app", "user", "waitlist"
-  targetId   String?  // ID of the affected entity
-  metadata   Json?    // Additional context
+  action     String // e.g., "app_created", "user_paused", "credits_issued"
+  targetType String? // e.g., "app", "user", "waitlist"
+  targetId   String? // ID of the affected entity
+  metadata   Json? // Additional context
   timestamp  DateTime @default(now())
-  
+
   @@index([action])
   @@index([targetType, targetId])
   @@index([timestamp])

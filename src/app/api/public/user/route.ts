@@ -236,19 +236,20 @@ export async function POST(request: NextRequest) {
               if (lead && lead.email && lead.emailVerified) {
                 await prisma.waitlist.upsert({
                   where: {
-                    appId_email: { appId: app.id, email: lead.email },
-                  },
+                    appId_email_productTag: { appId: app.id, email: lead.email, productTag: null },
+                  } as any,
                   create: {
                     appId: app.id,
                     email: lead.email,
+                    productTag: null, // App-level waitlist
                     status: 'INVITED',
                     invitedAt: new Date(),
-                    ...({ invitedVia: 'master_referral' } as any),
+                    invitedVia: 'master_referral',
                   } as any,
                   update: {
                     status: 'INVITED',
                     invitedAt: new Date(),
-                    ...({ invitedVia: 'master_referral' } as any),
+                    invitedVia: 'master_referral',
                   } as any,
                 });
               }
@@ -395,8 +396,8 @@ export async function POST(request: NextRequest) {
         if (lead && lead.email) {
           const waitlistEntry = await prisma.waitlist.findUnique({
             where: {
-              appId_email: { appId: app.id, email: lead.email },
-            },
+              appId_email_productTag: { appId: app.id, email: lead.email, productTag: null },
+            } as any,
             select: { status: true },
           });
           
@@ -520,11 +521,12 @@ export async function POST(request: NextRequest) {
         if (lead && lead.email) {
           const waitlistEntry = await prisma.waitlist.findUnique({
             where: {
-              appId_email: {
+              appId_email_productTag: {
                 appId: app.id,
                 email: lead.email,
+                productTag: null, // App-level waitlist
               },
-            },
+            } as any,
           });
 
           if (waitlistEntry) {
@@ -560,6 +562,43 @@ export async function POST(request: NextRequest) {
           };
         }
       }
+    }
+
+    // Get product waitlist statuses if user has email
+    const productWaitlists: Record<string, any> = {};
+    if (lead && lead.email) {
+      const productEntries = await prisma.waitlist.findMany({
+        where: {
+          appId: app.id,
+          email: lead.email,
+          productTag: { not: null },
+        } as any,
+        select: {
+          productTag: true,
+          status: true,
+          createdAt: true,
+        } as any,
+      });
+
+      for (const entry of productEntries as any[]) {
+        if (entry.productTag) {
+          productWaitlists[entry.productTag] = {
+            isOnList: true,
+            status: entry.status,
+            joinedAt: entry.createdAt.toISOString(),
+          };
+        }
+      }
+    }
+
+    // Add products to waitlist data if they exist
+    if (waitlistData && Object.keys(productWaitlists).length > 0) {
+      (waitlistData as any).products = productWaitlists;
+    } else if (!waitlistData && Object.keys(productWaitlists).length > 0) {
+      // User has product waitlists but no app-level waitlist
+      waitlistData = {
+        products: productWaitlists,
+      } as any;
     }
 
     // Build response to match original /v1/me format exactly

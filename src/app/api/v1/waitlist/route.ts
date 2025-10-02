@@ -56,11 +56,12 @@ export async function POST(request: NextRequest) {
     // Check if already on waitlist
     const existing = await prisma.waitlist.findUnique({
       where: {
-        appId_email: {
+        appId_email_productTag: {
           appId: authContext.app.id,
           email: normalizedEmail,
+          productTag: null, // App-level waitlist
         },
-      },
+      } as any,
     });
 
     if (existing) {

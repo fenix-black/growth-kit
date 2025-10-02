@@ -437,7 +437,8 @@ export class GrowthKitAPI {
   async joinWaitlist(
     email: string,
     fingerprint?: string,
-    metadata?: any
+    metadata?: any,
+    productTag?: string
   ): Promise<APIResponse<WaitlistResponse>> {
     return this.request<WaitlistResponse>('/v1/waitlist', {
       method: 'POST',
@@ -445,6 +446,7 @@ export class GrowthKitAPI {
         email,
         fingerprint,
         metadata,
+        productTag,
       }),
     });
   }
