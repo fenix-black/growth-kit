@@ -42,6 +42,15 @@ export function WaitlistForm({
   layout: layoutProp,
   targetSelector,
 }: WaitlistFormProps) {
+  // Get app data first to determine layout
+  const growthKit = useGrowthKit();
+  const { themeColors } = useGrowthKitConfig();
+  const { t } = useTranslation();
+  const { app } = growthKit;
+  
+  // Determine effective layout (prop overrides app setting)
+  const effectiveLayout = layoutProp || app?.waitlistLayout || 'centered';
+
   // If productTag is provided, use the product waitlist widget
   if (productTag) {
     return (
@@ -58,8 +67,8 @@ export function WaitlistForm({
     );
   }
 
-  // If embed layout is requested, use the embed widget
-  if (layoutProp === 'embed') {
+  // If embed layout is requested (from prop OR app setting), use the embed widget
+  if (effectiveLayout === 'embed') {
     const widget = (
       <EmbedWaitlistWidget
         variant={variant}
@@ -87,16 +96,12 @@ export function WaitlistForm({
   }
 
   // Original app-level waitlist logic below (full-page modes)
-  const growthKit = useGrowthKit();
-  const { themeColors } = useGrowthKitConfig();
-  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [position, setPosition] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { app } = growthKit;
-  const layout = layoutProp || app?.waitlistLayout || 'centered';
+  const layout = effectiveLayout;
   const brandColor = app?.primaryColor || themeColors.primary;
   const bgColor = app?.backgroundColor || 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)';
   const cardBgColor = app?.cardBackgroundColor || 'rgba(255, 255, 255, 0.05)';

@@ -33,7 +33,7 @@ export class GrowthKitAPI {
       console.log('[GrowthKit] Using secure proxy mode via middleware - API key is handled server-side');
     } else if (this.isPublicMode && typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
       console.log('[GrowthKit] Using public key mode - secure for client-side usage');
-    } else if (!this.isProxyMode && typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+    } else if (!this.isProxyMode && !this.isPublicMode && typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
       console.warn('[GrowthKit] Using direct API mode with client-side API key. Consider upgrading to proxy mode or public key mode for better security.');
     }
   }

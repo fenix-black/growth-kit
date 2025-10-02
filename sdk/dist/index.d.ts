@@ -78,6 +78,11 @@ interface GrowthKitActions {
     claimEmail: (email: string) => Promise<boolean>;
     verifyEmail: (token: string) => Promise<boolean>;
     joinWaitlist: (email: string, metadata?: any) => Promise<boolean>;
+    joinProductWaitlist: (productTag: string, email: string) => Promise<boolean>;
+    getProductWaitlistStatus: (productTag: string) => {
+        isOnList: boolean;
+        status: string;
+    };
     acceptInvitation: () => Promise<boolean>;
     share: (options?: ShareOptions) => Promise<boolean>;
     getReferralLink: () => string;
@@ -342,7 +347,7 @@ declare class GrowthKitAPI {
     claimName(fingerprint: string, name: string): Promise<APIResponse<ClaimResponse>>;
     claimEmail(fingerprint: string, email: string): Promise<APIResponse<ClaimResponse>>;
     verifyEmail(fingerprint: string, token: string): Promise<APIResponse<VerifyResponse>>;
-    joinWaitlist(email: string, fingerprint?: string, metadata?: any): Promise<APIResponse<WaitlistResponse>>;
+    joinWaitlist(email: string, fingerprint?: string, metadata?: any, productTag?: string): Promise<APIResponse<WaitlistResponse>>;
     trackReferralVisit(claim?: string): Promise<APIResponse<any>>;
     trackEvents(events: Array<{
         eventName: string;
@@ -375,11 +380,20 @@ interface WaitlistFormProps {
     onSuccess?: (position: number) => void;
     className?: string;
     style?: React$1.CSSProperties;
+    productTag?: string;
+    mode?: 'inline' | 'modal' | 'drawer';
+    variant?: 'compact' | 'standard';
+    hidePosition?: boolean;
+    trigger?: React$1.ReactNode;
+    drawerPosition?: 'left' | 'right';
+    layout?: 'centered' | 'split' | 'minimal' | 'embed';
+    targetSelector?: string;
 }
 /**
  * Modern waitlist form component with app branding
+ * Supports both app-level (full-page) and product-level (embeddable) waitlists
  */
-declare function WaitlistForm({ message, onSuccess, className, style }: WaitlistFormProps): React$1.JSX.Element;
+declare function WaitlistForm({ message, onSuccess, className, style, productTag, mode, variant, hidePosition, trigger, drawerPosition, layout: layoutProp, targetSelector, }: WaitlistFormProps): React$1.JSX.Element;
 
 interface GrowthKitAccountWidgetProps {
     config: GrowthKitConfig;
