@@ -95,8 +95,20 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
 
   // Show waitlist if required
   // BUT: If layout is "embed", don't show as gate - let AutoWaitlistInjector handle it
-  if (shouldShowWaitlist && app?.waitlistLayout !== 'embed') {
+  // Also wait for app data to load before showing waitlist gate
+  if (shouldShowWaitlist && app && app.waitlistLayout !== 'embed') {
     return <WaitlistForm />;
+  }
+  
+  // If waitlist is required but we're in embed mode, show children and let AutoWaitlistInjector handle it
+  if (shouldShowWaitlist && (!app || app.waitlistLayout === 'embed')) {
+    // Embed mode - render children, AutoWaitlistInjector will handle the widget
+    return (
+      <>
+        {children}
+        <CreditExhaustionModal ref={creditModalRef} />
+      </>
+    );
   }
 
   return (

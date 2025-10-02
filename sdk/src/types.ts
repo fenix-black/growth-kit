@@ -39,8 +39,9 @@ export interface AppBranding {
   primaryColor?: string;
   backgroundColor?: string;
   cardBackgroundColor?: string;
-  waitlistLayout?: 'centered' | 'split' | 'minimal';
+  waitlistLayout?: 'centered' | 'split' | 'minimal' | 'embed';
   hideGrowthKitBranding: boolean;
+  metadata?: any;
 }
 
 export interface GrowthKitState {
