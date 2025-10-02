@@ -20,7 +20,8 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
     error,
     shouldShowWaitlist,
     credits,
-    waitlistEnabled 
+    waitlistEnabled,
+    app
   } = useGrowthKit();
   
   const { themeColors } = useGrowthKitConfig();
@@ -93,7 +94,8 @@ export function GrowthKitGate({ children, loadingComponent }: GrowthKitGateProps
   }
 
   // Show waitlist if required
-  if (shouldShowWaitlist) {
+  // BUT: If layout is "embed", don't show as gate - let AutoWaitlistInjector handle it
+  if (shouldShowWaitlist && app?.waitlistLayout !== 'embed') {
     return <WaitlistForm />;
   }
 
