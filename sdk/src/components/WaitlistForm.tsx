@@ -882,7 +882,13 @@ export function WaitlistForm({
     </div>
   );
 
-  const renderMinimalLayout = () => (
+  const renderMinimalLayout = () => {
+    const minimalBg = isLightBackground(bgColor.includes('gradient') ? bgColor.split('#')[1]?.substring(0, 6) || '#ffffff' : bgColor) 
+      ? (bgColor.includes('gradient') ? '#ffffff' : bgColor)
+      : '#ffffff';
+    const isDarkBg = !isLightBackground(minimalBg);
+
+    return (
     <div 
       className={className}
       style={{
@@ -891,47 +897,101 @@ export function WaitlistForm({
         alignItems: 'center',
         minHeight: '100vh',
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-        background: '#ffffff',
+        background: minimalBg,
+        padding: '24px',
         ...style
       }}
     >
       <div style={{
-        maxWidth: '400px',
+        maxWidth: '440px',
         width: '100%',
-        padding: '24px',
+        padding: '32px',
       }}>
-        {app?.logoUrl && (
-          <img 
-            src={app.logoUrl} 
-            alt={app.name}
-            style={{ 
-              width: '48px', 
-              height: '48px', 
-              borderRadius: '12px',
-              marginBottom: '16px',
-              objectFit: 'cover',
-            }}
-          />
-        )}
+        {/* Logo */}
+        {app?.logoUrl ? (
+          <div style={{
+            width: '80px',
+            height: '80px',
+            borderRadius: '16px',
+            background: isDarkBg ? 'rgba(255, 255, 255, 0.1)' : 'white',
+            padding: '12px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            border: isDarkBg ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e5e7eb',
+          }}>
+            <img 
+              src={app.logoUrl} 
+              alt={app.name}
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'contain',
+              }}
+            />
+          </div>
+        ) : app?.name ? (
+          <div style={{
+            width: '80px',
+            height: '80px',
+            borderRadius: '16px',
+            background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '28px',
+            fontWeight: '700',
+            color: 'white',
+            marginBottom: '24px',
+            boxShadow: `0 4px 12px ${brandColor}40`,
+          }}>
+            {getLogoFallback()}
+          </div>
+        ) : null}
         
         <h1 style={{
-          fontSize: '24px',
-          fontWeight: '700',
-          color: '#1f2937',
-          marginBottom: '8px',
+          fontSize: '32px',
+          fontWeight: '800',
+          color: isDarkBg ? 'white' : '#1f2937',
+          marginBottom: '12px',
+          letterSpacing: '-0.02em',
+          lineHeight: '1.2',
         }}>
           {app?.name || 'Join Waitlist'}
         </h1>
         
-        {(app?.description || displayMessage) && (
+        {app?.description && (
           <p style={{
-            color: '#6b7280',
+            color: isDarkBg ? 'rgba(255, 255, 255, 0.8)' : '#6b7280',
             marginBottom: '24px',
-            fontSize: '14px',
+            fontSize: '16px',
+            lineHeight: '1.5',
+            fontWeight: '500',
           }}>
-            {displayMessage || app?.description}
+            {app.description}
           </p>
         )}
+
+        {/* Waitlist Message */}
+        <div style={{
+          background: isDarkBg ? 'rgba(255, 255, 255, 0.1)' : `${brandColor}10`,
+          border: isDarkBg ? '1px solid rgba(255, 255, 255, 0.2)' : `1px solid ${brandColor}30`,
+          borderRadius: '12px',
+          padding: '16px 20px',
+          marginBottom: '32px',
+        }}>
+          <p style={{
+            color: isDarkBg ? 'white' : brandColor,
+            fontSize: '14px',
+            fontWeight: '600',
+            margin: 0,
+            lineHeight: '1.5',
+          }}>
+            {getWaitlistMessage()}
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit}>
           <input
@@ -942,22 +1002,35 @@ export function WaitlistForm({
             disabled={isSubmitting}
             style={{
               width: '100%',
-              padding: '12px 16px',
-              fontSize: '14px',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
+              padding: '14px 18px',
+              fontSize: '15px',
+              border: isDarkBg ? '2px solid rgba(255, 255, 255, 0.2)' : '2px solid #d1d5db',
+              borderRadius: '12px',
               outline: 'none',
-              marginBottom: '12px',
+              marginBottom: '16px',
               boxSizing: 'border-box',
               fontFamily: 'inherit',
+              fontWeight: '500',
+              backgroundColor: isDarkBg ? 'rgba(255, 255, 255, 0.05)' : 'white',
+              color: isDarkBg ? 'white' : '#1f2937',
+              transition: 'all 0.2s ease',
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = brandColor;
+              e.currentTarget.style.boxShadow = `0 0 0 3px ${brandColor}20`;
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = isDarkBg ? 'rgba(255, 255, 255, 0.2)' : '#d1d5db';
+              e.currentTarget.style.boxShadow = 'none';
             }}
           />
 
           {error && (
             <p style={{ 
               color: '#ef4444',
-              marginBottom: '12px',
+              marginBottom: '16px',
               fontSize: '13px',
+              fontWeight: '500',
             }}>
               {error}
             </p>
@@ -968,19 +1041,44 @@ export function WaitlistForm({
             disabled={isSubmitting}
             style={{
               width: '100%',
-              padding: '12px 20px',
-              fontSize: '14px',
-              fontWeight: '600',
-              background: brandColor,
+              padding: '14px 24px',
+              fontSize: '15px',
+              fontWeight: '700',
+              background: isSubmitting 
+                ? '#9ca3af' 
+                : `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
               color: 'white',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: '12px',
               cursor: isSubmitting ? 'not-allowed' : 'pointer',
-              opacity: isSubmitting ? 0.6 : 1,
+              transition: 'all 0.2s ease',
+              boxShadow: isSubmitting ? 'none' : `0 4px 12px ${brandColor}30`,
+            }}
+            onMouseOver={(e) => {
+              if (!isSubmitting) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = `0 8px 20px ${brandColor}40`;
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!isSubmitting) {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `0 4px 12px ${brandColor}30`;
+              }
             }}
           >
             {isSubmitting ? t('waitlist.joining') : t('waitlist.joinWaitlist')}
           </button>
+          
+          <p style={{
+            marginTop: '16px',
+            textAlign: 'center',
+            color: isDarkBg ? 'rgba(255, 255, 255, 0.6)' : '#9ca3af',
+            fontSize: '13px',
+            fontWeight: '500',
+          }}>
+            {t('waitlist.noSpam')}
+          </p>
         </form>
 
         {!app?.hideGrowthKitBranding && (
@@ -989,31 +1087,33 @@ export function WaitlistForm({
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              marginTop: '24px',
-              paddingTop: '16px',
-              borderTop: '1px solid #e5e7eb',
+              marginTop: '32px',
+              paddingTop: '24px',
+              borderTop: isDarkBg ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e5e7eb',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '8px',
+              gap: '10px',
               textDecoration: 'none',
               transition: 'opacity 0.2s ease',
               cursor: 'pointer',
             }}
-            onMouseOver={(e) => e.currentTarget.style.opacity = '0.7'}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
             onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
           >
             <img 
-              src="https://growth.fenixblack.ai/growthkit-logo-alpha.png"
+              src={isDarkBg 
+                ? "https://growth.fenixblack.ai/growthkit-logo-dark-alpha.png"
+                : "https://growth.fenixblack.ai/growthkit-logo-alpha.png"}
               alt="GrowthKit"
               style={{
-                height: '20px',
+                height: '22px',
                 width: 'auto',
               }}
             />
             <span style={{
-              color: '#9ca3af',
-              fontSize: '10px',
+              color: isDarkBg ? 'rgba(255, 255, 255, 0.5)' : '#9ca3af',
+              fontSize: '11px',
               fontWeight: '500',
             }}>
               Powered by GrowthKit
@@ -1022,7 +1122,8 @@ export function WaitlistForm({
         )}
       </div>
     </div>
-  );
+    );
+  };
 
   // Render based on layout
   switch (layout) {
