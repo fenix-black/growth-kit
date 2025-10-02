@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useGrowthKit } from '../useGrowthKit';
 import { EmbedWaitlistWidget } from './EmbedWaitlistWidget';
