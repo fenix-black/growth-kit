@@ -44,6 +44,8 @@ model App {
   description                 String?
   logoUrl                     String?
   primaryColor                String?
+  backgroundColor             String?
+  cardBackgroundColor         String?
   hideGrowthKitBranding       Boolean       @default(false)
   trackUsdValue               Boolean       @default(false)
   allowCustomCredits          Boolean       @default(true)

@@ -171,6 +171,8 @@ export async function PUT(request: NextRequest) {
       description,
       logoUrl,
       primaryColor,
+      backgroundColor,
+      cardBackgroundColor,
       hideGrowthKitBranding,
       autoInviteEnabled,
       dailyInviteQuota,
@@ -191,6 +193,8 @@ export async function PUT(request: NextRequest) {
     if (description !== undefined) updateData.description = description;
     if (logoUrl !== undefined) updateData.logoUrl = logoUrl;
     if (primaryColor !== undefined) updateData.primaryColor = primaryColor;
+    if (backgroundColor !== undefined) updateData.backgroundColor = backgroundColor;
+    if (cardBackgroundColor !== undefined) updateData.cardBackgroundColor = cardBackgroundColor;
     if (hideGrowthKitBranding !== undefined) updateData.hideGrowthKitBranding = hideGrowthKitBranding;
     if (autoInviteEnabled !== undefined) updateData.autoInviteEnabled = autoInviteEnabled;
     if (dailyInviteQuota !== undefined) updateData.dailyInviteQuota = dailyInviteQuota;

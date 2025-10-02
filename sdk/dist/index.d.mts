@@ -38,6 +38,8 @@ interface AppBranding {
     description?: string;
     logoUrl?: string;
     primaryColor?: string;
+    backgroundColor?: string;
+    cardBackgroundColor?: string;
     waitlistLayout?: 'centered' | 'split' | 'minimal';
     hideGrowthKitBranding: boolean;
 }

@@ -11,6 +11,8 @@ interface BrandingCardProps {
   description?: string;
   logoUrl?: string;
   primaryColor?: string;
+  backgroundColor?: string;
+  cardBackgroundColor?: string;
   waitlistLayout?: string;
   waitlistMessages?: string[];
   hideGrowthKitBranding?: boolean;
@@ -22,6 +24,8 @@ export default function BrandingCard({
   description,
   logoUrl,
   primaryColor,
+  backgroundColor,
+  cardBackgroundColor,
   waitlistLayout,
   waitlistMessages,
   hideGrowthKitBranding,
@@ -30,6 +34,8 @@ export default function BrandingCard({
   const [editedDescription, setEditedDescription] = useState(description || '');
   const [editedLogoUrl, setEditedLogoUrl] = useState(logoUrl || '');
   const [editedPrimaryColor, setEditedPrimaryColor] = useState(primaryColor || '#10b981');
+  const [editedBackgroundColor, setEditedBackgroundColor] = useState(backgroundColor || '#0f172a');
+  const [editedCardBackgroundColor, setEditedCardBackgroundColor] = useState(cardBackgroundColor || 'rgba(255, 255, 255, 0.05)');
   const [editedWaitlistLayout, setEditedWaitlistLayout] = useState(waitlistLayout || 'centered');
   const [editedWaitlistMessages, setEditedWaitlistMessages] = useState<string[]>(waitlistMessages || []);
   const [newMessage, setNewMessage] = useState('');
@@ -131,6 +137,8 @@ export default function BrandingCard({
           description: editedDescription,
           logoUrl: editedLogoUrl || null,
           primaryColor: editedPrimaryColor,
+          backgroundColor: editedBackgroundColor,
+          cardBackgroundColor: editedCardBackgroundColor,
           waitlistLayout: editedWaitlistLayout,
           waitlistMessages: editedWaitlistMessages,
         }),
@@ -234,33 +242,75 @@ export default function BrandingCard({
           </div>
         </div>
 
-        {/* Primary Color */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Brand Color
-          </label>
-          <div className="flex gap-3 items-center">
-            <input
-              type="color"
-              value={editedPrimaryColor}
-              onChange={(e) => setEditedPrimaryColor(e.target.value)}
-              className="h-10 w-20 rounded border border-gray-300 cursor-pointer"
-            />
+        {/* Colors */}
+        <div className="space-y-4">
+          {/* Primary Color */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Accent Color (Buttons & Text)
+            </label>
+            <div className="flex gap-3 items-center">
+              <input
+                type="color"
+                value={editedPrimaryColor}
+                onChange={(e) => setEditedPrimaryColor(e.target.value)}
+                className="h-10 w-20 rounded border border-gray-300 cursor-pointer"
+              />
+              <input
+                type="text"
+                value={editedPrimaryColor}
+                onChange={(e) => setEditedPrimaryColor(e.target.value)}
+                className="block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                placeholder="#10b981"
+              />
+              <div
+                className="h-10 w-10 rounded-lg border border-gray-300"
+                style={{ backgroundColor: editedPrimaryColor }}
+              />
+            </div>
+          </div>
+
+          {/* Background Color */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Background Color
+            </label>
+            <div className="flex gap-3 items-center">
+              <input
+                type="color"
+                value={editedBackgroundColor.startsWith('#') ? editedBackgroundColor : '#0f172a'}
+                onChange={(e) => setEditedBackgroundColor(e.target.value)}
+                className="h-10 w-20 rounded border border-gray-300 cursor-pointer"
+              />
+              <input
+                type="text"
+                value={editedBackgroundColor}
+                onChange={(e) => setEditedBackgroundColor(e.target.value)}
+                className="block flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                placeholder="linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"
+              />
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Supports solid colors (#hex) or gradients. Default: linear-gradient(135deg, #0f172a 0%, #1e293b 100%)
+            </p>
+          </div>
+
+          {/* Card Background Color */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Card Background Color
+            </label>
             <input
               type="text"
-              value={editedPrimaryColor}
-              onChange={(e) => setEditedPrimaryColor(e.target.value)}
-              className="block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="#10b981"
+              value={editedCardBackgroundColor}
+              onChange={(e) => setEditedCardBackgroundColor(e.target.value)}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              placeholder="rgba(255, 255, 255, 0.05)"
             />
-            <div
-              className="h-10 w-10 rounded-lg border border-gray-300"
-              style={{ backgroundColor: editedPrimaryColor }}
-            />
+            <p className="mt-1 text-xs text-gray-500">
+              Supports rgba(), solid colors, or gradients. Use rgba for transparency + blur effect.
+            </p>
           </div>
-          <p className="mt-2 text-sm text-gray-500">
-            Used for buttons and accents in the waitlist screen
-          </p>
         </div>
 
         {/* Waitlist Layout */}

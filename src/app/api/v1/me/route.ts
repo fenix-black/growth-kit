@@ -715,6 +715,8 @@ export async function POST(request: NextRequest) {
         description: app.description,
         logoUrl: app.logoUrl,
         primaryColor: app.primaryColor,
+        backgroundColor: app.backgroundColor,
+        cardBackgroundColor: app.cardBackgroundColor,
         waitlistLayout: app.waitlistLayout,
         hideGrowthKitBranding: app.hideGrowthKitBranding,
       },

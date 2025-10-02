@@ -32,6 +32,8 @@ export function WaitlistForm({
   const { app } = growthKit;
   const layout = app?.waitlistLayout || 'centered';
   const brandColor = app?.primaryColor || themeColors.primary;
+  const bgColor = app?.backgroundColor || 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)';
+  const cardBgColor = app?.cardBackgroundColor || 'rgba(255, 255, 255, 0.05)';
   
   // Get custom message from props, messages array, or fallback
   const getCustomMessage = () => {
@@ -275,9 +277,9 @@ export function WaitlistForm({
         alignItems: 'center',
         minHeight: '100vh',
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-        backgroundSize: '200% 200%',
-        animation: 'gradientShift 15s ease infinite',
+        background: bgColor,
+        backgroundSize: bgColor.includes('gradient') ? '200% 200%' : 'auto',
+        animation: bgColor.includes('gradient') ? 'gradientShift 15s ease infinite' : 'none',
         padding: '24px',
         ...style
       }}
@@ -360,11 +362,11 @@ export function WaitlistForm({
 
         {/* Main Card */}
         <div style={{
-          background: 'rgba(255, 255, 255, 0.05)',
+          background: cardBgColor,
           borderRadius: '24px',
           padding: app?.logoUrl || app?.name ? '90px 64px 64px' : '64px',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset',
-          backdropFilter: 'blur(20px) saturate(180%)',
+          backdropFilter: cardBgColor.includes('rgba') || cardBgColor.includes('transparent') ? 'blur(20px) saturate(180%)' : 'none',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           animation: 'fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
           position: 'relative',

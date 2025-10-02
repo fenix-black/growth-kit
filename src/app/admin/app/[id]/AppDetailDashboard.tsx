@@ -40,6 +40,8 @@ interface AppDetails {
   description?: string;
   logoUrl?: string;
   primaryColor?: string;
+  backgroundColor?: string;
+  cardBackgroundColor?: string;
   waitlistLayout?: string;
   waitlistMessages?: string[];
   hideGrowthKitBranding?: boolean;
@@ -845,6 +847,8 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
               description={app.description}
               logoUrl={app.logoUrl}
               primaryColor={app.primaryColor}
+              backgroundColor={app.backgroundColor}
+              cardBackgroundColor={app.cardBackgroundColor}
               waitlistLayout={app.waitlistLayout}
               waitlistMessages={app.waitlistMessages}
               hideGrowthKitBranding={app.hideGrowthKitBranding}
