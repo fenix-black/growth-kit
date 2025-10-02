@@ -87,6 +87,7 @@ const AccountWidgetInternal = forwardRef<
     hasClaimedEmail,
     hasVerifiedEmail,
     refresh,
+    app,
   } = useGrowthKit();
 
   const { t } = useTranslation();
@@ -245,7 +246,8 @@ const AccountWidgetInternal = forwardRef<
   }
 
   // Show waitlist if required
-  if (shouldShowWaitlist) {
+  // BUT: If layout is "embed", don't take over page - let AutoWaitlistInjector handle it
+  if (shouldShowWaitlist && app && app.waitlistLayout !== 'embed') {
     const waitlistWidget = (
       <div style={{ ...getWidgetStyles(themeColors, slim), ...style }} className={className}>
         <div style={styles.waitlistWidget}>
@@ -265,6 +267,12 @@ const AccountWidgetInternal = forwardRef<
         ) : waitlistWidget}
       </>
     );
+  }
+
+  // If embed mode or app not loaded yet, render normally and let AutoWaitlistInjector handle widget
+  if (shouldShowWaitlist && (!app || app.waitlistLayout === 'embed')) {
+    // In embed mode: show page content, AutoWaitlistInjector will handle the waitlist
+    // Fall through to render children normally
   }
 
   // Main widget content
