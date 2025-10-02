@@ -35,6 +35,34 @@ export function WaitlistForm({
   const bgColor = app?.backgroundColor || 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)';
   const cardBgColor = app?.cardBackgroundColor || 'rgba(255, 255, 255, 0.05)';
   
+  // For split layout, determine if right side should be light or dark
+  const isLightBackground = (color: string) => {
+    if (color.includes('ffffff') || color.includes('f3f4f6') || color.includes('fafafa')) return true;
+    if (color.startsWith('#')) {
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      return luminance > 0.5;
+    }
+    return false;
+  };
+  
+  // Get the base color for split layout right side
+  const getSplitRightBg = () => {
+    // If cardBgColor is solid and light, use it
+    if (!cardBgColor.includes('rgba') && isLightBackground(cardBgColor)) {
+      return cardBgColor;
+    }
+    // If cardBgColor is solid and dark, use white as contrast
+    if (!cardBgColor.includes('rgba') && !isLightBackground(cardBgColor)) {
+      return '#ffffff';
+    }
+    // For transparent cards in split, use white background
+    return '#ffffff';
+  };
+  
   // Get custom message from props, messages array, or fallback
   const getCustomMessage = () => {
     if (message) return message; // Props message takes priority
@@ -686,7 +714,7 @@ export function WaitlistForm({
       {/* Right side - Form */}
       <div style={{
         flex: '1',
-        background: cardBgColor,
+        background: getSplitRightBg(),
         padding: '80px 60px',
         display: 'flex',
         flexDirection: 'column',
@@ -696,7 +724,7 @@ export function WaitlistForm({
           <h2 style={{
             fontSize: '36px',
             fontWeight: '800',
-            color: cardBgColor.includes('rgba') || cardBgColor.includes('0.') ? 'white' : '#1f2937',
+            color: isLightBackground(getSplitRightBg()) ? '#1f2937' : 'white',
             marginBottom: '12px',
             letterSpacing: '-0.02em',
             lineHeight: '1.2',
@@ -706,7 +734,7 @@ export function WaitlistForm({
           
           <p style={{
             fontSize: '16px',
-            color: cardBgColor.includes('rgba') || cardBgColor.includes('0.') ? 'rgba(255, 255, 255, 0.8)' : '#6b7280',
+            color: isLightBackground(getSplitRightBg()) ? '#6b7280' : 'rgba(255, 255, 255, 0.8)',
             marginBottom: '40px',
             lineHeight: '1.6',
           }}>
@@ -723,15 +751,15 @@ export function WaitlistForm({
               width: '100%',
               padding: '18px 24px',
               fontSize: '16px',
-              border: cardBgColor.includes('rgba') ? '2px solid rgba(255, 255, 255, 0.2)' : '2px solid #e5e7eb',
+              border: isLightBackground(getSplitRightBg()) ? '2px solid #e5e7eb' : '2px solid rgba(255, 255, 255, 0.2)',
               borderRadius: '16px',
               outline: 'none',
               marginBottom: '20px',
               boxSizing: 'border-box',
               fontFamily: 'inherit',
               fontWeight: '500',
-              backgroundColor: cardBgColor.includes('rgba') ? 'rgba(255, 255, 255, 0.1)' : 'white',
-              color: cardBgColor.includes('rgba') ? 'white' : '#1f2937',
+              backgroundColor: isLightBackground(getSplitRightBg()) ? 'white' : 'rgba(255, 255, 255, 0.1)',
+              color: isLightBackground(getSplitRightBg()) ? '#1f2937' : 'white',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
             onFocus={(e) => {
@@ -740,7 +768,7 @@ export function WaitlistForm({
               e.currentTarget.style.transform = 'translateY(-2px)';
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = cardBgColor.includes('rgba') ? 'rgba(255, 255, 255, 0.2)' : '#e5e7eb';
+              e.currentTarget.style.borderColor = isLightBackground(getSplitRightBg()) ? '#e5e7eb' : 'rgba(255, 255, 255, 0.2)';
               e.currentTarget.style.boxShadow = 'none';
               e.currentTarget.style.transform = 'translateY(0)';
             }}
@@ -803,7 +831,7 @@ export function WaitlistForm({
           <p style={{
             marginTop: '24px',
             textAlign: 'center',
-            color: cardBgColor.includes('rgba') || cardBgColor.includes('0.') ? 'rgba(255, 255, 255, 0.6)' : '#6b7280',
+            color: isLightBackground(getSplitRightBg()) ? '#6b7280' : 'rgba(255, 255, 255, 0.6)',
             fontSize: '14px',
             fontWeight: '500',
           }}>
@@ -819,7 +847,7 @@ export function WaitlistForm({
             style={{
               marginTop: '48px',
               paddingTop: '32px',
-              borderTop: cardBgColor.includes('rgba') ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e5e7eb',
+              borderTop: isLightBackground(getSplitRightBg()) ? '1px solid #e5e7eb' : '1px solid rgba(255, 255, 255, 0.1)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -832,9 +860,9 @@ export function WaitlistForm({
             onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
           >
             <img 
-              src={cardBgColor.includes('rgba') || cardBgColor.includes('0.') 
-                ? "https://growth.fenixblack.ai/growthkit-logo-dark-alpha.png"
-                : "https://growth.fenixblack.ai/growthkit-logo-alpha.png"}
+              src={isLightBackground(getSplitRightBg())
+                ? "https://growth.fenixblack.ai/growthkit-logo-alpha.png"
+                : "https://growth.fenixblack.ai/growthkit-logo-dark-alpha.png"}
               alt="GrowthKit"
               style={{
                 height: '24px',
@@ -842,7 +870,7 @@ export function WaitlistForm({
               }}
             />
             <span style={{
-              color: cardBgColor.includes('rgba') || cardBgColor.includes('0.') ? 'rgba(255, 255, 255, 0.5)' : '#9ca3af',
+              color: isLightBackground(getSplitRightBg()) ? '#9ca3af' : 'rgba(255, 255, 255, 0.5)',
               fontSize: '11px',
               fontWeight: '500',
             }}>

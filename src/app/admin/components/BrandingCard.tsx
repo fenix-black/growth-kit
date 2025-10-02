@@ -324,8 +324,8 @@ export default function BrandingCard({
             <button
               type="button"
               onClick={() => {
-                setBgColor1('#ffffff');
-                setBgColor2('#f3f4f6');
+                setBgColor1('#f9fafb');
+                setBgColor2('#e5e7eb');
                 setUseGradient(true);
                 setCardColor('#ffffff');
                 setCardOpacity(100);
@@ -334,7 +334,7 @@ export default function BrandingCard({
               className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
               title="Light"
             >
-              <div className="h-8 rounded border border-gray-200" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%)' }} />
+              <div className="h-8 rounded border border-gray-200" style={{ background: 'linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%)' }} />
               <p className="text-xs mt-1 text-center text-gray-600">Light</p>
             </button>
             <button
