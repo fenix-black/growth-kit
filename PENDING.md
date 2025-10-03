@@ -22,6 +22,8 @@ todo:
     - add a way of nurturing an anonymous fingerprint of an app, using the info of that fingerprint from other apps...
 - admin, add admin users management owner of groups of apps
 - add waitlist mode that doesn't replace the full page, but embeds it on an ID or generates the UI where you define. The widget could search and replace. Essentially a waitlist for a 'product' the dev can embed on a page. - DONE as 'embed layout' and using 'product waitlists'.
+- enable editing the info of a 'user' on the users & lead tab.
+- add a way to 'block' a given user from using an app, optionally specifying a reason. And to unblock them.
 
 - admin, add a way of grouping apps with a single apikey or public token, so they share credits consumption and earnings (like a passport by group)
 - admin. add app description field and keywords, to have better insights as to why a user wanted to use them (tracking)

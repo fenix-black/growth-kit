@@ -5,7 +5,9 @@ import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { corsErrors } from '@/lib/utils/corsResponse';
 import { successResponse } from '@/lib/utils/response';
 import { withCorsHeaders } from '@/lib/middleware/cors';
-import { sendWaitlistConfirmationEmail } from '@/lib/email/send';
+import { sendWaitlistConfirmationEmail, sendVerificationEmail } from '@/lib/email/send';
+import { generateVerificationToken } from '@/lib/security/hmac';
+import { buildAppUrl } from '@/lib/utils/url';
 import { findProductByTag, isValidProductTag } from '@/lib/types/product-waitlist';
 
 export async function OPTIONS(request: NextRequest) {
@@ -236,22 +238,53 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send confirmation email
+    // Send emails
     try {
       const appFullData = await prisma.app.findUnique({
         where: { id: app.id },
       });
 
       if (appFullData) {
+        // 1. Send waitlist confirmation email
         await sendWaitlistConfirmationEmail(appFullData, email, {
           position: nextPosition,
           name: name || undefined,
         });
-        
         console.log('✅ Waitlist confirmation email sent to:', email);
+
+        // 2. Also send verification email if email is not already verified
+        const leadRecord = await prisma.lead.findFirst({
+          where: {
+            appId: app.id,
+            fingerprintId: fingerprint.id,
+          },
+        });
+
+        if (leadRecord && !leadRecord.emailVerified) {
+          // Generate verification token
+          const verifyToken = generateVerificationToken();
+          const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+          // Update lead with verification token
+          await prisma.lead.update({
+            where: { id: leadRecord.id },
+            data: {
+              verifyToken,
+              verifyExpiresAt,
+            },
+          });
+
+          // Send verification email
+          const verificationLink = buildAppUrl(appFullData.domain, `/?verify=${verifyToken}`);
+          await sendVerificationEmail(appFullData, email, {
+            link: verificationLink,
+            name: name || undefined,
+          });
+          console.log('✅ Email verification email sent to:', email);
+        }
       }
     } catch (emailError) {
-      console.error('Failed to send waitlist confirmation email:', emailError);
+      console.error('Failed to send emails:', emailError);
       // Continue even if email fails
     }
 
