@@ -248,25 +248,9 @@ const AccountWidgetInternal = forwardRef<
   // Show waitlist if required
   // BUT: If layout is "embed", don't take over page - let AutoWaitlistInjector handle it
   if (shouldShowWaitlist && app && app.waitlistLayout !== 'embed') {
-    const waitlistWidget = (
-      <div style={{ ...getWidgetStyles(themeColors, slim), ...style }} className={className}>
-        <div style={styles.waitlistWidget}>
-          <span style={{ ...styles.waitlistIcon, backgroundColor: `${themeColors.warning}20`, color: themeColors.warning }}>⏳</span>
-          <span style={{ ...styles.waitlistText, color: themeColors.text }}>{t('widget.waitlistActive')}</span>
-        </div>
-      </div>
-    );
-
-    return (
-      <>
-        <WaitlistForm />
-        {position !== 'inline' ? (
-          <div style={getPositionStyles(position, slim)}>
-            {waitlistWidget}
-          </div>
-        ) : waitlistWidget}
-      </>
-    );
+    // For full-page waitlist modes (split, minimal, centered), just return the waitlist form
+    // Don't add the account widget overlay - WaitlistForm handles the full page
+    return <WaitlistForm />;
   }
 
   // If embed mode or app not loaded yet, render normally and let AutoWaitlistInjector handle widget
