@@ -11,7 +11,7 @@ import { GrowthKitProvider, useGrowthKitConfig } from './GrowthKitProvider';
  * if app is configured with layout="embed" and targetSelector
  */
 export function AutoWaitlistInjector() {
-  const { app, waitlistEnabled } = useGrowthKit();
+  const { app, waitlistEnabled, waitlistStatus, waitlistPosition } = useGrowthKit();
   const { config } = useGrowthKitConfig();
   const rootRef = useRef<Root | null>(null);
   const injectedRef = useRef<boolean>(false);
@@ -31,9 +31,15 @@ export function AutoWaitlistInjector() {
     // 1. Waitlist is enabled
     // 2. Layout is set to "embed"
     // 3. Target selector is configured
+    // 4. User is NOT already invited/accepted (position 0 or invited/accepted status)
     const targetSelector = (app as any)?.metadata?.waitlistTargetSelector;
     
     if (!waitlistEnabled || app.waitlistLayout !== 'embed' || !targetSelector) {
+      return;
+    }
+
+    // Don't inject if user is already invited or accepted
+    if (waitlistStatus === 'invited' || waitlistStatus === 'accepted' || waitlistPosition === 0) {
       return;
     }
 
