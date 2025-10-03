@@ -240,24 +240,36 @@ export async function POST(request: NextRequest) {
 
               // If user has email, update their waitlist status
               if (lead && lead.email && lead.emailVerified) {
-                await prisma.waitlist.upsert({
+                // Check if entry exists first (can't use unique constraint with null)
+                const existing = await prisma.waitlist.findFirst({
                   where: {
-                    appId_email_productTag: { appId: app.id, email: lead.email, productTag: null },
-                  } as any,
-                  create: {
                     appId: app.id,
                     email: lead.email,
-                    productTag: null, // App-level waitlist
-                    status: 'INVITED',
-                    invitedAt: new Date(),
-                    invitedVia: 'master_referral',
-                  } as any,
-                  update: {
-                    status: 'INVITED',
-                    invitedAt: new Date(),
-                    invitedVia: 'master_referral',
-                  } as any,
+                    productTag: null,
+                  },
                 });
+
+                if (existing) {
+                  await prisma.waitlist.update({
+                    where: { id: existing.id },
+                    data: {
+                      status: 'INVITED',
+                      invitedAt: new Date(),
+                      invitedVia: 'master_referral',
+                    } as any,
+                  });
+                } else {
+                  await prisma.waitlist.create({
+                    data: {
+                      appId: app.id,
+                      email: lead.email,
+                      productTag: null,
+                      status: 'INVITED',
+                      invitedAt: new Date(),
+                      invitedVia: 'master_referral',
+                    } as any,
+                  });
+                }
               }
 
               // Log event
@@ -400,10 +412,12 @@ export async function POST(request: NextRequest) {
       } else {
         // Check if user is invited or accepted
         if (lead && lead.email) {
-          const waitlistEntry = await prisma.waitlist.findUnique({
+          const waitlistEntry = await prisma.waitlist.findFirst({
             where: {
-              appId_email_productTag: { appId: app.id, email: lead.email, productTag: null },
-            } as any,
+              appId: app.id,
+              email: lead.email,
+              productTag: null,
+            },
             select: { status: true },
           });
           
@@ -525,14 +539,12 @@ export async function POST(request: NextRequest) {
       } else {
         // Check if user has email and waitlist entry
         if (lead && lead.email) {
-          const waitlistEntry = await prisma.waitlist.findUnique({
+          const waitlistEntry = await prisma.waitlist.findFirst({
             where: {
-              appId_email_productTag: {
-                appId: app.id,
-                email: lead.email,
-                productTag: null, // App-level waitlist
-              },
-            } as any,
+              appId: app.id,
+              email: lead.email,
+              productTag: null, // App-level waitlist
+            },
           });
 
           if (waitlistEntry) {

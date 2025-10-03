@@ -273,27 +273,36 @@ export async function POST(request: NextRequest) {
             });
 
             if (lead && lead.email) {
-              await prisma.waitlist.upsert({
+              // Upsert waitlist entry (can't use unique constraint with null productTag)
+              const existing = await prisma.waitlist.findFirst({
                 where: {
-                  appId_email_productTag: {
+                  appId: authContext.app.id,
+                  email: lead.email,
+                  productTag: null,
+                },
+              });
+
+              if (existing) {
+                await prisma.waitlist.update({
+                  where: { id: existing.id },
+                  data: {
+                    status: 'INVITED',
+                    invitedAt: new Date(),
+                    invitedVia: 'master_referral',
+                  } as any,
+                });
+              } else {
+                await prisma.waitlist.create({
+                  data: {
                     appId: authContext.app.id,
                     email: lead.email,
                     productTag: null,
-                  },
-                } as any,
-                create: {
-                  appId: authContext.app.id,
-                  email: lead.email,
-                  status: 'INVITED',
-                  invitedAt: new Date(),
-                  ...({ invitedVia: 'master_referral' } as any), // Temporary cast until migration is run
-                } as any,
-                update: {
-                  status: 'INVITED',
-                  invitedAt: new Date(),
-                  ...({ invitedVia: 'master_referral' } as any), // Temporary cast until migration is run
-                } as any,
-              });
+                    status: 'INVITED',
+                    invitedAt: new Date(),
+                    invitedVia: 'master_referral',
+                  } as any,
+                });
+              }
             }
 
             // Log event
@@ -461,14 +470,12 @@ export async function POST(request: NextRequest) {
       });
       
       if (lead && lead.email) {
-        const waitlistEntry = await prisma.waitlist.findUnique({
+        const waitlistEntry = await prisma.waitlist.findFirst({
           where: {
-            appId_email_productTag: {
-              appId: authContext.app.id,
-              email: lead.email,
-              productTag: null,
-            },
-          } as any,
+            appId: authContext.app.id,
+            email: lead.email,
+            productTag: null,
+          },
           select: { status: true },
         });
         
@@ -611,14 +618,12 @@ export async function POST(request: NextRequest) {
 
         if (lead && lead.email) {
           // Check waitlist status for this email
-          const waitlistEntry = await prisma.waitlist.findUnique({
+          const waitlistEntry = await prisma.waitlist.findFirst({
           where: {
-            appId_email_productTag: {
-              appId: authContext.app.id,
-              email: lead.email,
-              productTag: null,
-            },
-          } as any,
+            appId: authContext.app.id,
+            email: lead.email,
+            productTag: null,
+          },
         });
 
         if (waitlistEntry) {

@@ -142,14 +142,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is already on app-level waitlist
-    const existingWaitlistEntry = await prisma.waitlist.findUnique({
+    // Note: Can't use findUnique with null productTag, use findFirst instead
+    const existingWaitlistEntry = await prisma.waitlist.findFirst({
       where: {
-        appId_email_productTag: {
-          appId: app.id,
-          email,
-          productTag: null,
-        },
-      } as any,
+        appId: app.id,
+        email,
+        productTag: null,
+      },
     });
 
     if (existingWaitlistEntry) {
