@@ -1,5 +1,55 @@
 # Changelog
 
+## [0.6.2] - 2025-10-03
+
+### ✨ Features
+- **Product-Specific Waitlists**: Create multiple waitlists per app with product tags
+  - Tag-based approach for different products, features, or pricing tiers
+  - Independent auto-invite schedules per product
+  - Product-level analytics and management
+  - Simple "you're in" feedback without position tracking
+  - Custom field support for collecting product-specific data
+  - Same email can join multiple product waitlists
+
+- **Embedded Waitlist Widgets**: Auto-inject waitlist forms anywhere on your page
+  - New `AutoWaitlistInjector` component for automatic widget injection
+  - `EmbedWaitlistWidget` component for manual placement
+  - Works with existing app-level waitlist system
+  - Maintains position tracking and credit rewards
+  - `layout="embed"` configuration option
+  - CSS selector-based targeting for auto-injection
+  - Smart detection to avoid duplicate injections
+
+### 🎨 Waitlist Layout Enhancements
+- Added `embed` layout option alongside `centered`, `split`, and `minimal`
+- Embedded widgets automatically styled for inline placement
+- Responsive design for all embed scenarios
+- Seamless integration with existing waitlist branding
+
+### 🔧 SDK Enhancements
+- New exported components: `AutoWaitlistInjector`, `EmbedWaitlistWidget`
+- Enhanced app metadata to support product waitlist configurations
+- Automatic cleanup on component unmount
+- Debug logging for auto-injection behavior
+
+### 📦 Backend Integration
+- Product waitlist API endpoints for creation and management
+- Tag-based waitlist filtering and queries
+- Product configuration stored in `App.metadata`
+- Multi-product support with same-email deduplication
+- Custom field collection and storage
+
+### 🎯 Use Cases
+- **Product Waitlists**: SaaS pricing tiers, beta features, mobile app launches
+- **Embed Mode**: Landing pages, marketing sites, single-page apps
+- **Hybrid Approach**: Mix product-specific and app-level waitlists
+
+### 📝 Developer Experience
+- Zero-config auto-injection with CSS selectors
+- Flexible manual placement options
+- Full TypeScript support for new components
+- Backward compatible with existing waitlist implementations
+
 ## [0.6.1] - 2025-10-01
 
 ### ✨ Features

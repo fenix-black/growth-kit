@@ -2,19 +2,39 @@
 
 React SDK for GrowthKit - Intelligent waitlist and referral management system with client-side and middleware support.
 
-## ✨ What's New in v0.6.1
+## ✨ What's New in v0.6.2
 
-**🎨 Branded Waitlist Screens** - Create beautiful, on-brand waitlist experiences:
+**🎯 Product-Specific Waitlists** - Create multiple waitlists per app:
+- **Tag-Based System**: Separate waitlists for different products, features, or tiers
+- **Multi-Product Support**: Same email can join multiple product waitlists
+- **Per-Product Analytics**: Track signups and conversions by product
+- **Custom Fields**: Collect product-specific data from users
+- **Independent Schedules**: Auto-invite timing per product
+
+**📍 Embedded Waitlist Widgets** - Auto-inject waitlist forms anywhere:
+- **Auto-Injection**: Automatically inject forms using CSS selectors
+- **Manual Placement**: Place widgets exactly where you need them
+- **Inline Display**: Seamlessly integrate into existing pages
+- **Smart Detection**: Avoids duplicate injections
+
+```tsx
+// Auto-inject into any element
+<AutoWaitlistInjector />
+
+// Or place manually
+<EmbedWaitlistWidget variant="standard" />
+```
+
+[See Product Waitlists Documentation →](#product-waitlists)
+
+---
+
+**v0.6.1 - Branded Waitlist Screens**
 - **App Logo Support**: Upload your logo or use a URL (PNG/JPG/WebP)
 - **Custom Branding**: Your app name, description, and brand color automatically applied
 - **3 Modern Layouts**: Centered, Split, or Minimal - choose what fits your app
 - **Smart Fallbacks**: Works beautifully even without customization
 - **Zero Config**: Configure once in admin, works everywhere automatically
-
-```tsx
-// That's it! The waitlist automatically shows your branding
-<WaitlistForm message="Join our exclusive beta" />
-```
 
 [See Waitlist Branding Documentation →](#waitlistform)
 
@@ -936,6 +956,348 @@ const branding: AppBranding = {
   waitlistLayout: "centered",
   hideGrowthKitBranding: false,
 };
+```
+
+## Product Waitlists
+
+GrowthKit supports multiple waitlists per app using a tag-based system. This allows you to create separate waitlists for different products, features, pricing tiers, or launch phases.
+
+### When to Use Product Waitlists
+
+**Product Waitlists are ideal for:**
+- SaaS pricing tiers (e.g., "premium-plan", "enterprise-tier")
+- Beta features (e.g., "mobile-app", "ai-assistant")
+- Product launches (e.g., "ios-version", "android-version")
+- Geographic rollouts (e.g., "eu-launch", "asia-launch")
+
+**App-Level Waitlist is better for:**
+- Single product with one waitlist
+- Position tracking and competitive placement
+- Credit-based early access
+- Simple signup flows
+
+### Key Differences
+
+| Feature | App Waitlist | Product Waitlists |
+|---------|-------------|------------------|
+| Number of Lists | Single | Multiple per app |
+| Position Tracking | ✅ Yes | ❌ No |
+| Credit Rewards | ✅ Yes | ❌ No |
+| Same Email | Once only | Multiple products |
+| Analytics | App-level | Per-product |
+| Auto-Invites | Single schedule | Per-product schedule |
+| Custom Fields | Basic | Product-specific |
+
+### Creating Product Waitlists
+
+Product waitlists are configured in the GrowthKit admin dashboard:
+
+1. Navigate to **Product Waitlists** tab
+2. Click **Create Product Waitlist**
+3. Configure:
+   - **Product Tag**: Unique identifier (e.g., "premium-plan")
+   - **Display Name**: Human-readable name
+   - **Description**: Product details
+   - **Auto-Invite Schedule**: Optional automated invitations
+   - **Custom Fields**: Additional data to collect
+
+### SDK Integration
+
+The SDK automatically detects product waitlists and provides seamless integration:
+
+```tsx
+import { useGrowthKit } from '@fenixblack/growthkit';
+
+function ProductSignup() {
+  const { app } = useGrowthKit();
+  
+  // Access product waitlist configuration from app metadata
+  const productWaitlists = app?.metadata?.productWaitlists || [];
+  
+  return (
+    <div>
+      {productWaitlists.map((product: any) => (
+        <ProductWaitlistForm
+          key={product.tag}
+          productTag={product.tag}
+          productName={product.name}
+          description={product.description}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+### Joining Product Waitlists
+
+Users can join product waitlists through API calls:
+
+```tsx
+import { useGrowthKit } from '@fenixblack/growthkit';
+
+function PremiumSignup() {
+  const gk = useGrowthKit();
+  const [email, setEmail] = useState('');
+  const [joined, setJoined] = useState(false);
+
+  const handleJoin = async () => {
+    try {
+      // Join the premium-plan waitlist
+      const response = await fetch('/api/growthkit/waitlist/product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          productTag: 'premium-plan',
+          customFields: {
+            companySize: '50-100',
+            industry: 'SaaS'
+          }
+        })
+      });
+      
+      if (response.ok) {
+        setJoined(true);
+      }
+    } catch (error) {
+      console.error('Failed to join waitlist:', error);
+    }
+  };
+
+  if (joined) {
+    return (
+      <div className="success">
+        <h3>✨ You're in!</h3>
+        <p>We'll notify you when Premium is available.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h2>Join Premium Waitlist</h2>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="your@email.com"
+      />
+      <button onClick={handleJoin}>
+        Join Waitlist
+      </button>
+    </div>
+  );
+}
+```
+
+### Multi-Product Support
+
+A single email can join multiple product waitlists:
+
+```tsx
+function MultiProductSignup() {
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+
+  const joinMultipleWaitlists = async (email: string) => {
+    // User can join multiple product waitlists
+    const promises = selectedProducts.map(productTag =>
+      fetch('/api/growthkit/waitlist/product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, productTag })
+      })
+    );
+    
+    await Promise.all(promises);
+  };
+
+  return (
+    <div>
+      <h2>Which products interest you?</h2>
+      <label>
+        <input
+          type="checkbox"
+          value="premium-plan"
+          onChange={(e) => {
+            if (e.target.checked) {
+              setSelectedProducts([...selectedProducts, 'premium-plan']);
+            } else {
+              setSelectedProducts(selectedProducts.filter(p => p !== 'premium-plan'));
+            }
+          }}
+        />
+        Premium Plan
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          value="mobile-app"
+          onChange={(e) => {
+            if (e.target.checked) {
+              setSelectedProducts([...selectedProducts, 'mobile-app']);
+            } else {
+              setSelectedProducts(selectedProducts.filter(p => p !== 'mobile-app'));
+            }
+          }}
+        />
+        Mobile App
+      </label>
+      {/* Join button */}
+    </div>
+  );
+}
+```
+
+## Embedded Waitlist Widgets
+
+GrowthKit supports embedded waitlist widgets that can be placed anywhere on your page using auto-injection or manual placement.
+
+### Auto-Injection
+
+Automatically inject the waitlist widget into any element using CSS selectors:
+
+```tsx
+import { GrowthKitProvider, AutoWaitlistInjector } from '@fenixblack/growthkit';
+
+function App() {
+  return (
+    <GrowthKitProvider config={{ publicKey: 'pk_your_key' }}>
+      {/* Auto-injector watches for configured selector */}
+      <AutoWaitlistInjector />
+      
+      {/* Your page content */}
+      <div className="hero">
+        <h1>Welcome to Our App</h1>
+        {/* Widget will auto-inject here if configured */}
+        <div id="waitlist-placeholder"></div>
+      </div>
+    </GrowthKitProvider>
+  );
+}
+```
+
+**Configuration in Admin Dashboard:**
+1. Set `waitlistLayout` to `"embed"`
+2. Add `metadata.waitlistTargetSelector` to specify CSS selector (e.g., `"#waitlist-placeholder"`)
+3. Widget automatically injects when:
+   - Waitlist is enabled
+   - User is not already accepted/invited
+   - Target element is found in DOM
+
+### Manual Placement
+
+Place the embedded widget exactly where you need it:
+
+```tsx
+import { EmbedWaitlistWidget, GrowthKitProvider } from '@fenixblack/growthkit';
+
+function LandingPage() {
+  return (
+    <GrowthKitProvider config={{ publicKey: 'pk_your_key' }}>
+      <div className="hero">
+        <h1>Join Our Beta</h1>
+        <p>Get early access to amazing features</p>
+        
+        {/* Manual widget placement */}
+        <EmbedWaitlistWidget 
+          variant="standard"
+          onSuccess={(position) => {
+            console.log(`User joined at position ${position}`);
+          }}
+        />
+      </div>
+    </GrowthKitProvider>
+  );
+}
+```
+
+### Widget Variants
+
+The `EmbedWaitlistWidget` supports different display variants:
+
+```tsx
+// Standard variant - Full form with branding
+<EmbedWaitlistWidget variant="standard" />
+
+// Compact variant - Minimal inline form
+<EmbedWaitlistWidget variant="compact" />
+
+// Custom styling
+<EmbedWaitlistWidget 
+  variant="standard"
+  className="custom-waitlist"
+  style={{ maxWidth: '400px', margin: '0 auto' }}
+/>
+```
+
+### Embed Widget Features
+
+- **Inline Display**: Seamlessly integrates into existing page layouts
+- **Responsive Design**: Adapts to container width
+- **Position Tracking**: Shows waitlist position after signup
+- **Credit Rewards**: Maintains credit system from app-level waitlist
+- **Brand Styling**: Uses configured app branding
+- **Smart Cleanup**: Automatically unmounts when component is removed
+- **Duplicate Prevention**: Avoids multiple injections
+
+### Best Practices
+
+**Use Auto-Injection when:**
+- Content is dynamically loaded
+- You want zero-code integration
+- Widget placement varies by page/route
+- Working with template-based systems
+
+**Use Manual Placement when:**
+- You need precise control over positioning
+- Building custom layouts
+- Want to wrap widget in custom containers
+- Need to pass callbacks or handle events
+
+### Example: Marketing Landing Page
+
+```tsx
+import { GrowthKitProvider, EmbedWaitlistWidget } from '@fenixblack/growthkit';
+
+function MarketingLandingPage() {
+  const [signupCount, setSignupCount] = useState(0);
+
+  return (
+    <GrowthKitProvider config={{ publicKey: 'pk_your_key' }}>
+      <div className="landing-page">
+        {/* Hero Section */}
+        <section className="hero">
+          <h1>Revolutionary SaaS Platform</h1>
+          <p>Join {signupCount}+ others on the waitlist</p>
+        </section>
+
+        {/* Features */}
+        <section className="features">
+          {/* Feature content */}
+        </section>
+
+        {/* Embedded Waitlist */}
+        <section className="signup">
+          <h2>Get Early Access</h2>
+          <EmbedWaitlistWidget
+            variant="standard"
+            onSuccess={(position) => {
+              setSignupCount(position);
+              // Track conversion
+              analytics.track('waitlist_joined', { position });
+            }}
+          />
+        </section>
+
+        {/* Footer */}
+        <footer>
+          {/* Footer content */}
+        </footer>
+      </div>
+    </GrowthKitProvider>
+  );
+}
 ```
 
 ## Server-Side Usage
