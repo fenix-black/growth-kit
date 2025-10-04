@@ -307,7 +307,11 @@ export default function AppCreationWizard() {
               <input
                 type="text"
                 value={formData.domain}
-                onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
+                onChange={(e) => {
+                  const domain = e.target.value;
+                  setFormData({ ...formData, domain });
+                  updateSmartDefaults(domain);
+                }}
                 className={cn(
                   "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
                   errors.domain && "border-red-500"
@@ -336,121 +340,55 @@ export default function AppCreationWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Logo URL (optional)
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Logo (optional)
               </label>
-              <input
-                type="url"
-                value={formData.logoUrl}
-                onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="https://example.com/logo.png"
-              />
-              <p className="mt-1 text-sm text-gray-500">
-                PNG, JPG, or WebP. You can upload later in settings.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Brand Color
-              </label>
-              <div className="flex gap-3 items-center">
+              <div className="mt-2">
                 <input
-                  type="color"
-                  value={formData.primaryColor}
-                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                  className="h-10 w-20 rounded border border-gray-300 cursor-pointer"
+                  type="file"
+                  accept="image/*"
+                  className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/20 dark:file:text-blue-300"
                 />
-                <input
-                  type="text"
-                  value={formData.primaryColor}
-                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                  className="block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  placeholder="#10b981"
-                />
-                <div 
-                  className="h-10 w-10 rounded-lg border border-gray-300"
-                  style={{ backgroundColor: formData.primaryColor }}
-                />
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Upload PNG, JPG, or WebP. You can also add this later in settings.
+                </p>
               </div>
-              <p className="mt-1 text-sm text-gray-500">
-                Used for buttons and accents in the waitlist screen
-              </p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Waitlist Layout
-              </label>
-              <select
-                value={formData.waitlistLayout}
-                onChange={(e) => setFormData({ ...formData, waitlistLayout: e.target.value })}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              >
-                <option value="centered">Centered (Default)</option>
-                <option value="split">Split Layout</option>
-                <option value="minimal">Minimal</option>
-                <option value="embed">Embed (Widget Mode)</option>
-              </select>
-              <p className="mt-1 text-sm text-gray-500">
-                Choose how the waitlist screen will be displayed
-              </p>
+            {/* Waitlist Toggle - Key Decision */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <div>
+                <label className="flex items-center space-x-3 mb-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.waitlistEnabled}
+                    onChange={(e) => setFormData({ ...formData, waitlistEnabled: e.target.checked })}
+                    className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 scale-125"
+                  />
+                  <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                    Enable waitlist for this app
+                  </span>
+                </label>
+                <p className="text-sm text-gray-500 dark:text-gray-400 ml-8">
+                  Waitlists help build anticipation and manage app launch. Recommended for most apps.
+                </p>
+              </div>
             </div>
 
-
-            {/* Templates */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Quick Start Templates
-              </label>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Choose a template to automatically configure waitlist and credit settings in later steps.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {templates.map((template) => (
-                  <button
-                    key={template.name}
-                    type="button"
-                    onClick={() => applyTemplate(template)}
-                    className={cn(
-                      "text-left p-4 border rounded-lg transition-all duration-200 relative",
-                      selectedTemplate === template.name
-                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-2 ring-emerald-500 ring-opacity-20"
-                        : "border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                    )}
-                  >
-                    {selectedTemplate === template.name && (
-                      <div className="absolute top-2 right-2">
-                        <Check className="h-5 w-5 text-emerald-500" />
-                      </div>
-                    )}
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
-                      {template.name}
-                    </h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                      {template.description}
-                    </p>
-                    
-                    {/* Preview of key settings */}
-                    <div className="text-xs text-gray-400 dark:text-gray-500 space-y-1">
-                      <div>• Referral Credits: {template.values.referralCredits}</div>
-                      <div>• Daily Cap: {template.values.dailyReferralCap}</div>
-                      <div>• Waitlist: {template.values.waitlistEnabled ? 'Enabled' : 'Disabled'}</div>
-                      {template.values.waitlistEnabled && (
-                        <div>• Auto-approve: {template.values.autoApprove ? 'Yes' : 'No'}</div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-              
-              {selectedTemplate && (
-                <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                  <strong>Tip:</strong> You can customize these settings in steps 3-4, or choose a different template anytime.
+            {/* Show smart-populated preview if domain is set */}
+            {formData.domain && (
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-emerald-900 dark:text-emerald-100 mb-2">
+                  ✨ We'll auto-configure these for you:
+                </h4>
+                <div className="text-sm text-emerald-800 dark:text-emerald-200 space-y-1">
+                  <div>• CORS origins for {formData.domain} + localhost</div>
+                  <div>• Redirect URL: https://{formData.domain}/welcome</div>
+                  <div>• {formData.waitlistEnabled ? 'Waitlist with good defaults' : 'No waitlist - direct access'}</div>
+                  <div>• Sensible credit policy</div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         );
 
@@ -529,6 +467,69 @@ export default function AppCreationWizard() {
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                 This color will be used for buttons and accents in your waitlist
               </p>
+            </div>
+
+            {/* Waitlist Advanced Settings */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                Waitlist Configuration
+              </h4>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      checked={formData.autoApprove}
+                      onChange={(e) => setFormData({ ...formData, autoApprove: e.target.checked })}
+                      className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Auto-approve waitlist entries
+                    </span>
+                  </label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
+                    Users get immediate access vs manual approval
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Daily Invitation Quota
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.invitationQuota}
+                    onChange={(e) => setFormData({ ...formData, invitationQuota: parseInt(e.target.value) || 0 })}
+                    className={cn(
+                      "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
+                      errors.invitationQuota && "border-red-500"
+                    )}
+                    min="0"
+                  />
+                  {errors.invitationQuota && (
+                    <p className="mt-1 text-sm text-red-600">{errors.invitationQuota}</p>
+                  )}
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    How many invitations to send daily from waitlist
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Invitation Send Time
+                  </label>
+                  <input
+                    type="time"
+                    value={formData.invitationCronTime}
+                    onChange={(e) => setFormData({ ...formData, invitationCronTime: e.target.value })}
+                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Time when daily invitations are sent (UTC)
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -739,70 +740,6 @@ export default function AppCreationWizard() {
                 )}
               </div>
 
-              {/* Waitlist Advanced Settings */}
-              {formData.waitlistEnabled && (
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                  <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                    Waitlist Configuration
-                  </h4>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={formData.autoApprove}
-                          onChange={(e) => setFormData({ ...formData, autoApprove: e.target.checked })}
-                          className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                        />
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Auto-approve waitlist entries
-                        </span>
-                      </label>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
-                        Users get immediate access vs manual approval
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Daily Invitation Quota
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.invitationQuota}
-                        onChange={(e) => setFormData({ ...formData, invitationQuota: parseInt(e.target.value) || 0 })}
-                        className={cn(
-                          "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
-                          errors.invitationQuota && "border-red-500"
-                        )}
-                        min="0"
-                      />
-                      {errors.invitationQuota && (
-                        <p className="mt-1 text-sm text-red-600">{errors.invitationQuota}</p>
-                      )}
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        How many invitations to send daily from waitlist
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Invitation Send Time
-                      </label>
-                      <input
-                        type="time"
-                        value={formData.invitationCronTime}
-                        onChange={(e) => setFormData({ ...formData, invitationCronTime: e.target.value })}
-                        className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                      />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Time when daily invitations are sent (UTC)
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         );
