@@ -20,7 +20,8 @@ import {
   Plus,
   Search,
   BarChart3,
-  Activity
+  Activity,
+  Users
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -77,6 +78,13 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
       icon: BarChart3, 
       href: '/admin/analytics',
       active: pathname === '/admin/analytics'
+    },
+    { 
+      id: 'team', 
+      label: 'Team', 
+      icon: Users, 
+      href: '/admin/team',
+      active: pathname === '/admin/team'
     },
   ];
 

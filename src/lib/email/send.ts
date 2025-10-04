@@ -210,7 +210,7 @@ export async function sendTeamInvitationEmail(data: TeamInvitationData) {
           <tr>
             <td style="background-color: #f9fafb; padding: 30px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="margin: 0 0 10px; color: #6b7280; font-size: 14px;">
-                Powered by <strong style="color: #10b981;">FenixBlack</strong>
+                Powered by <a href="https://www.fenixblack.ai" target="_blank" style="color: #10b981; font-weight: 600; text-decoration: none;">FenixBlack</a>
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px;">
                 © ${new Date().getFullYear()} GrowthKit. All rights reserved.
@@ -238,7 +238,7 @@ This invitation expires on ${expiryDate}.
 If you weren't expecting this invitation, you can safely ignore this email.
 
 ---
-Powered by FenixBlack
+Powered by FenixBlack (https://www.fenixblack.ai)
 © ${new Date().getFullYear()} GrowthKit
   `.trim();
   
