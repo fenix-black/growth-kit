@@ -62,8 +62,7 @@ const steps = [
   { id: 1, name: 'Basic Info', icon: Package, description: 'App name, domain and description' },
   { id: 2, name: 'Waitlist Settings', icon: Users, description: 'Waitlist layout and branding' },
   { id: 3, name: 'Credits', icon: Coins, description: 'Template selection and credit policy' },
-  { id: 4, name: 'Security', icon: Shield, description: 'CORS origins and authentication' },
-  { id: 5, name: 'Review', icon: Eye, description: 'Review and confirm' },
+  { id: 4, name: 'Review', icon: Eye, description: 'Review and confirm' },
 ];
 
 const templates = [
@@ -151,12 +150,12 @@ export default function AppCreationWizard() {
 
   // Smart defaults: Auto-populate CORS and redirect based on domain
   const updateSmartDefaults = (domain: string) => {
-    if (domain && !formData.corsOrigins) {
+    if (domain) {
       const smartCors = `https://${domain}, http://localhost:3000, http://localhost:3001`;
       setFormData(prev => ({
         ...prev,
         corsOrigins: smartCors,
-        redirectUrl: prev.redirectUrl || `https://${domain}/welcome`
+        redirectUrl: prev.redirectUrl || `https://${domain}`
       }));
     }
   };
@@ -180,9 +179,7 @@ export default function AppCreationWizard() {
           newErrors.invitationQuota = 'Quota must be at least 1';
         }
         break;
-      case 4:
-        if (!formData.redirectUrl) newErrors.redirectUrl = 'Redirect URL is required';
-        break;
+      // Security step removed - validation moved to final submission
     }
     
     setErrors(newErrors);
@@ -195,7 +192,7 @@ export default function AppCreationWizard() {
       
       // Skip Step 2 (Waitlist Settings) if waitlist is disabled  
       if (currentStep === 1 && !formData.waitlistEnabled) {
-        nextStep = 3; // Jump to Credits
+        nextStep = 3; // Jump to Credits (Security step removed)
       }
       
       setCurrentStep(nextStep);
@@ -483,12 +480,9 @@ export default function AppCreationWizard() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="Brief description of your app"
+                className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                placeholder="Brief description of your app (optional)"
               />
-              <p className="mt-1 text-sm text-gray-500">
-                This will be shown on your waitlist screen
-              </p>
             </div>
 
 
@@ -1139,63 +1133,6 @@ export default function AppCreationWizard() {
       case 4:
         return (
           <div className="space-y-6">
-            {/* Show auto-configured info */}
-            <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-emerald-900 dark:text-emerald-100 mb-2">
-                ✅ Auto-configured based on your domain
-              </h4>
-              <div className="text-sm text-emerald-800 dark:text-emerald-200 space-y-1">
-                <div><strong>CORS Origins:</strong> {formData.corsOrigins || `https://${formData.domain}, http://localhost:3000, http://localhost:3001`}</div>
-                <div><strong>Redirect URL:</strong> {formData.redirectUrl || `https://${formData.domain}/welcome`}</div>
-              </div>
-              <p className="text-xs text-emerald-600 dark:text-emerald-300 mt-2">
-                These defaults work for most apps - no changes needed unless you have special requirements
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Redirect URL *
-              </label>
-              <input
-                type="url"
-                value={formData.redirectUrl || `https://${formData.domain}/welcome`}
-                onChange={(e) => setFormData({ ...formData, redirectUrl: e.target.value })}
-                className={cn(
-                  "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
-                  errors.redirectUrl && "border-red-500"
-                )}
-                placeholder={`https://${formData.domain}/welcome`}
-              />
-              {errors.redirectUrl && (
-                <p className="mt-1 text-sm text-red-600">{errors.redirectUrl}</p>
-              )}
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Where users go after completing waitlist signup or referral actions
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                CORS Origins
-              </label>
-              <textarea
-                value={formData.corsOrigins || `https://${formData.domain}, http://localhost:3000, http://localhost:3001`}
-                onChange={(e) => setFormData({ ...formData, corsOrigins: e.target.value })}
-                rows={2}
-                className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white text-sm"
-                placeholder="https://app.example.com, http://localhost:3000"
-              />
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Comma-separated domains allowed to access your API. Auto-configured based on your domain.
-              </p>
-            </div>
-          </div>
-        );
-
-      case 5:
-        return (
-          <div className="space-y-6">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex">
                 <AlertCircle className="h-5 w-5 text-blue-400 mt-0.5" />
@@ -1210,77 +1147,132 @@ export default function AppCreationWizard() {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Basic Information */}
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Basic Information</h4>
-                <dl className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
+                <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Basic Information</h4>
+                <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
                   <div>
-                    <dt className="text-sm text-gray-500">Name</dt>
-                    <dd className="text-sm font-medium text-gray-900">{formData.name || 'Not set'}</dd>
+                    <dt className="text-sm text-gray-500 dark:text-gray-400">App Name</dt>
+                    <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">{formData.name}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-gray-500">Domain</dt>
-                    <dd className="text-sm font-medium text-gray-900">{formData.domain || 'Not set'}</dd>
+                    <dt className="text-sm text-gray-500 dark:text-gray-400">Domain</dt>
+                    <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">{formData.domain}</dd>
                   </div>
-                </dl>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Security Settings</h4>
-                <dl className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
-                  <div>
-                    <dt className="text-sm text-gray-500">Redirect URL</dt>
-                    <dd className="text-sm font-medium text-gray-900">{formData.redirectUrl || 'Not set'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm text-gray-500">Authentication Required</dt>
-                    <dd className="text-sm font-medium text-gray-900">{formData.requireAuth ? 'Yes' : 'No'}</dd>
-                  </div>
-                </dl>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Waitlist Configuration</h4>
-                <dl className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
-                  <div>
-                    <dt className="text-sm text-gray-500">Waitlist Enabled</dt>
-                    <dd className="text-sm font-medium text-gray-900">{formData.waitlistEnabled ? 'Yes' : 'No'}</dd>
-                  </div>
-                  {formData.waitlistEnabled && (
-                    <>
-                      <div>
-                        <dt className="text-sm text-gray-500">Auto-Approve</dt>
-                        <dd className="text-sm font-medium text-gray-900">{formData.autoApprove ? 'Yes' : 'No'}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm text-gray-500">Daily Quota</dt>
-                        <dd className="text-sm font-medium text-gray-900">{formData.invitationQuota}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm text-gray-500">Send Time</dt>
-                        <dd className="text-sm font-medium text-gray-900">{formData.invitationCronTime}</dd>
-                      </div>
-                    </>
+                  {formData.description && (
+                    <div className="sm:col-span-2">
+                      <dt className="text-sm text-gray-500 dark:text-gray-400">Description</dt>
+                      <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">{formData.description}</dd>
+                    </div>
+                  )}
+                  {logoFile && (
+                    <div>
+                      <dt className="text-sm text-gray-500 dark:text-gray-400">Logo</dt>
+                      <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+                            <img 
+                              src={URL.createObjectURL(logoFile)} 
+                              alt="Logo"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          {logoFile.name}
+                        </div>
+                      </dd>
+                    </div>
                   )}
                 </dl>
               </div>
 
+              {/* Waitlist Configuration (only if enabled) */}
+              {formData.waitlistEnabled && (
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Waitlist Settings</h4>
+                  <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+                    <div>
+                      <dt className="text-sm text-gray-500 dark:text-gray-400">Layout</dt>
+                      <dd className="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize">
+                        {formData.waitlistLayout === 'embed' ? 'Embed Mode' : formData.waitlistLayout}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-sm text-gray-500 dark:text-gray-400">Brand Color</dt>
+                      <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-4 h-4 rounded border border-gray-300"
+                            style={{ backgroundColor: formData.primaryColor }}
+                          />
+                          {formData.primaryColor}
+                        </div>
+                      </dd>
+                    </div>
+                    {formData.autoApprove !== undefined && (
+                      <div>
+                        <dt className="text-sm text-gray-500 dark:text-gray-400">Auto-Approve</dt>
+                        <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">{formData.autoApprove ? 'Yes' : 'No'}</dd>
+                      </div>
+                    )}
+                    {formData.invitationQuota > 0 && (
+                      <div>
+                        <dt className="text-sm text-gray-500 dark:text-gray-400">Daily Invitation Quota</dt>
+                        <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">{formData.invitationQuota}</dd>
+                      </div>
+                    )}
+                  </dl>
+                </div>
+              )}
+
+              {/* Credit Policy */}
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Credit Policy</h4>
-                <dl className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
+                <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                  Credit Policy
+                  {selectedTemplate && (
+                    <span className="ml-2 text-sm font-normal text-emerald-600 dark:text-emerald-400">
+                      (using {selectedTemplate} template)
+                    </span>
+                  )}
+                </h4>
+                <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
                   <div>
-                    <dt className="text-sm text-gray-500">Referral Credits</dt>
-                    <dd className="text-sm font-medium text-gray-900">{formData.referralCredits}</dd>
+                    <dt className="text-sm text-gray-500 dark:text-gray-400">Referral Credits</dt>
+                    <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">{formData.referralCredits}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-gray-500">Daily Cap</dt>
-                    <dd className="text-sm font-medium text-gray-900">{formData.dailyReferralCap}</dd>
+                    <dt className="text-sm text-gray-500 dark:text-gray-400">Referred Credits</dt>
+                    <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">{formData.referredCredits}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-gray-500">Track USD</dt>
-                    <dd className="text-sm font-medium text-gray-900">{formData.trackUsdValue ? 'Yes' : 'No'}</dd>
+                    <dt className="text-sm text-gray-500 dark:text-gray-400">Daily Credits</dt>
+                    <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">{formData.dailyCredits}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm text-gray-500 dark:text-gray-400">Daily Referral Cap</dt>
+                    <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">{formData.dailyReferralCap}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm text-gray-500 dark:text-gray-400">Email Verify Credits</dt>
+                    <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">{formData.emailVerifyCredits}</dd>
                   </div>
                 </dl>
+              </div>
+
+              {/* Auto-configured note */}
+              <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <h5 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  🔧 Auto-configured for you:
+                </h5>
+                <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                  <div>• CORS Origins: {formData.corsOrigins || `https://${formData.domain} + localhost`}</div>
+                  <div>• Redirect URL: {formData.redirectUrl || `https://${formData.domain}`}</div>
+                  <div>• USD Tracking: Enabled</div>
+                  <div>• API Authentication: Optional (can enable later)</div>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  These technical settings can be adjusted later in app management
+                </p>
               </div>
             </div>
           </div>
@@ -1345,8 +1337,7 @@ export default function AppCreationWizard() {
               {currentStep === 1 && "Enter your app basics and decide if you want a waitlist."}
               {currentStep === 2 && "Configure your waitlist appearance and behavior."}
               {currentStep === 3 && "Choose a template to set smart credit defaults, or customize manually."}
-              {currentStep === 4 && "Security settings have been auto-configured. Review if needed."}
-              {currentStep === 5 && "Review everything before creating your app."}
+              {currentStep === 4 && "Review everything before creating your app."}
             </div>
           </div>
         </div>
@@ -1379,7 +1370,7 @@ export default function AppCreationWizard() {
                   {currentStep === 1 ? 'Cancel' : 'Previous'}
                 </Button>
                 
-                {currentStep < 5 ? (
+                {currentStep < 4 ? (
                   <Button
                     variant="primary"
                     onClick={handleNext}
