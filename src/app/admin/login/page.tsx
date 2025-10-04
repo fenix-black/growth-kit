@@ -72,8 +72,6 @@ function LoginForm() {
             <div className="mb-12">
               <Link 
                 href="https://growth.fenixblack.ai" 
-                target="_blank" 
-                rel="noopener noreferrer"
                 className="inline-block transition-opacity hover:opacity-80"
               >
                 <Image
@@ -166,8 +164,6 @@ function LoginForm() {
           <div className="lg:hidden text-center mb-8">
             <Link 
               href="https://growth.fenixblack.ai" 
-              target="_blank" 
-              rel="noopener noreferrer"
               className="inline-block transition-opacity hover:opacity-80"
             >
               <Image
