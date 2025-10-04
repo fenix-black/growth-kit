@@ -79,7 +79,15 @@ function LoginForm() {
               />
               <h1 className="text-4xl font-bold mb-6 leading-tight text-white">
                 Welcome back to your
-                <span className="block bg-gradient-to-r from-primary to-fenix-magenta bg-clip-text text-transparent">
+                <span 
+                  className="block"
+                  style={{
+                    background: 'linear-gradient(to right, #10b981, #d946ef)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}
+                >
                   Growth Dashboard
                 </span>
               </h1>
@@ -238,7 +246,20 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                className="w-full text-white font-medium py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                style={{
+                  background: loading ? '#6b7280' : 'linear-gradient(to right, #10b981, #14b8a6)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.background = 'linear-gradient(to right, #059669, #0d9488)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.background = 'linear-gradient(to right, #10b981, #14b8a6)';
+                  }
+                }}
               >
                 {loading ? (
                   <>
@@ -259,7 +280,10 @@ function LoginForm() {
                   Need an account?{' '}
                   <Link 
                     href="/admin/signup" 
-                    className="font-medium text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1"
+                    className="font-medium transition-colors inline-flex items-center gap-1"
+                    style={{ color: '#10b981' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#059669'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = '#10b981'}
                   >
                     Create account
                     <ArrowRight size={14} />
