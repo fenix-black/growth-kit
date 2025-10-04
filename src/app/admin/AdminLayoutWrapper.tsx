@@ -33,14 +33,14 @@ function DashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
         {children}
       </DashboardLayout>
       
-      {/* Navigation Loading Overlay */}
+      {/* Navigation Loading State */}
       {isNavigating && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-            <span className="text-gray-900 dark:text-gray-100">
+        <div className="fixed inset-0 bg-gray-50 dark:bg-gray-900 flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">
               {currentNavigationTarget ? `Loading ${currentNavigationTarget}...` : 'Loading...'}
-            </span>
+            </p>
           </div>
         </div>
       )}

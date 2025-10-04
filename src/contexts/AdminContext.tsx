@@ -88,8 +88,6 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   };
 
   const handleLogout = async () => {
-    setIsNavigating(true);
-    setCurrentNavigationTarget('Logging out...');
     await fetch('/api/admin/login', { method: 'DELETE' });
     router.push('/admin/login');
   };
