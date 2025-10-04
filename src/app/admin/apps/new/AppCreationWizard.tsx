@@ -105,6 +105,8 @@ export default function AppCreationWizard() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [showTemplateConfirmation, setShowTemplateConfirmation] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     domain: '',
@@ -168,6 +170,10 @@ export default function AppCreationWizard() {
 
   const applyTemplate = (template: typeof templates[0]) => {
     setFormData(prev => ({ ...prev, ...template.values }));
+    setSelectedTemplate(template.name);
+    setShowTemplateConfirmation(true);
+    // Hide confirmation after 3 seconds
+    setTimeout(() => setShowTemplateConfirmation(false), 3000);
   };
 
   const handleSubmit = async () => {
@@ -367,23 +373,69 @@ export default function AppCreationWizard() {
               </p>
             </div>
 
+            {/* Template Confirmation */}
+            {showTemplateConfirmation && (
+              <div className="mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-emerald-500 mr-2" />
+                  <p className="text-emerald-800 dark:text-emerald-200">
+                    <strong>{selectedTemplate}</strong> template applied! Settings updated for steps 3-4.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Templates */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 Quick Start Templates
               </label>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Choose a template to automatically configure waitlist and credit settings in later steps.
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {templates.map((template) => (
                   <button
                     key={template.name}
+                    type="button"
                     onClick={() => applyTemplate(template)}
-                    className="text-left p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    className={cn(
+                      "text-left p-4 border rounded-lg transition-all duration-200 relative",
+                      selectedTemplate === template.name
+                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-2 ring-emerald-500 ring-opacity-20"
+                        : "border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    )}
                   >
-                    <h4 className="font-medium text-gray-900">{template.name}</h4>
-                    <p className="text-sm text-gray-500 mt-1">{template.description}</p>
+                    {selectedTemplate === template.name && (
+                      <div className="absolute top-2 right-2">
+                        <Check className="h-5 w-5 text-emerald-500" />
+                      </div>
+                    )}
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                      {template.name}
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                      {template.description}
+                    </p>
+                    
+                    {/* Preview of key settings */}
+                    <div className="text-xs text-gray-400 dark:text-gray-500 space-y-1">
+                      <div>• Referral Credits: {template.values.referralCredits}</div>
+                      <div>• Daily Cap: {template.values.dailyReferralCap}</div>
+                      <div>• Waitlist: {template.values.waitlistEnabled ? 'Enabled' : 'Disabled'}</div>
+                      {template.values.waitlistEnabled && (
+                        <div>• Auto-approve: {template.values.autoApprove ? 'Yes' : 'No'}</div>
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
+              
+              {selectedTemplate && (
+                <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                  <strong>Tip:</strong> You can customize these settings in steps 3-4, or choose a different template anytime.
+                </div>
+              )}
             </div>
           </div>
         );
