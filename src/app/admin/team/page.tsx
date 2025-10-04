@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Users, Mail, Send, X, RotateCw, Trash2, UserPlus, CheckCircle, Clock, XCircle } from 'lucide-react';
+import DashboardLayout from '@/components/ui/DashboardLayout';
 
 interface TeamMember {
   id: string;
@@ -33,6 +34,7 @@ interface Organization {
 
 export default function TeamPage() {
   const router = useRouter();
+  const [apps, setApps] = useState<any[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +64,7 @@ export default function TeamPage() {
       }
       
       const appsData = await appsResponse.json();
-      const user = appsData.data.user;
+      setApps(appsData.data.apps || []);
       
       // Fetch full user data with organizations
       const userResponse = await fetch('/api/admin/user');
@@ -186,20 +188,45 @@ export default function TeamPage() {
   const selectedOrg = organizations.find(org => org.id === selectedOrgId);
   const orgInvitations = invitations.filter(inv => inv.organizationId === selectedOrgId && inv.status === 'PENDING');
 
+  const handleLogout = async () => {
+    await fetch('/api/admin/login', { method: 'DELETE' });
+    router.push('/admin/login');
+  };
+
+  const handleAppSelect = (appId: string) => {
+    router.push(`/admin/app/${appId}`);
+  };
+
+  const handleCreateApp = () => {
+    router.push('/admin/apps/new');
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading team...</p>
+      <DashboardLayout
+        apps={apps}
+        onAppSelect={handleAppSelect}
+        onCreateApp={handleCreateApp}
+        onLogout={handleLogout}
+      >
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+            <p className="text-slate-600">Loading team...</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-6xl mx-auto p-6">
+    <DashboardLayout
+      apps={apps}
+      onAppSelect={handleAppSelect}
+      onCreateApp={handleCreateApp}
+      onLogout={handleLogout}
+    >
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -374,7 +401,7 @@ export default function TeamPage() {
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
 
