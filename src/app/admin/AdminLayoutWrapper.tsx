@@ -5,19 +5,10 @@ import { AdminProvider, useAdmin } from '@/contexts/AdminContext';
 import DashboardLayout from '@/components/ui/DashboardLayout';
 
 /**
- * Inner wrapper that conditionally applies DashboardLayout
- * Pages like login/signup don't need the dashboard layout
+ * Inner wrapper that applies DashboardLayout for authenticated pages
  */
-function LayoutContent({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+function DashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
   const { apps, isLoading, handleAppSelect, handleCreateApp, handleLogout } = useAdmin();
-  
-  // Don't apply dashboard layout for auth pages
-  const isAuthPage = pathname.includes('/login') || pathname.includes('/signup');
-  
-  if (isAuthPage) {
-    return <>{children}</>;
-  }
   
   // Show loading state while fetching apps
   if (isLoading) {
@@ -44,12 +35,23 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Main layout wrapper that provides AdminContext to all admin pages
+ * Main layout wrapper that conditionally applies AdminContext and DashboardLayout
+ * Auth pages (login/signup) are rendered without the provider to avoid unnecessary API calls
  */
 export default function AdminLayoutWrapper({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  
+  // Don't apply provider or dashboard layout for auth pages
+  const isAuthPage = pathname?.includes('/login') || pathname?.includes('/signup');
+  
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
+  
+  // Wrap authenticated pages with provider and dashboard layout
   return (
     <AdminProvider>
-      <LayoutContent>{children}</LayoutContent>
+      <DashboardLayoutWrapper>{children}</DashboardLayoutWrapper>
     </AdminProvider>
   );
 }
