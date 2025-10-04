@@ -309,7 +309,10 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
   if (loading || !app) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-lg">Loading app details...</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading app details...</p>
+        </div>
       </div>
     );
   }

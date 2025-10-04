@@ -26,8 +26,6 @@ interface AdminContextType {
   handleAppSelect: (appId: string) => void;
   handleCreateApp: () => void;
   handleLogout: () => Promise<void>;
-  isNavigating: boolean;
-  currentNavigationTarget: string | null;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -49,8 +47,6 @@ const fetcher = async (url: string) => {
 
 export function AdminProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [currentNavigationTarget, setCurrentNavigationTarget] = useState<string | null>(null);
   
   // Use SWR to fetch and cache apps data
   const { data: apps = [], error, isLoading, mutate } = useSWR<App[]>(
@@ -63,28 +59,12 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     }
   );
 
-  const navigateWithFeedback = (path: string, label: string) => {
-    setIsNavigating(true);
-    setCurrentNavigationTarget(label);
-    
-    // Small delay to show the loading state, then navigate
-    setTimeout(() => {
-      router.push(path);
-      // Reset after navigation starts
-      setTimeout(() => {
-        setIsNavigating(false);
-        setCurrentNavigationTarget(null);
-      }, 500);
-    }, 100);
-  };
-
   const handleAppSelect = (appId: string) => {
-    const app = apps.find(a => a.id === appId);
-    navigateWithFeedback(`/admin/app/${appId}`, app?.name || 'App Details');
+    router.push(`/admin/app/${appId}`);
   };
 
   const handleCreateApp = () => {
-    navigateWithFeedback('/admin/apps/new', 'Create App');
+    router.push('/admin/apps/new');
   };
 
   const handleLogout = async () => {
@@ -100,8 +80,6 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     handleAppSelect,
     handleCreateApp,
     handleLogout,
-    isNavigating,
-    currentNavigationTarget,
   };
 
   return (
