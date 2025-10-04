@@ -8,7 +8,7 @@ import DashboardLayout from '@/components/ui/DashboardLayout';
  * Inner wrapper that applies DashboardLayout for authenticated pages
  */
 function DashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
-  const { apps, isLoading, handleAppSelect, handleCreateApp, handleLogout } = useAdmin();
+  const { apps, isLoading, handleAppSelect, handleCreateApp, handleLogout, isNavigating, currentNavigationTarget } = useAdmin();
   
   // Show loading state while fetching apps
   if (isLoading) {
@@ -23,14 +23,28 @@ function DashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
   }
   
   return (
-    <DashboardLayout
-      apps={apps}
-      onAppSelect={handleAppSelect}
-      onCreateApp={handleCreateApp}
-      onLogout={handleLogout}
-    >
-      {children}
-    </DashboardLayout>
+    <div className="relative">
+      <DashboardLayout
+        apps={apps}
+        onAppSelect={handleAppSelect}
+        onCreateApp={handleCreateApp}
+        onLogout={handleLogout}
+      >
+        {children}
+      </DashboardLayout>
+      
+      {/* Navigation Loading Overlay */}
+      {isNavigating && (
+        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            <span className="text-gray-900 dark:text-gray-100">
+              {currentNavigationTarget ? `Loading ${currentNavigationTarget}...` : 'Loading...'}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

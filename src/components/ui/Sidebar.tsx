@@ -93,8 +93,9 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
     app.domain.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleNavigation = (href: string) => {
+  const handleNavigation = (href: string, label: string) => {
     if (href !== '#') {
+      // Provide immediate visual feedback
       router.push(href);
     }
   };
@@ -185,14 +186,15 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
               {navigationItems.map((item) => (
                 <li key={item.id}>
                   <button
-                    onClick={() => handleNavigation(item.href)}
+                    onClick={() => handleNavigation(item.href, item.label)}
                     onMouseEnter={() => handlePrefetch(item.href)}
                     onFocus={() => handlePrefetch(item.href)}
+                    disabled={item.active}
                     className={cn(
-                      'w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors',
+                      'w-full flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200',
                       item.active ? 
-                        'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 
-                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+                        'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 cursor-default' : 
+                        'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95',
                       collapsed && 'justify-center'
                     )}
                   >

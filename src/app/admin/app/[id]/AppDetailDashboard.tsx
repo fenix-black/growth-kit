@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/ui/DashboardLayout';
+import { useAdmin } from '@/contexts/AdminContext';
 import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
 import Button from '@/components/ui/Button';
@@ -93,8 +93,8 @@ const tabs = [
 
 export default function AppDetailDashboard({ appId }: { appId: string }) {
   const router = useRouter();
+  const { apps } = useAdmin();
   const [app, setApp] = useState<AppDetails | null>(null);
-  const [apps, setApps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
@@ -109,7 +109,6 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
 
   useEffect(() => {
     fetchAppDetails();
-    fetchAllApps();
   }, [appId]);
 
   const fetchAppDetails = async () => {
@@ -157,22 +156,6 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
     }
   };
 
-  const fetchAllApps = async () => {
-    try {
-      const response = await fetch('/api/v1/admin/app', {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setApps(data.data.apps);
-      }
-    } catch (error) {
-      console.error('Error fetching apps:', error);
-    }
-  };
 
   const handleSaveSettings = async () => {
     setIsSaving(true);
@@ -312,10 +295,6 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
     }
   };
 
-  const handleLogout = async () => {
-    await fetch('/api/admin/login', { method: 'DELETE' });
-    router.push('/admin/login');
-  };
 
   const handleCopyToClipboard = async (text: string, type: string) => {
     try {
@@ -329,20 +308,14 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
 
   if (loading || !app) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="flex items-center justify-center py-12">
+        <div className="text-lg">Loading app details...</div>
       </div>
     );
   }
 
   return (
-    <DashboardLayout
-      apps={apps}
-      currentAppId={appId}
-      onAppSelect={(id) => router.push(`/admin/app/${id}`)}
-      onCreateApp={() => router.push('/admin/apps/new')}
-      onLogout={handleLogout}
-    >
+    <>
       <PageHeader 
         title={app.name}
         description={app.domain}
@@ -1036,6 +1009,6 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </>
   );
 }
