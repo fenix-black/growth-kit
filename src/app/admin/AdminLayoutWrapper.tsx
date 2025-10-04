@@ -8,15 +8,19 @@ import DashboardLayout from '@/components/ui/DashboardLayout';
  * Inner wrapper that applies DashboardLayout for authenticated pages
  */
 function DashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const { apps, isLoading, handleAppSelect, handleCreateApp, handleLogout } = useAdmin();
+  
+  // Extract current app ID from URL when on app detail pages
+  const currentAppId = pathname?.match(/^\/admin\/app\/([^\/]+)/)?.[1];
   
   // Show loading state while fetching apps
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -25,6 +29,7 @@ function DashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
   return (
     <DashboardLayout
       apps={apps}
+      currentAppId={currentAppId}
       onAppSelect={handleAppSelect}
       onCreateApp={handleCreateApp}
       onLogout={handleLogout}
