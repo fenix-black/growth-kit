@@ -99,6 +99,12 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
     }
   };
 
+  const handlePrefetch = (href: string) => {
+    if (href !== '#') {
+      router.prefetch(href);
+    }
+  };
+
   return (
     <>
       {/* Mobile menu toggle */}
@@ -180,6 +186,8 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
                 <li key={item.id}>
                   <button
                     onClick={() => handleNavigation(item.href)}
+                    onMouseEnter={() => handlePrefetch(item.href)}
+                    onFocus={() => handlePrefetch(item.href)}
                     className={cn(
                       'w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors',
                       item.active ? 

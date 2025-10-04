@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/ui/DashboardLayout';
+import { useAdmin } from '@/contexts/AdminContext';
 import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
 import StatsCard from '@/components/ui/StatsCard';
@@ -38,7 +38,7 @@ interface App {
   name: string;
   domain: string;
   isActive: boolean;
-  _count: {
+  _count?: {
     apiKeys: number;
     fingerprints: number;
     referrals: number;
@@ -78,7 +78,7 @@ const getColorForReason = (reason: string): string => {
 
 export default function DashboardOverview() {
   const router = useRouter();
-  const [apps, setApps] = useState<App[]>([]);
+  const { apps, handleCreateApp } = useAdmin();
   const [metrics, setMetrics] = useState<Metrics>({
     totalApps: 0,
     activeApps: 0,
@@ -104,51 +104,39 @@ export default function DashboardOverview() {
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [timeRange]);
+    if (apps.length > 0) {
+      fetchDashboardData();
+    }
+  }, [timeRange, apps]);
 
   const fetchDashboardData = async () => {
     setRefreshing(true);
-    let totalStats = { totalUsers: 0, totalReferrals: 0, totalLeads: 0, totalWaitlist: 0 };
     
     try {
-      // Fetch apps
-      const appsResponse = await fetch('/api/v1/admin/app', {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
+      // Calculate metrics from apps data
+      const activeApps = apps.filter((app: App) => app.isActive).length;
+      const totalStats = apps.reduce((acc: any, app: App) => ({
+        totalUsers: acc.totalUsers + (app._count?.fingerprints || 0),
+        totalReferrals: acc.totalReferrals + (app._count?.referrals || 0),
+        totalLeads: acc.totalLeads + (app._count?.leads || 0),
+        totalWaitlist: acc.totalWaitlist + (app._count?.waitlist || 0),
+      }), { totalUsers: 0, totalReferrals: 0, totalLeads: 0, totalWaitlist: 0 });
       
-      if (appsResponse.ok) {
-        const appsData = await appsResponse.json();
-        const appsList = appsData.data.apps;
-        setApps(appsList);
-        
-        // Calculate metrics
-        const activeApps = appsList.filter((app: App) => app.isActive).length;
-        totalStats = appsList.reduce((acc: any, app: App) => ({
-          totalUsers: acc.totalUsers + app._count.fingerprints,
-          totalReferrals: acc.totalReferrals + app._count.referrals,
-          totalLeads: acc.totalLeads + app._count.leads,
-          totalWaitlist: acc.totalWaitlist + app._count.waitlist,
-        }), { totalUsers: 0, totalReferrals: 0, totalLeads: 0, totalWaitlist: 0 });
-        
-        // Calculate growth rate (mock data for now)
-        const growthRate = totalStats.totalUsers > 0 ? 12.5 : 0;
-        const conversionRate = totalStats.totalLeads > 0 ? 
-          ((totalStats.totalUsers / totalStats.totalLeads) * 100) : 0;
-        
-        setMetrics({
-          totalApps: appsList.length,
-          activeApps,
-          ...totalStats,
-          totalUsdSpent: 0, // Will be fetched from USD metrics
-          totalCreditsIssued: 0,
-          totalCreditsConsumed: 0,
-          growthRate,
-          conversionRate
-        });
-      }
+      // Calculate growth rate (mock data for now)
+      const growthRate = totalStats.totalUsers > 0 ? 12.5 : 0;
+      const conversionRate = totalStats.totalLeads > 0 ? 
+        ((totalStats.totalUsers / totalStats.totalLeads) * 100) : 0;
+      
+      setMetrics({
+        totalApps: apps.length,
+        activeApps,
+        ...totalStats,
+        totalUsdSpent: 0, // Will be fetched from USD metrics
+        totalCreditsIssued: 0,
+        totalCreditsConsumed: 0,
+        growthRate,
+        conversionRate
+      });
       
       // Fetch dashboard metrics
       try {
@@ -341,41 +329,22 @@ export default function DashboardOverview() {
     const systemHealth = {
       cpuUsage: Math.floor(Math.random() * 30) + 40, // 40-70%
       memoryUsage: Math.floor(Math.random() * 20) + 60, // 60-80%
-      creditsUsage: (stats.totalCreditsConsumed / stats.totalCreditsIssued) * 100,
+      creditsUsage: stats.totalCreditsIssued > 0 ? (stats.totalCreditsConsumed / stats.totalCreditsIssued) * 100 : 0,
     };
     
     setChartData((prev: any) => ({ ...prev, growth, expenses, credits, conversion, systemHealth }));
   };
 
-
-  const handleLogout = async () => {
-    await fetch('/api/admin/login', { method: 'DELETE' });
-    router.push('/admin/login');
-  };
-
-  const handleCreateApp = () => {
-    router.push('/admin/apps/new');
-  };
-
-  const handleAppSelect = (appId: string) => {
-    router.push(`/admin/app/${appId}`);
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="flex items-center justify-center py-12">
+        <div className="text-lg">Loading dashboard...</div>
       </div>
     );
   }
 
   return (
-    <DashboardLayout
-      apps={apps}
-      onAppSelect={handleAppSelect}
-      onCreateApp={handleCreateApp}
-      onLogout={handleLogout}
-    >
+    <>
       <PageHeader 
         title="Dashboard Overview"
         description="Monitor your GrowthKit applications performance and metrics"
@@ -673,6 +642,6 @@ export default function DashboardOverview() {
           </div>
         </ContentCard>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

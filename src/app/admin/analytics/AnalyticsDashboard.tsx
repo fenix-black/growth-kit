@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/ui/DashboardLayout';
+import { useAdmin } from '@/contexts/AdminContext';
 import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
 import StatsCard from '@/components/ui/StatsCard';
@@ -76,7 +76,7 @@ interface GeneralMetrics {
 
 export default function AnalyticsDashboard() {
   const router = useRouter();
-  const [apps, setApps] = useState<any[]>([]);
+  const { apps } = useAdmin();
   const [selectedAppId, setSelectedAppId] = useState<string>('');
   const [timeRange, setTimeRange] = useState('30d');
   const [groupBy, setGroupBy] = useState<'user' | 'action' | 'day' | 'week' | 'month'>('day');
@@ -86,31 +86,10 @@ export default function AnalyticsDashboard() {
   const [generalMetrics, setGeneralMetrics] = useState<GeneralMetrics | null>(null);
 
   useEffect(() => {
-    fetchApps();
-  }, []);
-
-  useEffect(() => {
     if (apps.length > 0 || selectedAppId === '') {
       fetchMetrics();
     }
-  }, [selectedAppId, timeRange, groupBy]);
-
-  const fetchApps = async () => {
-    try {
-      const response = await fetch('/api/v1/admin/app', {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setApps(data.data.apps);
-      }
-    } catch (error) {
-      console.error('Error fetching apps:', error);
-    }
-  };
+  }, [selectedAppId, timeRange, groupBy, apps]);
 
   const fetchMetrics = async () => {
     setRefreshing(true);
@@ -153,10 +132,6 @@ export default function AnalyticsDashboard() {
     }
   };
 
-  const handleLogout = async () => {
-    await fetch('/api/admin/login', { method: 'DELETE' });
-    router.push('/admin/login');
-  };
 
   const handleExportCsv = async () => {
     try {
@@ -207,12 +182,7 @@ export default function AnalyticsDashboard() {
 
 
   return (
-    <DashboardLayout
-      apps={apps}
-      onAppSelect={(appId) => router.push(`/admin/app/${appId}`)}
-      onCreateApp={() => router.push('/admin/apps/new')}
-      onLogout={handleLogout}
-    >
+    <>
       <PageHeader 
         title="Analytics Dashboard"
         description="Detailed metrics and USD spending analysis"
@@ -228,7 +198,7 @@ export default function AnalyticsDashboard() {
               className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Apps</option>
-              {apps.filter(app => app.trackUsdValue).map(app => (
+              {apps.map(app => (
                 <option key={app.id} value={app.id}>{app.name}</option>
               ))}
             </select>
@@ -493,6 +463,6 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
       </ContentCard>
-    </DashboardLayout>
+    </>
   );
 }

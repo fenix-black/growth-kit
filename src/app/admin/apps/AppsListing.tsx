@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAdmin } from '@/contexts/AdminContext';
 import WaitlistManager from '../components/WaitlistManager';
 import EmailTemplateEditor from '../components/EmailTemplateEditor';
 import UsdMetricsDashboard from '../components/UsdMetricsDashboard';
 import InvitationCodesManager from '../components/InvitationCodesManager';
-import DashboardLayout from '@/components/ui/DashboardLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
 import Button from '@/components/ui/Button';
@@ -30,7 +30,7 @@ interface App {
   name: string;
   domain: string;
   isActive: boolean;
-  _count: {
+  _count?: {
     apiKeys: number;
     fingerprints: number;
     referrals: number;
@@ -41,8 +41,7 @@ interface App {
 
 export default function AppsListing() {
   const router = useRouter();
-  const [apps, setApps] = useState<App[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { apps, handleCreateApp, handleAppSelect } = useAdmin();
   const [selectedApp, setSelectedApp] = useState<App | null>(null);
   const [showWaitlistManager, setShowWaitlistManager] = useState(false);
   const [showEmailEditor, setShowEmailEditor] = useState(false);
@@ -51,42 +50,6 @@ export default function AppsListing() {
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
-
-  useEffect(() => {
-    fetchApps();
-  }, []);
-
-  const fetchApps = async () => {
-    try {
-      const response = await fetch('/api/v1/admin/app', {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setApps(data.data.apps);
-      }
-    } catch (error) {
-      console.error('Error fetching apps:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await fetch('/api/admin/login', { method: 'DELETE' });
-    router.push('/admin/login');
-  };
-
-  const handleAppSelect = (appId: string) => {
-    router.push(`/admin/app/${appId}`);
-  };
-
-  const handleCreateApp = () => {
-    router.push('/admin/apps/new');
-  };
 
   // Filter apps based on search and status
   const filteredApps = apps.filter(app => {
@@ -98,22 +61,8 @@ export default function AppsListing() {
     return matchesSearch && matchesStatus;
   });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
-
   return (
-    <DashboardLayout
-      apps={apps}
-      onAppSelect={handleAppSelect}
-      onCreateApp={handleCreateApp}
-      onLogout={handleLogout}
-      currentAppId={selectedApp?.id}
-    >
+    <>
       <PageHeader 
         title="Applications"
         description="Manage and monitor all your GrowthKit applications"
@@ -230,19 +179,19 @@ export default function AppsListing() {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="bg-gray-50 rounded p-2">
                     <p className="text-xs text-gray-500">Users</p>
-                    <p className="text-lg font-semibold">{app._count.fingerprints.toLocaleString()}</p>
+                    <p className="text-lg font-semibold">{(app._count?.fingerprints || 0).toLocaleString()}</p>
                   </div>
                   <div className="bg-gray-50 rounded p-2">
                     <p className="text-xs text-gray-500">Referrals</p>
-                    <p className="text-lg font-semibold">{app._count.referrals.toLocaleString()}</p>
+                    <p className="text-lg font-semibold">{(app._count?.referrals || 0).toLocaleString()}</p>
                   </div>
                   <div className="bg-gray-50 rounded p-2">
                     <p className="text-xs text-gray-500">Leads</p>
-                    <p className="text-lg font-semibold">{app._count.leads.toLocaleString()}</p>
+                    <p className="text-lg font-semibold">{(app._count?.leads || 0).toLocaleString()}</p>
                   </div>
                   <div className="bg-gray-50 rounded p-2">
                     <p className="text-xs text-gray-500">Waitlist</p>
-                    <p className="text-lg font-semibold">{app._count.waitlist.toLocaleString()}</p>
+                    <p className="text-lg font-semibold">{(app._count?.waitlist || 0).toLocaleString()}</p>
                   </div>
                 </div>
                 
@@ -340,13 +289,13 @@ export default function AppsListing() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {app._count.fingerprints.toLocaleString()}
+                      {(app._count?.fingerprints || 0).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {app._count.referrals.toLocaleString()}
+                      {(app._count?.referrals || 0).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {app._count.waitlist.toLocaleString()}
+                      {(app._count?.waitlist || 0).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
@@ -409,7 +358,6 @@ export default function AppsListing() {
           onClose={() => {
             setShowWaitlistManager(false);
             setSelectedApp(null);
-            fetchApps();
           }}
         />
       )}
@@ -476,6 +424,6 @@ export default function AppsListing() {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </>
   );
 }

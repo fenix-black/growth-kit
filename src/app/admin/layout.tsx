@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ClientWrapper from './ClientWrapper';
 import ThemeScript from './ThemeScript';
+import AdminLayoutWrapper from './AdminLayoutWrapper';
 
 export const metadata: Metadata = {
   title: "FenixBlack.ai GrowthKit - Admin Dashboard",
@@ -25,7 +26,9 @@ export default function AdminLayout({
     <>
       <ThemeScript />
       <ClientWrapper>
-        {children}
+        <AdminLayoutWrapper>
+          {children}
+        </AdminLayoutWrapper>
       </ClientWrapper>
     </>
   );

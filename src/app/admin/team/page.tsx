@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Users, Mail, Send, X, RotateCw, Trash2, UserPlus, CheckCircle, Clock, XCircle } from 'lucide-react';
-import DashboardLayout from '@/components/ui/DashboardLayout';
 
 interface TeamMember {
   id: string;
@@ -34,7 +33,6 @@ interface Organization {
 
 export default function TeamPage() {
   const router = useRouter();
-  const [apps, setApps] = useState<any[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,19 +50,6 @@ export default function TeamPage() {
   const fetchTeamData = async () => {
     try {
       setLoading(true);
-      
-      // Fetch user's organizations and members
-      const appsResponse = await fetch('/api/admin/apps');
-      if (!appsResponse.ok) {
-        if (appsResponse.status === 401) {
-          router.push('/admin/login');
-          return;
-        }
-        throw new Error('Failed to fetch team data');
-      }
-      
-      const appsData = await appsResponse.json();
-      setApps(appsData.data.apps || []);
       
       // Fetch full user data with organizations
       const userResponse = await fetch('/api/admin/user');
@@ -188,44 +173,19 @@ export default function TeamPage() {
   const selectedOrg = organizations.find(org => org.id === selectedOrgId);
   const orgInvitations = invitations.filter(inv => inv.organizationId === selectedOrgId && inv.status === 'PENDING');
 
-  const handleLogout = async () => {
-    await fetch('/api/admin/login', { method: 'DELETE' });
-    router.push('/admin/login');
-  };
-
-  const handleAppSelect = (appId: string) => {
-    router.push(`/admin/app/${appId}`);
-  };
-
-  const handleCreateApp = () => {
-    router.push('/admin/apps/new');
-  };
-
   if (loading) {
     return (
-      <DashboardLayout
-        apps={apps}
-        onAppSelect={handleAppSelect}
-        onCreateApp={handleCreateApp}
-        onLogout={handleLogout}
-      >
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-            <p className="text-slate-600">Loading team...</p>
-          </div>
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400">Loading team...</p>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   return (
-    <DashboardLayout
-      apps={apps}
-      onAppSelect={handleAppSelect}
-      onCreateApp={handleCreateApp}
-      onLogout={handleLogout}
-    >
+    <>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -401,7 +361,7 @@ export default function TeamPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }
 
