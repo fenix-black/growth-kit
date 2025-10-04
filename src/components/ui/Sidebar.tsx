@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { cn } from './utils';
 import ThemeSwitcher from './ThemeSwitcher';
+import SmartLogo from './SmartLogo';
 import { 
   Home, 
   Package, 
@@ -140,17 +140,7 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
                 "flex items-center",
                 collapsed ? "justify-center w-full" : ""
               )}>
-                <Image
-                  src="/growthkit-logo.png"
-                  alt="GrowthKit"
-                  width={collapsed ? 40 : 150}
-                  height={collapsed ? 40 : 40}
-                  className={cn(
-                    "object-contain transition-all duration-200",
-                    collapsed ? "mx-auto" : ""
-                  )}
-                  priority
-                />
+                <SmartLogo collapsed={collapsed} />
               </div>
               <button
                 onClick={() => setCollapsed(!collapsed)}
