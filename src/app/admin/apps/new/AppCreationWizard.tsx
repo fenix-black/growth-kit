@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/ui/DashboardLayout';
+import { useAdmin } from '@/contexts/AdminContext';
 import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
 import Button from '@/components/ui/Button';
@@ -101,6 +101,7 @@ const templates = [
 
 export default function AppCreationWizard() {
   const router = useRouter();
+  const { mutate } = useAdmin();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -128,10 +129,6 @@ export default function AppCreationWizard() {
     customActions: '',
   });
 
-  const handleLogout = async () => {
-    await fetch('/api/admin/login', { method: 'DELETE' });
-    router.push('/admin/login');
-  };
 
   const validateStep = () => {
     const newErrors: Record<string, string> = {};
@@ -234,6 +231,8 @@ export default function AppCreationWizard() {
         if (data.data.initialApiKey) {
           alert(`App created successfully!\n\nAPI Key: ${data.data.initialApiKey}\n\nIMPORTANT: Save this key now, it won't be shown again!`);
         }
+        // Refresh the apps cache to show the new app in sidebar
+        mutate();
         router.push('/admin/apps');
       } else {
         const error = await response.json();
@@ -731,10 +730,7 @@ export default function AppCreationWizard() {
   };
 
   return (
-    <DashboardLayout
-      apps={[]}
-      onLogout={handleLogout}
-    >
+    <>
       <PageHeader 
         title="Create New App"
         description="Set up a new GrowthKit application"
@@ -837,6 +833,6 @@ export default function AppCreationWizard() {
           </div>
         </ContentCard>
       </div>
-    </DashboardLayout>
+    </>
   );
 }
