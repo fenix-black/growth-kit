@@ -248,6 +248,12 @@ textarea {
   .ring-offset-background {
     --tw-ring-offset-color: hsl(var(--background));
   }
+  .focus\:ring-primary\/50:focus {
+    --tw-ring-color: hsl(var(--primary) / 0.5);
+  }
+  .focus\:border-primary:focus {
+    border-color: hsl(var(--primary));
+  }
   
   /* Gradient utilities for GrowthKit theme */
   .from-primary {
@@ -257,6 +263,12 @@ textarea {
   }
   .to-accent {
     --tw-gradient-to: hsl(var(--accent)) var(--tw-gradient-to-position);
+  }
+  .to-secondary {
+    --tw-gradient-to: hsl(var(--secondary)) var(--tw-gradient-to-position);
+  }
+  .to-fenix-magenta {
+    --tw-gradient-to: hsl(var(--fenix-magenta)) var(--tw-gradient-to-position);
   }
   .bg-gradient-to-r {
     background-image: linear-gradient(to right, var(--tw-gradient-stops));
@@ -284,6 +296,17 @@ textarea {
   }
   .hover\:text-accent-foreground:hover {
     color: hsl(var(--accent-foreground));
+  }
+  .hover\:from-primary\/90:hover {
+    --tw-gradient-from: hsl(var(--primary) / 0.9) var(--tw-gradient-from-position);
+    --tw-gradient-to: hsl(var(--primary) / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .hover\:to-secondary\/90:hover {
+    --tw-gradient-to: hsl(var(--secondary) / 0.9) var(--tw-gradient-to-position);
+  }
+  .hover\:text-primary\/80:hover {
+    color: hsl(var(--primary) / 0.8);
   }
   .bg-primary\/10 {
     background-color: hsl(var(--primary) / 0.1);
@@ -341,6 +364,18 @@ textarea {
   }
   .bg-fenix-orange\/10 {
     background-color: hsl(var(--fenix-orange) / 0.1);
+  }
+  .bg-fenix-purple\/20 {
+    background-color: hsl(var(--fenix-purple) / 0.2);
+  }
+  .bg-fenix-magenta\/20 {
+    background-color: hsl(var(--fenix-magenta) / 0.2);
+  }
+  .bg-primary\/20 {
+    background-color: hsl(var(--primary) / 0.2);
+  }
+  .bg-secondary\/20 {
+    background-color: hsl(var(--secondary) / 0.2);
   }
 }
 
