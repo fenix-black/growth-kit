@@ -16,7 +16,8 @@ import {
   Shield,
   Users,
   Coins,
-  Eye
+  Eye,
+  Plus
 } from 'lucide-react';
 
 interface FormData {
@@ -38,6 +39,9 @@ interface FormData {
   autoApprove: boolean;
   invitationQuota: number;
   invitationCronTime: string;
+  waitlistMessages: string[];
+  backgroundColor: string;
+  cardBackgroundColor: string;
   
   // Credit Policy
   referralCredits: number;
@@ -50,11 +54,12 @@ interface FormData {
   // Advanced
   trackUsdValue: boolean;
   customActions: string;
+  embedSelector?: string;
 }
 
 const steps = [
   { id: 1, name: 'Basic Info', icon: Package, description: 'App name, domain and description' },
-  { id: 2, name: 'Widget Settings', icon: Users, description: 'Waitlist layout and branding' },
+  { id: 2, name: 'Waitlist Settings', icon: Users, description: 'Waitlist layout and branding' },
   { id: 3, name: 'Credits', icon: Coins, description: 'Template selection and credit policy' },
   { id: 4, name: 'Security', icon: Shield, description: 'CORS origins and authentication' },
   { id: 5, name: 'Review', icon: Eye, description: 'Review and confirm' },
@@ -130,6 +135,9 @@ export default function AppCreationWizard() {
     dailyReferralCap: 10,
     trackUsdValue: false,
     customActions: '',
+    waitlistMessages: ['Join our waitlist to get early access!'],
+    backgroundColor: '#ffffff',
+    cardBackgroundColor: '#f8fafc',
   });
 
   // Smart defaults: Auto-populate CORS and redirect based on domain
@@ -413,8 +421,8 @@ export default function AppCreationWizard() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 Waitlist Layout
               </label>
-              <div className="grid grid-cols-3 gap-4">
-                {['centered', 'split', 'minimal'].map((layout) => (
+              <div className="grid grid-cols-2 gap-4">
+                {['centered', 'split', 'minimal', 'embed'].map((layout) => (
                   <button
                     key={layout}
                     type="button"
@@ -427,16 +435,36 @@ export default function AppCreationWizard() {
                     )}
                   >
                     <div className="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize mb-1">
-                      {layout}
+                      {layout === 'embed' ? 'Embed Mode' : layout}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
                       {layout === 'centered' && 'Classic center layout'}
                       {layout === 'split' && 'Split screen design'} 
                       {layout === 'minimal' && 'Clean minimal style'}
+                      {layout === 'embed' && 'Widget for existing pages'}
                     </div>
                   </button>
                 ))}
               </div>
+
+              {/* CSS Selector for Embed Mode */}
+              {formData.waitlistLayout === 'embed' && (
+                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    CSS Selector for Embed Container
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.embedSelector || ''}
+                    onChange={(e) => setFormData({ ...formData, embedSelector: e.target.value })}
+                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-white dark:text-gray-900"
+                    placeholder="#waitlist-container"
+                  />
+                  <p className="text-xs text-blue-600 dark:text-blue-300 mt-2">
+                    CSS selector where the waitlist widget will be embedded (e.g., "#waitlist-container", ".embed-here")
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
@@ -469,10 +497,103 @@ export default function AppCreationWizard() {
               </p>
             </div>
 
-            {/* Waitlist Advanced Settings */}
+            {/* Custom Messages */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Custom Messages
+              </label>
+              <div className="space-y-2">
+                {formData.waitlistMessages.map((message, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={message}
+                      onChange={(e) => {
+                        const newMessages = [...formData.waitlistMessages];
+                        newMessages[index] = e.target.value;
+                        setFormData({ ...formData, waitlistMessages: newMessages });
+                      }}
+                      className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      placeholder="Enter a custom message for your waitlist"
+                    />
+                    {formData.waitlistMessages.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newMessages = formData.waitlistMessages.filter((_, i) => i !== index);
+                          setFormData({ ...formData, waitlistMessages: newMessages });
+                        }}
+                      >
+                        ×
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFormData({ 
+                    ...formData, 
+                    waitlistMessages: [...formData.waitlistMessages, ''] 
+                  })}
+                  icon={<Plus size={16} />}
+                >
+                  Add Message
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                Custom messages shown to users on the waitlist page
+              </p>
+            </div>
+
+            {/* Background Colors */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Background Color
+                </label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="color"
+                    value={formData.backgroundColor}
+                    onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
+                    className="h-10 w-16 rounded border border-gray-300 cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={formData.backgroundColor}
+                    onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
+                    className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Card Background
+                </label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="color"
+                    value={formData.cardBackgroundColor}
+                    onChange={(e) => setFormData({ ...formData, cardBackgroundColor: e.target.value })}
+                    className="h-10 w-16 rounded border border-gray-300 cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={formData.cardBackgroundColor}
+                    onChange={(e) => setFormData({ ...formData, cardBackgroundColor: e.target.value })}
+                    className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Advanced Waitlist Settings */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
               <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                Waitlist Configuration
+                Advanced Settings
               </h4>
               
               <div className="space-y-4">
@@ -493,41 +614,44 @@ export default function AppCreationWizard() {
                   </p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Daily Invitation Quota
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.invitationQuota}
-                    onChange={(e) => setFormData({ ...formData, invitationQuota: parseInt(e.target.value) || 0 })}
-                    className={cn(
-                      "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
-                      errors.invitationQuota && "border-red-500"
-                    )}
-                    min="0"
-                  />
-                  {errors.invitationQuota && (
-                    <p className="mt-1 text-sm text-red-600">{errors.invitationQuota}</p>
-                  )}
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    How many invitations to send daily from waitlist
-                  </p>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Invitation Send Time
-                  </label>
-                  <input
-                    type="time"
-                    value={formData.invitationCronTime}
-                    onChange={(e) => setFormData({ ...formData, invitationCronTime: e.target.value })}
-                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                  />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Time when daily invitations are sent (UTC)
-                  </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Daily Invitation Quota
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.invitationQuota}
+                      onChange={(e) => setFormData({ ...formData, invitationQuota: parseInt(e.target.value) || 0 })}
+                      className={cn(
+                        "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
+                        errors.invitationQuota && "border-red-500"
+                      )}
+                      min="0"
+                    />
+                    {errors.invitationQuota && (
+                      <p className="mt-1 text-sm text-red-600">{errors.invitationQuota}</p>
+                    )}
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      How many invitations to send daily from waitlist
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Invitation Send Time
+                    </label>
+                    <input
+                      type="time"
+                      value={formData.invitationCronTime}
+                      onChange={(e) => setFormData({ ...formData, invitationCronTime: e.target.value })}
+                      className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Time when daily invitations are sent (UTC)
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -990,7 +1114,7 @@ export default function AppCreationWizard() {
             </h4>
             <div className="text-xs text-blue-800 dark:text-blue-200">
               {currentStep === 1 && "Enter your app basics and decide if you want a waitlist."}
-              {currentStep === 2 && "Configure how your waitlist looks and behaves for users."}
+              {currentStep === 2 && "Configure your waitlist appearance and behavior."}
               {currentStep === 3 && "Choose a template to set smart credit defaults, or customize manually."}
               {currentStep === 4 && "Security settings have been auto-configured. Review if needed."}
               {currentStep === 5 && "Review everything before creating your app."}
