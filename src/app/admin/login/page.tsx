@@ -79,7 +79,7 @@ function LoginForm() {
               />
               <h1 className="text-4xl font-bold mb-6 leading-tight text-white">
                 Welcome back to your
-                <span className="block bg-gradient-to-r from-emerald-400 to-pink-400 bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-r from-emerald-400 to-purple-400 bg-clip-text text-transparent">
                   Growth Dashboard
                 </span>
               </h1>

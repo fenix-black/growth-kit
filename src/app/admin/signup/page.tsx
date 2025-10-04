@@ -96,7 +96,7 @@ export default function AdminSignupPage() {
               />
               <h1 className="text-4xl font-bold mb-6 leading-tight text-white">
                 Start your journey to
-                <span className="block bg-gradient-to-r from-emerald-400 to-pink-400 bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-r from-emerald-400 to-purple-400 bg-clip-text text-transparent">
                   Exponential Growth
                 </span>
               </h1>
@@ -333,7 +333,7 @@ export default function AdminSignupPage() {
                   Already have an account?{' '}
                   <Link 
                     href="/admin/login" 
-                    className="font-medium text-emerald-600 hover:text-emerald-500 transition-colors inline-flex items-center gap-1"
+                    className="font-medium text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1"
                   >
                     Sign in
                     <ArrowRight size={14} />
