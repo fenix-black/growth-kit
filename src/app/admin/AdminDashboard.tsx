@@ -79,15 +79,15 @@ export default function AdminDashboard() {
 
   const fetchApps = async () => {
     try {
-      const response = await fetch('/api/v1/admin/app', {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
+      // Use the new session-based admin endpoint that filters by organization
+      const response = await fetch('/api/admin/apps');
       
       if (response.ok) {
         const data = await response.json();
         setApps(data.data.apps);
+      } else if (response.status === 401) {
+        // Session expired, redirect to login
+        router.push('/admin/login');
       }
     } catch (error) {
       console.error('Error fetching apps:', error);
@@ -113,11 +113,11 @@ export default function AdminDashboard() {
         .map(s => s.trim())
         .filter(Boolean);
 
-      const response = await fetch('/api/v1/admin/app', {
+      // Use the new session-based admin endpoint
+      const response = await fetch('/api/admin/apps', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
         },
         body: JSON.stringify({
           ...formData,
@@ -130,6 +130,8 @@ export default function AdminDashboard() {
         const data = await response.json();
         if (data.data.initialApiKey) {
           alert(`App created! API Key: ${data.data.initialApiKey}\n\nSave this key, it won't be shown again!`);
+        } else {
+          alert('App created successfully!');
         }
         setShowCreateForm(false);
         setFormData({
@@ -150,6 +152,9 @@ export default function AdminDashboard() {
           }, null, 2)
         });
         fetchApps();
+      } else if (response.status === 401) {
+        // Session expired, redirect to login
+        router.push('/admin/login');
       } else {
         const error = await response.json();
         alert(`Error: ${error.message}`);

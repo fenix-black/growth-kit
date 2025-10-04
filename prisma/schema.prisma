@@ -8,6 +8,33 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // bcrypt hash
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Organization relationship
+  organizations Organization[]
+
+  @@map("users")
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  users User[]
+  apps  App[]
+
+  @@map("organizations")
+}
+
 model Tenant {
   id        String   @id @default(cuid())
   name      String
@@ -22,6 +49,7 @@ model Tenant {
 model App {
   id                          String        @id @default(cuid())
   tenantId                    String?
+  organizationId              String?       // New field for organization relationship
   name                        String
   domain                      String
   corsOrigins                 String[]      @default([])
@@ -60,6 +88,7 @@ model App {
   creditsPausedAt             DateTime?
   apiKeys                     ApiKey[]
   tenant                      Tenant?       @relation(fields: [tenantId], references: [id])
+  organization                Organization? @relation(fields: [organizationId], references: [id])
   eventLogs                   EventLog[]
   fingerprints                Fingerprint[]
   leads                       Lead[]
@@ -68,6 +97,7 @@ model App {
   activities                  Activity[]
 
   @@index([tenantId])
+  @@index([organizationId])
   @@index([domain])
   @@map("apps")
 }

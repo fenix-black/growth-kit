@@ -28,6 +28,10 @@
 - [ ] Migrate from hardcoded `ADMIN_USER` to database lookup
 - [ ] Keep existing session system (HMAC tokens work great!)
 - [ ] Update login page: change "username" to "email"
+- [ ] **Redesign sign-up and login screens**: 
+  - Match dashboard aesthetic but more modern
+  - Incorporate animations from landing page for polished feel
+  - Maintain GrowthKit branding consistency
 
 ### Phase 2: Add Organization Concept  
 **Goal**: Multiple admins can manage the same apps

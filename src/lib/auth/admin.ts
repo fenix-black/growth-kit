@@ -1,22 +1,45 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
+import { prisma } from '@/lib/db';
 
 const ADMIN_USER = process.env.ADMIN_USER;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const SESSION_SECRET = process.env.REF_SECRET || 'default-secret';
 
 export interface AdminSession {
-  username: string;
+  username?: string; // For backward compatibility with env-based auth
+  email?: string; // For new database-based auth
+  userId?: string; // User ID for database-based auth
   expiresAt: number;
 }
 
 /**
- * Create admin session token
+ * Create admin session token (backward compatibility with username)
  */
 export function createAdminSession(username: string): string {
   const session: AdminSession = {
     username,
+    expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+  };
+
+  const payload = JSON.stringify(session);
+  const hmac = crypto
+    .createHmac('sha256', SESSION_SECRET)
+    .update(payload)
+    .digest('hex');
+
+  return `${Buffer.from(payload).toString('base64url')}.${hmac}`;
+}
+
+/**
+ * Create admin session token for database user
+ */
+export function createUserAdminSession(email: string, userId: string): string {
+  const session: AdminSession = {
+    email,
+    userId,
     expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
   };
 
@@ -59,7 +82,40 @@ export function verifyAdminSession(token: string): AdminSession | null {
 }
 
 /**
- * Verify admin credentials
+ * Verify admin credentials from database
+ */
+export async function verifyUserCredentials(email: string, password: string): Promise<{ success: boolean; user?: any }> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        organizations: {
+          include: {
+            apps: true
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      return { success: false };
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    if (!isPasswordValid) {
+      return { success: false };
+    }
+
+    return { success: true, user };
+  } catch (error) {
+    console.error('Database auth error:', error);
+    return { success: false };
+  }
+}
+
+/**
+ * Verify admin credentials (env vars - backward compatibility)
  */
 export function verifyAdminCredentials(username: string, password: string): boolean {
   if (!ADMIN_USER || !ADMIN_PASSWORD) {
@@ -68,6 +124,26 @@ export function verifyAdminCredentials(username: string, password: string): bool
   }
 
   return username === ADMIN_USER && password === ADMIN_PASSWORD;
+}
+
+/**
+ * Verify credentials - checks both database and env vars
+ */
+export async function verifyCredentials(emailOrUsername: string, password: string): Promise<{ success: boolean; user?: any; type: 'database' | 'env' }> {
+  // First try database authentication (email-based)
+  if (emailOrUsername.includes('@')) {
+    const dbResult = await verifyUserCredentials(emailOrUsername, password);
+    if (dbResult.success) {
+      return { success: true, user: dbResult.user, type: 'database' };
+    }
+  }
+  
+  // Fall back to environment variables (username-based)
+  if (verifyAdminCredentials(emailOrUsername, password)) {
+    return { success: true, type: 'env' };
+  }
+  
+  return { success: false, type: 'env' };
 }
 
 /**
