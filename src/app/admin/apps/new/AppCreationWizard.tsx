@@ -113,6 +113,16 @@ export default function AppCreationWizard() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [showAdvancedSecurity, setShowAdvancedSecurity] = useState(false);
   const [showAdvancedCredits, setShowAdvancedCredits] = useState(false);
+  
+  // Waitlist color controls (matching BrandingCard)
+  const [bgColor1, setBgColor1] = useState('#0f172a');
+  const [bgColor2, setBgColor2] = useState('#1e293b');
+  const [useGradient, setUseGradient] = useState(true);
+  const [cardColor, setCardColor] = useState('#ffffff');
+  const [cardOpacity, setCardOpacity] = useState(5);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [extractingColors, setExtractingColors] = useState(false);
+  
   const [formData, setFormData] = useState<FormData>({
     name: '',
     domain: '',
@@ -207,6 +217,141 @@ export default function AppCreationWizard() {
   const applyTemplate = (template: typeof templates[0]) => {
     setFormData(prev => ({ ...prev, ...template.values }));
     setSelectedTemplate(template.name);
+  };
+
+  // Generate CSS strings from color controls (matching BrandingCard)
+  const generateBackgroundColor = () => {
+    if (useGradient) {
+      return `linear-gradient(135deg, ${bgColor1} 0%, ${bgColor2} 100%)`;
+    }
+    return bgColor1;
+  };
+  
+  const generateCardColor = () => {
+    if (cardOpacity < 100) {
+      const hex = cardColor.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${cardOpacity / 100})`;
+    }
+    return cardColor;
+  };
+
+  // Extract colors from uploaded logo
+  const extractColorsFromLogo = (file: File) => {
+    return new Promise<string[]>((resolve) => {
+      setExtractingColors(true);
+      
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      img.onload = () => {
+        // Resize canvas to reasonable size for processing
+        const maxSize = 100;
+        const scale = Math.min(maxSize / img.width, maxSize / img.height);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        // Get image data
+        const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData?.data;
+        
+        if (!data) {
+          resolve([]);
+          return;
+        }
+        
+        // Color frequency map
+        const colorMap = new Map<string, number>();
+        
+        // Sample every few pixels for performance
+        for (let i = 0; i < data.length; i += 16) { // Sample every 4th pixel
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const a = data[i + 3];
+          
+          // Skip transparent/near-transparent pixels
+          if (a < 128) continue;
+          
+          // Skip very dark/light colors (likely text/background)
+          const brightness = (r + g + b) / 3;
+          if (brightness < 30 || brightness > 225) continue;
+          
+          // Round colors to reduce noise
+          const roundedR = Math.round(r / 16) * 16;
+          const roundedG = Math.round(g / 16) * 16;
+          const roundedB = Math.round(b / 16) * 16;
+          
+          const colorKey = `${roundedR},${roundedG},${roundedB}`;
+          colorMap.set(colorKey, (colorMap.get(colorKey) || 0) + 1);
+        }
+        
+        // Get top colors by frequency
+        const sortedColors = Array.from(colorMap.entries())
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 5)
+          .map(([rgb]) => {
+            const [r, g, b] = rgb.split(',').map(Number);
+            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+          });
+        
+        setExtractingColors(false);
+        resolve(sortedColors);
+      };
+      
+      img.onerror = () => {
+        setExtractingColors(false);
+        resolve([]);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  // Apply extracted colors as smart defaults
+  const applyExtractedColors = async (colors: string[]) => {
+    if (colors.length === 0) return;
+    
+    const [primary, secondary, tertiary] = colors;
+    
+    // Set brand color to most vibrant
+    setFormData(prev => ({ ...prev, primaryColor: primary }));
+    
+    // Create dark gradient background using extracted colors
+    if (secondary) {
+      setBgColor1(primary);
+      setBgColor2(secondary);
+      setUseGradient(true);
+    } else {
+      setBgColor1(primary);
+      setUseGradient(false);
+    }
+    
+    // Set card to light color that complements
+    setCardColor('#ffffff');
+    setCardOpacity(10); // Light glass effect
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setLogoFile(file);
+    
+    // Extract colors and apply as defaults
+    try {
+      const colors = await extractColorsFromLogo(file);
+      if (colors.length > 0) {
+        await applyExtractedColors(colors);
+      }
+    } catch (error) {
+      console.error('Error extracting colors:', error);
+    }
   };
 
   const handleSubmit = async () => {
@@ -355,11 +500,41 @@ export default function AppCreationWizard() {
                 <input
                   type="file"
                   accept="image/*"
+                  onChange={handleLogoUpload}
                   className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/20 dark:file:text-blue-300"
                 />
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Upload PNG, JPG, or WebP. You can also add this later in settings.
+                  Upload PNG, JPG, or WebP. Colors will be auto-extracted for themes.
                 </p>
+                
+                {/* Logo Preview and Color Extraction */}
+                {logoFile && (
+                  <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                        <img 
+                          src={URL.createObjectURL(logoFile)} 
+                          alt="Logo preview"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {logoFile.name}
+                        </p>
+                        {extractingColors ? (
+                          <p className="text-xs text-blue-600 dark:text-blue-400">
+                            🎨 Extracting colors for smart defaults...
+                          </p>
+                        ) : (
+                          <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                            ✨ Colors extracted! Check your theme below.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -547,45 +722,198 @@ export default function AppCreationWizard() {
               </p>
             </div>
 
-            {/* Background Colors */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Background Color
-                </label>
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="color"
-                    value={formData.backgroundColor}
-                    onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
-                    className="h-10 w-16 rounded border border-gray-300 cursor-pointer"
-                  />
-                  <input
-                    type="text"
-                    value={formData.backgroundColor}
-                    onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
-                    className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                  />
-                </div>
+            {/* Background Colors with Gradient Support */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Background
+              </label>
+              
+              {/* Preset Options */}
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBgColor1('#0f172a');
+                    setBgColor2('#1e293b');
+                    setUseGradient(true);
+                  }}
+                  className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
+                  title="Dark (Default)"
+                >
+                  <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }} />
+                  <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Dark</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBgColor1('#f9fafb');
+                    setBgColor2('#e5e7eb');
+                    setUseGradient(true);
+                  }}
+                  className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
+                  title="Light"
+                >
+                  <div className="h-8 rounded border border-gray-200" style={{ background: 'linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%)' }} />
+                  <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Light</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBgColor1('#1e3a8a');
+                    setBgColor2('#312e81');
+                    setUseGradient(true);
+                  }}
+                  className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
+                  title="Ocean"
+                >
+                  <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #312e81 100%)' }} />
+                  <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Ocean</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBgColor1('#7c2d12');
+                    setBgColor2('#991b1b');
+                    setUseGradient(true);
+                  }}
+                  className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
+                  title="Sunset"
+                >
+                  <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #991b1b 100%)' }} />
+                  <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Sunset</p>
+                </button>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Card Background
-                </label>
-                <div className="flex gap-2 items-center">
+              {/* Custom Background Controls */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
                   <input
-                    type="color"
-                    value={formData.cardBackgroundColor}
-                    onChange={(e) => setFormData({ ...formData, cardBackgroundColor: e.target.value })}
-                    className="h-10 w-16 rounded border border-gray-300 cursor-pointer"
+                    type="checkbox"
+                    id="useGradient"
+                    checked={useGradient}
+                    onChange={(e) => setUseGradient(e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <input
-                    type="text"
-                    value={formData.cardBackgroundColor}
-                    onChange={(e) => setFormData({ ...formData, cardBackgroundColor: e.target.value })}
-                    className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                  />
+                  <label htmlFor="useGradient" className="text-sm text-gray-600 dark:text-gray-400">
+                    Use gradient (two colors)
+                  </label>
+                </div>
+                
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                      {useGradient ? 'Color 1' : 'Background Color'}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        value={bgColor1}
+                        onChange={(e) => setBgColor1(e.target.value)}
+                        className="h-10 w-16 rounded border border-gray-300 cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={bgColor1}
+                        onChange={(e) => setBgColor1(e.target.value)}
+                        className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white text-xs"
+                      />
+                    </div>
+                  </div>
+                  
+                  {useGradient && (
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Color 2</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          value={bgColor2}
+                          onChange={(e) => setBgColor2(e.target.value)}
+                          className="h-10 w-16 rounded border border-gray-300 cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={bgColor2}
+                          onChange={(e) => setBgColor2(e.target.value)}
+                          className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white text-xs"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Background Preview */}
+                <div className="mt-3 p-4 rounded-lg border border-gray-200" style={{ background: generateBackgroundColor() }}>
+                  <p className="text-center text-sm text-white font-medium drop-shadow">Background Preview</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Card Background with Opacity */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Card Background
+              </label>
+              
+              <div className="space-y-3">
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Color</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        value={cardColor}
+                        onChange={(e) => setCardColor(e.target.value)}
+                        className="h-10 w-16 rounded border border-gray-300 cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={cardColor}
+                        onChange={(e) => setCardColor(e.target.value)}
+                        className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white text-xs"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="w-32">
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Opacity (%)</label>
+                    <input
+                      type="range"
+                      min="5"
+                      max="100"
+                      step="5"
+                      value={cardOpacity}
+                      onChange={(e) => setCardOpacity(parseInt(e.target.value))}
+                      className="w-full"
+                    />
+                    <div className="text-xs text-center text-gray-500 dark:text-gray-400">{cardOpacity}%</div>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Lower opacity creates a glass/blur effect (recommended: 5-15%)
+                </p>
+                
+                {/* Combined Preview */}
+                <div className="mt-4 p-8 rounded-lg" style={{ background: generateBackgroundColor() }}>
+                  <div 
+                    className="p-6 rounded-lg shadow-lg max-w-md mx-auto text-center" 
+                    style={{ 
+                      background: generateCardColor(), 
+                      backdropFilter: cardOpacity < 100 ? 'blur(10px)' : 'none' 
+                    }}
+                  >
+                    <h3 className="text-lg font-semibold mb-2" style={{ color: formData.primaryColor }}>
+                      {formData.name || 'Your App Name'}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {formData.waitlistMessages[0] || 'Join our waitlist to get early access!'}
+                    </p>
+                    <button 
+                      className="px-6 py-2 rounded-lg text-white font-medium"
+                      style={{ backgroundColor: formData.primaryColor }}
+                    >
+                      Join Waitlist
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
