@@ -106,7 +106,8 @@ export default function AppCreationWizard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-  const [showTemplateConfirmation, setShowTemplateConfirmation] = useState(false);
+  const [showAdvancedSecurity, setShowAdvancedSecurity] = useState(false);
+  const [showAdvancedCredits, setShowAdvancedCredits] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     domain: '',
@@ -117,7 +118,7 @@ export default function AppCreationWizard() {
     corsOrigins: '',
     redirectUrl: '',
     requireAuth: false,
-    waitlistEnabled: false,
+    waitlistEnabled: true, // Default enabled - most apps want waitlists
     autoApprove: false,
     invitationQuota: 10,
     invitationCronTime: '10:00',
@@ -130,6 +131,18 @@ export default function AppCreationWizard() {
     trackUsdValue: false,
     customActions: '',
   });
+
+  // Smart defaults: Auto-populate CORS and redirect based on domain
+  const updateSmartDefaults = (domain: string) => {
+    if (domain && !formData.corsOrigins) {
+      const smartCors = `https://${domain}, http://localhost:3000, http://localhost:3001`;
+      setFormData(prev => ({
+        ...prev,
+        corsOrigins: smartCors,
+        redirectUrl: prev.redirectUrl || `https://${domain}/welcome`
+      }));
+    }
+  };
 
 
   const validateStep = () => {
@@ -171,9 +184,6 @@ export default function AppCreationWizard() {
   const applyTemplate = (template: typeof templates[0]) => {
     setFormData(prev => ({ ...prev, ...template.values }));
     setSelectedTemplate(template.name);
-    setShowTemplateConfirmation(true);
-    // Hide confirmation after 3 seconds
-    setTimeout(() => setShowTemplateConfirmation(false), 3000);
   };
 
   const handleSubmit = async () => {
@@ -373,17 +383,6 @@ export default function AppCreationWizard() {
               </p>
             </div>
 
-            {/* Template Confirmation */}
-            {showTemplateConfirmation && (
-              <div className="mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
-                <div className="flex items-center">
-                  <Check className="h-5 w-5 text-emerald-500 mr-2" />
-                  <p className="text-emerald-800 dark:text-emerald-200">
-                    <strong>{selectedTemplate}</strong> template applied! Settings updated for steps 3-4.
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Templates */}
             <div>
@@ -443,24 +442,19 @@ export default function AppCreationWizard() {
       case 2:
         return (
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                CORS Origins
-              </label>
-              <input
-                type="text"
-                value={formData.corsOrigins}
-                onChange={(e) => setFormData({ ...formData, corsOrigins: e.target.value })}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="http://localhost:3000, https://app.example.com"
-              />
-              <p className="mt-1 text-sm text-gray-500">
-                Comma-separated list of allowed origins
-              </p>
+            {/* Show smart defaults info */}
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-emerald-900 dark:text-emerald-100 mb-2">
+                ✨ Auto-configured based on your domain
+              </h4>
+              <div className="text-sm text-emerald-800 dark:text-emerald-200 space-y-1">
+                <div><strong>CORS Origins:</strong> We've set up {formData.domain} + localhost for development</div>
+                <div><strong>Redirect URL:</strong> Where users go after completing actions</div>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Redirect URL *
               </label>
               <input
@@ -468,7 +462,7 @@ export default function AppCreationWizard() {
                 value={formData.redirectUrl}
                 onChange={(e) => setFormData({ ...formData, redirectUrl: e.target.value })}
                 className={cn(
-                  "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
+                  "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
                   errors.redirectUrl && "border-red-500"
                 )}
                 placeholder="https://app.example.com/welcome"
@@ -476,20 +470,64 @@ export default function AppCreationWizard() {
               {errors.redirectUrl && (
                 <p className="mt-1 text-sm text-red-600">{errors.redirectUrl}</p>
               )}
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Where users will be redirected after completing actions
+              </p>
             </div>
 
+            {/* Advanced Security Settings - Collapsible */}
             <div>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  checked={formData.requireAuth}
-                  onChange={(e) => setFormData({ ...formData, requireAuth: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              <button
+                type="button"
+                onClick={() => setShowAdvancedSecurity(!showAdvancedSecurity)}
+                className="flex items-center text-sm text-blue-600 hover:text-blue-700 mb-3"
+              >
+                <ChevronRight 
+                  size={16} 
+                  className={cn(
+                    "mr-1 transition-transform",
+                    showAdvancedSecurity && "rotate-90"
+                  )} 
                 />
-                <span className="text-sm font-medium text-gray-700">
-                  Require authentication for API access
-                </span>
-              </label>
+                Advanced Security Settings
+              </button>
+              
+              {showAdvancedSecurity && (
+                <div className="space-y-4 pl-4 border-l-2 border-blue-200 dark:border-blue-800">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      CORS Origins
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.corsOrigins}
+                      onChange={(e) => setFormData({ ...formData, corsOrigins: e.target.value })}
+                      className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      placeholder="http://localhost:3000, https://app.example.com"
+                    />
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      Comma-separated list of allowed origins (auto-configured)
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        checked={formData.requireAuth}
+                        onChange={(e) => setFormData({ ...formData, requireAuth: e.target.checked })}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Require authentication for API access
+                      </span>
+                    </label>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
+                      Most apps don't need this unless you have sensitive data
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -785,7 +823,7 @@ export default function AppCreationWizard() {
     <>
       <PageHeader 
         title="Create New App"
-        description="Set up a new GrowthKit application"
+        description="Set up a new GrowthKit application with smart defaults"
         breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Apps', href: '/admin/apps' },
@@ -793,97 +831,149 @@ export default function AppCreationWizard() {
         ]}
       />
 
-      <div className="max-w-4xl mx-auto">
-        {/* Progress Steps */}
-        <nav aria-label="Progress" className="mb-8">
-          <ol className="flex items-center justify-between">
-            {steps.map((step, stepIdx) => (
-              <li key={step.id} className={cn("relative", stepIdx !== 0 && "pl-8 sm:pl-20 md:pl-32")}>
-                {stepIdx !== 0 && (
-                  <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div className={cn(
-                      "h-0.5 w-full",
-                      currentStep > step.id ? "bg-blue-600" : "bg-gray-200"
-                    )} />
-                  </div>
-                )}
+      <div className="flex gap-8 max-w-7xl mx-auto">
+        {/* Left Sidebar - Templates & Progress */}
+        <div className="w-80 flex-shrink-0">
+          {/* Quick Start Templates */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+              Quick Start Templates
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Choose a template to configure defaults for your use case
+            </p>
+            
+            <div className="space-y-3">
+              {templates.map((template) => (
                 <button
-                  onClick={() => currentStep >= step.id && setCurrentStep(step.id)}
+                  key={template.name}
+                  type="button"
+                  onClick={() => applyTemplate(template)}
                   className={cn(
-                    "relative flex items-center justify-center",
-                    currentStep >= step.id && "cursor-pointer"
+                    "w-full text-left p-4 border rounded-lg transition-all duration-200 relative",
+                    selectedTemplate === template.name
+                      ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-2 ring-emerald-500 ring-opacity-20"
+                      : "border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                   )}
-                  disabled={currentStep < step.id}
                 >
-                  <span className={cn(
-                    "h-12 w-12 rounded-full flex items-center justify-center border-2",
-                    currentStep > step.id ? "bg-blue-600 border-blue-600" :
-                    currentStep === step.id ? "bg-white border-blue-600" :
-                    "bg-white border-gray-300"
-                  )}>
-                    {currentStep > step.id ? (
-                      <Check className="h-6 w-6 text-white" />
-                    ) : (
-                      <step.icon className={cn(
-                        "h-6 w-6",
-                        currentStep === step.id ? "text-blue-600" : "text-gray-400"
-                      )} />
-                    )}
-                  </span>
-                  <span className="absolute -bottom-8 text-xs text-center w-20">
-                    <span className={cn(
-                      "block font-medium",
-                      currentStep === step.id ? "text-blue-600" : "text-gray-500"
-                    )}>
-                      {step.name}
-                    </span>
-                  </span>
+                  {selectedTemplate === template.name && (
+                    <div className="absolute top-2 right-2">
+                      <Check className="h-4 w-4 text-emerald-500" />
+                    </div>
+                  )}
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm mb-1">
+                    {template.name}
+                  </h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    {template.description}
+                  </p>
+                  
+                  {/* Compact preview */}
+                  <div className="text-xs text-gray-400 dark:text-gray-500">
+                    {template.values.referralCredits} credits • {template.values.waitlistEnabled ? 'Waitlist' : 'No waitlist'}
+                  </div>
                 </button>
-              </li>
-            ))}
-          </ol>
-        </nav>
+              ))}
+            </div>
+            
+            {!selectedTemplate && (
+              <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                💡 Templates set smart defaults. You can always customize later.
+              </div>
+            )}
+          </div>
 
-        {/* Form Content */}
-        <ContentCard className="mt-12">
-          <div className="p-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">
-              {steps[currentStep - 1].name}
-            </h2>
-            
-            {renderStepContent()}
-            
-            {/* Navigation Buttons */}
-            <div className="mt-8 flex justify-between">
-              <Button
-                variant="ghost"
-                icon={<ChevronLeft size={20} />}
-                onClick={currentStep === 1 ? () => router.push('/admin/apps') : handlePrevious}
-              >
-                {currentStep === 1 ? 'Cancel' : 'Previous'}
-              </Button>
-              
-              {currentStep < 5 ? (
-                <Button
-                  variant="primary"
-                  onClick={handleNext}
-                  icon={<ChevronRight size={20} />}
-                >
-                  Next
-                </Button>
-              ) : (
-                <Button
-                  variant="success"
-                  onClick={handleSubmit}
-                  loading={isSubmitting}
-                  icon={<Check size={20} />}
-                >
-                  Create App
-                </Button>
-              )}
+          {/* Progress Indicator */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+              Progress
+            </h3>
+            <div className="space-y-3">
+              {steps.map((step) => (
+                <div key={step.id} className="flex items-center">
+                  <div className={cn(
+                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
+                    currentStep > step.id
+                      ? "bg-emerald-500 text-white"
+                      : currentStep === step.id
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 dark:bg-gray-700 text-gray-500"
+                  )}>
+                    {currentStep > step.id ? <Check size={14} /> : step.id}
+                  </div>
+                  <span className={cn(
+                    "ml-3 text-sm",
+                    currentStep >= step.id
+                      ? "text-gray-900 dark:text-gray-100 font-medium"
+                      : "text-gray-500 dark:text-gray-400"
+                  )}>
+                    {step.name}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        </ContentCard>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 max-w-3xl">
+          <ContentCard>
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    {steps[currentStep - 1].name}
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {steps[currentStep - 1].description}
+                  </p>
+                </div>
+                {selectedTemplate && (
+                  <div className="text-right">
+                    <div className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">
+                      Using template:
+                    </div>
+                    <div className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                      {selectedTemplate}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {renderStepContent()}
+              
+              {/* Navigation Buttons */}
+              <div className="mt-8 flex justify-between">
+                <Button
+                  variant="ghost"
+                  icon={<ChevronLeft size={20} />}
+                  onClick={currentStep === 1 ? () => router.push('/admin/apps') : handlePrevious}
+                >
+                  {currentStep === 1 ? 'Cancel' : 'Previous'}
+                </Button>
+                
+                {currentStep < 5 ? (
+                  <Button
+                    variant="primary"
+                    onClick={handleNext}
+                    icon={<ChevronRight size={20} />}
+                  >
+                    Next
+                  </Button>
+                ) : (
+                  <Button
+                    variant="success"
+                    onClick={handleSubmit}
+                    loading={isSubmitting}
+                    icon={<Check size={20} />}
+                  >
+                    Create App
+                  </Button>
+                )}
+              </div>
+            </div>
+          </ContentCard>
+        </div>
       </div>
     </>
   );
