@@ -50,8 +50,9 @@ interface FormData {
   emailClaimCredits: number;
   emailVerifyCredits: number;
   dailyReferralCap: number;
+  dailyCredits: number;
   
-  // Advanced
+  // Advanced (hidden from wizard, set as defaults)
   trackUsdValue: boolean;
   customActions: string;
   embedSelector?: string;
@@ -70,36 +71,33 @@ const templates = [
     name: 'SaaS Starter',
     description: 'Standard configuration for SaaS applications',
     values: {
-      waitlistEnabled: true,
-      autoApprove: false,
-      invitationQuota: 10,
       referralCredits: 5,
       referredCredits: 3,
       dailyReferralCap: 10,
+      dailyCredits: 3,
+      emailVerifyCredits: 5,
     }
   },
   {
     name: 'Community Platform',
     description: 'Optimized for community-driven growth',
     values: {
-      waitlistEnabled: false,
-      autoApprove: true,
-      invitationQuota: 50,
       referralCredits: 10,
       referredCredits: 5,
       dailyReferralCap: 20,
+      dailyCredits: 5,
+      emailVerifyCredits: 3,
     }
   },
   {
     name: 'Beta Launch',
-    description: 'Controlled rollout with strict waitlist',
+    description: 'Controlled rollout with conservative credits',
     values: {
-      waitlistEnabled: true,
-      autoApprove: false,
-      invitationQuota: 5,
       referralCredits: 3,
       referredCredits: 2,
       dailyReferralCap: 5,
+      dailyCredits: 2,
+      emailVerifyCredits: 3,
     }
   },
 ];
@@ -143,7 +141,8 @@ export default function AppCreationWizard() {
     emailClaimCredits: 2,
     emailVerifyCredits: 5,
     dailyReferralCap: 10,
-    trackUsdValue: false,
+    dailyCredits: 3,
+    trackUsdValue: true, // Enable by default, hidden from wizard
     customActions: '',
     waitlistMessages: ['Join our waitlist to get early access!'],
     backgroundColor: '#ffffff',
@@ -332,9 +331,9 @@ export default function AppCreationWizard() {
       setUseGradient(false);
     }
     
-    // Set card to light color that complements
+    // Set card to light color that complements with good readability for branded content
     setCardColor('#ffffff');
-    setCardOpacity(10); // Light glass effect
+    setCardOpacity(95); // Solid background for good logo/text readability
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -674,117 +673,78 @@ export default function AppCreationWizard() {
               </p>
             </div>
 
-            {/* Custom Messages */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Custom Messages
-              </label>
-              <div className="space-y-2">
-                {formData.waitlistMessages.map((message, index) => (
-                  <div key={index} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={message}
-                      onChange={(e) => {
-                        const newMessages = [...formData.waitlistMessages];
-                        newMessages[index] = e.target.value;
-                        setFormData({ ...formData, waitlistMessages: newMessages });
-                      }}
-                      className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                      placeholder="Enter a custom message for your waitlist"
-                    />
-                    {formData.waitlistMessages.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          const newMessages = formData.waitlistMessages.filter((_, i) => i !== index);
-                          setFormData({ ...formData, waitlistMessages: newMessages });
-                        }}
-                      >
-                        ×
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setFormData({ 
-                    ...formData, 
-                    waitlistMessages: [...formData.waitlistMessages, ''] 
-                  })}
-                  icon={<Plus size={16} />}
-                >
-                  Add Message
-                </Button>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                Custom messages shown to users on the waitlist page
-              </p>
-            </div>
-
             {/* Background Colors with Gradient Support */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 Background
               </label>
               
-              {/* Preset Options */}
-              <div className="grid grid-cols-4 gap-3 mb-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBgColor1('#0f172a');
-                    setBgColor2('#1e293b');
-                    setUseGradient(true);
-                  }}
-                  className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
-                  title="Dark (Default)"
-                >
-                  <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }} />
-                  <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Dark</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBgColor1('#f9fafb');
-                    setBgColor2('#e5e7eb');
-                    setUseGradient(true);
-                  }}
-                  className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
-                  title="Light"
-                >
-                  <div className="h-8 rounded border border-gray-200" style={{ background: 'linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%)' }} />
-                  <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Light</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBgColor1('#1e3a8a');
-                    setBgColor2('#312e81');
-                    setUseGradient(true);
-                  }}
-                  className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
-                  title="Ocean"
-                >
-                  <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #312e81 100%)' }} />
-                  <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Ocean</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBgColor1('#7c2d12');
-                    setBgColor2('#991b1b');
-                    setUseGradient(true);
-                  }}
-                  className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
-                  title="Sunset"
-                >
-                  <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #991b1b 100%)' }} />
-                  <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Sunset</p>
-                </button>
-              </div>
+              {/* Preset Options - Only show if no logo uploaded */}
+              {!logoFile && (
+                <div className="grid grid-cols-4 gap-3 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBgColor1('#0f172a');
+                      setBgColor2('#1e293b');
+                      setUseGradient(true);
+                    }}
+                    className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
+                    title="Dark (Default)"
+                  >
+                    <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }} />
+                    <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Dark</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBgColor1('#f9fafb');
+                      setBgColor2('#e5e7eb');
+                      setUseGradient(true);
+                    }}
+                    className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
+                    title="Light"
+                  >
+                    <div className="h-8 rounded border border-gray-200" style={{ background: 'linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%)' }} />
+                    <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Light</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBgColor1('#1e3a8a');
+                      setBgColor2('#312e81');
+                      setUseGradient(true);
+                    }}
+                    className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
+                    title="Ocean"
+                  >
+                    <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #312e81 100%)' }} />
+                    <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Ocean</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBgColor1('#7c2d12');
+                      setBgColor2('#991b1b');
+                      setUseGradient(true);
+                    }}
+                    className="p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
+                    title="Sunset"
+                  >
+                    <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #991b1b 100%)' }} />
+                    <p className="text-xs mt-1 text-center text-gray-600 dark:text-gray-400">Sunset</p>
+                  </button>
+                </div>
+              )}
+
+              {/* Show hint when logo is uploaded */}
+              {logoFile && (
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    🎨 Using colors extracted from your logo. You can still customize below if needed.
+                  </p>
+                </div>
+              )}
 
               {/* Custom Background Controls */}
               <div className="space-y-3">
@@ -888,29 +848,93 @@ export default function AppCreationWizard() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Lower opacity creates a glass/blur effect (recommended: 5-15%)
                 </p>
-                
-                {/* Combined Preview */}
-                <div className="mt-4 p-8 rounded-lg" style={{ background: generateBackgroundColor() }}>
-                  <div 
-                    className="p-6 rounded-lg shadow-lg max-w-md mx-auto text-center" 
-                    style={{ 
-                      background: generateCardColor(), 
-                      backdropFilter: cardOpacity < 100 ? 'blur(10px)' : 'none' 
-                    }}
-                  >
-                    <h3 className="text-lg font-semibold mb-2" style={{ color: formData.primaryColor }}>
-                      {formData.name || 'Your App Name'}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      {formData.waitlistMessages[0] || 'Join our waitlist to get early access!'}
-                    </p>
-                    <button 
-                      className="px-6 py-2 rounded-lg text-white font-medium"
-                      style={{ backgroundColor: formData.primaryColor }}
-                    >
-                      Join Waitlist
-                    </button>
+              </div>
+            </div>
+
+            {/* Custom Messages */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Custom Messages
+              </label>
+              <div className="space-y-2">
+                {formData.waitlistMessages.map((message, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={message}
+                      onChange={(e) => {
+                        const newMessages = [...formData.waitlistMessages];
+                        newMessages[index] = e.target.value;
+                        setFormData({ ...formData, waitlistMessages: newMessages });
+                      }}
+                      className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      placeholder="Enter a custom message for your waitlist"
+                    />
+                    {formData.waitlistMessages.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newMessages = formData.waitlistMessages.filter((_, i) => i !== index);
+                          setFormData({ ...formData, waitlistMessages: newMessages });
+                        }}
+                      >
+                        ×
+                      </Button>
+                    )}
                   </div>
+                ))}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFormData({ 
+                    ...formData, 
+                    waitlistMessages: [...formData.waitlistMessages, ''] 
+                  })}
+                  icon={<Plus size={16} />}
+                >
+                  Add Message
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                Custom messages shown to users on the waitlist page
+              </p>
+            </div>
+
+            {/* Combined Waitlist Preview */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Preview
+              </label>
+              <div className="p-8 rounded-lg border border-gray-200" style={{ background: generateBackgroundColor() }}>
+                <div 
+                  className="p-6 rounded-lg shadow-lg max-w-md mx-auto text-center" 
+                  style={{ 
+                    background: generateCardColor(), 
+                    backdropFilter: cardOpacity < 100 ? 'blur(10px)' : 'none' 
+                  }}
+                >
+                  {logoFile && (
+                    <div className="w-12 h-12 mx-auto mb-3 bg-white rounded-lg flex items-center justify-center overflow-hidden shadow-sm">
+                      <img 
+                        src={URL.createObjectURL(logoFile)} 
+                        alt="Logo"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  )}
+                  <h3 className="text-lg font-semibold mb-2" style={{ color: formData.primaryColor }}>
+                    {formData.name || 'Your App Name'}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {formData.waitlistMessages[0] || 'Join our waitlist to get early access!'}
+                  </p>
+                  <button 
+                    className="px-6 py-2 rounded-lg text-white font-medium shadow-sm"
+                    style={{ backgroundColor: formData.primaryColor }}
+                  >
+                    Join Waitlist
+                  </button>
                 </div>
               </div>
             </div>
@@ -987,208 +1011,127 @@ export default function AppCreationWizard() {
         return (
           <div className="space-y-6">
             {/* Template Selection */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">
-                Choose Your Credit Template
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                Templates configure how users earn and spend credits in your app
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                {templates.map((template) => (
-                  <button
-                    key={template.name}
-                    type="button"
-                    onClick={() => applyTemplate(template)}
-                    className={cn(
-                      "text-left p-4 border rounded-lg transition-all duration-200 relative",
-                      selectedTemplate === template.name
-                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-2 ring-emerald-500 ring-opacity-20"
-                        : "border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                    )}
-                  >
-                    {selectedTemplate === template.name && (
-                      <div className="absolute top-2 right-2">
-                        <Check className="h-5 w-5 text-emerald-500" />
-                      </div>
-                    )}
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
-                      {template.name}
-                    </h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                      {template.description}
-                    </p>
-                    
-                    {/* Full preview */}
-                    <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1 pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <div>Referral Credits: <strong>{template.values.referralCredits}</strong></div>
-                      <div>Referred Credits: <strong>{template.values.referredCredits}</strong></div>
-                      <div>Daily Cap: <strong>{template.values.dailyReferralCap}</strong></div>
-                      <div>Waitlist: <strong>{template.values.waitlistEnabled ? 'Enabled' : 'Disabled'}</strong></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {templates.map((template) => (
+                <button
+                  key={template.name}
+                  type="button"
+                  onClick={() => applyTemplate(template)}
+                  className={cn(
+                    "text-left p-4 border rounded-lg transition-all duration-200 relative",
+                    selectedTemplate === template.name
+                      ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-2 ring-emerald-500 ring-opacity-20"
+                      : "border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  )}
+                >
+                  {selectedTemplate === template.name && (
+                    <div className="absolute top-2 right-2">
+                      <Check className="h-5 w-5 text-emerald-500" />
                     </div>
-                  </button>
-                ))}
+                  )}
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    {template.name}
+                  </h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                    {template.description}
+                  </p>
+                  
+                  {/* Credit values preview */}
+                  <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <div>Referral Credits: <strong>{template.values.referralCredits}</strong></div>
+                    <div>Referred Credits: <strong>{template.values.referredCredits}</strong></div>
+                    <div>Daily Credits: <strong>{template.values.dailyCredits}</strong></div>
+                    <div>Daily Cap: <strong>{template.values.dailyReferralCap}</strong></div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Credit Values */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Referral Credits
+                </label>
+                <input
+                  type="number"
+                  value={formData.referralCredits}
+                  onChange={(e) => setFormData({ ...formData, referralCredits: parseInt(e.target.value) || 0 })}
+                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  min="0"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Credits earned by referrer</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Referred Credits
+                </label>
+                <input
+                  type="number"
+                  value={formData.referredCredits}
+                  onChange={(e) => setFormData({ ...formData, referredCredits: parseInt(e.target.value) || 0 })}
+                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  min="0"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Credits earned by referred user</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Daily Credits
+                </label>
+                <input
+                  type="number"
+                  value={formData.dailyCredits}
+                  onChange={(e) => setFormData({ ...formData, dailyCredits: parseInt(e.target.value) || 0 })}
+                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  min="0"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Credits given daily for visiting</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Daily Referral Cap
+                </label>
+                <input
+                  type="number"
+                  value={formData.dailyReferralCap}
+                  onChange={(e) => setFormData({ ...formData, dailyReferralCap: parseInt(e.target.value) || 1 })}
+                  className={cn(
+                    "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
+                    errors.dailyReferralCap && "border-red-500"
+                  )}
+                  min="1"
+                />
+                {errors.dailyReferralCap && (
+                  <p className="mt-1 text-sm text-red-600">{errors.dailyReferralCap}</p>
+                )}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Max referrals per day</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Email Verify Credits
+                </label>
+                <input
+                  type="number"
+                  value={formData.emailVerifyCredits}
+                  onChange={(e) => setFormData({ ...formData, emailVerifyCredits: parseInt(e.target.value) || 0 })}
+                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  min="0"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Credits for email verification</p>
+              </div>
+
+              <div>
+                {/* Empty grid item for 2x3 layout */}
               </div>
             </div>
 
-            {/* Credit Configuration */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                  Credit Configuration
-                </h4>
-                {selectedTemplate && (
-                  <div className="text-sm text-emerald-600 dark:text-emerald-400">
-                    Using {selectedTemplate} defaults
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Referral Credits
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.referralCredits}
-                    onChange={(e) => setFormData({ ...formData, referralCredits: parseInt(e.target.value) || 0 })}
-                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                    min="0"
-                  />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Credits earned by referrer</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Referred Credits
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.referredCredits}
-                    onChange={(e) => setFormData({ ...formData, referredCredits: parseInt(e.target.value) || 0 })}
-                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                    min="0"
-                  />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Credits earned by referred user</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Daily Referral Cap
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.dailyReferralCap}
-                    onChange={(e) => setFormData({ ...formData, dailyReferralCap: parseInt(e.target.value) || 1 })}
-                    className={cn(
-                      "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
-                      errors.dailyReferralCap && "border-red-500"
-                    )}
-                    min="1"
-                  />
-                  {errors.dailyReferralCap && (
-                    <p className="mt-1 text-sm text-red-600">{errors.dailyReferralCap}</p>
-                  )}
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Max referrals per day</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Email Verify Credits
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.emailVerifyCredits}
-                    onChange={(e) => setFormData({ ...formData, emailVerifyCredits: parseInt(e.target.value) || 0 })}
-                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                    min="0"
-                  />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Credits for email verification</p>
-                </div>
-              </div>
-
-              {/* Advanced Credit Settings */}
-              <div className="mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvancedCredits(!showAdvancedCredits)}
-                  className="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 mb-3"
-                >
-                  <ChevronRight 
-                    size={16} 
-                    className={cn(
-                      "mr-1 transition-transform",
-                      showAdvancedCredits && "rotate-90"
-                    )} 
-                  />
-                  Advanced Credit Settings (optional)
-                </button>
-                
-                {showAdvancedCredits && (
-                  <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Name Claim Credits
-                        </label>
-                        <input
-                          type="number"
-                          value={formData.nameClaimCredits}
-                          onChange={(e) => setFormData({ ...formData, nameClaimCredits: parseInt(e.target.value) || 0 })}
-                          className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                          min="0"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Email Claim Credits
-                        </label>
-                        <input
-                          type="number"
-                          value={formData.emailClaimCredits}
-                          onChange={(e) => setFormData({ ...formData, emailClaimCredits: parseInt(e.target.value) || 0 })}
-                          className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                          min="0"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={formData.trackUsdValue}
-                          onChange={(e) => setFormData({ ...formData, trackUsdValue: e.target.checked })}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Track USD value for transactions
-                        </span>
-                      </label>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Custom Action Credits (JSON)
-                      </label>
-                      <textarea
-                        value={formData.customActions}
-                        onChange={(e) => setFormData({ ...formData, customActions: e.target.value })}
-                        rows={4}
-                        className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-xs"
-                        placeholder='{"premium_feature": {"creditsRequired": 10}}'
-                      />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Define custom actions and their credit costs
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+              💡 Advanced settings like custom actions and name/email claim credits can be configured later in app settings
             </div>
           </div>
         );
@@ -1460,16 +1403,7 @@ export default function AppCreationWizard() {
                     {steps[currentStep - 1].description}
                   </p>
                 </div>
-                {selectedTemplate && (
-                  <div className="text-right">
-                    <div className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">
-                      Using template:
-                    </div>
-                    <div className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                      {selectedTemplate}
-                    </div>
-                  </div>
-                )}
+{/* Template indicator moved to page header only */}
               </div>
               
               {renderStepContent()}
