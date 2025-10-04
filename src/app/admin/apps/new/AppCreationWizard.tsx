@@ -53,10 +53,10 @@ interface FormData {
 }
 
 const steps = [
-  { id: 1, name: 'Basic Info', icon: Package, description: 'App name and domain' },
-  { id: 2, name: 'Security', icon: Shield, description: 'CORS and authentication' },
-  { id: 3, name: 'Waitlist', icon: Users, description: 'Waitlist configuration' },
-  { id: 4, name: 'Credits', icon: Coins, description: 'Credit policy settings' },
+  { id: 1, name: 'Basic Info', icon: Package, description: 'App name, domain and description' },
+  { id: 2, name: 'Widget Settings', icon: Users, description: 'Waitlist layout and branding' },
+  { id: 3, name: 'Credits', icon: Coins, description: 'Template selection and credit policy' },
+  { id: 4, name: 'Security', icon: Shield, description: 'CORS origins and authentication' },
   { id: 5, name: 'Review', icon: Eye, description: 'Review and confirm' },
 ];
 
@@ -154,16 +154,17 @@ export default function AppCreationWizard() {
         if (!formData.domain) newErrors.domain = 'Domain is required';
         break;
       case 2:
-        if (!formData.redirectUrl) newErrors.redirectUrl = 'Redirect URL is required';
+        // Widget settings - no required fields
         break;
       case 3:
+        if (formData.referralCredits < 0) newErrors.referralCredits = 'Credits cannot be negative';
+        if (formData.dailyReferralCap < 1) newErrors.dailyReferralCap = 'Cap must be at least 1';
         if (formData.waitlistEnabled && formData.invitationQuota < 1) {
           newErrors.invitationQuota = 'Quota must be at least 1';
         }
         break;
       case 4:
-        if (formData.referralCredits < 0) newErrors.referralCredits = 'Credits cannot be negative';
-        if (formData.dailyReferralCap < 1) newErrors.dailyReferralCap = 'Cap must be at least 1';
+        if (!formData.redirectUrl) newErrors.redirectUrl = 'Redirect URL is required';
         break;
     }
     
@@ -173,12 +174,26 @@ export default function AppCreationWizard() {
 
   const handleNext = () => {
     if (validateStep()) {
-      setCurrentStep(currentStep + 1);
+      let nextStep = currentStep + 1;
+      
+      // Skip Step 2 (Waitlist Settings) if waitlist is disabled  
+      if (currentStep === 1 && !formData.waitlistEnabled) {
+        nextStep = 3; // Jump to Credits
+      }
+      
+      setCurrentStep(nextStep);
     }
   };
 
   const handlePrevious = () => {
-    setCurrentStep(currentStep - 1);
+    let prevStep = currentStep - 1;
+    
+    // Skip Step 2 (Waitlist Settings) if waitlist is disabled and we're going back from Step 3
+    if (currentStep === 3 && !formData.waitlistEnabled) {
+      prevStep = 1; // Jump back to Basic Info
+    }
+    
+    setCurrentStep(prevStep);
   };
 
   const applyTemplate = (template: typeof templates[0]) => {
@@ -440,17 +455,373 @@ export default function AppCreationWizard() {
         );
 
       case 2:
+        // Only show this step if waitlist is enabled
+        if (!formData.waitlistEnabled) {
+          return null; // This step will be skipped
+        }
+        
         return (
           <div className="space-y-6">
-            {/* Show smart defaults info */}
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4 mb-6">
+              <h4 className="text-sm font-medium text-emerald-900 dark:text-emerald-100 mb-2">
+                🎉 Waitlist enabled! Let's configure how it looks
+              </h4>
+              <p className="text-sm text-emerald-800 dark:text-emerald-200">
+                Your waitlist will help build anticipation and manage your app launch
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Waitlist Layout
+              </label>
+              <div className="grid grid-cols-3 gap-4">
+                {['centered', 'split', 'minimal'].map((layout) => (
+                  <button
+                    key={layout}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, waitlistLayout: layout })}
+                    className={cn(
+                      "p-4 border rounded-lg text-center transition-all duration-200",
+                      formData.waitlistLayout === layout
+                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500 ring-opacity-20"
+                        : "border-gray-200 dark:border-gray-700 hover:border-blue-300"
+                    )}
+                  >
+                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize mb-1">
+                      {layout}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {layout === 'centered' && 'Classic center layout'}
+                      {layout === 'split' && 'Split screen design'} 
+                      {layout === 'minimal' && 'Clean minimal style'}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Brand Color
+              </label>
+              <div className="flex gap-4 items-center">
+                <input
+                  type="color"
+                  value={formData.primaryColor}
+                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  className="h-12 w-20 rounded-lg border border-gray-300 cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={formData.primaryColor}
+                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  className="block w-32 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  placeholder="#10b981"
+                />
+                <div 
+                  className="h-12 w-12 rounded-lg border border-gray-300 flex items-center justify-center"
+                  style={{ backgroundColor: formData.primaryColor }}
+                >
+                  <Check className="text-white" size={16} />
+                </div>
+              </div>
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                This color will be used for buttons and accents in your waitlist
+              </p>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            {/* Template Selection */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">
+                Choose Your Credit Template
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                Templates configure how users earn and spend credits in your app
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {templates.map((template) => (
+                  <button
+                    key={template.name}
+                    type="button"
+                    onClick={() => applyTemplate(template)}
+                    className={cn(
+                      "text-left p-4 border rounded-lg transition-all duration-200 relative",
+                      selectedTemplate === template.name
+                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-2 ring-emerald-500 ring-opacity-20"
+                        : "border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    )}
+                  >
+                    {selectedTemplate === template.name && (
+                      <div className="absolute top-2 right-2">
+                        <Check className="h-5 w-5 text-emerald-500" />
+                      </div>
+                    )}
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                      {template.name}
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                      {template.description}
+                    </p>
+                    
+                    {/* Full preview */}
+                    <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <div>Referral Credits: <strong>{template.values.referralCredits}</strong></div>
+                      <div>Referred Credits: <strong>{template.values.referredCredits}</strong></div>
+                      <div>Daily Cap: <strong>{template.values.dailyReferralCap}</strong></div>
+                      <div>Waitlist: <strong>{template.values.waitlistEnabled ? 'Enabled' : 'Disabled'}</strong></div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Credit Configuration */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                  Credit Configuration
+                </h4>
+                {selectedTemplate && (
+                  <div className="text-sm text-emerald-600 dark:text-emerald-400">
+                    Using {selectedTemplate} defaults
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Referral Credits
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.referralCredits}
+                    onChange={(e) => setFormData({ ...formData, referralCredits: parseInt(e.target.value) || 0 })}
+                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                    min="0"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Credits earned by referrer</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Referred Credits
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.referredCredits}
+                    onChange={(e) => setFormData({ ...formData, referredCredits: parseInt(e.target.value) || 0 })}
+                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                    min="0"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Credits earned by referred user</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Daily Referral Cap
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.dailyReferralCap}
+                    onChange={(e) => setFormData({ ...formData, dailyReferralCap: parseInt(e.target.value) || 1 })}
+                    className={cn(
+                      "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
+                      errors.dailyReferralCap && "border-red-500"
+                    )}
+                    min="1"
+                  />
+                  {errors.dailyReferralCap && (
+                    <p className="mt-1 text-sm text-red-600">{errors.dailyReferralCap}</p>
+                  )}
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Max referrals per day</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Email Verify Credits
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.emailVerifyCredits}
+                    onChange={(e) => setFormData({ ...formData, emailVerifyCredits: parseInt(e.target.value) || 0 })}
+                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                    min="0"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Credits for email verification</p>
+                </div>
+              </div>
+
+              {/* Advanced Credit Settings */}
+              <div className="mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedCredits(!showAdvancedCredits)}
+                  className="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 mb-3"
+                >
+                  <ChevronRight 
+                    size={16} 
+                    className={cn(
+                      "mr-1 transition-transform",
+                      showAdvancedCredits && "rotate-90"
+                    )} 
+                  />
+                  Advanced Credit Settings (optional)
+                </button>
+                
+                {showAdvancedCredits && (
+                  <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Name Claim Credits
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.nameClaimCredits}
+                          onChange={(e) => setFormData({ ...formData, nameClaimCredits: parseInt(e.target.value) || 0 })}
+                          className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                          min="0"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Email Claim Credits
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.emailClaimCredits}
+                          onChange={(e) => setFormData({ ...formData, emailClaimCredits: parseInt(e.target.value) || 0 })}
+                          className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                          min="0"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={formData.trackUsdValue}
+                          onChange={(e) => setFormData({ ...formData, trackUsdValue: e.target.checked })}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Track USD value for transactions
+                        </span>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Custom Action Credits (JSON)
+                      </label>
+                      <textarea
+                        value={formData.customActions}
+                        onChange={(e) => setFormData({ ...formData, customActions: e.target.value })}
+                        rows={4}
+                        className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-xs"
+                        placeholder='{"premium_feature": {"creditsRequired": 10}}'
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Define custom actions and their credit costs
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Waitlist Advanced Settings */}
+              {formData.waitlistEnabled && (
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                  <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                    Waitlist Configuration
+                  </h4>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={formData.autoApprove}
+                          onChange={(e) => setFormData({ ...formData, autoApprove: e.target.checked })}
+                          className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Auto-approve waitlist entries
+                        </span>
+                      </label>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
+                        Users get immediate access vs manual approval
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Daily Invitation Quota
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.invitationQuota}
+                        onChange={(e) => setFormData({ ...formData, invitationQuota: parseInt(e.target.value) || 0 })}
+                        className={cn(
+                          "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
+                          errors.invitationQuota && "border-red-500"
+                        )}
+                        min="0"
+                      />
+                      {errors.invitationQuota && (
+                        <p className="mt-1 text-sm text-red-600">{errors.invitationQuota}</p>
+                      )}
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        How many invitations to send daily from waitlist
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Invitation Send Time
+                      </label>
+                      <input
+                        type="time"
+                        value={formData.invitationCronTime}
+                        onChange={(e) => setFormData({ ...formData, invitationCronTime: e.target.value })}
+                        className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Time when daily invitations are sent (UTC)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            {/* Show auto-configured info */}
             <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
               <h4 className="text-sm font-medium text-emerald-900 dark:text-emerald-100 mb-2">
-                ✨ Auto-configured based on your domain
+                ✅ Auto-configured based on your domain
               </h4>
               <div className="text-sm text-emerald-800 dark:text-emerald-200 space-y-1">
-                <div><strong>CORS Origins:</strong> We've set up {formData.domain} + localhost for development</div>
-                <div><strong>Redirect URL:</strong> Where users go after completing actions</div>
+                <div><strong>CORS Origins:</strong> {formData.corsOrigins || `https://${formData.domain}, http://localhost:3000, http://localhost:3001`}</div>
+                <div><strong>Redirect URL:</strong> {formData.redirectUrl || `https://${formData.domain}/welcome`}</div>
               </div>
+              <p className="text-xs text-emerald-600 dark:text-emerald-300 mt-2">
+                These defaults work for most apps - no changes needed unless you have special requirements
+              </p>
             </div>
 
             <div>
@@ -465,22 +836,22 @@ export default function AppCreationWizard() {
                   "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
                   errors.redirectUrl && "border-red-500"
                 )}
-                placeholder="https://app.example.com/welcome"
+                placeholder={`https://${formData.domain}/welcome`}
               />
               {errors.redirectUrl && (
                 <p className="mt-1 text-sm text-red-600">{errors.redirectUrl}</p>
               )}
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Where users will be redirected after completing actions
+                Where users go after completing waitlist signup or referral actions
               </p>
             </div>
 
-            {/* Advanced Security Settings - Collapsible */}
+            {/* Advanced Security - Collapsible */}
             <div>
               <button
                 type="button"
                 onClick={() => setShowAdvancedSecurity(!showAdvancedSecurity)}
-                className="flex items-center text-sm text-blue-600 hover:text-blue-700 mb-3"
+                className="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 mb-3"
               >
                 <ChevronRight 
                   size={16} 
@@ -489,24 +860,24 @@ export default function AppCreationWizard() {
                     showAdvancedSecurity && "rotate-90"
                   )} 
                 />
-                Advanced Security Settings
+                Advanced Security Settings (optional)
               </button>
               
               {showAdvancedSecurity && (
-                <div className="space-y-4 pl-4 border-l-2 border-blue-200 dark:border-blue-800">
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       CORS Origins
                     </label>
-                    <input
-                      type="text"
+                    <textarea
                       value={formData.corsOrigins}
                       onChange={(e) => setFormData({ ...formData, corsOrigins: e.target.value })}
-                      className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                      placeholder="http://localhost:3000, https://app.example.com"
+                      rows={2}
+                      className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                      placeholder="https://app.example.com, http://localhost:3000"
                     />
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      Comma-separated list of allowed origins (auto-configured)
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Comma-separated domains allowed to access your API
                     </p>
                   </div>
 
@@ -523,200 +894,11 @@ export default function AppCreationWizard() {
                       </span>
                     </label>
                     <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
-                      Most apps don't need this unless you have sensitive data
+                      Only enable if you have sensitive data - most apps don't need this
                     </p>
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        );
-
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  checked={formData.waitlistEnabled}
-                  onChange={(e) => setFormData({ ...formData, waitlistEnabled: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  Enable waitlist system
-                </span>
-              </label>
-            </div>
-
-            {formData.waitlistEnabled && (
-              <>
-                <div>
-                  <label className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      checked={formData.autoApprove}
-                      onChange={(e) => setFormData({ ...formData, autoApprove: e.target.checked })}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm font-medium text-gray-700">
-                      Auto-approve waitlist entries
-                    </span>
-                  </label>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Daily Invitation Quota
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.invitationQuota}
-                    onChange={(e) => setFormData({ ...formData, invitationQuota: parseInt(e.target.value) || 0 })}
-                    className={cn(
-                      "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
-                      errors.invitationQuota && "border-red-500"
-                    )}
-                    min="0"
-                  />
-                  {errors.invitationQuota && (
-                    <p className="mt-1 text-sm text-red-600">{errors.invitationQuota}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Invitation Cron Time
-                  </label>
-                  <input
-                    type="time"
-                    value={formData.invitationCronTime}
-                    onChange={(e) => setFormData({ ...formData, invitationCronTime: e.target.value })}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                  <p className="mt-1 text-sm text-gray-500">
-                    Time when daily invitations are sent
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
-        );
-
-      case 4:
-        return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Referral Credits
-                </label>
-                <input
-                  type="number"
-                  value={formData.referralCredits}
-                  onChange={(e) => setFormData({ ...formData, referralCredits: parseInt(e.target.value) || 0 })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  min="0"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Referred Credits
-                </label>
-                <input
-                  type="number"
-                  value={formData.referredCredits}
-                  onChange={(e) => setFormData({ ...formData, referredCredits: parseInt(e.target.value) || 0 })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  min="0"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name Claim Credits
-                </label>
-                <input
-                  type="number"
-                  value={formData.nameClaimCredits}
-                  onChange={(e) => setFormData({ ...formData, nameClaimCredits: parseInt(e.target.value) || 0 })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  min="0"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Claim Credits
-                </label>
-                <input
-                  type="number"
-                  value={formData.emailClaimCredits}
-                  onChange={(e) => setFormData({ ...formData, emailClaimCredits: parseInt(e.target.value) || 0 })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  min="0"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Verify Credits
-                </label>
-                <input
-                  type="number"
-                  value={formData.emailVerifyCredits}
-                  onChange={(e) => setFormData({ ...formData, emailVerifyCredits: parseInt(e.target.value) || 0 })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  min="0"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Daily Referral Cap
-                </label>
-                <input
-                  type="number"
-                  value={formData.dailyReferralCap}
-                  onChange={(e) => setFormData({ ...formData, dailyReferralCap: parseInt(e.target.value) || 1 })}
-                  className={cn(
-                    "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
-                    errors.dailyReferralCap && "border-red-500"
-                  )}
-                  min="1"
-                />
-                {errors.dailyReferralCap && (
-                  <p className="mt-1 text-sm text-red-600">{errors.dailyReferralCap}</p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  checked={formData.trackUsdValue}
-                  onChange={(e) => setFormData({ ...formData, trackUsdValue: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  Track USD value for transactions
-                </span>
-              </label>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Custom Action Credits (JSON)
-              </label>
-              <textarea
-                value={formData.customActions}
-                onChange={(e) => setFormData({ ...formData, customActions: e.target.value })}
-                rows={4}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-xs"
-                placeholder='{"premium_feature": {"creditsRequired": 10}}'
-              />
             </div>
           </div>
         );
@@ -832,59 +1014,9 @@ export default function AppCreationWizard() {
       />
 
       <div className="flex gap-8 max-w-7xl mx-auto">
-        {/* Left Sidebar - Templates & Progress */}
+        {/* Left Sidebar - Progress & Tips */}
         <div className="w-80 flex-shrink-0">
-          {/* Quick Start Templates */}
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-              Quick Start Templates
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Choose a template to configure defaults for your use case
-            </p>
-            
-            <div className="space-y-3">
-              {templates.map((template) => (
-                <button
-                  key={template.name}
-                  type="button"
-                  onClick={() => applyTemplate(template)}
-                  className={cn(
-                    "w-full text-left p-4 border rounded-lg transition-all duration-200 relative",
-                    selectedTemplate === template.name
-                      ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-2 ring-emerald-500 ring-opacity-20"
-                      : "border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                  )}
-                >
-                  {selectedTemplate === template.name && (
-                    <div className="absolute top-2 right-2">
-                      <Check className="h-4 w-4 text-emerald-500" />
-                    </div>
-                  )}
-                  <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm mb-1">
-                    {template.name}
-                  </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                    {template.description}
-                  </p>
-                  
-                  {/* Compact preview */}
-                  <div className="text-xs text-gray-400 dark:text-gray-500">
-                    {template.values.referralCredits} credits • {template.values.waitlistEnabled ? 'Waitlist' : 'No waitlist'}
-                  </div>
-                </button>
-              ))}
-            </div>
-            
-            {!selectedTemplate && (
-              <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                💡 Templates set smart defaults. You can always customize later.
-              </div>
-            )}
-          </div>
-
-          {/* Progress Indicator */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
               Progress
             </h3>
@@ -911,6 +1043,20 @@ export default function AppCreationWizard() {
                   </span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Current Step Tips */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+              💡 Step {currentStep} Tips
+            </h4>
+            <div className="text-xs text-blue-800 dark:text-blue-200">
+              {currentStep === 1 && "Enter your app basics and decide if you want a waitlist."}
+              {currentStep === 2 && "Configure how your waitlist looks and behaves for users."}
+              {currentStep === 3 && "Choose a template to set smart credit defaults, or customize manually."}
+              {currentStep === 4 && "Security settings have been auto-configured. Review if needed."}
+              {currentStep === 5 && "Review everything before creating your app."}
             </div>
           </div>
         </div>
