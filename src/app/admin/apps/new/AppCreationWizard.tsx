@@ -1159,7 +1159,7 @@ export default function AppCreationWizard() {
               </label>
               <input
                 type="url"
-                value={formData.redirectUrl}
+                value={formData.redirectUrl || `https://${formData.domain}/welcome`}
                 onChange={(e) => setFormData({ ...formData, redirectUrl: e.target.value })}
                 className={cn(
                   "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white",
@@ -1175,59 +1175,20 @@ export default function AppCreationWizard() {
               </p>
             </div>
 
-            {/* Advanced Security - Collapsible */}
             <div>
-              <button
-                type="button"
-                onClick={() => setShowAdvancedSecurity(!showAdvancedSecurity)}
-                className="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 mb-3"
-              >
-                <ChevronRight 
-                  size={16} 
-                  className={cn(
-                    "mr-1 transition-transform",
-                    showAdvancedSecurity && "rotate-90"
-                  )} 
-                />
-                Advanced Security Settings (optional)
-              </button>
-              
-              {showAdvancedSecurity && (
-                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      CORS Origins
-                    </label>
-                    <textarea
-                      value={formData.corsOrigins}
-                      onChange={(e) => setFormData({ ...formData, corsOrigins: e.target.value })}
-                      rows={2}
-                      className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                      placeholder="https://app.example.com, http://localhost:3000"
-                    />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Comma-separated domains allowed to access your API
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        checked={formData.requireAuth}
-                        onChange={(e) => setFormData({ ...formData, requireAuth: e.target.checked })}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Require authentication for API access
-                      </span>
-                    </label>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
-                      Only enable if you have sensitive data - most apps don't need this
-                    </p>
-                  </div>
-                </div>
-              )}
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                CORS Origins
+              </label>
+              <textarea
+                value={formData.corsOrigins || `https://${formData.domain}, http://localhost:3000, http://localhost:3001`}
+                onChange={(e) => setFormData({ ...formData, corsOrigins: e.target.value })}
+                rows={2}
+                className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white text-sm"
+                placeholder="https://app.example.com, http://localhost:3000"
+              />
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Comma-separated domains allowed to access your API. Auto-configured based on your domain.
+              </p>
             </div>
           </div>
         );
