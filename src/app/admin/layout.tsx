@@ -5,28 +5,15 @@ import ThemeScript from './ThemeScript';
 export const metadata: Metadata = {
   title: "FenixBlack.ai GrowthKit - Admin Dashboard",
   description: "Powering growth with intelligent waitlist management and referral systems - Admin Dashboard",
-  icons: [
-    {
-      url: '/favicon-16x16.png',
-      sizes: '16x16',
-      type: 'image/png',
-    },
-    {
-      url: '/favicon-32x32.png',
-      sizes: '32x32',
-      type: 'image/png',
-    },
-    {
-      url: '/favicon-48x48.png',
-      sizes: '48x48',
-      type: 'image/png',
-    },
-    {
-      url: '/favicon-64x64.png',
-      sizes: '64x64',
-      type: 'image/png',
-    }
-  ],
+  icons: {
+    icon: [
+      { url: '/growthkit-logo-icon-24px.png', sizes: '24x24', type: 'image/png' },
+      { url: '/growthkit-logo-icon-alpha.png', sizes: '32x32', type: 'image/png' },
+      { url: '/growthkit-logo-icon.png', sizes: '64x64', type: 'image/png' },
+    ],
+    apple: { url: '/growthkit-logo-icon.png', sizes: '180x180', type: 'image/png' },
+    shortcut: { url: '/favicon.ico', type: 'image/x-icon' },
+  },
 };
 
 export default function AdminLayout({

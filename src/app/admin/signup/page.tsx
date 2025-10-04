@@ -87,13 +87,20 @@ export default function AdminSignupPage() {
         <div className="relative z-10 flex flex-col justify-center px-12 py-12 text-white">
           <ScrollReveal direction="up" delay={0.2}>
             <div className="mb-12">
-              <Image
-                src="/growthkit-logo-dark-alpha.png"
-                alt="GrowthKit"
-                width={180}
-                height={60}
-                className="mb-8"
-              />
+              <Link 
+                href="https://growth.fenixblack.ai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block transition-opacity hover:opacity-80"
+              >
+                <Image
+                  src="/growthkit-logo-dark-alpha.png"
+                  alt="GrowthKit"
+                  width={180}
+                  height={60}
+                  className="mb-8"
+                />
+              </Link>
               <h1 className="text-4xl font-bold mb-6 leading-tight text-white">
                 Start your journey to
                 <span 
@@ -149,17 +156,22 @@ export default function AdminSignupPage() {
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={0.6}>
-            <div className="mt-12 p-6 rounded-xl bg-gradient-to-r from-primary/10 to-fenix-magenta/10 border border-primary/30">
+            <Link 
+              href="https://www.fenixblack.ai" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block mt-12 p-6 rounded-xl bg-gradient-to-r from-primary/10 to-fenix-magenta/10 border border-primary/30 transition-all hover:border-primary/50 hover:from-primary/15 hover:to-fenix-magenta/15"
+            >
               <div className="flex items-start gap-3">
                 <Sparkles className="w-6 h-6 text-primary mt-1" />
                 <div>
-                  <h3 className="font-semibold text-white mb-2">Trusted by 10,000+ Businesses</h3>
+                  <h3 className="font-semibold text-white mb-2">Powered by FenixBlack</h3>
                   <p className="text-sm text-slate-300">
-                    From startups to Fortune 500 companies, businesses trust GrowthKit to scale their growth.
+                    Enterprise-grade infrastructure with 99.9% uptime, built for scale and reliability.
                   </p>
                 </div>
               </div>
-            </div>
+            </Link>
           </ScrollReveal>
         </div>
       </div>
@@ -169,13 +181,20 @@ export default function AdminSignupPage() {
         <div className="max-w-md mx-auto w-full">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
-            <Image
-              src="/growthkit-logo-alpha.png"
-              alt="GrowthKit"
-              width={60}
-              height={60}
-              className="mx-auto mb-4"
-            />
+            <Link 
+              href="https://growth.fenixblack.ai" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block transition-opacity hover:opacity-80"
+            >
+              <Image
+                src="/growthkit-logo-alpha.png"
+                alt="GrowthKit"
+                width={60}
+                height={60}
+                className="mx-auto mb-4"
+              />
+            </Link>
           </div>
 
           <ScrollReveal direction="fade" delay={0.1}>
@@ -371,7 +390,20 @@ export default function AdminSignupPage() {
         {/* Footer */}
         <ScrollReveal direction="up" delay={0.3}>
           <div className="text-center mt-12 text-sm text-slate-500 dark:text-slate-400">
-            <p>© 2025 GrowthKit. Powered by FenixBlack.</p>
+            <p>
+              © 2025 GrowthKit. Powered by{' '}
+              <Link 
+                href="https://www.fenixblack.ai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="transition-colors"
+                style={{ color: '#10b981' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#059669'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#10b981'}
+              >
+                FenixBlack
+              </Link>.
+            </p>
           </div>
         </ScrollReveal>
       </div>

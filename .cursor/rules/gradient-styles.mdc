@@ -1,0 +1,141 @@
+---
+description: Guidelines for implementing gradients using inline styles instead of Tailwind classes for compatibility with Tailwind v4
+---
+
+# Gradient Styles - Inline CSS Approach
+
+## Background
+This project uses **Tailwind CSS v4** (beta), which has build system changes that can cause custom gradient utilities to not render properly. The landing page successfully uses **inline CSS styles** for all gradients, and this approach should be used consistently across the codebase.
+
+## When to Use This Approach
+- **Text gradients** (gradient backgrounds with text clipping)
+- **Background gradients** on buttons and interactive elements
+- **Any gradient effects** that need to be reliable across builds
+
+## Implementation Patterns
+
+### 1. Text Gradients (Headlines, Logos)
+Use inline styles with WebKit properties for text clipping:
+
+```tsx
+<span 
+  className="block"
+  style={{
+    background: 'linear-gradient(to right, #10b981, #d946ef)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text'
+  }}
+>
+  Your Text Here
+</span>
+```
+
+**Color Palette:**
+- Primary Green: `#10b981` (emerald-500)
+- Secondary Teal: `#14b8a6` (teal-500)
+- Fenix Magenta: `#d946ef` (fuchsia-500)
+- Fenix Purple: `#a855f7` (purple-500)
+- Fenix Orange: `#f97316` (orange-500)
+- Fenix Pink: `#ec4899` (pink-500)
+
+### 2. Background Gradients with Hover States
+For buttons and interactive elements, use inline styles with event handlers:
+
+```tsx
+<button
+  className="w-full text-white font-medium py-4 px-6 rounded-xl transition-all duration-200"
+  style={{
+    background: loading ? '#6b7280' : 'linear-gradient(to right, #10b981, #14b8a6)'
+  }}
+  onMouseEnter={(e) => {
+    if (!loading) {
+      e.currentTarget.style.background = 'linear-gradient(to right, #059669, #0d9488)';
+    }
+  }}
+  onMouseLeave={(e) => {
+    if (!loading) {
+      e.currentTarget.style.background = 'linear-gradient(to right, #10b981, #14b8a6)';
+    }
+  }}
+>
+  Submit
+</button>
+```
+
+**Hover Color Adjustments:**
+- Emerald-500 (`#10b981`) → Emerald-600 (`#059669`)
+- Teal-500 (`#14b8a6`) → Teal-600 (`#0d9488`)
+
+### 3. Solid Colors with Hover States
+For links and text elements:
+
+```tsx
+<Link 
+  href="/path"
+  className="font-medium transition-colors"
+  style={{ color: '#10b981' }}
+  onMouseEnter={(e) => e.currentTarget.style.color = '#059669'}
+  onMouseLeave={(e) => e.currentTarget.style.color = '#10b981'}
+>
+  Link Text
+</Link>
+```
+
+## What NOT to Do
+❌ **Avoid Tailwind gradient utilities:**
+```tsx
+// DON'T DO THIS - may not render in Tailwind v4
+<div className="bg-gradient-to-r from-primary to-secondary">
+```
+
+❌ **Avoid custom @layer utilities for gradients:**
+```css
+/* DON'T DO THIS - build system issues in v4 */
+@layer utilities {
+  .from-primary {
+    --tw-gradient-from: hsl(var(--primary));
+  }
+}
+```
+
+## Reference Implementation
+See the working implementation in:
+- [src/components/landing/sections/HeroSection.tsx](mdc:src/components/landing/sections/HeroSection.tsx) (lines 182-187, 224-226)
+- [src/app/admin/login/page.tsx](mdc:src/app/admin/login/page.tsx)
+- [src/app/admin/signup/page.tsx](mdc:src/app/admin/signup/page.tsx)
+
+## Common Gradient Combinations
+Based on GrowthKit + FenixBlack branding:
+
+1. **Primary Brand Gradient:**
+   ```
+   linear-gradient(to right, #10b981, #14b8a6)
+   ```
+
+2. **Marketing/Excitement Gradient:**
+   ```
+   linear-gradient(to right, #10b981, #d946ef)
+   ```
+
+3. **Premium/Purple Gradient:**
+   ```
+   linear-gradient(to right, #a855f7, #d946ef)
+   ```
+
+4. **Energy/Action Gradient:**
+   ```
+   linear-gradient(to right, #f97316, #ec4899)
+   ```
+
+5. **Multi-color Brand Gradient:**
+   ```
+   linear-gradient(to right, #10b981, #14b8a6, #a855f7)
+   ```
+
+## Performance Note
+Inline styles are re-evaluated on every render. For static gradients that don't change:
+- Consider extracting to a constant
+- Or use CSS classes in `globals.css` with `!important` if needed
+
+For dynamic/hover states, inline styles with event handlers are the most reliable approach.
