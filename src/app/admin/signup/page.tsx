@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, Loader2, User, Building, ArrowRight, Sparkles, Shield, Rocket, BarChart3 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2, User, Building, ArrowRight, Sparkles, Shield, Rocket, BarChart3, CheckCircle } from 'lucide-react';
 import ScrollReveal from '@/components/landing/animations/ScrollReveal';
+import { Suspense } from 'react';
 
-export default function AdminSignupPage() {
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -18,8 +20,57 @@ export default function AdminSignupPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [validatingInvite, setValidatingInvite] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [inviteData, setInviteData] = useState<{
+    token: string;
+    email: string;
+    organizationName: string;
+    valid: boolean;
+  } | null>(null);
+
+  // Check for invite token on mount
+  useEffect(() => {
+    const token = searchParams.get('invite');
+    if (token) {
+      validateInviteToken(token);
+    }
+  }, [searchParams]);
+
+  const validateInviteToken = async (token: string) => {
+    setValidatingInvite(true);
+    setError('');
+    
+    try {
+      const response = await fetch('/api/admin/invitations/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.data.valid) {
+        setInviteData({
+          token,
+          email: data.data.email,
+          organizationName: data.data.organizationName,
+          valid: true
+        });
+        setFormData(prev => ({
+          ...prev,
+          email: data.data.email
+        }));
+      } else {
+        setError(data.data.error || 'Invalid invitation');
+      }
+    } catch (err) {
+      setError('Failed to validate invitation');
+    } finally {
+      setValidatingInvite(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,26 +91,36 @@ export default function AdminSignupPage() {
     }
 
     try {
+      const payload: any = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      };
+      
+      if (inviteData?.token) {
+        payload.inviteToken = inviteData.token;
+      } else {
+        payload.organizationName = formData.organizationName;
+      }
+      
       const response = await fetch('/api/admin/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          organizationName: formData.organizationName
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         // Redirect to login with success message
-        router.push('/admin/login?message=Account created successfully');
+        const message = inviteData 
+          ? `Account created! You've joined ${inviteData.organizationName}`
+          : 'Account created successfully';
+        router.push(`/admin/login?message=${encodeURIComponent(message)}`);
       } else {
-        setError(data.message || 'Failed to create account');
+        setError(data.error?.message || 'Failed to create account');
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
@@ -196,16 +257,48 @@ export default function AdminSignupPage() {
           <ScrollReveal direction="fade" delay={0.1}>
             <div className="text-center lg:text-left mb-8">
               <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                Create Your Account
+                {inviteData ? 'Accept Invitation' : 'Create Your Account'}
               </h2>
               <p className="text-slate-600 dark:text-slate-400">
-                Join GrowthKit and start growing your business today
+                {inviteData 
+                  ? `Join ${inviteData.organizationName} on GrowthKit`
+                  : 'Join GrowthKit and start growing your business today'}
               </p>
             </div>
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={0.2}>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Invitation Banner */}
+              {inviteData && (
+                <div className="p-4 rounded-xl border-2" style={{ 
+                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(20, 184, 166, 0.1))',
+                  borderColor: '#10b981'
+                }}>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 mt-0.5" style={{ color: '#10b981' }} />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">
+                        You're joining {inviteData.organizationName}
+                      </p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                        Complete the form below to create your account and join the team.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Loading State */}
+              {validatingInvite && (
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <div className="animate-spin w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full"></div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Validating invitation...</p>
+                  </div>
+                </div>
+              )}
+
               {/* Name Field */}
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
@@ -238,30 +331,38 @@ export default function AdminSignupPage() {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                   placeholder="Enter your work email"
-                  disabled={loading}
+                  disabled={loading || !!inviteData}
+                  readOnly={!!inviteData}
                 />
+                {inviteData && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    This email is locked to the invitation
+                  </p>
+                )}
               </div>
 
-              {/* Organization Name Field */}
-              <div className="space-y-2">
-                <label htmlFor="organizationName" className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                  <Building size={16} />
-                  Organization Name
-                </label>
-                <input
-                  id="organizationName"
-                  name="organizationName"
-                  type="text"
-                  required
-                  value={formData.organizationName}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
-                  placeholder="Enter your company name"
-                  disabled={loading}
-                />
-              </div>
+              {/* Organization Name Field - only show if not invited */}
+              {!inviteData && (
+                <div className="space-y-2">
+                  <label htmlFor="organizationName" className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <Building size={16} />
+                    Organization Name
+                  </label>
+                  <input
+                    id="organizationName"
+                    name="organizationName"
+                    type="text"
+                    required={!inviteData}
+                    value={formData.organizationName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+                    placeholder="Enter your company name"
+                    disabled={loading}
+                  />
+                </div>
+              )}
 
               {/* Password Field */}
               <div className="space-y-2">
@@ -404,5 +505,20 @@ export default function AdminSignupPage() {
         </ScrollReveal>
       </div>
     </div>
+  );
+}
+
+export default function AdminSignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
   );
 }

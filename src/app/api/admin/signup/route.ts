@@ -6,11 +6,15 @@ import bcrypt from 'bcrypt';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password, organizationName } = body;
+    const { name, email, password, organizationName, inviteToken } = body;
 
-    // Validate required fields
-    if (!name || !email || !password || !organizationName) {
+    // Validate required fields (organizationName not required if inviteToken is provided)
+    if (!name || !email || !password) {
       return errors.badRequest('Missing required fields');
+    }
+
+    if (!inviteToken && !organizationName) {
+      return errors.badRequest('Organization name is required');
     }
 
     // Validate email format
@@ -37,32 +41,93 @@ export async function POST(request: NextRequest) {
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create organization and user in a transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // Create organization
-      const organization = await tx.organization.create({
-        data: {
-          name: organizationName
-        }
-      });
+    // Handle invitation flow or regular signup
+    let result;
 
-      // Create user and connect to organization
-      const user = await tx.user.create({
-        data: {
-          name,
-          email,
-          password: hashedPassword,
-          organizations: {
-            connect: { id: organization.id }
-          }
-        },
+    if (inviteToken) {
+      // Invitation-based signup
+      const invitation = await prisma.organizationInvitation.findUnique({
+        where: { inviteToken },
         include: {
-          organizations: true
+          organization: true
         }
       });
 
-      return { user, organization };
-    });
+      if (!invitation) {
+        return errors.badRequest('Invalid invitation token');
+      }
+
+      if (invitation.status !== 'PENDING') {
+        return errors.badRequest('This invitation has already been used or revoked');
+      }
+
+      if (new Date() > invitation.expiresAt) {
+        await prisma.organizationInvitation.update({
+          where: { id: invitation.id },
+          data: { status: 'EXPIRED' }
+        });
+        return errors.badRequest('This invitation has expired');
+      }
+
+      if (invitation.email.toLowerCase() !== email.toLowerCase()) {
+        return errors.badRequest('Email does not match invitation');
+      }
+
+      // Create user and add to organization in transaction
+      result = await prisma.$transaction(async (tx) => {
+        const user = await tx.user.create({
+          data: {
+            name,
+            email,
+            password: hashedPassword,
+            organizations: {
+              connect: { id: invitation.organizationId }
+            }
+          },
+          include: {
+            organizations: true
+          }
+        });
+
+        // Mark invitation as accepted
+        await tx.organizationInvitation.update({
+          where: { id: invitation.id },
+          data: { status: 'ACCEPTED' }
+        });
+
+        return { user, organization: invitation.organization };
+      });
+
+      console.log(`✅ User ${email} accepted invitation and joined ${result.organization.name}`);
+
+    } else {
+      // Regular signup - create new organization
+      result = await prisma.$transaction(async (tx) => {
+        const organization = await tx.organization.create({
+          data: {
+            name: organizationName
+          }
+        });
+
+        const user = await tx.user.create({
+          data: {
+            name,
+            email,
+            password: hashedPassword,
+            organizations: {
+              connect: { id: organization.id }
+            }
+          },
+          include: {
+            organizations: true
+          }
+        });
+
+        return { user, organization };
+      });
+
+      console.log(`✅ User ${email} signed up and created organization ${organizationName}`);
+    }
 
     return successResponse({
       success: true,
