@@ -77,9 +77,9 @@ function LoginForm() {
                 height={60}
                 className="mb-8"
               />
-              <h1 className="text-4xl font-bold mb-6 leading-tight">
+              <h1 className="text-4xl font-bold mb-6 leading-tight text-white">
                 Welcome back to your
-                <span className="block bg-gradient-to-r from-primary to-fenix-magenta bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-r from-emerald-400 to-pink-400 bg-clip-text text-transparent">
                   Growth Dashboard
                 </span>
               </h1>
@@ -179,7 +179,7 @@ function LoginForm() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all duration-200"
                   placeholder="Enter your email"
                   disabled={loading}
                 />
@@ -199,7 +199,7 @@ function LoginForm() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+                    className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all duration-200"
                     placeholder="Enter your password"
                     disabled={loading}
                   />
@@ -238,7 +238,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-medium py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
               >
                 {loading ? (
                   <>
@@ -259,7 +259,7 @@ function LoginForm() {
                   Need an account?{' '}
                   <Link 
                     href="/admin/signup" 
-                    className="font-medium text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1"
+                    className="font-medium text-emerald-600 hover:text-emerald-500 transition-colors inline-flex items-center gap-1"
                   >
                     Create account
                     <ArrowRight size={14} />
