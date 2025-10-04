@@ -492,51 +492,6 @@ export default function AppCreationWizard() {
               </p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Logo (optional)
-              </label>
-              <div className="mt-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/20 dark:file:text-blue-300"
-                />
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Upload PNG, JPG, or WebP. Colors will be auto-extracted for themes.
-                </p>
-                
-                {/* Logo Preview and Color Extraction */}
-                {logoFile && (
-                  <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                        <img 
-                          src={URL.createObjectURL(logoFile)} 
-                          alt="Logo preview"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {logoFile.name}
-                        </p>
-                        {extractingColors ? (
-                          <p className="text-xs text-blue-600 dark:text-blue-400">
-                            🎨 Extracting colors for smart defaults...
-                          </p>
-                        ) : (
-                          <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                            ✨ Colors extracted! Check your theme below.
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
 
             {/* Waitlist Toggle - Key Decision */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
@@ -590,6 +545,53 @@ export default function AppCreationWizard() {
               <p className="text-sm text-emerald-800 dark:text-emerald-200">
                 Your waitlist will help build anticipation and manage your app launch
               </p>
+            </div>
+
+            {/* Logo Upload with Color Extraction */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Logo (optional)
+              </label>
+              <div className="mt-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/20 dark:file:text-blue-300"
+                />
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Upload PNG, JPG, or WebP. Colors will be auto-extracted for your theme.
+                </p>
+                
+                {/* Logo Preview and Color Extraction */}
+                {logoFile && (
+                  <div className="mt-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden shadow-sm">
+                        <img 
+                          src={URL.createObjectURL(logoFile)} 
+                          alt="Logo preview"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">
+                          {logoFile.name}
+                        </p>
+                        {extractingColors ? (
+                          <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                            🎨 Extracting brand colors...
+                          </p>
+                        ) : (
+                          <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                            ✨ Colors extracted and applied!
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div>
@@ -839,11 +841,6 @@ export default function AppCreationWizard() {
                       </div>
                     </div>
                   )}
-                </div>
-                
-                {/* Background Preview */}
-                <div className="mt-3 p-4 rounded-lg border border-gray-200" style={{ background: generateBackgroundColor() }}>
-                  <p className="text-center text-sm text-white font-medium drop-shadow">Background Preview</p>
                 </div>
               </div>
             </div>
