@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, Loader2, User, Building } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2, User, Building, ArrowRight, Sparkles, Shield, Rocket, BarChart3 } from 'lucide-react';
 import ScrollReveal from '@/components/landing/animations/ScrollReveal';
 
 export default function AdminSignupPage() {
@@ -76,32 +76,112 @@ export default function AdminSignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo and Header */}
-        <ScrollReveal direction="fade" delay={0.1}>
-          <div className="text-center mb-8">
-            <div className="mb-6">
+    <div className="min-h-screen flex">
+      {/* Left Panel - Marketing & Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-fenix-magenta/5"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(16,185,129,0.1),transparent_50%),radial-gradient(circle_at_70%_70%,rgba(217,70,239,0.1),transparent_50%)]"></div>
+        
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-center px-12 py-12 text-white">
+          <ScrollReveal direction="up" delay={0.2}>
+            <div className="mb-12">
               <Image
-                src="/growthkit-logo-alpha.png"
+                src="/growthkit-logo-dark-alpha.png"
                 alt="GrowthKit"
-                width={60}
+                width={180}
                 height={60}
-                className="mx-auto"
+                className="mb-8"
               />
+              <h1 className="text-4xl font-bold mb-6 leading-tight">
+                Start your journey to
+                <span className="block bg-gradient-to-r from-primary to-fenix-magenta bg-clip-text text-transparent">
+                  Exponential Growth
+                </span>
+              </h1>
+              <p className="text-xl text-slate-300 leading-relaxed">
+                Join thousands of marketers and businesses using GrowthKit to generate more leads, build powerful referral programs, and turn visitors into customers.
+              </p>
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-fenix-magenta bg-clip-text text-transparent mb-2">
-              Create Account
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400">
-              Join GrowthKit and start growing your business
-            </p>
-          </div>
-        </ScrollReveal>
+          </ScrollReveal>
 
-        {/* Signup Form */}
-        <ScrollReveal direction="up" delay={0.2}>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
+          <ScrollReveal direction="up" delay={0.4}>
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+                <div className="p-2 rounded-lg bg-primary/20">
+                  <Rocket className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">Launch in Minutes</h3>
+                  <p className="text-sm text-slate-300">Get your growth system up and running instantly</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+                <div className="p-2 rounded-lg bg-fenix-magenta/20">
+                  <BarChart3 className="w-6 h-6 text-fenix-magenta" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">Marketing Insights</h3>
+                  <p className="text-sm text-slate-300">Track conversion rates, lead quality, and campaign performance</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+                <div className="p-2 rounded-lg bg-secondary/20">
+                  <Shield className="w-6 h-6 text-secondary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">Enterprise Security</h3>
+                  <p className="text-sm text-slate-300">Bank-grade security with SOC 2 compliance</p>
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal direction="up" delay={0.6}>
+            <div className="mt-12 p-6 rounded-xl bg-gradient-to-r from-primary/10 to-fenix-magenta/10 border border-primary/30">
+              <div className="flex items-start gap-3">
+                <Sparkles className="w-6 h-6 text-primary mt-1" />
+                <div>
+                  <h3 className="font-semibold text-white mb-2">Trusted by 10,000+ Businesses</h3>
+                  <p className="text-sm text-slate-300">
+                    From startups to Fortune 500 companies, businesses trust GrowthKit to scale their growth.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </div>
+
+      {/* Right Panel - Signup Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 py-12 bg-white dark:bg-slate-900">
+        <div className="max-w-md mx-auto w-full">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-8">
+            <Image
+              src="/growthkit-logo-alpha.png"
+              alt="GrowthKit"
+              width={60}
+              height={60}
+              className="mx-auto mb-4"
+            />
+          </div>
+
+          <ScrollReveal direction="fade" delay={0.1}>
+            <div className="text-center lg:text-left mb-8">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                Create Your Account
+              </h2>
+              <p className="text-slate-600 dark:text-slate-400">
+                Join GrowthKit and start growing your business today
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal direction="up" delay={0.2}>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name Field */}
               <div className="space-y-2">
@@ -116,7 +196,7 @@ export default function AdminSignupPage() {
                   required
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
                   placeholder="Enter your full name"
                   disabled={loading}
                 />
@@ -135,8 +215,8 @@ export default function AdminSignupPage() {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
-                  placeholder="Enter your email"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+                  placeholder="Enter your work email"
                   disabled={loading}
                 />
               </div>
@@ -154,8 +234,8 @@ export default function AdminSignupPage() {
                   required
                   value={formData.organizationName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
-                  placeholder="Enter your organization name"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+                  placeholder="Enter your company name"
                   disabled={loading}
                 />
               </div>
@@ -174,7 +254,7 @@ export default function AdminSignupPage() {
                     required
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+                    className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
                     placeholder="Create a strong password"
                     disabled={loading}
                   />
@@ -203,7 +283,7 @@ export default function AdminSignupPage() {
                     required
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+                    className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
                     placeholder="Confirm your password"
                     disabled={loading}
                   />
@@ -221,7 +301,8 @@ export default function AdminSignupPage() {
               {/* Error Message */}
               {error && (
                 <ScrollReveal direction="fade" delay={0}>
-                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">
+                  <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm flex items-start gap-3">
+                    <div className="w-4 h-4 rounded-full bg-red-500 mt-0.5 flex-shrink-0"></div>
                     {error}
                   </div>
                 </ScrollReveal>
@@ -231,7 +312,7 @@ export default function AdminSignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
               >
                 {loading ? (
                   <>
@@ -239,29 +320,33 @@ export default function AdminSignupPage() {
                     Creating Account...
                   </>
                 ) : (
-                  'Create Account'
+                  <>
+                    Create Account
+                    <ArrowRight size={20} />
+                  </>
                 )}
               </button>
 
               {/* Login Link */}
-              <div className="text-center">
+              <div className="text-center pt-4 border-t border-slate-200 dark:border-slate-700">
                 <p className="text-sm text-slate-600 dark:text-slate-400">
                   Already have an account?{' '}
                   <Link 
                     href="/admin/login" 
-                    className="font-medium text-primary hover:text-primary/80 transition-colors"
+                    className="font-medium text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1"
                   >
                     Sign in
+                    <ArrowRight size={14} />
                   </Link>
                 </p>
               </div>
             </form>
-          </div>
-        </ScrollReveal>
+          </ScrollReveal>
+        </div>
 
         {/* Footer */}
         <ScrollReveal direction="up" delay={0.3}>
-          <div className="text-center mt-8 text-sm text-slate-500 dark:text-slate-400">
+          <div className="text-center mt-12 text-sm text-slate-500 dark:text-slate-400">
             <p>© 2025 GrowthKit. Powered by FenixBlack.</p>
           </div>
         </ScrollReveal>
