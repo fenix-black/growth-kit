@@ -32,7 +32,7 @@ interface EventSummary {
   stats: {
     totalEvents: number;
     uniqueUsers: number;
-    eventsToday: number;
+    dailyAverage: number;
     eventsPerUser: number;
   };
   eventFrequency: Array<{
@@ -261,8 +261,8 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
               color="secondary"
             />
             <StatsCard
-              title="Events Today"
-              value={summary.stats.eventsToday.toLocaleString()}
+              title="Daily Average"
+              value={summary.stats.dailyAverage.toLocaleString()}
               icon={<Calendar size={24} />}
               color="primary"
             />

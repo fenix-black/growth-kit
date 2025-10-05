@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
         `;
 
     // Get total stats
-    const [totalEvents, uniqueUsers, eventsToday] = await Promise.all([
+    const [totalEvents, uniqueUsers] = await Promise.all([
       prisma.activity.count({
         where: {
           appId,
@@ -94,14 +94,6 @@ export async function GET(request: NextRequest) {
           timestamp: { gte: startDate },
         },
       }).then(result => result.length),
-      prisma.activity.count({
-        where: {
-          appId,
-          timestamp: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          },
-        },
-      }),
     ]);
 
     // Convert BigInt to number for JSON serialization
@@ -112,7 +104,7 @@ export async function GET(request: NextRequest) {
       stats: {
         totalEvents,
         uniqueUsers,
-        eventsToday,
+        dailyAverage: Math.round(totalEvents / days),
         eventsPerUser: uniqueUsers > 0 ? Math.round(totalEvents / uniqueUsers) : 0,
       },
       eventFrequency: eventFrequency.map(event => ({
