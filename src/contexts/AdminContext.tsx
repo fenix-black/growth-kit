@@ -95,7 +95,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   );
 
   const organizations: Organization[] = userData?.organizations || [];
-  const userInfo = userData ? { name: userData.name, email: userData.email } : undefined;
+  const userInfo = userData?.user ? { name: userData.user.name, email: userData.user.email } : undefined;
   
   // Set initial org if not set and organizations are available
   React.useEffect(() => {
