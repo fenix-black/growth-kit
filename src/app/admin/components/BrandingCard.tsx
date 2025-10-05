@@ -593,10 +593,6 @@ export default function BrandingCard({
               )}
             </div>
             
-            {/* Background Preview */}
-            <div className="mt-3 p-4 rounded-lg border border-gray-200" style={{ background: generateBackgroundColor() }}>
-              <p className="text-center text-sm text-white font-medium drop-shadow">Preview</p>
-            </div>
           </div>
 
           {/* Card Color */}
@@ -644,10 +640,49 @@ export default function BrandingCard({
               </div>
             </div>
             
-            {/* Card Preview */}
-            <div className="mt-3 p-8 rounded-lg" style={{ background: generateBackgroundColor() }}>
-              <div className="p-4 rounded-lg shadow-lg" style={{ background: generateCardColor(), backdropFilter: cardOpacity < 100 ? 'blur(10px)' : 'none' }}>
-                <p className="text-center text-sm text-white font-medium">Card Preview</p>
+            {/* Combined Waitlist Preview */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Preview
+              </label>
+              <div className="p-8 rounded-lg border border-gray-200" style={{ background: generateBackgroundColor() }}>
+                <div 
+                  className="p-6 rounded-lg shadow-lg max-w-md mx-auto text-center" 
+                  style={{ 
+                    background: generateCardColor(), 
+                    backdropFilter: cardOpacity < 100 ? 'blur(10px)' : 'none' 
+                  }}
+                >
+                  {editedLogoUrl && (
+                    <div className="w-12 h-12 mx-auto mb-3 bg-white rounded-lg flex items-center justify-center overflow-hidden shadow-sm">
+                      <img 
+                        src={editedLogoUrl} 
+                        alt="Logo"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  )}
+                  <h3 className="text-lg font-semibold mb-2" style={{ color: editedPrimaryColor }}>
+                    {appId ? 'Your App' : 'App Name'}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {editedWaitlistMessages[0] || 'Join our waitlist to get early access!'}
+                  </p>
+                  <div className="mb-3">
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-gray-900"
+                      readOnly
+                    />
+                  </div>
+                  <button 
+                    className="px-6 py-2 rounded-lg text-white font-medium shadow-sm"
+                    style={{ backgroundColor: editedPrimaryColor }}
+                  >
+                    Join Waitlist
+                  </button>
+                </div>
               </div>
             </div>
           </div>
