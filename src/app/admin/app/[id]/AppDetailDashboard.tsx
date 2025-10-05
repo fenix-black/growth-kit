@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/contexts/AdminContext';
-import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
 import Button from '@/components/ui/Button';
 import WaitlistManager from '../../components/WaitlistManager';
@@ -319,15 +318,18 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
 
   return (
     <>
-      <PageHeader 
-        title={app.name}
-        description={app.domain}
-        breadcrumbs={[
-          { label: 'Admin', href: '/admin' },
-          { label: 'Apps', href: '/admin/apps' },
-          { label: app.name }
-        ]}
-        actions={
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <Settings className="w-8 h-8" style={{ color: '#10b981' }} />
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{app.name}</h1>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400">
+              {app.domain}
+            </p>
+          </div>
           <div className="flex items-center space-x-3">
             <div className={cn(
               'px-3 py-1.5 rounded-full text-xs font-semibold',
@@ -428,8 +430,8 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
               Delete App
             </Button>
           </div>
-        }
-      />
+        </div>
+      </div>
 
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-6">

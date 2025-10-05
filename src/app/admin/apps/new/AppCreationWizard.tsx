@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/contexts/AdminContext';
-import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
 import Button from '@/components/ui/Button';
 import { cn } from '@/components/ui/utils';
@@ -1278,15 +1277,16 @@ export default function AppCreationWizard() {
 
   return (
     <>
-      <PageHeader 
-        title="Create New App"
-        description="Set up a new GrowthKit application with smart defaults"
-        breadcrumbs={[
-          { label: 'Admin', href: '/admin' },
-          { label: 'Apps', href: '/admin/apps' },
-          { label: 'Create New' }
-        ]}
-      />
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <Plus className="w-8 h-8" style={{ color: '#10b981' }} />
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Create New App</h1>
+        </div>
+        <p className="text-slate-600 dark:text-slate-400">
+          Set up a new GrowthKit application with smart defaults
+        </p>
+      </div>
 
       <div className="flex gap-8 max-w-7xl mx-auto">
         {/* Left Sidebar - Progress & Tips */}

@@ -7,7 +7,6 @@ import WaitlistManager from '../components/WaitlistManager';
 import EmailTemplateEditor from '../components/EmailTemplateEditor';
 import UsdMetricsDashboard from '../components/UsdMetricsDashboard';
 import InvitationCodesManager from '../components/InvitationCodesManager';
-import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
 import Button from '@/components/ui/Button';
 import { cn } from '@/components/ui/utils';
@@ -63,10 +62,18 @@ export default function AppsListing() {
 
   return (
     <>
-      <PageHeader 
-        title="Applications"
-        description="Manage and monitor all your GrowthKit applications"
-        actions={
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <Package className="w-8 h-8" style={{ color: '#10b981' }} />
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Applications</h1>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400">
+              Manage and monitor all your GrowthKit applications
+            </p>
+          </div>
           <Button
             variant="primary"
             icon={<Plus size={20} />}
@@ -74,8 +81,8 @@ export default function AppsListing() {
           >
             Create App
           </Button>
-        }
-      />
+        </div>
+      </div>
 
       {/* Filters and Search */}
       <div className="mb-6 flex flex-col sm:flex-row gap-4">

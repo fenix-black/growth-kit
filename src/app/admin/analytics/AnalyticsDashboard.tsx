@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/contexts/AdminContext';
-import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
 import StatsCard from '@/components/ui/StatsCard';
 import Button from '@/components/ui/Button';
@@ -186,10 +185,18 @@ export default function AnalyticsDashboard() {
 
   return (
     <>
-      <PageHeader 
-        title="Analytics Dashboard"
-        description="Detailed metrics and USD spending analysis"
-        actions={
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <TrendingUp className="w-8 h-8" style={{ color: '#10b981' }} />
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Analytics Dashboard</h1>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400">
+              Detailed metrics and USD spending analysis
+            </p>
+          </div>
           <div className="flex space-x-3">
             <select
               value={selectedAppId}
@@ -238,8 +245,8 @@ export default function AnalyticsDashboard() {
               Export CSV
             </Button>
           </div>
-        }
-      />
+        </div>
+      </div>
 
       {/* Key Metrics */}
       {generalMetrics && (

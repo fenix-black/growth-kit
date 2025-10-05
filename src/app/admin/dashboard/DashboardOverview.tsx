@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/contexts/AdminContext';
-import PageHeader from '@/components/ui/PageHeader';
 import ContentCard from '@/components/ui/ContentCard';
 import StatsCard from '@/components/ui/StatsCard';
 import Button from '@/components/ui/Button';
@@ -348,10 +347,18 @@ export default function DashboardOverview() {
 
   return (
     <>
-      <PageHeader 
-        title="Dashboard Overview"
-        description="Monitor your GrowthKit applications performance and metrics"
-        actions={
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <Activity className="w-8 h-8" style={{ color: '#10b981' }} />
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Dashboard Overview</h1>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400">
+              Monitor your GrowthKit applications performance and metrics
+            </p>
+          </div>
           <div className="flex space-x-3">
             <select
               value={timeRange}
@@ -385,8 +392,8 @@ export default function DashboardOverview() {
               Create App
             </Button>
           </div>
-        }
-      />
+        </div>
+      </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
