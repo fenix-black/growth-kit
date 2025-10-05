@@ -8,7 +8,6 @@ import {
   Users,
   Mail,
   Settings,
-  Clock,
   DollarSign,
   FileText,
   ArrowRight,
@@ -80,15 +79,6 @@ export default function CommandPalette() {
         router.push('/admin/apps/new');
       },
       keywords: ['new', 'add'],
-    },
-    {
-      id: 'nav-cron-monitor',
-      label: 'Cron Job Monitor',
-      description: 'View cron job execution history',
-      icon: Clock,
-      type: 'navigation',
-      path: '/admin/cron',
-      keywords: ['jobs', 'schedule', 'automation', 'monitor'],
     },
     {
       id: 'action-email-templates',

@@ -8,7 +8,6 @@ import OrgSwitcher from './OrgSwitcher';
 import { 
   Home, 
   Package, 
-  Clock, 
   Mail, 
   DollarSign, 
   Ticket, 
@@ -84,13 +83,6 @@ export default function Sidebar({
       icon: Package, 
       href: '/admin/apps',
       active: pathname.startsWith('/admin/apps')
-    },
-    { 
-      id: 'cron', 
-      label: 'Cron Monitor', 
-      icon: Clock, 
-      href: '/admin/cron',
-      active: pathname === '/admin/cron'
     },
     { 
       id: 'team', 
