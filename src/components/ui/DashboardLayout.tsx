@@ -19,6 +19,10 @@ interface DashboardLayoutProps {
   }>;
   currentAppId?: string;
   currentOrgId?: string;
+  userInfo?: {
+    name: string;
+    email: string;
+  };
   onAppSelect?: (appId: string) => void;
   onOrgChange?: (orgId: string) => void;
   onCreateApp?: () => void;
@@ -32,6 +36,7 @@ export default function DashboardLayout({
   organizations,
   currentAppId,
   currentOrgId,
+  userInfo,
   onAppSelect,
   onOrgChange,
   onCreateApp,
@@ -47,6 +52,7 @@ export default function DashboardLayout({
         organizations={organizations}
         currentAppId={currentAppId}
         currentOrgId={currentOrgId}
+        userInfo={userInfo}
         onAppSelect={onAppSelect}
         onOrgChange={onOrgChange}
         onCreateApp={onCreateApp}

@@ -27,6 +27,7 @@ interface AdminContextType {
   apps: App[];
   organizations: Organization[];
   currentOrgId: string | undefined;
+  userInfo: { name: string; email: string } | undefined;
   isLoading: boolean;
   error: any;
   mutate: () => void;
@@ -94,6 +95,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   );
 
   const organizations: Organization[] = userData?.organizations || [];
+  const userInfo = userData ? { name: userData.name, email: userData.email } : undefined;
   
   // Set initial org if not set and organizations are available
   React.useEffect(() => {
@@ -125,6 +127,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     apps,
     organizations,
     currentOrgId,
+    userInfo,
     isLoading: isLoading || userLoading,
     error: error || userError,
     mutate,

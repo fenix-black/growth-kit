@@ -13,6 +13,7 @@ function DashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
     apps, 
     organizations, 
     currentOrgId, 
+    userInfo,
     isLoading, 
     handleAppSelect, 
     handleCreateApp, 
@@ -41,6 +42,7 @@ function DashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
       organizations={organizations}
       currentAppId={currentAppId}
       currentOrgId={currentOrgId}
+      userInfo={userInfo}
       onAppSelect={handleAppSelect}
       onOrgChange={handleOrgChange}
       onCreateApp={handleCreateApp}

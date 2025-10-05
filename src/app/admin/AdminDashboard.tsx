@@ -193,6 +193,7 @@ export default function AdminDashboard() {
       apps={apps}
       organizations={[]} // TODO: This should be refactored to use AdminContext
       currentOrgId={undefined}
+      userInfo={undefined} // TODO: This should be refactored to use AdminContext
       onAppSelect={handleAppSelect}
       onOrgChange={() => {}} // No-op for now
       onCreateApp={() => setShowCreateForm(true)}
