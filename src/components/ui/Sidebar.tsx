@@ -248,14 +248,14 @@ export default function Sidebar({
           {/* Footer */}
           <div className="relative p-4 border-t border-gray-200 dark:border-gray-700">
             {/* Theme Switcher and User Info */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-3 mb-3">
               <ThemeSwitcher />
               {!collapsed && userInfo && userInfo.name && userInfo.email && (
-                <div className="text-right">
-                  <p className="text-xs font-medium text-gray-900 dark:text-white truncate max-w-24">
+                <div className="flex-1 min-w-0 text-right">
+                  <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
                     {userInfo.name}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-24">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                     {userInfo.email}
                   </p>
                 </div>
