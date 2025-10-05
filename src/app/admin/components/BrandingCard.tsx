@@ -341,7 +341,7 @@ export default function BrandingCard({
   };
 
   return (
-    <ContentCard title="Branding & Waitlist Display" className="mt-6">
+    <ContentCard title="Waitlist Display Settings" className="mt-6">
       <div className="space-y-6 p-6">
 
         {/* Logo Upload */}
@@ -635,50 +635,107 @@ export default function BrandingCard({
               </div>
             </div>
             
-            {/* Combined Waitlist Preview */}
+            {/* Layout-Specific Preview */}
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Preview
+                Preview ({editedWaitlistLayout})
               </label>
-              <div className="p-8 rounded-lg border border-gray-200" style={{ background: generateBackgroundColor() }}>
-                <div 
-                  className="p-6 rounded-lg shadow-lg max-w-md mx-auto text-center" 
-                  style={{ 
-                    background: generateCardColor(), 
-                    backdropFilter: cardOpacity < 100 ? 'blur(10px)' : 'none' 
-                  }}
-                >
-                  {editedLogoUrl && (
-                    <div className="w-12 h-12 mx-auto mb-3 bg-white rounded-lg flex items-center justify-center overflow-hidden shadow-sm">
-                      <img 
-                        src={editedLogoUrl} 
-                        alt="Logo"
-                        className="w-full h-full object-contain"
-                      />
+              
+              {/* Centered Layout Preview */}
+              {editedWaitlistLayout === 'centered' && (
+                <div className="aspect-video rounded-lg border border-gray-200 overflow-hidden" style={{ background: generateBackgroundColor() }}>
+                  <div className="h-full flex items-center justify-center p-4">
+                    {editedLogoUrl && (
+                      <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                        <img src={editedLogoUrl} alt="Logo" className="w-6 h-6 object-contain" />
+                      </div>
+                    )}
+                    <div 
+                      className="p-4 rounded-lg shadow-lg max-w-xs text-center relative" 
+                      style={{ 
+                        background: generateCardColor(), 
+                        backdropFilter: cardOpacity < 100 ? 'blur(10px)' : 'none' 
+                      }}
+                    >
+                      <h3 className="text-sm font-semibold mb-2 text-white">Your App</h3>
+                      <p className="text-xs text-gray-300 mb-3">{editedWaitlistMessages[0] || 'Join our waitlist!'}</p>
+                      <div className="bg-white/20 h-6 rounded mb-2"></div>
+                      <div className="h-6 rounded text-white text-xs flex items-center justify-center" style={{ backgroundColor: editedPrimaryColor }}>
+                        Join Waitlist
+                      </div>
                     </div>
-                  )}
-                  <h3 className="text-lg font-semibold mb-2" style={{ color: editedPrimaryColor }}>
-                    {appId ? 'Your App' : 'App Name'}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    {editedWaitlistMessages[0] || 'Join our waitlist to get early access!'}
-                  </p>
-                  <div className="mb-3">
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-gray-900"
-                      readOnly
-                    />
                   </div>
-                  <button 
-                    className="px-6 py-2 rounded-lg text-white font-medium shadow-sm"
-                    style={{ backgroundColor: editedPrimaryColor }}
-                  >
-                    Join Waitlist
-                  </button>
                 </div>
-              </div>
+              )}
+
+              {/* Split Layout Preview */}
+              {editedWaitlistLayout === 'split' && (
+                <div className="aspect-video rounded-lg border border-gray-200 overflow-hidden">
+                  <div className="h-full flex">
+                    <div className="flex-1 p-4 flex flex-col justify-center" style={{ background: generateBackgroundColor() }}>
+                      {editedLogoUrl && (
+                        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center mb-2 shadow-sm">
+                          <img src={editedLogoUrl} alt="Logo" className="w-6 h-6 object-contain" />
+                        </div>
+                      )}
+                      <h3 className="text-sm font-bold text-white mb-1">Your App</h3>
+                      <p className="text-xs text-gray-300">{editedWaitlistMessages[0] || 'Join our waitlist!'}</p>
+                    </div>
+                    <div className="flex-1 bg-white p-4 flex flex-col justify-center">
+                      <h4 className="text-sm font-bold text-gray-900 mb-2">Get Early Access</h4>
+                      <div className="bg-gray-100 h-6 rounded mb-2"></div>
+                      <div className="h-6 rounded text-white text-xs flex items-center justify-center" style={{ backgroundColor: editedPrimaryColor }}>
+                        Join Waitlist
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Minimal Layout Preview */}
+              {editedWaitlistLayout === 'minimal' && (
+                <div className="aspect-video rounded-lg border border-gray-200 bg-white overflow-hidden">
+                  <div className="h-full flex items-center justify-center p-6">
+                    <div className="max-w-xs text-center">
+                      {editedLogoUrl && (
+                        <div className="w-10 h-10 bg-gray-50 border rounded-lg flex items-center justify-center mb-3 mx-auto shadow-sm">
+                          <img src={editedLogoUrl} alt="Logo" className="w-8 h-8 object-contain" />
+                        </div>
+                      )}
+                      <h3 className="text-sm font-bold text-gray-900 mb-1">Your App</h3>
+                      <p className="text-xs text-gray-600 mb-3">{editedWaitlistMessages[0] || 'Join our waitlist!'}</p>
+                      <div className="bg-gray-100 h-6 rounded mb-2"></div>
+                      <div className="h-6 rounded text-white text-xs flex items-center justify-center" style={{ backgroundColor: editedPrimaryColor }}>
+                        Join
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Embed Layout Preview */}
+              {editedWaitlistLayout === 'embed' && (
+                <div className="aspect-video rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
+                  <div className="h-full flex items-center justify-center p-4">
+                    <div className="bg-white border rounded-lg p-4 shadow-sm max-w-xs">
+                      {editedLogoUrl && (
+                        <div className="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center mb-2 shadow-sm">
+                          <img src={editedLogoUrl} alt="Logo" className="w-6 h-6 object-contain" />
+                        </div>
+                      )}
+                      <h4 className="text-sm font-semibold mb-1" style={{ color: editedPrimaryColor }}>Your App</h4>
+                      <p className="text-xs text-gray-600 mb-3">{editedWaitlistMessages[0] || 'Join our waitlist!'}</p>
+                      <div className="flex gap-2 mb-2">
+                        <div className="flex-1 bg-gray-100 h-5 rounded"></div>
+                        <div className="h-5 px-3 rounded text-white text-xs flex items-center justify-center" style={{ backgroundColor: editedPrimaryColor }}>
+                          Join
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-400">No spam, unsubscribe anytime</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
