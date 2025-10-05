@@ -17,7 +17,9 @@ import {
   Users,
   Coins,
   Eye,
-  Plus
+  Plus,
+  Copy,
+  CheckCircle
 } from 'lucide-react';
 
 interface FormData {
@@ -119,6 +121,9 @@ export default function AppCreationWizard() {
   const [cardOpacity, setCardOpacity] = useState(5);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [extractingColors, setExtractingColors] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [newApiKey, setNewApiKey] = useState<string | null>(null);
+  const [showCopySuccess, setShowCopySuccess] = useState(false);
   
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -382,11 +387,10 @@ export default function AppCreationWizard() {
         }
       }
 
-      const response = await fetch('/api/v1/admin/app', {
+      const response = await fetch('/api/admin/apps', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
         },
         body: JSON.stringify({
           name: formData.name,
@@ -408,12 +412,16 @@ export default function AppCreationWizard() {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.data.initialApiKey) {
-          alert(`App created successfully!\n\nAPI Key: ${data.data.initialApiKey}\n\nIMPORTANT: Save this key now, it won't be shown again!`);
-        }
         // Refresh the apps cache to show the new app in sidebar
         mutate();
-        router.push('/admin/apps');
+        
+        if (data.data.initialApiKey) {
+          // Show API key modal instead of alert
+          setNewApiKey(data.data.initialApiKey);
+          setShowApiKeyModal(true);
+        } else {
+          router.push('/admin/apps');
+        }
       } else {
         const error = await response.json();
         alert(`Error: ${error.message}`);
@@ -514,7 +522,7 @@ export default function AppCreationWizard() {
                 </h4>
                 <div className="text-sm text-emerald-800 dark:text-emerald-200 space-y-1">
                   <div>• CORS origins for {formData.domain} + localhost</div>
-                  <div>• Redirect URL: https://{formData.domain}/welcome</div>
+                  <div>• Redirect URL: https://{formData.domain}</div>
                   <div>• {formData.waitlistEnabled ? 'Waitlist with good defaults' : 'No waitlist - direct access'}</div>
                   <div>• Sensible credit policy</div>
                 </div>
@@ -1259,21 +1267,6 @@ export default function AppCreationWizard() {
                 </dl>
               </div>
 
-              {/* Auto-configured note */}
-              <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                <h5 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  🔧 Auto-configured for you:
-                </h5>
-                <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                  <div>• CORS Origins: {formData.corsOrigins || `https://${formData.domain} + localhost`}</div>
-                  <div>• Redirect URL: {formData.redirectUrl || `https://${formData.domain}`}</div>
-                  <div>• USD Tracking: Enabled</div>
-                  <div>• API Authentication: Optional (can enable later)</div>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  These technical settings can be adjusted later in app management
-                </p>
-              </div>
             </div>
           </div>
         );
@@ -1393,6 +1386,48 @@ export default function AppCreationWizard() {
           </ContentCard>
         </div>
       </div>
+
+      {/* API Key Success Modal */}
+      {showApiKeyModal && newApiKey && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+              🎉 App Created Successfully!
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Your app <strong>{formData.name}</strong> is ready to use. Save this API key now - it won't be shown again!
+            </p>
+            <div className="bg-gray-100 dark:bg-gray-700 rounded p-4 mb-4">
+              <code className="text-sm text-gray-900 dark:text-gray-100 break-all font-mono">
+                {newApiKey}
+              </code>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  navigator.clipboard.writeText(newApiKey);
+                  setShowCopySuccess(true);
+                  setTimeout(() => setShowCopySuccess(false), 2000);
+                }}
+                icon={showCopySuccess ? <CheckCircle className="h-5 w-5 text-emerald-500" /> : <Copy className="h-5 w-5" />}
+              >
+                {showCopySuccess ? 'Copied!' : 'Copy API Key'}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setShowApiKeyModal(false);
+                  setNewApiKey(null);
+                  router.push('/admin/apps');
+                }}
+              >
+                Continue to Apps
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
