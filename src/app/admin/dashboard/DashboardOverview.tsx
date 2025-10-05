@@ -486,22 +486,20 @@ export default function DashboardOverview() {
           />
         </ContentCard>
 
-        {/* Conversion Funnel */}
+        {/* Credits Utilization */}
         <ContentCard
-          title="Conversion Funnel"
-          description="User journey through your app"
+          title="Credits Utilization"
+          description="Credits consumed vs issued"
           className="col-span-1"
         >
-          <EChartsBarChart
-            data={chartData.conversion}
-            xKey="stage"
-            series={[
-              { dataKey: 'users', name: 'Users' }
-            ]}
+          <EChartsGauge
+            value={chartData.systemHealth?.creditsUsage || 0}
+            max={100}
+            title="Credits"
+            subtitle="Usage percentage"
             height={300}
-            horizontal={true}
-            colorScheme="growth"
-            showLabel={true}
+            formatter={(value) => `${value.toFixed(1)}%`}
+            thresholds={{ low: 60, medium: 80, high: 95 }}
           />
         </ContentCard>
       </div>
@@ -510,53 +508,6 @@ export default function DashboardOverview() {
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Advanced Analytics</h2>
         
-        {/* System Health Gauges */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <ContentCard
-            title="CPU Usage"
-            description="Current system CPU utilization"
-          >
-            <EChartsGauge
-              value={chartData.systemHealth?.cpuUsage || 0}
-              max={100}
-              title="CPU"
-              subtitle="Server load average"
-              height={250}
-              formatter={(value) => `${value.toFixed(0)}%`}
-              thresholds={{ low: 40, medium: 70, high: 85 }}
-            />
-          </ContentCard>
-
-          <ContentCard
-            title="Memory Usage"
-            description="System memory consumption"
-          >
-            <EChartsGauge
-              value={chartData.systemHealth?.memoryUsage || 0}
-              max={100}
-              title="Memory"
-              subtitle="RAM utilization"
-              height={250}
-              formatter={(value) => `${value.toFixed(0)}%`}
-              thresholds={{ low: 50, medium: 75, high: 90 }}
-            />
-          </ContentCard>
-
-          <ContentCard
-            title="Credits Utilization"
-            description="Credits consumed vs issued"
-          >
-            <EChartsGauge
-              value={chartData.systemHealth?.creditsUsage || 0}
-              max={100}
-              title="Credits"
-              subtitle="Usage percentage"
-              height={250}
-              formatter={(value) => `${value.toFixed(1)}%`}
-              thresholds={{ low: 60, medium: 80, high: 95 }}
-            />
-          </ContentCard>
-        </div>
 
       </div>
 
