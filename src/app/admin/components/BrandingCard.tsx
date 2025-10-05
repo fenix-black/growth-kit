@@ -9,6 +9,7 @@ import imageCompression from 'browser-image-compression';
 
 interface BrandingCardProps {
   appId: string;
+  appName?: string;
   logoUrl?: string;
   primaryColor?: string;
   backgroundColor?: string;
@@ -25,6 +26,7 @@ interface BrandingCardProps {
 
 export default function BrandingCard({
   appId,
+  appName,
   logoUrl,
   primaryColor,
   backgroundColor,
@@ -110,6 +112,15 @@ export default function BrandingCard({
       return `rgba(${r}, ${g}, ${b}, ${(cardOpacity / 100).toFixed(2)})`;
     }
     return cardColor;
+  };
+
+  // Helper functions for preview
+  const getDisplayName = () => appName || 'Your App';
+  
+  const getRandomMessage = () => {
+    if (!editedWaitlistMessages.length) return 'Join our waitlist!';
+    const randomIndex = Math.floor(Math.random() * editedWaitlistMessages.length);
+    return editedWaitlistMessages[randomIndex];
   };
 
   // Extract colors from uploaded logo (same as app creation wizard)
@@ -644,25 +655,39 @@ export default function BrandingCard({
               {/* Centered Layout Preview */}
               {editedWaitlistLayout === 'centered' && (
                 <div className="aspect-video rounded-lg border border-gray-200 overflow-hidden" style={{ background: generateBackgroundColor() }}>
-                  <div className="h-full flex items-center justify-center p-4">
+                  <div className="h-full flex items-center justify-center p-4 relative">
                     {editedLogoUrl && (
-                      <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                        <img src={editedLogoUrl} alt="Logo" className="w-6 h-6 object-contain" />
+                      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-lg">
+                        <img src={editedLogoUrl} alt="Logo" className="w-8 h-8 object-contain" />
                       </div>
                     )}
                     <div 
-                      className="p-4 rounded-lg shadow-lg max-w-xs text-center relative" 
+                      className="p-6 rounded-xl shadow-2xl max-w-sm text-center relative" 
                       style={{ 
                         background: generateCardColor(), 
-                        backdropFilter: cardOpacity < 100 ? 'blur(10px)' : 'none' 
+                        backdropFilter: cardOpacity < 100 ? 'blur(16px) saturate(180%)' : 'none',
+                        border: cardOpacity < 100 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
                       }}
                     >
-                      <h3 className="text-sm font-semibold mb-2 text-white">Your App</h3>
-                      <p className="text-xs text-gray-300 mb-3">{editedWaitlistMessages[0] || 'Join our waitlist!'}</p>
-                      <div className="bg-white/20 h-6 rounded mb-2"></div>
-                      <div className="h-6 rounded text-white text-xs flex items-center justify-center" style={{ backgroundColor: editedPrimaryColor }}>
+                      <h3 className="text-lg font-bold mb-3 text-gray-900" style={{ 
+                        color: cardOpacity < 50 ? '#ffffff' : '#1f2937' 
+                      }}>
+                        {getDisplayName()}
+                      </h3>
+                      <p className="text-sm mb-4" style={{ 
+                        color: cardOpacity < 50 ? 'rgba(255, 255, 255, 0.8)' : '#6b7280' 
+                      }}>
+                        {getRandomMessage()}
+                      </p>
+                      <div className="bg-gray-200/40 h-10 rounded-lg mb-3" style={{
+                        backgroundColor: cardOpacity < 50 ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'
+                      }}></div>
+                      <button 
+                        className="w-full h-10 rounded-lg text-white font-medium transition-all hover:shadow-lg" 
+                        style={{ backgroundColor: editedPrimaryColor }}
+                      >
                         Join Waitlist
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -672,21 +697,24 @@ export default function BrandingCard({
               {editedWaitlistLayout === 'split' && (
                 <div className="aspect-video rounded-lg border border-gray-200 overflow-hidden">
                   <div className="h-full flex">
-                    <div className="flex-1 p-4 flex flex-col justify-center" style={{ background: generateBackgroundColor() }}>
+                    <div className="flex-1 p-6 flex flex-col justify-center" style={{ background: generateBackgroundColor() }}>
                       {editedLogoUrl && (
-                        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center mb-2 shadow-sm">
-                          <img src={editedLogoUrl} alt="Logo" className="w-6 h-6 object-contain" />
+                        <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 shadow-lg">
+                          <img src={editedLogoUrl} alt="Logo" className="w-8 h-8 object-contain" />
                         </div>
                       )}
-                      <h3 className="text-sm font-bold text-white mb-1">Your App</h3>
-                      <p className="text-xs text-gray-300">{editedWaitlistMessages[0] || 'Join our waitlist!'}</p>
+                      <h3 className="text-xl font-bold text-white mb-2">{getDisplayName()}</h3>
+                      <p className="text-sm text-white/80">{getRandomMessage()}</p>
                     </div>
-                    <div className="flex-1 bg-white p-4 flex flex-col justify-center">
-                      <h4 className="text-sm font-bold text-gray-900 mb-2">Get Early Access</h4>
-                      <div className="bg-gray-100 h-6 rounded mb-2"></div>
-                      <div className="h-6 rounded text-white text-xs flex items-center justify-center" style={{ backgroundColor: editedPrimaryColor }}>
+                    <div className="flex-1 bg-white p-6 flex flex-col justify-center">
+                      <h4 className="text-lg font-bold text-gray-900 mb-4">Get Early Access</h4>
+                      <div className="bg-gray-100 h-12 rounded-lg mb-4"></div>
+                      <button 
+                        className="h-12 rounded-lg text-white font-medium transition-all hover:shadow-lg" 
+                        style={{ backgroundColor: editedPrimaryColor }}
+                      >
                         Join Waitlist
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -696,18 +724,21 @@ export default function BrandingCard({
               {editedWaitlistLayout === 'minimal' && (
                 <div className="aspect-video rounded-lg border border-gray-200 bg-white overflow-hidden">
                   <div className="h-full flex items-center justify-center p-6">
-                    <div className="max-w-xs text-center">
+                    <div className="max-w-sm text-center">
                       {editedLogoUrl && (
-                        <div className="w-10 h-10 bg-gray-50 border rounded-lg flex items-center justify-center mb-3 mx-auto shadow-sm">
-                          <img src={editedLogoUrl} alt="Logo" className="w-8 h-8 object-contain" />
+                        <div className="w-16 h-16 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center mb-4 mx-auto shadow-sm">
+                          <img src={editedLogoUrl} alt="Logo" className="w-12 h-12 object-contain" />
                         </div>
                       )}
-                      <h3 className="text-sm font-bold text-gray-900 mb-1">Your App</h3>
-                      <p className="text-xs text-gray-600 mb-3">{editedWaitlistMessages[0] || 'Join our waitlist!'}</p>
-                      <div className="bg-gray-100 h-6 rounded mb-2"></div>
-                      <div className="h-6 rounded text-white text-xs flex items-center justify-center" style={{ backgroundColor: editedPrimaryColor }}>
-                        Join
-                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{getDisplayName()}</h3>
+                      <p className="text-sm text-gray-600 mb-6">{getRandomMessage()}</p>
+                      <div className="bg-gray-100 h-12 rounded-lg mb-4"></div>
+                      <button 
+                        className="w-full h-12 rounded-lg text-white font-medium transition-all hover:shadow-lg" 
+                        style={{ backgroundColor: editedPrimaryColor }}
+                      >
+                        Join Waitlist
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -717,21 +748,26 @@ export default function BrandingCard({
               {editedWaitlistLayout === 'embed' && (
                 <div className="aspect-video rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
                   <div className="h-full flex items-center justify-center p-4">
-                    <div className="bg-white border rounded-lg p-4 shadow-sm max-w-xs">
+                    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg max-w-md">
                       {editedLogoUrl && (
-                        <div className="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center mb-2 shadow-sm">
-                          <img src={editedLogoUrl} alt="Logo" className="w-6 h-6 object-contain" />
+                        <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center mb-3 shadow-sm">
+                          <img src={editedLogoUrl} alt="Logo" className="w-8 h-8 object-contain" />
                         </div>
                       )}
-                      <h4 className="text-sm font-semibold mb-1" style={{ color: editedPrimaryColor }}>Your App</h4>
-                      <p className="text-xs text-gray-600 mb-3">{editedWaitlistMessages[0] || 'Join our waitlist!'}</p>
-                      <div className="flex gap-2 mb-2">
-                        <div className="flex-1 bg-gray-100 h-5 rounded"></div>
-                        <div className="h-5 px-3 rounded text-white text-xs flex items-center justify-center" style={{ backgroundColor: editedPrimaryColor }}>
+                      <h4 className="text-lg font-bold mb-2" style={{ color: editedPrimaryColor }}>
+                        {getDisplayName()}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-4">{getRandomMessage()}</p>
+                      <div className="flex gap-3 mb-3">
+                        <div className="flex-1 bg-gray-100 h-10 rounded-lg"></div>
+                        <button 
+                          className="h-10 px-6 rounded-lg text-white font-medium" 
+                          style={{ backgroundColor: editedPrimaryColor }}
+                        >
                           Join
-                        </div>
+                        </button>
                       </div>
-                      <p className="text-xs text-gray-400">No spam, unsubscribe anytime</p>
+                      <p className="text-xs text-gray-400 text-center">No spam, unsubscribe anytime</p>
                     </div>
                   </div>
                 </div>

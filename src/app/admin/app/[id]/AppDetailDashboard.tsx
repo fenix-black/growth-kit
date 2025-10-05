@@ -790,6 +790,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
             <div className="col-span-2">
               <BrandingCard
                 appId={appId}
+                appName={app.name}
                 logoUrl={app.logoUrl}
                 primaryColor={app.primaryColor}
                 backgroundColor={app.backgroundColor}
