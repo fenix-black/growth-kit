@@ -747,7 +747,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
             </div>
           </ContentCard>
 
-          <ContentCard title="Credit Policy JSON" className="col-span-2">
+          <ContentCard title="Credit Policy JSON">
             <div className="space-y-2">
               <textarea
                 value={isEditing ? policyJsonText : JSON.stringify(app.policyJson, null, 2)}

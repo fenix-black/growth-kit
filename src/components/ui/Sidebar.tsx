@@ -248,7 +248,7 @@ export default function Sidebar({
           {/* Footer */}
           <div className="relative p-4 border-t border-gray-200 dark:border-gray-700">
             {/* User Info */}
-            {!collapsed && userInfo && (
+            {!collapsed && userInfo && userInfo.name && userInfo.email && (
               <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
