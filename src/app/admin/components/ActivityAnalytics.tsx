@@ -121,11 +121,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
   const fetchSummary = async () => {
     setRefreshing(true);
     try {
-      const response = await fetch(`/api/v1/admin/analytics/events/summary?days=${timeRange}&appId=${appId}`, {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
+      const response = await fetch(`/api/admin/proxy/analytics/events/summary?days=${timeRange}&appId=${appId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -144,11 +140,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
 
   const fetchSegmentsData = async () => {
     try {
-      const response = await fetch(`/api/v1/admin/analytics/segments?appId=${appId}`, {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
+      const response = await fetch(`/api/admin/proxy/analytics/segments?appId=${appId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -165,11 +157,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
       const mappedTimeRange = timeRangeMap[timeRange as keyof typeof timeRangeMap] || '7d';
       const groupBy = mappedTimeRange === '7d' ? 'day' : mappedTimeRange === '30d' ? 'week' : 'month';
       
-      const response = await fetch(`/api/v1/admin/metrics/usd?appId=${appId}&groupBy=${groupBy}`, {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
+      const response = await fetch(`/api/admin/proxy/metrics/usd?appId=${appId}&groupBy=${groupBy}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -186,11 +174,7 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
 
   const fetchGeneralMetrics = async () => {
     try {
-      const response = await fetch(`/api/v1/admin/metrics?appId=${appId}`, {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
+      const response = await fetch(`/api/admin/proxy/metrics/general?appId=${appId}`);
 
       if (response.ok) {
         const data = await response.json();
