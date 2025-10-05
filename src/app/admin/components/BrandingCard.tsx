@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ContentCard from '@/components/ui/ContentCard';
 import Button from '@/components/ui/Button';
+import { cn } from '@/components/ui/utils';
 import { Upload, X, Save, Image as ImageIcon } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 
@@ -83,6 +84,8 @@ export default function BrandingCard({
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [extractingColors, setExtractingColors] = useState(false);
+  const [extractedFromLogo, setExtractedFromLogo] = useState(false);
   
   // Generate CSS strings from controls
   const generateBackgroundColor = () => {
@@ -101,6 +104,106 @@ export default function BrandingCard({
       return `rgba(${r}, ${g}, ${b}, ${(cardOpacity / 100).toFixed(2)})`;
     }
     return cardColor;
+  };
+
+  // Extract colors from uploaded logo (same as app creation wizard)
+  const extractColorsFromLogo = (file: File) => {
+    return new Promise<string[]>((resolve) => {
+      setExtractingColors(true);
+      
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      img.onload = () => {
+        // Resize canvas to reasonable size for processing
+        const maxSize = 100;
+        const scale = Math.min(maxSize / img.width, maxSize / img.height);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        // Get image data
+        const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData?.data;
+        
+        if (!data) {
+          resolve([]);
+          return;
+        }
+        
+        // Color frequency map
+        const colorMap = new Map<string, number>();
+        
+        // Sample every few pixels for performance
+        for (let i = 0; i < data.length; i += 16) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const a = data[i + 3];
+          
+          // Skip transparent/near-transparent pixels
+          if (a < 128) continue;
+          
+          // Skip very dark/light colors (likely text/background)
+          const brightness = (r + g + b) / 3;
+          if (brightness < 30 || brightness > 225) continue;
+          
+          // Round colors to reduce noise
+          const roundedR = Math.round(r / 16) * 16;
+          const roundedG = Math.round(g / 16) * 16;
+          const roundedB = Math.round(b / 16) * 16;
+          
+          const colorKey = `${roundedR},${roundedG},${roundedB}`;
+          colorMap.set(colorKey, (colorMap.get(colorKey) || 0) + 1);
+        }
+        
+        // Get top colors by frequency
+        const sortedColors = Array.from(colorMap.entries())
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 5)
+          .map(([rgb]) => {
+            const [r, g, b] = rgb.split(',').map(Number);
+            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+          });
+        
+        setExtractingColors(false);
+        resolve(sortedColors);
+      };
+      
+      img.onerror = () => {
+        setExtractingColors(false);
+        resolve([]);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  // Apply extracted colors as smart defaults
+  const applyExtractedColors = async (colors: string[]) => {
+    if (colors.length === 0) return;
+    
+    const [primary, secondary] = colors;
+    
+    // Set accent color to most vibrant
+    setEditedPrimaryColor(primary);
+    
+    // Create gradient background using extracted colors
+    if (secondary) {
+      setBgColor1(primary);
+      setBgColor2(secondary);
+      setUseGradient(true);
+    } else {
+      setBgColor1(primary);
+      setUseGradient(false);
+    }
+    
+    // Set card to light color with good opacity for readability
+    setCardColor('#ffffff');
+    setCardOpacity(95);
+    setExtractedFromLogo(true);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,6 +253,16 @@ export default function BrandingCard({
         const data = await response.json();
         setEditedLogoUrl(data.data.logoUrl);
         setUploadError(null);
+        
+        // Extract colors from uploaded file and apply as defaults
+        try {
+          const colors = await extractColorsFromLogo(compressedFile);
+          if (colors.length > 0) {
+            await applyExtractedColors(colors);
+          }
+        } catch (error) {
+          console.error('Error extracting colors:', error);
+        }
       } else {
         const error = await response.json();
         const errorMessage = error.message || 'Failed to upload logo';
@@ -269,17 +382,17 @@ export default function BrandingCard({
             <div>
               <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition">
                 <Upload size={16} className="mr-2" />
-                {isUploading ? 'Uploading...' : 'Upload Logo'}
+                {isUploading ? 'Uploading...' : extractingColors ? 'Extracting colors...' : 'Upload Logo'}
                 <input
                   type="file"
                   accept="image/png,image/jpeg,image/webp"
                   onChange={handleFileUpload}
-                  disabled={isUploading}
+                  disabled={isUploading || extractingColors}
                   className="hidden"
                 />
               </label>
               <p className="mt-2 text-sm text-gray-500">
-                PNG, JPG, or WebP. Max 5MB. Will be optimized to 512x512px.
+                PNG, JPG, or WebP. Max 5MB. Colors will be auto-extracted for themes.
               </p>
             </div>
 
@@ -305,81 +418,92 @@ export default function BrandingCard({
           </div>
         </div>
 
-        {/* Color Presets */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Quick Presets
-          </label>
-          <div className="grid grid-cols-4 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setBgColor1('#0f172a');
-                setBgColor2('#1e293b');
-                setUseGradient(true);
-                setCardColor('#ffffff');
-                setCardOpacity(5);
-                setEditedPrimaryColor('#10b981');
-              }}
-              className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
-              title="Dark (Default)"
-            >
-              <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }} />
-              <p className="text-xs mt-1 text-center text-gray-600">Dark</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setBgColor1('#f9fafb');
-                setBgColor2('#e5e7eb');
-                setUseGradient(true);
-                setCardColor('#ffffff');
-                setCardOpacity(100);
-                setEditedPrimaryColor('#1874ec');
-              }}
-              className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
-              title="Light"
-            >
-              <div className="h-8 rounded border border-gray-200" style={{ background: 'linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%)' }} />
-              <p className="text-xs mt-1 text-center text-gray-600">Light</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setBgColor1('#1e3a8a');
-                setBgColor2('#312e81');
-                setUseGradient(true);
-                setCardColor('#ffffff');
-                setCardOpacity(10);
-                setEditedPrimaryColor('#60a5fa');
-              }}
-              className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
-              title="Ocean"
-            >
-              <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #312e81 100%)' }} />
-              <p className="text-xs mt-1 text-center text-gray-600">Ocean</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setBgColor1('#7c2d12');
-                setBgColor2('#991b1b');
-                setUseGradient(true);
-                setCardColor('#ffffff');
-                setCardOpacity(10);
-                setEditedPrimaryColor('#fb923c');
-              }}
-              className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
-              title="Sunset"
-            >
-              <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #991b1b 100%)' }} />
-              <p className="text-xs mt-1 text-center text-gray-600">Sunset</p>
-            </button>
+        {/* Color Presets - Hide if colors extracted from logo */}
+        {!extractedFromLogo && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Quick Presets
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setBgColor1('#0f172a');
+                  setBgColor2('#1e293b');
+                  setUseGradient(true);
+                  setCardColor('#ffffff');
+                  setCardOpacity(5);
+                  setEditedPrimaryColor('#10b981');
+                }}
+                className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
+                title="Dark (Default)"
+              >
+                <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }} />
+                <p className="text-xs mt-1 text-center text-gray-600">Dark</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setBgColor1('#f9fafb');
+                  setBgColor2('#e5e7eb');
+                  setUseGradient(true);
+                  setCardColor('#ffffff');
+                  setCardOpacity(100);
+                  setEditedPrimaryColor('#1874ec');
+                }}
+                className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
+                title="Light"
+              >
+                <div className="h-8 rounded border border-gray-200" style={{ background: 'linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%)' }} />
+                <p className="text-xs mt-1 text-center text-gray-600">Light</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setBgColor1('#1e3a8a');
+                  setBgColor2('#312e81');
+                  setUseGradient(true);
+                  setCardColor('#ffffff');
+                  setCardOpacity(10);
+                  setEditedPrimaryColor('#60a5fa');
+                }}
+                className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
+                title="Ocean"
+              >
+                <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #312e81 100%)' }} />
+                <p className="text-xs mt-1 text-center text-gray-600">Ocean</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setBgColor1('#7c2d12');
+                  setBgColor2('#991b1b');
+                  setUseGradient(true);
+                  setCardColor('#ffffff');
+                  setCardOpacity(10);
+                  setEditedPrimaryColor('#fb923c');
+                }}
+                className="p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition"
+                title="Sunset"
+              >
+                <div className="h-8 rounded" style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #991b1b 100%)' }} />
+                <p className="text-xs mt-1 text-center text-gray-600">Sunset</p>
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              Click a preset to quickly apply a theme, then customize below.
+            </p>
           </div>
-          <p className="mt-2 text-xs text-gray-500">
-            Click a preset to quickly apply a theme, then customize below.
-          </p>
-        </div>
+        )}
+
+        {/* Show extracted colors hint */}
+        {extractedFromLogo && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              🎨 Using colors extracted from your logo. You can still customize below if needed.
+            </p>
+          </div>
+        )}
 
         {/* Colors */}
         <div className="space-y-6">
@@ -529,45 +653,53 @@ export default function BrandingCard({
           </div>
         </div>
 
-        {/* Waitlist Layout */}
+        {/* Waitlist Layout - Visual Selection like in wizard */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Waitlist Layout
           </label>
-          <select
-            value={editedWaitlistLayout}
-            onChange={(e) => setEditedWaitlistLayout(e.target.value)}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          >
-            <option value="centered">Centered (Default)</option>
-            <option value="split">Split Layout</option>
-            <option value="minimal">Minimal</option>
-            <option value="embed">Embed (Widget Mode)</option>
-          </select>
-          <p className="mt-2 text-sm text-gray-500">
-            {editedWaitlistLayout === 'embed' 
-              ? 'Widget will auto-inject into the specified CSS selector on your page'
-              : 'Choose how the waitlist screen will be displayed'
-            }
-          </p>
+          <div className="grid grid-cols-2 gap-4">
+            {['centered', 'split', 'minimal', 'embed'].map((layout) => (
+              <button
+                key={layout}
+                type="button"
+                onClick={() => setEditedWaitlistLayout(layout)}
+                className={cn(
+                  "p-4 border rounded-lg text-center transition-all duration-200",
+                  editedWaitlistLayout === layout
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500 ring-opacity-20"
+                    : "border-gray-200 dark:border-gray-700 hover:border-blue-300"
+                )}
+              >
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize mb-1">
+                  {layout === 'embed' ? 'Embed Mode' : layout}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {layout === 'centered' && 'Classic center layout'}
+                  {layout === 'split' && 'Split screen design'} 
+                  {layout === 'minimal' && 'Clean minimal style'}
+                  {layout === 'embed' && 'Widget for existing pages'}
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Target Selector (only for embed mode) */}
+        {/* Target Selector (only for embed mode) - Styled like wizard */}
         {editedWaitlistLayout === 'embed' && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Target CSS Selector
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              CSS Selector for Embed Container
             </label>
             <input
               type="text"
               value={editedTargetSelector}
               onChange={(e) => setEditedTargetSelector(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-sm"
-              placeholder="#waitlist-container or .hero-section"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-white dark:text-gray-900 font-mono text-sm"
+              placeholder="#waitlist-container"
             />
-            <p className="mt-2 text-sm text-gray-500">
-              The SDK will automatically find this element and inject the waitlist widget there.
-              Examples: <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">#hero</code>, <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">.waitlist</code>, <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">#main-content</code>
+            <p className="text-xs text-blue-600 dark:text-blue-300 mt-2">
+              CSS selector where the waitlist widget will be embedded (e.g., "#waitlist-container", ".embed-here")
             </p>
           </div>
         )}
