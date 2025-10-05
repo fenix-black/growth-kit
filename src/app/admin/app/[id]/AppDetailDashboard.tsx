@@ -572,6 +572,17 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">App Description</label>
+                <textarea
+                  value={isEditing ? (editedApp.description || '') : (app.description || '')}
+                  onChange={(e) => setEditedApp({ ...editedApp, description: e.target.value })}
+                  disabled={!isEditing}
+                  rows={3}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-50"
+                  placeholder="Brief description of your app"
+                />
+              </div>
+              <div>
                 <label className="flex items-center space-x-3">
                   <button
                     onClick={() => isEditing && setEditedApp({ ...editedApp, isActive: !editedApp.isActive })}
@@ -584,6 +595,21 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                     }
                   </button>
                   <span className="text-sm font-medium text-gray-700">App Active</span>
+                </label>
+              </div>
+              <div>
+                <label className="flex items-center space-x-3">
+                  <button
+                    onClick={() => isEditing && setEditedApp({ ...editedApp, waitlistEnabled: !editedApp.waitlistEnabled })}
+                    disabled={!isEditing}
+                    className="cursor-pointer"
+                  >
+                    {(isEditing ? editedApp.waitlistEnabled : app.waitlistEnabled) ? 
+                      <ToggleRight className="h-6 w-6 text-primary" /> : 
+                      <ToggleLeft className="h-6 w-6 text-gray-400" />
+                    }
+                  </button>
+                  <span className="text-sm font-medium text-gray-700">Waitlist Enabled</span>
                 </label>
               </div>
             </div>
@@ -616,64 +642,6 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
             </div>
           </ContentCard>
 
-          <ContentCard title="Waitlist Settings">
-            <div className="space-y-4">
-              <div>
-                <label className="flex items-center space-x-3">
-                  <button
-                    onClick={() => isEditing && setEditedApp({ ...editedApp, waitlistEnabled: !editedApp.waitlistEnabled })}
-                    disabled={!isEditing}
-                    className="cursor-pointer"
-                  >
-                    {(isEditing ? editedApp.waitlistEnabled : app.waitlistEnabled) ? 
-                      <ToggleRight className="h-6 w-6 text-primary" /> : 
-                      <ToggleLeft className="h-6 w-6 text-gray-400" />
-                    }
-                  </button>
-                  <span className="text-sm font-medium text-gray-700">Waitlist Enabled</span>
-                </label>
-              </div>
-              {(isEditing ? editedApp.waitlistEnabled : app.waitlistEnabled) && (
-                <>
-                  <div>
-                    <label className="flex items-center space-x-3">
-                      <button
-                        onClick={() => isEditing && setEditedApp({ ...editedApp, autoApproveWaitlist: !editedApp.autoApproveWaitlist })}
-                        disabled={!isEditing}
-                        className="cursor-pointer"
-                      >
-                        {(isEditing ? editedApp.autoApproveWaitlist : app.autoApproveWaitlist) ? 
-                          <ToggleRight className="h-6 w-6 text-primary" /> : 
-                          <ToggleLeft className="h-6 w-6 text-gray-400" />
-                        }
-                      </button>
-                      <span className="text-sm font-medium text-gray-700">Auto-Approve</span>
-                    </label>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Daily Invitation Quota</label>
-                    <input
-                      type="number"
-                      value={isEditing ? (editedApp.invitationQuota ?? 10) : (app.invitationQuota ?? 10)}
-                      onChange={(e) => setEditedApp({ ...editedApp, invitationQuota: parseInt(e.target.value) || 0 })}
-                      disabled={!isEditing}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Invitation Time</label>
-                    <input
-                      type="time"
-                      value={isEditing ? (editedApp.invitationCronTime || '12:00') : (app.invitationCronTime || '12:00')}
-                      onChange={(e) => setEditedApp({ ...editedApp, invitationCronTime: e.target.value })}
-                      disabled={!isEditing}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-50"
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          </ContentCard>
 
           <ContentCard title="Advanced Settings">
             <div className="space-y-4">
@@ -819,21 +787,25 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
             </div>
           </ContentCard>
 
-          <div className="col-span-2">
-            <BrandingCard
-              appId={appId}
-              description={app.description}
-              logoUrl={app.logoUrl}
-              primaryColor={app.primaryColor}
-              backgroundColor={app.backgroundColor}
-              cardBackgroundColor={app.cardBackgroundColor}
-              waitlistLayout={app.waitlistLayout}
-              waitlistMessages={app.waitlistMessages}
-              waitlistTargetSelector={(app as any).metadata?.waitlistTargetSelector}
-              hideGrowthKitBranding={app.hideGrowthKitBranding}
-              onUpdate={fetchAppDetails}
-            />
-          </div>
+          {(isEditing ? editedApp.waitlistEnabled : app.waitlistEnabled) && (
+            <div className="col-span-2">
+              <BrandingCard
+                appId={appId}
+                logoUrl={app.logoUrl}
+                primaryColor={app.primaryColor}
+                backgroundColor={app.backgroundColor}
+                cardBackgroundColor={app.cardBackgroundColor}
+                waitlistLayout={app.waitlistLayout}
+                waitlistMessages={app.waitlistMessages}
+                waitlistTargetSelector={(app as any).metadata?.waitlistTargetSelector}
+                hideGrowthKitBranding={app.hideGrowthKitBranding}
+                autoApprove={app.autoApproveWaitlist}
+                invitationQuota={app.invitationQuota}
+                invitationTime={app.invitationCronTime}
+                onUpdate={fetchAppDetails}
+              />
+            </div>
+          )}
         </div>
       )}
 

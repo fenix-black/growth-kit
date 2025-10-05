@@ -9,7 +9,6 @@ import imageCompression from 'browser-image-compression';
 
 interface BrandingCardProps {
   appId: string;
-  description?: string;
   logoUrl?: string;
   primaryColor?: string;
   backgroundColor?: string;
@@ -18,12 +17,14 @@ interface BrandingCardProps {
   waitlistMessages?: string[];
   waitlistTargetSelector?: string;
   hideGrowthKitBranding?: boolean;
+  autoApprove?: boolean;
+  invitationQuota?: number;
+  invitationTime?: string;
   onUpdate: () => void;
 }
 
 export default function BrandingCard({
   appId,
-  description,
   logoUrl,
   primaryColor,
   backgroundColor,
@@ -32,11 +33,16 @@ export default function BrandingCard({
   waitlistMessages,
   waitlistTargetSelector,
   hideGrowthKitBranding,
+  autoApprove,
+  invitationQuota,
+  invitationTime,
   onUpdate,
 }: BrandingCardProps) {
-  const [editedDescription, setEditedDescription] = useState(description || '');
   const [editedLogoUrl, setEditedLogoUrl] = useState(logoUrl || '');
   const [editedPrimaryColor, setEditedPrimaryColor] = useState(primaryColor || '#10b981');
+  const [editedAutoApprove, setEditedAutoApprove] = useState(autoApprove || false);
+  const [editedInvitationQuota, setEditedInvitationQuota] = useState(invitationQuota || 10);
+  const [editedInvitationTime, setEditedInvitationTime] = useState(invitationTime || '12:00');
   
   // Parse existing colors or use defaults
   const parseBackgroundColor = (color: string | undefined) => {
@@ -307,13 +313,15 @@ export default function BrandingCard({
         },
         body: JSON.stringify({
           id: appId,
-          description: editedDescription,
           logoUrl: editedLogoUrl || null,
           primaryColor: editedPrimaryColor,
           backgroundColor: generateBackgroundColor(),
           cardBackgroundColor: generateCardColor(),
           waitlistLayout: editedWaitlistLayout,
           waitlistMessages: editedWaitlistMessages,
+          autoApproveWaitlist: editedAutoApprove,
+          invitationQuota: editedInvitationQuota,
+          invitationCronTime: editedInvitationTime,
           metadata: {
             waitlistTargetSelector: editedTargetSelector || null,
           },
@@ -335,19 +343,6 @@ export default function BrandingCard({
   return (
     <ContentCard title="Branding & Waitlist Display" className="mt-6">
       <div className="space-y-6 p-6">
-        {/* Description */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            App Description
-          </label>
-          <textarea
-            value={editedDescription}
-            onChange={(e) => setEditedDescription(e.target.value)}
-            rows={3}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            placeholder="Brief description of your app (shown on waitlist screen)"
-          />
-        </div>
 
         {/* Logo Upload */}
         <div>
@@ -418,8 +413,8 @@ export default function BrandingCard({
           </div>
         </div>
 
-        {/* Color Presets - Hide if colors extracted from logo */}
-        {!extractedFromLogo && (
+        {/* Color Presets - Hide if colors extracted from logo or if logo already exists */}
+        {!extractedFromLogo && !editedLogoUrl && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Quick Presets
@@ -791,6 +786,58 @@ export default function BrandingCard({
               No messages added. A default message will be shown.
             </p>
           )}
+        </div>
+
+        {/* Advanced Waitlist Settings */}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+            Advanced Settings
+          </h4>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  checked={editedAutoApprove}
+                  onChange={(e) => setEditedAutoApprove(e.target.checked)}
+                  className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Auto-approve waitlist entries
+                </span>
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
+                Users get immediate access vs manual approval
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Daily Invitation Quota
+                </label>
+                <input
+                  type="number"
+                  value={editedInvitationQuota}
+                  onChange={(e) => setEditedInvitationQuota(parseInt(e.target.value) || 0)}
+                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  min="0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Invitation Send Time
+                </label>
+                <input
+                  type="time"
+                  value={editedInvitationTime}
+                  onChange={(e) => setEditedInvitationTime(e.target.value)}
+                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Save Button */}
