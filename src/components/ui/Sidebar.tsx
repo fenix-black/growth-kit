@@ -247,28 +247,19 @@ export default function Sidebar({
 
           {/* Footer */}
           <div className="relative p-4 border-t border-gray-200 dark:border-gray-700">
-            {/* User Info */}
-            {!collapsed && userInfo && userInfo.name && userInfo.email && (
-              <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                    {userInfo.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {userInfo.name}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {userInfo.email}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Theme Switcher and Logout */}
+            {/* Theme Switcher and User Info */}
             <div className="flex items-center justify-between mb-3">
               <ThemeSwitcher />
+              {!collapsed && userInfo && userInfo.name && userInfo.email && (
+                <div className="text-right">
+                  <p className="text-xs font-medium text-gray-900 dark:text-white truncate max-w-24">
+                    {userInfo.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-24">
+                    {userInfo.email}
+                  </p>
+                </div>
+              )}
             </div>
             <button
               onClick={onLogout}
