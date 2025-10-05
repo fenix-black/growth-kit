@@ -9,7 +9,16 @@ import DashboardLayout from '@/components/ui/DashboardLayout';
  */
 function DashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { apps, isLoading, handleAppSelect, handleCreateApp, handleLogout } = useAdmin();
+  const { 
+    apps, 
+    organizations, 
+    currentOrgId, 
+    isLoading, 
+    handleAppSelect, 
+    handleCreateApp, 
+    handleOrgChange, 
+    handleLogout 
+  } = useAdmin();
   
   // Extract current app ID from URL when on app detail pages
   const currentAppId = pathname?.match(/^\/admin\/app\/([^\/]+)/)?.[1];
@@ -29,8 +38,11 @@ function DashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
   return (
     <DashboardLayout
       apps={apps}
+      organizations={organizations}
       currentAppId={currentAppId}
+      currentOrgId={currentOrgId}
       onAppSelect={handleAppSelect}
+      onOrgChange={handleOrgChange}
       onCreateApp={handleCreateApp}
       onLogout={handleLogout}
     >

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { cn } from './utils';
 import ThemeSwitcher from './ThemeSwitcher';
 import SmartLogo from './SmartLogo';
+import OrgSwitcher from './OrgSwitcher';
 import { 
   Home, 
   Package, 
@@ -18,7 +19,6 @@ import {
   X,
   LogOut,
   Plus,
-  Search,
   BarChart3,
   Activity,
   Users
@@ -32,16 +32,30 @@ interface SidebarProps {
     domain: string;
     isActive: boolean;
   }>;
+  organizations: Array<{
+    id: string;
+    name: string;
+  }>;
   currentAppId?: string;
+  currentOrgId?: string;
   onAppSelect?: (appId: string) => void;
+  onOrgChange?: (orgId: string) => void;
   onCreateApp?: () => void;
   onLogout?: () => void;
 }
 
-export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, onLogout }: SidebarProps) {
+export default function Sidebar({ 
+  apps, 
+  organizations, 
+  currentAppId, 
+  currentOrgId, 
+  onAppSelect, 
+  onOrgChange, 
+  onCreateApp, 
+  onLogout 
+}: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const pathname = usePathname();
 
@@ -88,10 +102,7 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
     },
   ];
 
-  const filteredApps = apps.filter(app => 
-    app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    app.domain.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // No longer need filtering since we removed search
 
   const handleNavigation = (href: string, label: string) => {
     if (href !== '#') {
@@ -154,20 +165,13 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
             </div>
           </div>
 
-          {/* Search */}
+          {/* Organization Switcher */}
           {!collapsed && (
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 dark:text-gray-400" size={18} />
-                <input
-                  type="text"
-                  placeholder="Search apps..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
+            <OrgSwitcher
+              organizations={organizations}
+              currentOrgId={currentOrgId}
+              onOrgChange={onOrgChange}
+            />
           )}
 
           {/* Navigation */}
@@ -208,7 +212,7 @@ export default function Sidebar({ apps, currentAppId, onAppSelect, onCreateApp, 
                       </button>
                     </div>
                   </li>
-                  {filteredApps.map((app) => (
+                  {apps.map((app) => (
                     <li key={app.id}>
                       <button
                         onClick={() => onAppSelect?.(app.id)}

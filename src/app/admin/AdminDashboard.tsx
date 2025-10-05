@@ -191,7 +191,10 @@ export default function AdminDashboard() {
   return (
     <DashboardLayout
       apps={apps}
+      organizations={[]} // TODO: This should be refactored to use AdminContext
+      currentOrgId={undefined}
       onAppSelect={handleAppSelect}
+      onOrgChange={() => {}} // No-op for now
       onCreateApp={() => setShowCreateForm(true)}
       onLogout={handleLogout}
     >

@@ -13,8 +13,14 @@ interface DashboardLayoutProps {
     domain: string;
     isActive: boolean;
   }>;
+  organizations: Array<{
+    id: string;
+    name: string;
+  }>;
   currentAppId?: string;
+  currentOrgId?: string;
   onAppSelect?: (appId: string) => void;
+  onOrgChange?: (orgId: string) => void;
   onCreateApp?: () => void;
   onLogout?: () => void;
   className?: string;
@@ -23,8 +29,11 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({
   children,
   apps,
+  organizations,
   currentAppId,
+  currentOrgId,
   onAppSelect,
+  onOrgChange,
   onCreateApp,
   onLogout,
   className
@@ -35,8 +44,11 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar 
         apps={apps}
+        organizations={organizations}
         currentAppId={currentAppId}
+        currentOrgId={currentOrgId}
         onAppSelect={onAppSelect}
+        onOrgChange={onOrgChange}
         onCreateApp={onCreateApp}
         onLogout={onLogout}
       />
