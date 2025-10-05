@@ -260,137 +260,146 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Activity Analytics */}
       {summary && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard
-            title="Total Events"
-            value={summary.stats.totalEvents.toLocaleString()}
-            icon={<Activity size={24} />}
-            color="primary"
-          />
-          <StatsCard
-            title="Unique Users"
-            value={summary.stats.uniqueUsers.toLocaleString()}
-            icon={<Users size={24} />}
-            color="secondary"
-          />
-          <StatsCard
-            title="Events Today"
-            value={summary.stats.eventsToday.toLocaleString()}
-            icon={<Calendar size={24} />}
-            color="primary"
-          />
-          <StatsCard
-            title="Events per User"
-            value={summary.stats.eventsPerUser.toFixed(1)}
-            icon={<TrendingUp size={24} />}
-            color="secondary"
-          />
-        </div>
+        <>
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Activity Analytics</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <StatsCard
+                title="Total Events"
+                value={summary.stats.totalEvents.toLocaleString()}
+                icon={<Activity size={24} />}
+                color="primary"
+              />
+              <StatsCard
+                title="Unique Users"
+                value={summary.stats.uniqueUsers.toLocaleString()}
+                icon={<Users size={24} />}
+                color="secondary"
+              />
+              <StatsCard
+                title="Events Today"
+                value={summary.stats.eventsToday.toLocaleString()}
+                icon={<Calendar size={24} />}
+                color="primary"
+              />
+              <StatsCard
+                title="Events per User"
+                value={summary.stats.eventsPerUser.toFixed(1)}
+                icon={<TrendingUp size={24} />}
+                color="secondary"
+              />
+            </div>
+          </div>
+        </>
       )}
 
-      {/* Credit Metrics */}
+      {/* Credit System Metrics */}
       {generalMetrics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          <StatsCard
-            title="Total Credits Issued"
-            value={generalMetrics.overview.totalCreditsIssued.toLocaleString()}
-            icon={<Activity size={24} />}
-            color="primary"
-          />
-          <StatsCard
-            title="Credits Consumed"
-            value={generalMetrics.overview.totalCreditsConsumed.toLocaleString()}
-            icon={<TrendingUp size={24} />}
-            color="purple"
-          />
-          <StatsCard
-            title="Referral Conversion"
-            value={`${generalMetrics.conversion.referralConversionRate.toFixed(1)}%`}
-            icon={<Users size={24} />}
-            color="secondary"
-          />
-          <StatsCard
-            title="Email Verification"
-            value={`${generalMetrics.conversion.emailVerificationRate.toFixed(1)}%`}
-            icon={<FileText size={24} />}
-            color="violet"
-          />
-          <StatsCard
-            title="Credits Balance"
-            value={(generalMetrics.overview.totalCreditsIssued - generalMetrics.overview.totalCreditsConsumed).toLocaleString()}
-            icon={<BarChart3 size={24} />}
-            color="magenta"
-          />
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Credit System</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <StatsCard
+              title="Total Credits Issued"
+              value={generalMetrics.overview.totalCreditsIssued.toLocaleString()}
+              icon={<Activity size={24} />}
+              color="primary"
+            />
+            <StatsCard
+              title="Credits Consumed"
+              value={generalMetrics.overview.totalCreditsConsumed.toLocaleString()}
+              icon={<TrendingUp size={24} />}
+              color="purple"
+            />
+            <StatsCard
+              title="Referral Conversion"
+              value={`${generalMetrics.conversion.referralConversionRate.toFixed(1)}%`}
+              icon={<Users size={24} />}
+              color="secondary"
+            />
+            <StatsCard
+              title="Email Verification"
+              value={`${generalMetrics.conversion.emailVerificationRate.toFixed(1)}%`}
+              icon={<FileText size={24} />}
+              color="violet"
+            />
+            <StatsCard
+              title="Credits Balance"
+              value={(generalMetrics.overview.totalCreditsIssued - generalMetrics.overview.totalCreditsConsumed).toLocaleString()}
+              icon={<BarChart3 size={24} />}
+              color="magenta"
+            />
+          </div>
         </div>
       )}
 
-      {/* USD Metrics Summary */}
+      {/* Financial Metrics */}
       {usdMetrics?.summary && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard
-            title="Total USD Spent"
-            value={formatCurrency(usdMetrics.summary.totalRevenue)}
-            icon={<DollarSign size={24} />}
-            color="orange"
-          />
-          <StatsCard
-            title="Total Transactions"
-            value={usdMetrics.summary.totalTransactions.toLocaleString()}
-            icon={<Activity size={24} />}
-            color="pink"
-          />
-          <StatsCard
-            title="Avg Transaction Value"
-            value={formatCurrency(usdMetrics.summary.avgTransactionValue)}
-            icon={<TrendingUp size={24} />}
-            color="violet"
-          />
-          <StatsCard
-            title="Avg User Spend"
-            value={formatCurrency(usdMetrics.summary.avgUserValue)}
-            icon={<Users size={24} />}
-            color="magenta"
-          />
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Financial Performance</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatsCard
+              title="Total USD Spent"
+              value={formatCurrency(usdMetrics.summary.totalRevenue)}
+              icon={<DollarSign size={24} />}
+              color="orange"
+            />
+            <StatsCard
+              title="Total Transactions"
+              value={usdMetrics.summary.totalTransactions.toLocaleString()}
+              icon={<Activity size={24} />}
+              color="pink"
+            />
+            <StatsCard
+              title="Avg Transaction Value"
+              value={formatCurrency(usdMetrics.summary.avgTransactionValue)}
+              icon={<TrendingUp size={24} />}
+              color="violet"
+            />
+            <StatsCard
+              title="Avg User Spend"
+              value={formatCurrency(usdMetrics.summary.avgUserValue)}
+              icon={<Users size={24} />}
+              color="magenta"
+            />
+          </div>
         </div>
       )}
 
-      {/* Insights Block */}
-      <ContentCard
-        title="Insights"
-        description="Key observations from your data"
-      >
+      {/* Business Insights */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Business Insights</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">Credit Efficiency</h4>
-            <p className="text-2xl font-bold text-blue-700">
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+            <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Credit Efficiency</h4>
+            <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
               {generalMetrics && generalMetrics.overview.totalCreditsConsumed > 0
                 ? `${((generalMetrics.overview.totalCreditsConsumed / generalMetrics.overview.totalCreditsIssued) * 100).toFixed(1)}%`
                 : '0%'}
             </p>
-            <p className="text-xs text-blue-600 mt-1">Credits consumed vs issued</p>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">Credits consumed vs issued</p>
           </div>
           
-          <div className="bg-green-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-green-900 mb-2">Cost per Credit</h4>
-            <p className="text-2xl font-bold text-green-700">
+          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+            <h4 className="text-sm font-medium text-green-900 dark:text-green-100 mb-2">Cost per Credit</h4>
+            <p className="text-2xl font-bold text-green-700 dark:text-green-300">
               {usdMetrics && generalMetrics && generalMetrics.overview.totalCreditsConsumed > 0
                 ? formatCurrency(usdMetrics.summary.totalRevenue / generalMetrics.overview.totalCreditsConsumed)
                 : '$0.00'}
             </p>
-            <p className="text-xs text-green-600 mt-1">Average USD value per credit</p>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-1">Average USD value per credit</p>
           </div>
           
-          <div className="bg-purple-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-purple-900 mb-2">Active Users</h4>
-            <p className="text-2xl font-bold text-purple-700">
+          <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+            <h4 className="text-sm font-medium text-purple-900 dark:text-purple-100 mb-2">Active Users</h4>
+            <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
               {usdMetrics?.summary.uniqueUsers || 0}
             </p>
-            <p className="text-xs text-purple-600 mt-1">Users with USD transactions</p>
+            <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">Users with USD transactions</p>
           </div>
         </div>
-      </ContentCard>
+      </div>
 
       {/* Main content - either feed or charts */}
       {showFeed ? (
@@ -404,24 +413,30 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
         </ContentCard>
       ) : (
         <>
-          {/* Event Frequency Chart */}
-          {summary?.eventFrequency && summary.eventFrequency.length > 0 && (
-            <ContentCard title="Most Common Events">
-              <EChartsBarChart
-                data={summary.eventFrequency}
-                xKey="eventName"
-                series={[
-                  { dataKey: 'count', name: 'Events', color: '#a855f7' }
-                ]}
-                height={300}
-                showLegend={false}
-                colorScheme="analytics"
-              />
-            </ContentCard>
-          )}
+          {/* User Behavior Analysis */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">User Behavior Analysis</h2>
+            
+            {/* Event Frequency Chart */}
+            {summary?.eventFrequency && summary.eventFrequency.length > 0 && (
+              <div className="mb-6">
+                <ContentCard title="Most Common Events">
+                  <EChartsBarChart
+                    data={summary.eventFrequency}
+                    xKey="eventName"
+                    series={[
+                      { dataKey: 'count', name: 'Events', color: '#a855f7' }
+                    ]}
+                    height={300}
+                    showLegend={false}
+                    colorScheme="analytics"
+                  />
+                </ContentCard>
+              </div>
+            )}
 
-          {/* Device and Browser Breakdown */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Device and Browser Breakdown */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {summary?.deviceBreakdown && summary.deviceBreakdown.length > 0 && (
               <ContentCard title="Device Breakdown">
                 <EChartsPieChart
@@ -466,184 +481,192 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
               />
             </ContentCard>
           )}
-
-
-          {/* User Segments */}
-          {segmentsData && (
-            <ContentCard 
-              title="User Segments" 
-              description="Behavioral user segmentation"
-              className="col-span-2"
-            >
-              <div className="space-y-4">
-                {/* Segment Overview */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  {segmentsData.segments.map((segment: any) => (
-                    <div 
-                      key={segment.key}
-                      className={`p-4 rounded-lg border-2 ${
-                        segment.color === 'purple' ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' :
-                        segment.color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' :
-                        segment.color === 'green' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' :
-                        segment.color === 'orange' ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' :
-                        'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-                      }`}
-                    >
-                      <h4 className={`font-semibold ${
-                        segment.color === 'purple' ? 'text-purple-900 dark:text-purple-100' :
-                        segment.color === 'blue' ? 'text-blue-900 dark:text-blue-100' :
-                        segment.color === 'green' ? 'text-green-900 dark:text-green-100' :
-                        segment.color === 'orange' ? 'text-orange-900 dark:text-orange-100' :
-                        'text-red-900 dark:text-red-100'
-                      }`}>
-                        {segment.name}
-                      </h4>
-                      <p className="text-2xl font-bold mt-2">{segment.count}</p>
-                      <p className="text-sm opacity-75">{segment.percentage}%</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Segment Details */}
-                <div className="border-t pt-4">
-                  <h4 className="text-sm font-semibold mb-3">Segment Criteria</h4>
-                  <div className="space-y-2">
-                    {segmentsData.segments.map((segment: any) => (
-                      <div key={segment.key} className="flex items-start space-x-3">
-                        <div className={`w-3 h-3 rounded-full mt-1 flex-shrink-0 ${
-                          segment.color === 'purple' ? 'bg-purple-500' :
-                          segment.color === 'blue' ? 'bg-blue-500' :
-                          segment.color === 'green' ? 'bg-green-500' :
-                          segment.color === 'orange' ? 'bg-orange-500' :
-                          'bg-red-500'
-                        }`} />
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{segment.name}</p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">{segment.criteria}</p>
+            
+            {/* User Segments */}
+            {segmentsData && (
+              <div className="mb-6">
+                <ContentCard 
+                  title="User Segments" 
+                  description="Behavioral user segmentation"
+                >
+                  <div className="space-y-4">
+                    {/* Segment Overview */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      {segmentsData.segments.map((segment: any) => (
+                        <div 
+                          key={segment.key}
+                          className={`p-4 rounded-lg border-2 ${
+                            segment.color === 'purple' ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' :
+                            segment.color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' :
+                            segment.color === 'green' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' :
+                            segment.color === 'orange' ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' :
+                            'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                          }`}
+                        >
+                          <h4 className={`font-semibold ${
+                            segment.color === 'purple' ? 'text-purple-900 dark:text-purple-100' :
+                            segment.color === 'blue' ? 'text-blue-900 dark:text-blue-100' :
+                            segment.color === 'green' ? 'text-green-900 dark:text-green-100' :
+                            segment.color === 'orange' ? 'text-orange-900 dark:text-orange-100' :
+                            'text-red-900 dark:text-red-100'
+                          }`}>
+                            {segment.name}
+                          </h4>
+                          <p className="text-2xl font-bold mt-2">{segment.count}</p>
+                          <p className="text-sm opacity-75">{segment.percentage}%</p>
                         </div>
+                      ))}
+                    </div>
+
+                    {/* Segment Details */}
+                    <div className="border-t pt-4">
+                      <h4 className="text-sm font-semibold mb-3">Segment Criteria</h4>
+                      <div className="space-y-2">
+                        {segmentsData.segments.map((segment: any) => (
+                          <div key={segment.key} className="flex items-start space-x-3">
+                            <div className={`w-3 h-3 rounded-full mt-1 flex-shrink-0 ${
+                              segment.color === 'purple' ? 'bg-purple-500' :
+                              segment.color === 'blue' ? 'bg-blue-500' :
+                              segment.color === 'green' ? 'bg-green-500' :
+                              segment.color === 'orange' ? 'bg-orange-500' :
+                              'bg-red-500'
+                            }`} />
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{segment.name}</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">{segment.criteria}</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
                   </div>
+                </ContentCard>
+              </div>
+            )}
+          </div>
+
+          {/* Financial Analysis */}
+          {(usdMetrics?.timeline || usdMetrics?.byAction || usdMetrics?.byUser) && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Financial Analysis</h2>
+              
+              {/* USD Timeline Chart */}
+              {usdMetrics?.timeline && (
+                <div className="mb-6">
+                  <ContentCard
+                    title="USD Spending Over Time"
+                    description="Financial metrics timeline"
+                  >
+                    <EChartsAreaChart
+                      data={usdMetrics.timeline}
+                      xKey="period"
+                      series={[
+                        { dataKey: 'revenue', name: 'USD Spent', type: 'area', gradient: true },
+                        { dataKey: 'transactionCount', name: 'Transactions', type: 'line' }
+                      ]}
+                      height={400}
+                      colorScheme="financial"
+                      formatter={(value) => typeof value === 'number' ? formatCurrency(value) : value.toString()}
+                    />
+                  </ContentCard>
                 </div>
-              </div>
-            </ContentCard>
-          )}
+              )}
 
-          {/* USD Financial Charts */}
-          {usdMetrics?.timeline && (
-            <ContentCard
-              title="USD Spending Over Time"
-              description="Financial metrics timeline"
-              className="col-span-2"
-            >
-              <EChartsAreaChart
-                data={usdMetrics.timeline}
-                xKey="period"
-                series={[
-                  { dataKey: 'revenue', name: 'USD Spent', type: 'area', gradient: true },
-                  { dataKey: 'transactionCount', name: 'Transactions', type: 'line' }
-                ]}
-                height={400}
-                colorScheme="financial"
-                formatter={(value) => typeof value === 'number' ? formatCurrency(value) : value.toString()}
-              />
-            </ContentCard>
-          )}
+              {/* USD by Action Charts */}
+              {usdMetrics?.byAction && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  <ContentCard
+                    title="USD Spending by Action"
+                    description="Which actions consume the most value"
+                  >
+                    <EChartsBarChart
+                      data={usdMetrics.byAction}
+                      xKey="action"
+                      series={[
+                        { dataKey: 'totalRevenue', name: 'Total Spent', color: '#d946ef' }
+                      ]}
+                      height={400}
+                      horizontal={true}
+                      colorScheme="financial"
+                      formatter={(value) => formatCurrency(value)}
+                      showLabel={true}
+                    />
+                  </ContentCard>
 
-          {/* USD by Action Charts */}
-          {usdMetrics?.byAction && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ContentCard
-                title="USD Spending by Action"
-                description="Which actions consume the most value"
-                className="col-span-1"
-              >
-                <EChartsBarChart
-                  data={usdMetrics.byAction}
-                  xKey="action"
-                  series={[
-                    { dataKey: 'totalRevenue', name: 'Total Spent', color: '#d946ef' }
-                  ]}
-                  height={400}
-                  horizontal={true}
-                  colorScheme="financial"
-                  formatter={(value) => formatCurrency(value)}
-                  showLabel={true}
-                />
-              </ContentCard>
+                  <ContentCard
+                    title="Action Distribution"
+                    description="Percentage of spending by action type"
+                  >
+                    <EChartsPieChart
+                      data={usdMetrics.byAction.map((item: any) => ({ 
+                        name: item.action, 
+                        value: item.totalRevenue 
+                      }))}
+                      height={400}
+                      colorScheme="financial"
+                      formatter={(value) => formatCurrency(value)}
+                      donut={true}
+                    />
+                  </ContentCard>
+                </div>
+              )}
 
-              <ContentCard
-                title="Action Distribution"
-                description="Percentage of spending by action type"
-                className="col-span-1"
-              >
-                <EChartsPieChart
-                  data={usdMetrics.byAction.map((item: any) => ({ 
-                    name: item.action, 
-                    value: item.totalRevenue 
-                  }))}
-                  height={400}
-                  colorScheme="financial"
-                  formatter={(value) => formatCurrency(value)}
-                  donut={true}
-                />
-              </ContentCard>
+              {/* Top Spenders Table */}
+              {usdMetrics?.byUser && (
+                <div className="mb-6">
+                  <ContentCard
+                    title="Top Spenders"
+                    description="Users with highest USD consumption"
+                    noPadding
+                  >
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-800">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              User
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Email
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Total Spent
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Transactions
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Avg Transaction
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                          {usdMetrics.byUser.slice(0, 10).map((user) => (
+                            <tr key={user.fingerprintId}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                {user.name || user.fingerprintId.slice(0, 8)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                {user.email || '-'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                {formatCurrency(user.totalSpent)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                {user.transactionCount.toLocaleString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                {formatCurrency(user.avgTransactionValue)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </ContentCard>
+                </div>
+              )}
             </div>
-          )}
-
-          {/* Top Spenders Table */}
-          {usdMetrics?.byUser && (
-            <ContentCard
-              title="Top Spenders"
-              description="Users with highest USD consumption"
-              className="col-span-2"
-              noPadding
-            >
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-300">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        User
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Email
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Total Spent
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Transactions
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Avg Transaction
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {usdMetrics.byUser.slice(0, 10).map((user) => (
-                      <tr key={user.fingerprintId}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.name || user.fingerprintId.slice(0, 8)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {user.email || '-'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {formatCurrency(user.totalSpent)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {user.transactionCount.toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatCurrency(user.avgTransactionValue)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </ContentCard>
           )}
         </>
       )}
