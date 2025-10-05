@@ -716,7 +716,6 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                   </p>
                 </div>
               )}
-
             </div>
           </ContentCard>
 
