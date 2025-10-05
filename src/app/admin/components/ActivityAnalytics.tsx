@@ -260,39 +260,36 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
         </div>
       </div>
 
-      {/* Activity Analytics */}
+      {/* Activity Metrics */}
       {summary && (
-        <>
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Activity Analytics</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatsCard
-                title="Total Events"
-                value={summary.stats.totalEvents.toLocaleString()}
-                icon={<Activity size={24} />}
-                color="primary"
-              />
-              <StatsCard
-                title="Unique Users"
-                value={summary.stats.uniqueUsers.toLocaleString()}
-                icon={<Users size={24} />}
-                color="secondary"
-              />
-              <StatsCard
-                title="Events Today"
-                value={summary.stats.eventsToday.toLocaleString()}
-                icon={<Calendar size={24} />}
-                color="primary"
-              />
-              <StatsCard
-                title="Events per User"
-                value={summary.stats.eventsPerUser.toFixed(1)}
-                icon={<TrendingUp size={24} />}
-                color="secondary"
-              />
-            </div>
+        <div className="mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatsCard
+              title="Total Events"
+              value={summary.stats.totalEvents.toLocaleString()}
+              icon={<Activity size={24} />}
+              color="primary"
+            />
+            <StatsCard
+              title="Unique Users"
+              value={summary.stats.uniqueUsers.toLocaleString()}
+              icon={<Users size={24} />}
+              color="secondary"
+            />
+            <StatsCard
+              title="Events Today"
+              value={summary.stats.eventsToday.toLocaleString()}
+              icon={<Calendar size={24} />}
+              color="primary"
+            />
+            <StatsCard
+              title="Events per User"
+              value={summary.stats.eventsPerUser.toFixed(1)}
+              icon={<TrendingUp size={24} />}
+              color="secondary"
+            />
           </div>
-        </>
+        </div>
       )}
 
       {/* Credit System Metrics */}
