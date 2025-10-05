@@ -251,7 +251,7 @@ export default function Sidebar({
             <div className="flex items-center space-x-3 mb-3">
               <ThemeSwitcher />
               {!collapsed && userInfo && userInfo.name && userInfo.email && (
-                <div className="flex-1 min-w-0 text-right">
+                <div className="min-w-0">
                   <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
                     {userInfo.name}
                   </p>
