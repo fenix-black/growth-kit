@@ -19,7 +19,6 @@ import {
   X,
   LogOut,
   Plus,
-  BarChart3,
   Activity,
   Users,
   User,
@@ -92,13 +91,6 @@ export default function Sidebar({
       icon: Clock, 
       href: '/admin/cron',
       active: pathname === '/admin/cron'
-    },
-    { 
-      id: 'analytics', 
-      label: 'Analytics', 
-      icon: BarChart3, 
-      href: '/admin/analytics',
-      active: pathname === '/admin/analytics'
     },
     { 
       id: 'team', 

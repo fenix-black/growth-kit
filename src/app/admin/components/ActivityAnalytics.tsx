@@ -5,7 +5,6 @@ import ContentCard from '@/components/ui/ContentCard';
 import StatsCard from '@/components/ui/StatsCard';
 import { AdminActivityFeed } from './AdminActivityFeed';
 import { EChartsHeatmap } from '@/components/ui/EChartsHeatmap';
-import { EChartsFunnelChart } from '@/components/ui/EChartsFunnelChart';
 import {
   BarChart3,
   Activity,
@@ -13,9 +12,12 @@ import {
   MousePointer,
   TrendingUp,
   Calendar,
-  RefreshCw
+  RefreshCw,
+  DollarSign,
+  FileText
 } from 'lucide-react';
 import { 
+  EChartsAreaChart,
   EChartsBarChart,
   EChartsPieChart,
   chartColorSchemes
@@ -52,20 +54,68 @@ interface EventSummary {
   }>;
 }
 
+interface UsdMetrics {
+  summary: {
+    totalRevenue: number;
+    totalTransactions: number;
+    uniqueUsers: number;
+    avgTransactionValue: number;
+    avgUserValue: number;
+  };
+  timeline?: Array<{
+    period: string;
+    revenue: number;
+    transactionCount: number;
+    avgTransactionValue: number;
+  }>;
+  byUser?: Array<{
+    fingerprintId: string;
+    email?: string;
+    name?: string;
+    totalSpent: number;
+    transactionCount: number;
+    avgTransactionValue: number;
+  }>;
+  byAction?: Array<{
+    action: string;
+    totalRevenue: number;
+    transactionCount: number;
+    avgTransactionValue: number;
+  }>;
+}
+
+interface GeneralMetrics {
+  overview: {
+    totalFingerprints: number;
+    totalReferrals: number;
+    totalLeads: number;
+    verifiedEmails: number;
+    totalWaitlist: number;
+    invitedWaitlist: number;
+    totalCreditsIssued: number;
+    totalCreditsConsumed: number;
+  };
+  conversion: {
+    referralConversionRate: number;
+    emailVerificationRate: number;
+  };
+}
+
 export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps) {
   const [summary, setSummary] = useState<EventSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [timeRange, setTimeRange] = useState('7');
   const [showFeed, setShowFeed] = useState(false);
-  const [funnelData, setFunnelData] = useState<any>(null);
   const [segmentsData, setSegmentsData] = useState<any>(null);
-  const [funnelSteps, setFunnelSteps] = useState<string[]>(['page_viewed', 'button_clicked', 'form_submitted']);
+  const [usdMetrics, setUsdMetrics] = useState<UsdMetrics | null>(null);
+  const [generalMetrics, setGeneralMetrics] = useState<GeneralMetrics | null>(null);
 
   useEffect(() => {
     fetchSummary();
-    fetchFunnelData();
     fetchSegmentsData();
+    fetchUsdMetrics();
+    fetchGeneralMetrics();
   }, [appId, timeRange]);
 
   const fetchSummary = async () => {
@@ -91,28 +141,6 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
     }
   };
 
-  const fetchFunnelData = async () => {
-    try {
-      const params = new URLSearchParams({
-        appId,
-        steps: funnelSteps.join(','),
-        days: timeRange,
-      });
-
-      const response = await fetch(`/api/v1/admin/analytics/funnel?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setFunnelData(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching funnel data:', error);
-    }
-  };
 
   const fetchSegmentsData = async () => {
     try {
@@ -131,6 +159,60 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
     }
   };
 
+  const fetchUsdMetrics = async () => {
+    try {
+      const timeRangeMap = { '7': '7d', '30': '30d', '90': '90d' };
+      const mappedTimeRange = timeRangeMap[timeRange as keyof typeof timeRangeMap] || '7d';
+      const groupBy = mappedTimeRange === '7d' ? 'day' : mappedTimeRange === '30d' ? 'week' : 'month';
+      
+      const response = await fetch(`/api/v1/admin/metrics/usd?appId=${appId}&groupBy=${groupBy}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsdMetrics(data.data);
+      } else {
+        console.error('Failed to fetch USD metrics:', response.status);
+        setUsdMetrics(null);
+      }
+    } catch (error) {
+      console.error('Error fetching USD metrics:', error);
+      setUsdMetrics(null);
+    }
+  };
+
+  const fetchGeneralMetrics = async () => {
+    try {
+      const response = await fetch(`/api/v1/admin/metrics?appId=${appId}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setGeneralMetrics(data.data);
+      } else {
+        console.error('Failed to fetch general metrics:', response.status);
+        setGeneralMetrics(null);
+      }
+    } catch (error) {
+      console.error('Error fetching general metrics:', error);
+      setGeneralMetrics(null);
+    }
+  };
+
+  const formatCurrency = (value: number): string => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
 
   if (loading) {
     return (
@@ -208,6 +290,108 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
         </div>
       )}
 
+      {/* Credit Metrics */}
+      {generalMetrics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <StatsCard
+            title="Total Credits Issued"
+            value={generalMetrics.overview.totalCreditsIssued.toLocaleString()}
+            icon={<Activity size={24} />}
+            color="primary"
+          />
+          <StatsCard
+            title="Credits Consumed"
+            value={generalMetrics.overview.totalCreditsConsumed.toLocaleString()}
+            icon={<TrendingUp size={24} />}
+            color="purple"
+          />
+          <StatsCard
+            title="Referral Conversion"
+            value={`${generalMetrics.conversion.referralConversionRate.toFixed(1)}%`}
+            icon={<Users size={24} />}
+            color="secondary"
+          />
+          <StatsCard
+            title="Email Verification"
+            value={`${generalMetrics.conversion.emailVerificationRate.toFixed(1)}%`}
+            icon={<FileText size={24} />}
+            color="violet"
+          />
+          <StatsCard
+            title="Credits Balance"
+            value={(generalMetrics.overview.totalCreditsIssued - generalMetrics.overview.totalCreditsConsumed).toLocaleString()}
+            icon={<BarChart3 size={24} />}
+            color="magenta"
+          />
+        </div>
+      )}
+
+      {/* USD Metrics Summary */}
+      {usdMetrics?.summary && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatsCard
+            title="Total USD Spent"
+            value={formatCurrency(usdMetrics.summary.totalRevenue)}
+            icon={<DollarSign size={24} />}
+            color="orange"
+          />
+          <StatsCard
+            title="Total Transactions"
+            value={usdMetrics.summary.totalTransactions.toLocaleString()}
+            icon={<Activity size={24} />}
+            color="pink"
+          />
+          <StatsCard
+            title="Avg Transaction Value"
+            value={formatCurrency(usdMetrics.summary.avgTransactionValue)}
+            icon={<TrendingUp size={24} />}
+            color="violet"
+          />
+          <StatsCard
+            title="Avg User Spend"
+            value={formatCurrency(usdMetrics.summary.avgUserValue)}
+            icon={<Users size={24} />}
+            color="magenta"
+          />
+        </div>
+      )}
+
+      {/* Insights Block */}
+      <ContentCard
+        title="Insights"
+        description="Key observations from your data"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="text-sm font-medium text-blue-900 mb-2">Credit Efficiency</h4>
+            <p className="text-2xl font-bold text-blue-700">
+              {generalMetrics && generalMetrics.overview.totalCreditsConsumed > 0
+                ? `${((generalMetrics.overview.totalCreditsConsumed / generalMetrics.overview.totalCreditsIssued) * 100).toFixed(1)}%`
+                : '0%'}
+            </p>
+            <p className="text-xs text-blue-600 mt-1">Credits consumed vs issued</p>
+          </div>
+          
+          <div className="bg-green-50 p-4 rounded-lg">
+            <h4 className="text-sm font-medium text-green-900 mb-2">Cost per Credit</h4>
+            <p className="text-2xl font-bold text-green-700">
+              {usdMetrics && generalMetrics && generalMetrics.overview.totalCreditsConsumed > 0
+                ? formatCurrency(usdMetrics.summary.totalRevenue / generalMetrics.overview.totalCreditsConsumed)
+                : '$0.00'}
+            </p>
+            <p className="text-xs text-green-600 mt-1">Average USD value per credit</p>
+          </div>
+          
+          <div className="bg-purple-50 p-4 rounded-lg">
+            <h4 className="text-sm font-medium text-purple-900 mb-2">Active Users</h4>
+            <p className="text-2xl font-bold text-purple-700">
+              {usdMetrics?.summary.uniqueUsers || 0}
+            </p>
+            <p className="text-xs text-purple-600 mt-1">Users with USD transactions</p>
+          </div>
+        </div>
+      </ContentCard>
+
       {/* Main content - either feed or charts */}
       {showFeed ? (
         <ContentCard title="Activity Feed" noPadding>
@@ -283,19 +467,6 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
             </ContentCard>
           )}
 
-          {/* Funnel Analysis */}
-          {funnelData && (
-            <ContentCard 
-              title="Conversion Funnel" 
-              description="Track user progression through key events"
-              className="col-span-2"
-            >
-              <EChartsFunnelChart 
-                data={funnelData.funnel}
-                overallConversion={funnelData.overallConversion}
-              />
-            </ContentCard>
-          )}
 
           {/* User Segments */}
           {segmentsData && (
@@ -354,6 +525,123 @@ export default function ActivityAnalytics({ appId, app }: ActivityAnalyticsProps
                     ))}
                   </div>
                 </div>
+              </div>
+            </ContentCard>
+          )}
+
+          {/* USD Financial Charts */}
+          {usdMetrics?.timeline && (
+            <ContentCard
+              title="USD Spending Over Time"
+              description="Financial metrics timeline"
+              className="col-span-2"
+            >
+              <EChartsAreaChart
+                data={usdMetrics.timeline}
+                xKey="period"
+                series={[
+                  { dataKey: 'revenue', name: 'USD Spent', type: 'area', gradient: true },
+                  { dataKey: 'transactionCount', name: 'Transactions', type: 'line' }
+                ]}
+                height={400}
+                colorScheme="financial"
+                formatter={(value) => typeof value === 'number' ? formatCurrency(value) : value.toString()}
+              />
+            </ContentCard>
+          )}
+
+          {/* USD by Action Charts */}
+          {usdMetrics?.byAction && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ContentCard
+                title="USD Spending by Action"
+                description="Which actions consume the most value"
+                className="col-span-1"
+              >
+                <EChartsBarChart
+                  data={usdMetrics.byAction}
+                  xKey="action"
+                  series={[
+                    { dataKey: 'totalRevenue', name: 'Total Spent', color: '#d946ef' }
+                  ]}
+                  height={400}
+                  horizontal={true}
+                  colorScheme="financial"
+                  formatter={(value) => formatCurrency(value)}
+                  showLabel={true}
+                />
+              </ContentCard>
+
+              <ContentCard
+                title="Action Distribution"
+                description="Percentage of spending by action type"
+                className="col-span-1"
+              >
+                <EChartsPieChart
+                  data={usdMetrics.byAction.map((item: any) => ({ 
+                    name: item.action, 
+                    value: item.totalRevenue 
+                  }))}
+                  height={400}
+                  colorScheme="financial"
+                  formatter={(value) => formatCurrency(value)}
+                  donut={true}
+                />
+              </ContentCard>
+            </div>
+          )}
+
+          {/* Top Spenders Table */}
+          {usdMetrics?.byUser && (
+            <ContentCard
+              title="Top Spenders"
+              description="Users with highest USD consumption"
+              className="col-span-2"
+              noPadding
+            >
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-300">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        User
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Total Spent
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Transactions
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Avg Transaction
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {usdMetrics.byUser.slice(0, 10).map((user) => (
+                      <tr key={user.fingerprintId}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.name || user.fingerprintId.slice(0, 8)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {user.email || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {formatCurrency(user.totalSpent)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {user.transactionCount.toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatCurrency(user.avgTransactionValue)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </ContentCard>
           )}
