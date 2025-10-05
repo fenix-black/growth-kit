@@ -189,10 +189,6 @@ export default function AnalyticsDashboard() {
       <PageHeader 
         title="Analytics Dashboard"
         description="Detailed metrics and USD spending analysis"
-        breadcrumbs={[
-          { label: 'Admin', href: '/admin' },
-          { label: 'Analytics' }
-        ]}
         actions={
           <div className="flex space-x-3">
             <select

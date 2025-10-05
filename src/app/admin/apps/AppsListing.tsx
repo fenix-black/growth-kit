@@ -66,10 +66,6 @@ export default function AppsListing() {
       <PageHeader 
         title="Applications"
         description="Manage and monitor all your GrowthKit applications"
-        breadcrumbs={[
-          { label: 'Admin', href: '/admin' },
-          { label: 'Apps' }
-        ]}
         actions={
           <Button
             variant="primary"

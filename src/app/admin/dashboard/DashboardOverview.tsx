@@ -351,10 +351,6 @@ export default function DashboardOverview() {
       <PageHeader 
         title="Dashboard Overview"
         description="Monitor your GrowthKit applications performance and metrics"
-        breadcrumbs={[
-          { label: 'Admin', href: '/admin' },
-          { label: 'Dashboard' }
-        ]}
         actions={
           <div className="flex space-x-3">
             <select
