@@ -29,10 +29,14 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
+  // Credits
+  creditBalance Int @default(0)
+  
   // Relationships
-  users       User[]
-  apps        App[]
-  invitations OrganizationInvitation[]
+  users             User[]
+  apps              App[]
+  invitations       OrganizationInvitation[]
+  creditTransactions OrganizationCreditTransaction[]
 
   @@map("organizations")
 }
@@ -333,4 +337,18 @@ model AdminActivity {
   @@index([targetType, targetId])
   @@index([timestamp])
   @@map("admin_activities")
+}
+
+model OrganizationCreditTransaction {
+  id             String       @id @default(cuid())
+  organizationId String
+  amount         Int          // positive for add, negative for spend
+  type           String       // "ADMIN_ADD", "EMAIL_SEND", "FEATURE_USE", etc.
+  description    String?      // optional human-readable note
+  createdAt      DateTime     @default(now())
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  @@index([organizationId, createdAt])
+  @@map("organization_credit_transactions")
 }

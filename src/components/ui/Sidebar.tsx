@@ -22,7 +22,8 @@ import {
   BarChart3,
   Activity,
   Users,
-  User
+  User,
+  Coins
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -261,6 +262,15 @@ export default function Sidebar({
                 </div>
               )}
             </div>
+            
+            {/* Credits Display */}
+            {!collapsed && (
+              <div className="flex items-center px-3 py-2 mb-2 text-sm text-gray-600 dark:text-gray-400">
+                <Coins size={16} className="text-yellow-500 mr-2" />
+                <span>1,250 credits</span>
+              </div>
+            )}
+            
             <button
               onClick={onLogout}
               className={cn(

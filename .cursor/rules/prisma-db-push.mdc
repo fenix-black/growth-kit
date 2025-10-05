@@ -1,0 +1,39 @@
+---
+alwaysApply: true
+description: Guidelines for Prisma database operations in single-database environment
+---
+
+# Prisma Database Operations
+
+## Always Use `prisma db push`
+
+This project uses a **single database environment** and does NOT use migration files.
+
+### ✅ Correct Command
+```bash
+npx prisma db push
+```
+
+### ❌ Never Use
+```bash
+npx prisma migrate dev
+npx prisma migrate deploy
+```
+
+### Why `db push`?
+- **Single database**: We only have one database (no separate dev/staging/prod)
+- **No migration history needed**: We don't need to track migration files
+- **Faster development**: Direct schema sync without migration file generation
+- **Simpler workflow**: No shadow database issues or migration conflicts
+
+### When Making Schema Changes
+1. Edit [prisma/schema.prisma](mdc:prisma/schema.prisma)
+2. Run `npx prisma db push` to sync changes
+3. Prisma Client is automatically regenerated
+
+### Database Reset (if needed)
+```bash
+npx prisma db push --force-reset
+```
+
+This rule applies to all Prisma-related database operations in this codebase.
