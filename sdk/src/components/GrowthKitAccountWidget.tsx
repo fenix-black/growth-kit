@@ -161,10 +161,8 @@ const AccountWidgetInternal = forwardRef<
     if (setLanguage) {
       setLanguage(language);
       // Trigger refresh to update backend with new language preference
-      // Small delay to ensure API client is updated with new language
-      setTimeout(() => {
-        refresh();
-      }, 100);
+      // The API client's language will be updated via useEffect in useGrowthKit
+      refresh();
     }
   }, [setLanguage, refresh]);
 

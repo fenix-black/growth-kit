@@ -45,7 +45,17 @@ export function useGrowthKit(): GrowthKitHook {
     // In public mode, public key is required
     // In direct mode, API key is required
     apiRef.current = new GrowthKitAPI(config.apiKey, config.publicKey, config.apiUrl, config.debug, currentLanguage);
-  }, [config.apiKey, config.publicKey, config.apiUrl, config.debug, currentLanguage]);
+  }, [config.apiKey, config.publicKey, config.apiUrl, config.debug]); // Remove currentLanguage from deps
+
+  // Update language on existing API instance when it changes
+  useEffect(() => {
+    if (apiRef.current && currentLanguage) {
+      apiRef.current.setLanguage(currentLanguage);
+      if (config.debug) {
+        console.log('[GrowthKit] Updated API language to:', currentLanguage);
+      }
+    }
+  }, [currentLanguage, config.debug]);
 
   // Track previous language to detect changes
   const prevLanguageRef = useRef(currentLanguage);
@@ -392,9 +402,10 @@ export function useGrowthKit(): GrowthKitHook {
         console.log('[GrowthKit] Language changed from', prevLanguageRef.current, 'to', currentLanguage, '- refreshing data');
       }
       prevLanguageRef.current = currentLanguage;
-      refresh();
+      // Don't refresh here - let the widget's setLanguageWithRefresh handle it
+      // This avoids duplicate refresh calls
     }
-  }, [currentLanguage, state.initialized, state.loading, refresh]);
+  }, [currentLanguage, state.initialized, state.loading]);
 
   // Complete an action
   const completeAction = useCallback(async (
