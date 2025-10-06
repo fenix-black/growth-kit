@@ -73,7 +73,6 @@ export default function LandingNav() {
 
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center space-x-4">
-            <LanguageSwitcher />
             <Link
               href="https://github.com/fenix-black/growth-kit"
               target="_blank"
@@ -115,6 +114,7 @@ export default function LandingNav() {
             >
               {t('nav.getStarted')}
             </Link>
+            <LanguageSwitcher />
           </div>
 
           {/* Mobile Menu Button */}

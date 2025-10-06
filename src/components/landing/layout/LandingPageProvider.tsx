@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
-import { GrowthKitAccountWidget, useGrowthKit } from '@fenixblack/growthkit';
+import { useEffect, useRef } from 'react';
+import { GrowthKitAccountWidget, useGrowthKit, type GrowthKitAccountWidgetRef } from '@fenixblack/growthkit';
+import { useLanguageContext } from '@/contexts/LanguageContext';
 
 // Analytics wrapper that tracks landing page interactions
 function LandingPageTracker({ children }: { children: React.ReactNode }) {
@@ -36,16 +37,30 @@ function LandingPageTracker({ children }: { children: React.ReactNode }) {
 }
 
 export default function LandingPageProvider({ children }: { children: React.ReactNode }) {
+  const { language } = useLanguageContext();
+  const widgetRef = useRef<GrowthKitAccountWidgetRef>(null);
+
   const config = {
     // ✨ Client-side only with public key - SDK auto-detects production API
     publicKey: process.env.NEXT_PUBLIC_GROWTHKIT_PUBLIC_KEY!,
     debug: process.env.NODE_ENV === 'development',
-    language: 'en' as const,
+    language: language, // Dynamic language from context
     theme: 'auto' as const,
   };
 
+  // Sync widget language when landing page language changes
+  useEffect(() => {
+    if (widgetRef.current) {
+      widgetRef.current.setLanguage(language);
+      if (config.debug) {
+        console.log('[GrowthKit] Widget language updated to:', language);
+      }
+    }
+  }, [language, config.debug]);
+
   return (
     <GrowthKitAccountWidget 
+      ref={widgetRef}
       config={config}
       position="bottom-right"
       slim={true}
