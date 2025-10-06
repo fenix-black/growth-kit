@@ -1,0 +1,143 @@
+{
+  "nav": {
+    "features": "Features",
+    "examples": "Examples",
+    "integration": "Integration",
+    "demo": "Demo",
+    "dashboard": "Dashboard",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "badge": "No backend required • Works everywhere • 10 second setup",
+    "transformWord1": "Transform",
+    "transformWord2": "Supercharge",
+    "transformWord3": "Accelerate",
+    "transformWord4": "Amplify",
+    "title1": "any app into a",
+    "title2": "viral growth engine",
+    "subtitle1": "Add referrals, credits, and waitlists to",
+    "subtitle2": "any JavaScript app",
+    "subtitle3": "in seconds.",
+    "subtitle4": "No backend. No framework lock-in. No complexity.",
+    "ctaPrimary": "Start Building Today",
+    "ctaSecondary": "See How It Works",
+    "stat1Value": "0 backend",
+    "stat1Label": "Infrastructure Required",
+    "stat2Value": "2 steps",
+    "stat2Label": "To Add Viral Growth",
+    "stat3Value": "∞ platforms",
+    "stat3Label": "React, Vue, Static Sites..."
+  },
+  "features": {
+    "badge": "Powerful Features",
+    "title1": "Everything you need to",
+    "title2": "supercharge your growth",
+    "subtitle": "From anonymous user tracking to viral referral systems - get enterprise-grade growth features that work",
+    "subtitleHighlight": "anywhere JavaScript runs",
+    "platforms": {
+      "static": "🌐 Static Sites",
+      "frameworks": "⚛️ React/Vue/Svelte",
+      "nextjs": "🚀 Next.js",
+      "github": "📄 GitHub Pages",
+      "codepen": "🎨 CodePen",
+      "any": "☁️ Any Platform"
+    },
+    "fingerprinting": {
+      "title": "Browser Fingerprinting",
+      "description": "Track anonymous users without cookies or accounts. Works everywhere JavaScript runs.",
+      "demoTitle": "User Fingerprinting",
+      "demoStatus": "Anonymous Tracking"
+    },
+    "referrals": {
+      "title": "Viral Referrals",
+      "description": "Turn users into growth champions with automatic referral tracking and credit rewards.",
+      "demoTitle": "Viral Referrals",
+      "demoCoefficient": "Viral Coefficient"
+    },
+    "credits": {
+      "title": "Flexible Credits",
+      "description": "Reward any action with credits. Gate features, track usage, or create your own economy.",
+      "demoTitle": "Credit System",
+      "actions": {
+        "emailVerification": "Email Verification",
+        "friendReferral": "Friend Referral",
+        "profileComplete": "Profile Complete"
+      },
+      "useCredit": "Use Credit (-1)"
+    },
+    "waitlist": {
+      "title": "Smart Waitlists",
+      "description": "Build hype with position tracking, auto-invites, and referral-based queue jumping.",
+      "demoTitle": "Smart Waitlist",
+      "demoQueue": "in queue",
+      "statuses": {
+        "invited": "invited",
+        "queued": "queued"
+      },
+      "autoInvite": "Auto-inviting 30 users daily"
+    },
+    "liveDemo": "Live Demo"
+  },
+  "cta": {
+    "title1": "Ready to",
+    "title2": "10x your growth",
+    "title3": "?",
+    "subtitle": "Join hundreds of developers who've already transformed their apps into viral growth engines. Get started today and watch your user acquisition skyrocket.",
+    "ctaPrimary": "Start Building Now",
+    "ctaSecondary": "See How It Works",
+    "stat1Value": "300%+",
+    "stat1Label": "Average Growth Increase",
+    "stat2Value": "500+",
+    "stat2Label": "Active Apps",
+    "stat3Value": "<30s",
+    "stat3Label": "Setup Time",
+    "trustedBy": "Trusted by developers at",
+    "companies": {
+      "startups": "Startups",
+      "scaleups": "Scale-ups",
+      "enterprise": "Enterprise",
+      "agencies": "Agencies",
+      "indie": "Indie Makers"
+    },
+    "bottomMessage": "Free to start • No credit card required • Cancel anytime"
+  },
+  "footer": {
+    "tagline": "Transform any app into a viral growth engine with referrals, credits, and waitlists. Built for developers who want enterprise-grade growth features without the complexity.",
+    "product": "Product",
+    "productLinks": {
+      "features": "Features",
+      "examples": "Examples",
+      "demo": "Demo",
+      "dashboard": "Dashboard"
+    },
+    "developers": "Developers",
+    "developersLinks": {
+      "sdk": "SDK Documentation",
+      "api": "API Reference",
+      "github": "GitHub",
+      "examples": "Code Examples"
+    },
+    "resources": "Resources",
+    "resourcesLinks": {
+      "blog": "Blog",
+      "guides": "Guides",
+      "changelog": "Changelog",
+      "support": "Support"
+    },
+    "company": "Company",
+    "companyLinks": {
+      "about": "About",
+      "contact": "Contact",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    },
+    "ctaTitle": "Ready to accelerate your growth?",
+    "ctaSubtitle": "Get started with GrowthKit today and see the difference.",
+    "ctaButton": "Start Building Your Growth Engine",
+    "copyright": "© 2025 GrowthKit by",
+    "copyrightCompany": "FenixBlack",
+    "copyrightSuffix": ". All rights reserved.",
+    "builtWith": "Built with",
+    "builtWithSuffix": "for developers"
+  }
+}

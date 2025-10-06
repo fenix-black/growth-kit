@@ -11,8 +11,10 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import ScrollReveal from '@/components/landing/animations/ScrollReveal';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function CTASection() {
+  const { t } = useTranslation();
   return (
     <section id="get-started" className="py-20 bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden dark-section">
       {/* Animated Background Elements */}
@@ -74,7 +76,7 @@ export default function CTASection() {
             </motion.div>
 
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-              Ready to{' '}
+              {t('cta.title1')}{' '}
               <span 
                 className="text-primary"
                 style={{
@@ -84,14 +86,13 @@ export default function CTASection() {
                   backgroundClip: 'text'
                 }}
               >
-                10x your growth
+                {t('cta.title2')}
               </span>
-              ?
+              {t('cta.title3')}
             </h2>
             
             <p className="text-xl text-gray-300 mb-12 leading-relaxed max-w-2xl mx-auto">
-              Join hundreds of developers who've already transformed their apps into viral growth engines. 
-              Get started today and watch your user acquisition skyrocket.
+              {t('cta.subtitle')}
             </p>
 
             {/* CTA Buttons */}
@@ -103,14 +104,14 @@ export default function CTASection() {
                   background: 'linear-gradient(to right, #10b981, #14b8a6)',
                 }}
               >
-                <span>Start Building Now</span>
+                <span>{t('cta.ctaPrimary')}</span>
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-200" />
               </Link>
               <Link
                 href="#features"
                 className="group bg-white/20 backdrop-blur-sm text-white border-2 border-white/40 px-10 py-5 rounded-2xl font-bold text-xl hover:bg-white/30 hover:border-white/60 transition-all duration-300 hover:scale-105 flex items-center space-x-3 shadow-lg"
               >
-                <span>See How It Works</span>
+                <span>{t('cta.ctaSecondary')}</span>
                 <Sparkles className="w-6 h-6 group-hover:rotate-12 transition-transform duration-200" />
               </Link>
             </div>
@@ -130,8 +131,8 @@ export default function CTASection() {
               >
                 <TrendingUp className="w-8 h-8 text-white" />
               </div>
-              <div className="text-4xl font-bold text-white mb-2">300%+</div>
-              <div className="text-gray-400 font-medium">Average Growth Increase</div>
+              <div className="text-4xl font-bold text-white mb-2">{t('cta.stat1Value')}</div>
+              <div className="text-gray-400 font-medium">{t('cta.stat1Label')}</div>
             </motion.div>
 
             <motion.div
@@ -146,8 +147,8 @@ export default function CTASection() {
               >
                 <Users className="w-8 h-8 text-white" />
               </div>
-              <div className="text-4xl font-bold text-white mb-2">500+</div>
-              <div className="text-gray-400 font-medium">Active Apps</div>
+              <div className="text-4xl font-bold text-white mb-2">{t('cta.stat2Value')}</div>
+              <div className="text-gray-400 font-medium">{t('cta.stat2Label')}</div>
             </motion.div>
 
             <motion.div
@@ -162,21 +163,21 @@ export default function CTASection() {
               >
                 <Zap className="w-8 h-8 text-white" />
               </div>
-              <div className="text-4xl font-bold text-white mb-2">&lt;30s</div>
-              <div className="text-gray-400 font-medium">Setup Time</div>
+              <div className="text-4xl font-bold text-white mb-2">{t('cta.stat3Value')}</div>
+              <div className="text-gray-400 font-medium">{t('cta.stat3Label')}</div>
             </motion.div>
           </div>
 
           {/* Trust Indicators */}
           <div className="mt-16 pt-8 border-t border-white/10">
-            <p className="text-gray-400 text-lg mb-8">Trusted by developers at</p>
+            <p className="text-gray-400 text-lg mb-8">{t('cta.trustedBy')}</p>
             <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
               {[
-                'Startups',
-                'Scale-ups', 
-                'Enterprise',
-                'Agencies',
-                'Indie Makers'
+                t('cta.companies.startups'),
+                t('cta.companies.scaleups'),
+                t('cta.companies.enterprise'),
+                t('cta.companies.agencies'),
+                t('cta.companies.indie')
               ].map((company, index) => (
                 <motion.div
                   key={company}
@@ -194,7 +195,7 @@ export default function CTASection() {
           {/* Bottom Message */}
           <div className="mt-12">
             <p className="text-gray-400 text-sm">
-              Free to start • No credit card required • Cancel anytime
+              {t('cta.bottomMessage')}
             </p>
           </div>
         </ScrollReveal>

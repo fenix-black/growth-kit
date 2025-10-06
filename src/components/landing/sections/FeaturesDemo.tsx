@@ -15,9 +15,11 @@ import {
 } from 'lucide-react';
 import ScrollReveal, { ScrollRevealStagger, StaggerItem } from '@/components/landing/animations/ScrollReveal';
 import { featureDetails } from '@/lib/landing/examples';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function FeaturesDemo() {
   const [activeFeature, setActiveFeature] = useState(0);
+  const { t } = useTranslation();
 
   const iconMap = {
     'Fingerprint': Fingerprint,
@@ -77,10 +79,10 @@ export default function FeaturesDemo() {
         <ScrollReveal className="text-center mb-16">
           <div className="flex items-center justify-center space-x-2 text-primary mb-4">
             <Zap className="w-6 h-6" />
-            <span className="text-sm font-semibold uppercase tracking-wider">Powerful Features</span>
+            <span className="text-sm font-semibold uppercase tracking-wider">{t('features.badge')}</span>
           </div>
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Everything you need to
+            {t('features.title1')}
             <br />
             <span 
               className="text-primary"
@@ -91,21 +93,21 @@ export default function FeaturesDemo() {
                 backgroundClip: 'text'
               }}
             >
-              supercharge your growth
+              {t('features.title2')}
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            From anonymous user tracking to viral referral systems - get enterprise-grade growth features 
-            that work <span className="font-semibold text-primary">anywhere JavaScript runs</span>.
+            {t('features.subtitle')}{' '}
+            <span className="font-semibold text-primary">{t('features.subtitleHighlight')}</span>.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             {[
-              '🌐 Static Sites',
-              '⚛️ React/Vue/Svelte',
-              '🚀 Next.js',
-              '📄 GitHub Pages',
-              '🎨 CodePen',
-              '☁️ Any Platform'
+              t('features.platforms.static'),
+              t('features.platforms.frameworks'),
+              t('features.platforms.nextjs'),
+              t('features.platforms.github'),
+              t('features.platforms.codepen'),
+              t('features.platforms.any')
             ].map((platform) => (
               <motion.div
                 key={platform}
@@ -224,7 +226,7 @@ export default function FeaturesDemo() {
               >
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-gray-700">Live Demo</span>
+                  <span className="text-sm font-medium text-gray-700">{t('features.liveDemo')}</span>
                 </div>
               </motion.div>
             </div>
@@ -237,13 +239,15 @@ export default function FeaturesDemo() {
 
 // Individual demo components
 function FingerprintingDemo() {
+  const { t } = useTranslation();
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-gray-900">User Fingerprinting</h3>
+        <h3 className="text-xl font-semibold text-gray-900">{t('features.fingerprinting.demoTitle')}</h3>
         <div className="flex items-center space-x-2 text-sm text-gray-600">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span>Anonymous Tracking</span>
+          <span>{t('features.fingerprinting.demoStatus')}</span>
         </div>
       </div>
       
@@ -281,11 +285,13 @@ function FingerprintingDemo() {
 }
 
 function ReferralDemo() {
+  const { t } = useTranslation();
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-gray-900">Viral Referrals</h3>
-        <div className="text-sm font-medium text-fenix-purple">0.45 Viral Coefficient</div>
+        <h3 className="text-xl font-semibold text-gray-900">{t('features.referrals.demoTitle')}</h3>
+        <div className="text-sm font-medium text-fenix-purple">0.45 {t('features.referrals.demoCoefficient')}</div>
       </div>
       
       <div className="space-y-4">
@@ -329,11 +335,12 @@ function ReferralDemo() {
 
 function CreditsDemo() {
   const [credits, setCredits] = useState(24);
+  const { t } = useTranslation();
   
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-gray-900">Credit System</h3>
+        <h3 className="text-xl font-semibold text-gray-900">{t('features.credits.demoTitle')}</h3>
         <div className="flex items-center space-x-2">
           <Coins className="w-5 h-5 text-fenix-orange" />
           <span className="text-xl font-bold text-fenix-orange">{credits}</span>
@@ -342,9 +349,9 @@ function CreditsDemo() {
       
       <div className="space-y-3">
         {[
-          { action: 'Email Verification', credits: '+5', color: 'green' },
-          { action: 'Friend Referral', credits: '+3', color: 'blue' },
-          { action: 'Profile Complete', credits: '+2', color: 'purple' },
+          { action: t('features.credits.actions.emailVerification'), credits: '+5', color: 'green' },
+          { action: t('features.credits.actions.friendReferral'), credits: '+3', color: 'blue' },
+          { action: t('features.credits.actions.profileComplete'), credits: '+2', color: 'purple' },
         ].map((item, index) => (
           <motion.div
             key={item.action}
@@ -368,18 +375,20 @@ function CreditsDemo() {
           background: 'linear-gradient(to right, #f97316, #ec4899)',
         }}
       >
-        Use Credit (-1)
+        {t('features.credits.useCredit')}
       </motion.button>
     </div>
   );
 }
 
 function WaitlistDemo() {
+  const { t } = useTranslation();
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-gray-900">Smart Waitlist</h3>
-        <div className="text-sm font-medium text-fenix-magenta">1,247 in queue</div>
+        <h3 className="text-xl font-semibold text-gray-900">{t('features.waitlist.demoTitle')}</h3>
+        <div className="text-sm font-medium text-fenix-magenta">1,247 {t('features.waitlist.demoQueue')}</div>
       </div>
       
       <div className="space-y-3">
@@ -413,7 +422,7 @@ function WaitlistDemo() {
                 ? 'bg-green-100 text-green-700' 
                 : 'bg-gray-100 text-gray-600'
             }`}>
-              {user.status}
+              {t(`features.waitlist.statuses.${user.status}`)}
             </div>
           </motion.div>
         ))}
@@ -427,7 +436,7 @@ function WaitlistDemo() {
         >
           <Clock className="w-4 h-4" />
         </motion.div>
-        <p className="text-sm text-gray-600">Auto-inviting 30 users daily</p>
+        <p className="text-sm text-gray-600">{t('features.waitlist.autoInvite')}</p>
       </div>
     </div>
   );

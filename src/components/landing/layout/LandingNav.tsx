@@ -7,17 +7,20 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAdaptiveNav } from '@/hooks/useAdaptiveNav';
 import { useGrowthKit } from '@fenixblack/growthkit';
+import { useTranslation } from '@/hooks/useTranslation';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export default function LandingNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navTheme = useAdaptiveNav();
   const { track } = useGrowthKit();
+  const { t } = useTranslation();
 
   const navItems = [
-    { href: '#features', label: 'Features' },
-    { href: '#examples', label: 'Examples' },
-    { href: '#integration', label: 'Integration' },
-    { href: '/demo', label: 'Demo' },
+    { href: '#features', label: t('nav.features') },
+    { href: '#examples', label: t('nav.examples') },
+    { href: '#integration', label: t('nav.integration') },
+    { href: '/demo', label: t('nav.demo') },
   ];
 
   return (
@@ -70,6 +73,7 @@ export default function LandingNav() {
 
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center space-x-4">
+            <LanguageSwitcher />
             <Link
               href="https://github.com/fenix-black/growth-kit"
               target="_blank"
@@ -90,7 +94,7 @@ export default function LandingNav() {
                 source: 'header'
               })}
             >
-              <span>Dashboard</span>
+              <span>{t('nav.dashboard')}</span>
               <ExternalLink className="w-4 h-4" />
             </Link>
             <Link
@@ -109,7 +113,7 @@ export default function LandingNav() {
                 navStyle: navTheme.isDark ? 'dark_mode' : 'light_mode'
               })}
             >
-              Get Started
+              {t('nav.getStarted')}
             </Link>
           </div>
 
@@ -140,6 +144,9 @@ export default function LandingNav() {
             }`}
           >
             <div className="px-4 pt-2 pb-4 space-y-1">
+              <div className="px-3 py-2">
+                <LanguageSwitcher />
+              </div>
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -165,7 +172,7 @@ export default function LandingNav() {
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  <span>Dashboard</span>
+                  <span>{t('nav.dashboard')}</span>
                   <ExternalLink className="w-4 h-4" />
                 </Link>
                 <Link
@@ -180,7 +187,7 @@ export default function LandingNav() {
                     background: 'linear-gradient(to right, #10b981, #14b8a6)',
                   } : {}}
                 >
-                  Get Started
+                  {t('nav.getStarted')}
                 </Link>
               </div>
             </div>

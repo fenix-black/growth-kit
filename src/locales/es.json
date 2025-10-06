@@ -1,0 +1,143 @@
+{
+  "nav": {
+    "features": "Características",
+    "examples": "Ejemplos",
+    "integration": "Integración",
+    "demo": "Demo",
+    "dashboard": "Panel",
+    "getStarted": "Comenzar"
+  },
+  "hero": {
+    "badge": "Sin backend requerido • Funciona en todas partes • Configuración en 10 segundos",
+    "transformWord1": "Transforma",
+    "transformWord2": "Potencia",
+    "transformWord3": "Acelera",
+    "transformWord4": "Amplifica",
+    "title1": "cualquier app en un",
+    "title2": "motor de crecimiento viral",
+    "subtitle1": "Agrega referencias, créditos y listas de espera a",
+    "subtitle2": "cualquier app JavaScript",
+    "subtitle3": "en segundos.",
+    "subtitle4": "Sin backend. Sin dependencia de frameworks. Sin complejidad.",
+    "ctaPrimary": "Comienza a Construir Hoy",
+    "ctaSecondary": "Ver Cómo Funciona",
+    "stat1Value": "0 backend",
+    "stat1Label": "Infraestructura Requerida",
+    "stat2Value": "2 pasos",
+    "stat2Label": "Para Agregar Crecimiento Viral",
+    "stat3Value": "∞ plataformas",
+    "stat3Label": "React, Vue, Sitios Estáticos..."
+  },
+  "features": {
+    "badge": "Características Poderosas",
+    "title1": "Todo lo que necesitas para",
+    "title2": "potenciar tu crecimiento",
+    "subtitle": "Desde seguimiento anónimo de usuarios hasta sistemas de referidos virales - obtén características de crecimiento de nivel empresarial que funcionan",
+    "subtitleHighlight": "donde sea que JavaScript funcione",
+    "platforms": {
+      "static": "🌐 Sitios Estáticos",
+      "frameworks": "⚛️ React/Vue/Svelte",
+      "nextjs": "🚀 Next.js",
+      "github": "📄 GitHub Pages",
+      "codepen": "🎨 CodePen",
+      "any": "☁️ Cualquier Plataforma"
+    },
+    "fingerprinting": {
+      "title": "Huella Digital del Navegador",
+      "description": "Rastrea usuarios anónimos sin cookies ni cuentas. Funciona donde sea que JavaScript funcione.",
+      "demoTitle": "Huella Digital de Usuario",
+      "demoStatus": "Seguimiento Anónimo"
+    },
+    "referrals": {
+      "title": "Referencias Virales",
+      "description": "Convierte usuarios en campeones de crecimiento con seguimiento automático de referidos y recompensas de créditos.",
+      "demoTitle": "Referencias Virales",
+      "demoCoefficient": "Coeficiente Viral"
+    },
+    "credits": {
+      "title": "Créditos Flexibles",
+      "description": "Recompensa cualquier acción con créditos. Controla características, rastrea uso, o crea tu propia economía.",
+      "demoTitle": "Sistema de Créditos",
+      "actions": {
+        "emailVerification": "Verificación de Email",
+        "friendReferral": "Referido de Amigo",
+        "profileComplete": "Perfil Completo"
+      },
+      "useCredit": "Usar Crédito (-1)"
+    },
+    "waitlist": {
+      "title": "Listas de Espera Inteligentes",
+      "description": "Genera expectativa con seguimiento de posición, auto-invitaciones, y avance en la cola basado en referidos.",
+      "demoTitle": "Lista de Espera Inteligente",
+      "demoQueue": "en cola",
+      "statuses": {
+        "invited": "invitado",
+        "queued": "en cola"
+      },
+      "autoInvite": "Auto-invitando 30 usuarios diariamente"
+    },
+    "liveDemo": "Demo en Vivo"
+  },
+  "cta": {
+    "title1": "¿Listo para",
+    "title2": "multiplicar tu crecimiento x10",
+    "title3": "?",
+    "subtitle": "Únete a cientos de desarrolladores que ya han transformado sus apps en motores de crecimiento viral. Comienza hoy y observa cómo se dispara tu adquisición de usuarios.",
+    "ctaPrimary": "Comienza a Construir Ahora",
+    "ctaSecondary": "Ver Cómo Funciona",
+    "stat1Value": "300%+",
+    "stat1Label": "Aumento Promedio de Crecimiento",
+    "stat2Value": "500+",
+    "stat2Label": "Apps Activas",
+    "stat3Value": "<30s",
+    "stat3Label": "Tiempo de Configuración",
+    "trustedBy": "Confiado por desarrolladores en",
+    "companies": {
+      "startups": "Startups",
+      "scaleups": "Scale-ups",
+      "enterprise": "Empresas",
+      "agencies": "Agencias",
+      "indie": "Creadores Independientes"
+    },
+    "bottomMessage": "Gratis para comenzar • Sin tarjeta de crédito • Cancela cuando quieras"
+  },
+  "footer": {
+    "tagline": "Transforma cualquier app en un motor de crecimiento viral con referencias, créditos y listas de espera. Construido para desarrolladores que quieren características de crecimiento de nivel empresarial sin la complejidad.",
+    "product": "Producto",
+    "productLinks": {
+      "features": "Características",
+      "examples": "Ejemplos",
+      "demo": "Demo",
+      "dashboard": "Panel"
+    },
+    "developers": "Desarrolladores",
+    "developersLinks": {
+      "sdk": "Documentación del SDK",
+      "api": "Referencia de API",
+      "github": "GitHub",
+      "examples": "Ejemplos de Código"
+    },
+    "resources": "Recursos",
+    "resourcesLinks": {
+      "blog": "Blog",
+      "guides": "Guías",
+      "changelog": "Registro de Cambios",
+      "support": "Soporte"
+    },
+    "company": "Empresa",
+    "companyLinks": {
+      "about": "Acerca de",
+      "contact": "Contacto",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos de Servicio"
+    },
+    "ctaTitle": "¿Listo para acelerar tu crecimiento?",
+    "ctaSubtitle": "Comienza con GrowthKit hoy y observa la diferencia.",
+    "ctaButton": "Comienza a Construir Tu Motor de Crecimiento",
+    "copyright": "© 2025 GrowthKit por",
+    "copyrightCompany": "FenixBlack",
+    "copyrightSuffix": ". Todos los derechos reservados.",
+    "builtWith": "Construido con",
+    "builtWithSuffix": "para desarrolladores"
+  }
+}

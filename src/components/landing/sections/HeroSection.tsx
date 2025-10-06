@@ -6,10 +6,17 @@ import Image from 'next/image';
 import { ArrowRight, Sparkles, TrendingUp, Users, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useGrowthKit } from '@fenixblack/growthkit';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function HeroSection() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const transformWords = ['Transform', 'Supercharge', 'Accelerate', 'Amplify'];
+  const { t } = useTranslation();
+  const transformWords = [
+    t('hero.transformWord1'),
+    t('hero.transformWord2'),
+    t('hero.transformWord3'),
+    t('hero.transformWord4')
+  ];
   const { track } = useGrowthKit();
 
   // Animated word cycling
@@ -165,7 +172,7 @@ export default function HeroSection() {
         <motion.div variants={itemVariants} className="mb-8">
           <div className="inline-flex items-center space-x-2 bg-white/90 backdrop-blur-sm border border-primary/30 rounded-full px-6 py-3 text-sm font-medium text-gray-800 shadow-lg shadow-primary/10">
             <Zap className="w-4 h-4 text-primary" />
-            <span>No backend required • Works everywhere • 10 second setup</span>
+            <span>{t('hero.badge')}</span>
           </div>
         </motion.div>
 
@@ -189,7 +196,7 @@ export default function HeroSection() {
               {transformWords[currentWordIndex]}
             </motion.span>
             <br />
-<span className="text-gray-900">any app into a</span>
+<span className="text-gray-900">{t('hero.title1')}</span>
             <br />
             <span 
               className="text-fenix-magenta"
@@ -200,7 +207,7 @@ export default function HeroSection() {
                 backgroundClip: 'text'
               }}
             >
-              viral growth engine
+              {t('hero.title2')}
             </span>
           </h1>
         </motion.div>
@@ -208,10 +215,10 @@ export default function HeroSection() {
         {/* Subtitle */}
         <motion.div variants={itemVariants} className="mb-12">
           <p className="text-xl sm:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Add referrals, credits, and waitlists to{' '}
-            <span className="font-semibold text-primary">any JavaScript app</span> in seconds.
+            {t('hero.subtitle1')}{' '}
+            <span className="font-semibold text-primary">{t('hero.subtitle2')}</span> {t('hero.subtitle3')}
             <br />
-            <span className="font-semibold text-gray-900">No backend. No framework lock-in. No complexity.</span>
+            <span className="font-semibold text-gray-900">{t('hero.subtitle4')}</span>
           </p>
         </motion.div>
 
@@ -230,7 +237,7 @@ export default function HeroSection() {
                 destination: 'get-started'
               })}
             >
-              <span>Start Building Today</span>
+              <span>{t('hero.ctaPrimary')}</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
             </Link>
             <Link
@@ -242,7 +249,7 @@ export default function HeroSection() {
                 destination: 'features'
               })}
             >
-              See How It Works
+              {t('hero.ctaSecondary')}
             </Link>
           </div>
         </motion.div>
@@ -260,9 +267,9 @@ export default function HeroSection() {
                   backgroundClip: 'text'
                 }}
               >
-                0 backend
+                {t('hero.stat1Value')}
               </div>
-              <div className="text-gray-600 text-sm font-medium">Infrastructure Required</div>
+              <div className="text-gray-600 text-sm font-medium">{t('hero.stat1Label')}</div>
             </div>
             <div className="text-center">
               <div 
@@ -274,9 +281,9 @@ export default function HeroSection() {
                   backgroundClip: 'text'
                 }}
               >
-                2 steps
+                {t('hero.stat2Value')}
               </div>
-              <div className="text-gray-600 text-sm font-medium">To Add Viral Growth</div>
+              <div className="text-gray-600 text-sm font-medium">{t('hero.stat2Label')}</div>
             </div>
             <div className="text-center">
               <div 
@@ -288,9 +295,9 @@ export default function HeroSection() {
                   backgroundClip: 'text'
                 }}
               >
-                ∞ platforms
+                {t('hero.stat3Value')}
               </div>
-              <div className="text-gray-600 text-sm font-medium">React, Vue, Static Sites...</div>
+              <div className="text-gray-600 text-sm font-medium">{t('hero.stat3Label')}</div>
             </div>
           </div>
         </motion.div>

@@ -3,43 +3,46 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Github, ExternalLink, Heart } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function LandingFooter() {
+  const { t } = useTranslation();
+  
   const footerSections = [
     {
-      title: 'Product',
+      title: t('footer.product'),
       links: [
-        { href: '#features', label: 'Features' },
-        { href: '#examples', label: 'Examples' },
-        { href: '/demo', label: 'Demo' },
-        { href: '/admin', label: 'Dashboard' },
+        { href: '#features', label: t('footer.productLinks.features') },
+        { href: '#examples', label: t('footer.productLinks.examples') },
+        { href: '/demo', label: t('footer.productLinks.demo') },
+        { href: '/admin', label: t('footer.productLinks.dashboard') },
       ]
     },
     {
-      title: 'Developers',
+      title: t('footer.developers'),
       links: [
-        { href: 'https://github.com/fenix-black/growth-kit/tree/main/sdk', label: 'SDK Documentation', external: true },
-        { href: '/api-docs', label: 'API Reference' },
-        { href: 'https://github.com/fenix-black/growth-kit', label: 'GitHub', external: true },
-        { href: '/examples', label: 'Code Examples' },
+        { href: 'https://github.com/fenix-black/growth-kit/tree/main/sdk', label: t('footer.developersLinks.sdk'), external: true },
+        { href: '/api-docs', label: t('footer.developersLinks.api') },
+        { href: 'https://github.com/fenix-black/growth-kit', label: t('footer.developersLinks.github'), external: true },
+        { href: '/examples', label: t('footer.developersLinks.examples') },
       ]
     },
     {
-      title: 'Resources',
+      title: t('footer.resources'),
       links: [
-        { href: '/blog', label: 'Blog' },
-        { href: '/guides', label: 'Guides' },
-        { href: '/changelog', label: 'Changelog' },
-        { href: '/support', label: 'Support' },
+        { href: '/blog', label: t('footer.resourcesLinks.blog') },
+        { href: '/guides', label: t('footer.resourcesLinks.guides') },
+        { href: '/changelog', label: t('footer.resourcesLinks.changelog') },
+        { href: '/support', label: t('footer.resourcesLinks.support') },
       ]
     },
     {
-      title: 'Company',
+      title: t('footer.company'),
       links: [
-        { href: '/about', label: 'About' },
-        { href: '/contact', label: 'Contact' },
-        { href: '/privacy', label: 'Privacy Policy' },
-        { href: '/terms', label: 'Terms of Service' },
+        { href: '/about', label: t('footer.companyLinks.about') },
+        { href: '/contact', label: t('footer.companyLinks.contact') },
+        { href: '/privacy', label: t('footer.companyLinks.privacy') },
+        { href: '/terms', label: t('footer.companyLinks.terms') },
       ]
     }
   ];
@@ -66,8 +69,7 @@ export default function LandingFooter() {
               </div>
             </div>
             <p className="text-gray-600 text-sm mb-4 max-w-sm">
-              Transform any app into a viral growth engine with referrals, credits, and waitlists. 
-              Built for developers who want enterprise-grade growth features without the complexity.
+              {t('footer.tagline')}
             </p>
             <div className="flex space-x-4">
               <Link
@@ -106,8 +108,8 @@ export default function LandingFooter() {
         {/* CTA Section */}
         <div className="mt-12 pt-8 border-t border-gray-200">
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to accelerate your growth?</h3>
-            <p className="text-gray-600 mb-4">Get started with GrowthKit today and see the difference.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('footer.ctaTitle')}</h3>
+            <p className="text-gray-600 mb-4">{t('footer.ctaSubtitle')}</p>
             <Link
               href="#get-started"
               className="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg hover:shadow-primary/25 transition-all duration-200 hover:scale-105"
@@ -115,7 +117,7 @@ export default function LandingFooter() {
                 background: 'linear-gradient(to right, #10b981, #14b8a6)',
               }}
             >
-              Start Building Your Growth Engine
+              {t('footer.ctaButton')}
             </Link>
           </div>
         </div>
@@ -128,12 +130,12 @@ export default function LandingFooter() {
             rel="noopener noreferrer"
             className="text-gray-500 hover:text-primary transition-colors duration-200 text-sm cursor-pointer hover:underline"
           >
-            © 2025 GrowthKit by <span className="font-medium">FenixBlack</span>. All rights reserved.
+            {t('footer.copyright')} <span className="font-medium">{t('footer.copyrightCompany')}</span>{t('footer.copyrightSuffix')}
           </Link>
           <div className="flex items-center space-x-1 text-gray-500 text-sm">
-            <span>Built with</span>
+            <span>{t('footer.builtWith')}</span>
             <Heart className="w-4 h-4 text-red-500 fill-current" />
-            <span>for developers</span>
+            <span>{t('footer.builtWithSuffix')}</span>
           </div>
         </div>
       </div>
