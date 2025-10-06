@@ -44,8 +44,8 @@ export function useGrowthKit(): GrowthKitHook {
     // In proxy mode, no API key is required (it's handled server-side)
     // In public mode, public key is required
     // In direct mode, API key is required
-    apiRef.current = new GrowthKitAPI(config.apiKey, config.publicKey, config.apiUrl, config.debug);
-  }, [config.apiKey, config.publicKey, config.apiUrl, config.debug]);
+    apiRef.current = new GrowthKitAPI(config.apiKey, config.publicKey, config.apiUrl, config.debug, config.language);
+  }, [config.apiKey, config.publicKey, config.apiUrl, config.debug, config.language]);
 
   // Initialize fingerprint and fetch user data
   const initialize = useCallback(async () => {

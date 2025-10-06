@@ -334,10 +334,12 @@ declare class GrowthKitAPI {
     private token;
     private tokenExpiry;
     private retryingRequest;
-    constructor(apiKey?: string, publicKey?: string, apiUrl?: string, debug?: boolean);
+    private language;
+    constructor(apiKey?: string, publicKey?: string, apiUrl?: string, debug?: boolean, language?: 'en' | 'es');
     private detectApiUrl;
     private detectProxyUrl;
     setFingerprint(fingerprint: string): void;
+    setLanguage(language: 'en' | 'es'): void;
     private isTokenValid;
     private getStoredToken;
     private storeToken;

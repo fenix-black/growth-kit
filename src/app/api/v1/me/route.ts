@@ -88,8 +88,11 @@ export async function POST(request: NextRequest) {
           location: location.city || location.country ? location : undefined,
           // Language tracking (backwards compatible - defaults to 'en' if not provided)
           browserLanguage: context?.browserLanguage || 'en',
-          preferredLanguage: context?.widgetLanguage || 'en',
-          languageSource: 'browser_detected',
+          preferredLanguage: context?.widgetLanguage || context?.browserLanguage || 'en',
+          // Only mark as 'user_selected' if widgetLanguage differs from browserLanguage
+          languageSource: (context?.widgetLanguage && context?.widgetLanguage !== context?.browserLanguage) 
+            ? 'user_selected' 
+            : 'browser_detected',
           languageUpdatedAt: new Date(),
         },
         include: {
@@ -125,14 +128,19 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      // Update language data if missing (for backwards compatibility with old fingerprints)
+      // Update language data if missing or if widget language has changed
       if (!fingerprintRecord.browserLanguage && context?.browserLanguage) {
         updateData.browserLanguage = context.browserLanguage;
       }
       
-      if (!fingerprintRecord.preferredLanguage && context?.widgetLanguage) {
-        updateData.preferredLanguage = context.widgetLanguage;
-        updateData.languageSource = 'browser_detected';
+      // Update preferred language if missing OR if widget language is different
+      const newPreferredLanguage = context?.widgetLanguage || context?.browserLanguage;
+      if (newPreferredLanguage && (!fingerprintRecord.preferredLanguage || fingerprintRecord.preferredLanguage !== newPreferredLanguage)) {
+        updateData.preferredLanguage = newPreferredLanguage;
+        // Only mark as 'user_selected' if widgetLanguage differs from browserLanguage
+        updateData.languageSource = (context?.widgetLanguage && context?.widgetLanguage !== context?.browserLanguage)
+          ? 'user_selected'
+          : 'browser_detected';
         updateData.languageUpdatedAt = new Date();
       }
       

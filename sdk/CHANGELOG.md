@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.6.5] - 2025-10-06
+
+### 🐛 Bug Fixes
+- **Fixed Widget Language Integration**: Widget language now properly syncs with parent application
+  - API class now accepts `language` parameter in constructor
+  - Added `setLanguage()` method to update language dynamically
+  - Widget language correctly overrides default in API calls
+  - `widgetLanguage` in context now reflects actual configured language
+
+### 🔧 Improvements
+- **Enhanced Language Source Detection**: Backend now correctly distinguishes between auto-detected and user-selected languages
+  - `languageSource` is `'browser_detected'` when widget language matches browser language
+  - `languageSource` is `'user_selected'` when user explicitly switches language
+  - More accurate tracking of user language preferences
+  - Better data for analytics and personalization
+
+### 📊 Data Quality
+- **Accurate Language Tracking**: Fixed issue where all languages were marked as 'user_selected'
+  - Now correctly identifies auto-detected vs explicitly chosen languages
+  - `preferredLanguage` properly reflects user's active language choice
+  - `browserLanguage` remains unchanged as browser setting reference
+
 ## [0.6.4] - 2025-10-06
 
 ### 🔧 Build Optimization

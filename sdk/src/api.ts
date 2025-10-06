@@ -19,8 +19,10 @@ export class GrowthKitAPI {
   private token: string | null = null;
   private tokenExpiry: Date | null = null;
   private retryingRequest: boolean = false;
+  private language: 'en' | 'es' = 'en'; // Widget language preference
 
-  constructor(apiKey?: string, publicKey?: string, apiUrl: string = '', debug: boolean = false) {
+  constructor(apiKey?: string, publicKey?: string, apiUrl: string = '', debug: boolean = false, language?: 'en' | 'es') {
+    this.language = language || 'en';
     // Determine mode: proxy (default), public key, or private API key
     this.isPublicMode = !!publicKey;
     this.isProxyMode = !apiKey && !publicKey;
@@ -70,6 +72,10 @@ export class GrowthKitAPI {
 
   setFingerprint(fingerprint: string) {
     this.fingerprint = fingerprint;
+  }
+
+  setLanguage(language: 'en' | 'es') {
+    this.language = language;
   }
 
   private isTokenValid(): boolean {
@@ -364,11 +370,17 @@ export class GrowthKitAPI {
     // Get browser context for better tracking
     const context = getBrowserContext();
     
+    // Override widgetLanguage with the configured language
+    const contextWithLanguage = {
+      ...context,
+      widgetLanguage: this.language,
+    };
+    
     // In public mode, we don't need to send fingerprint (it's in the token)
     // But we still need to send it for other modes
     const bodyData = this.isPublicMode 
-      ? { ...(claim && { claim }), context }  // Send claim and context
-      : { fingerprint, ...(claim && { claim }), context }; // Send fingerprint, claim, and context
+      ? { ...(claim && { claim }), context: contextWithLanguage }  // Send claim and context
+      : { fingerprint, ...(claim && { claim }), context: contextWithLanguage }; // Send fingerprint, claim, and context
 
     return this.request<MeResponse>('/v1/me', {
       method: 'POST',
