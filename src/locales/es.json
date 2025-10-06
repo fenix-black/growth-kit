@@ -1,38 +1,38 @@
 {
   "nav": {
-    "features": "Funciones",
+    "features": "Features",
     "examples": "Ejemplos",
     "integration": "Integración",
     "demo": "Demo",
-    "dashboard": "Panel",
-    "getStarted": "Empezar"
+    "dashboard": "Dashboard",
+    "getStarted": "Comenzar"
   },
   "hero": {
-    "badge": "Sin backend requerido • Funciona en todas partes • Configuración en 10 segundos",
+    "badge": "Sin backend • Funciona en cualquier lugar • Setup en 10 segundos",
     "transformWord1": "Transforma",
-    "transformWord2": "Potencia",
+    "transformWord2": "Multiplica",
     "transformWord3": "Acelera",
-    "transformWord4": "Amplifica",
+    "transformWord4": "Dispara",
     "title1": "cualquier app en un",
     "title2": "motor de crecimiento viral",
-    "subtitle1": "Agrega referencias, créditos y listas de espera a",
+    "subtitle1": "Agrega referidos, créditos y waitlists a",
     "subtitle2": "cualquier app JavaScript",
     "subtitle3": "en segundos.",
-    "subtitle4": "Sin backend. Sin dependencia de frameworks. Sin complejidad.",
-    "ctaPrimary": "Empezar Ahora",
+    "subtitle4": "Sin backend. Sin atarte a frameworks. Sin complicaciones.",
+    "ctaPrimary": "Comenzar Gratis",
     "ctaSecondary": "Ver Cómo Funciona",
     "stat1Value": "0 backend",
-    "stat1Label": "Infraestructura",
+    "stat1Label": "Infraestructura Necesaria",
     "stat2Value": "2 pasos",
     "stat2Label": "Para Crecimiento Viral",
     "stat3Value": "∞ plataformas",
     "stat3Label": "React, Vue, Sitios Web..."
   },
   "features": {
-    "badge": "Funciones Poderosas",
+    "badge": "Features Poderosos",
     "title1": "Todo lo que necesitas para",
-    "title2": "potenciar tu crecimiento",
-    "subtitle": "Desde tracking anónimo hasta referidos virales - obtén funciones empresariales que funcionan",
+    "title2": "multiplicar tu crecimiento",
+    "subtitle": "Desde tracking automático hasta referidos virales - obtén features de nivel enterprise que funcionan",
     "subtitleHighlight": "donde JavaScript funcione",
     "platforms": {
       "static": "🌐 Sitios Estáticos",
@@ -43,104 +43,104 @@
       "any": "☁️ Cualquier Plataforma"
     },
     "fingerprinting": {
-      "title": "Huella Digital del Navegador",
-      "description": "Rastrea usuarios anónimos sin cookies ni cuentas. Funciona donde sea que JavaScript funcione.",
-      "demoTitle": "Huella Digital de Usuario",
-      "demoStatus": "Seguimiento Anónimo",
+      "title": "Identificación Inteligente",
+      "description": "Identifica y reconoce visitantes automáticamente, sin cookies ni login. Funciona donde JavaScript funcione.",
+      "demoTitle": "Identificación de Usuarios",
+      "demoStatus": "Tracking Automático",
       "active": "Activo"
     },
     "referrals": {
-      "title": "Referencias Virales",
-      "description": "Convierte usuarios en campeones de crecimiento con seguimiento automático de referidos y recompensas de créditos.",
-      "demoTitle": "Referencias Virales",
+      "title": "Sistema de Referidos",
+      "description": "Convierte cada usuario en un promotor con tracking automático de referidos y recompensas en créditos.",
+      "demoTitle": "Referidos Virales",
       "demoCoefficient": "Coeficiente Viral",
       "sarahReferrals": "Referidos de Sarah",
       "credits": "Créditos"
     },
     "credits": {
-      "title": "Créditos Flexibles",
-      "description": "Recompensa cualquier acción con créditos. Controla características, rastrea uso, o crea tu propia economía.",
+      "title": "Sistema de Créditos",
+      "description": "Recompensa cualquier acción con créditos. Controla features, mide uso, o crea tu propia economía.",
       "demoTitle": "Sistema de Créditos",
       "actions": {
         "emailVerification": "Verificación de Email",
-        "friendReferral": "Referido de Amigo",
-        "profileComplete": "Perfil Completo"
+        "friendReferral": "Referir un Amigo",
+        "profileComplete": "Completar Perfil"
       },
       "useCredit": "Usar Crédito (-1)"
     },
     "waitlist": {
-      "title": "Listas de Espera Inteligentes",
-      "description": "Genera expectativa con seguimiento de posición, auto-invitaciones, y avance en la cola basado en referidos.",
-      "demoTitle": "Lista de Espera Inteligente",
+      "title": "Waitlists Inteligentes",
+      "description": "Crea expectativa con tracking de posición, invitaciones automáticas y avance por referidos.",
+      "demoTitle": "Waitlist Inteligente",
       "demoQueue": "en cola",
       "statuses": {
         "invited": "invitado",
         "queued": "en cola"
       },
-      "autoInvite": "Auto-invitando 30 usuarios diariamente"
+      "autoInvite": "Invitando 30 usuarios automáticamente cada día"
     },
     "liveDemo": "Demo en Vivo"
   },
   "featureDetails": [
     {
       "id": "fingerprinting",
-      "title": "Huella Digital Inteligente",
-      "description": "Rastrea usuarios entre sesiones sin login",
+      "title": "Identificación Inteligente",
+      "description": "Reconoce usuarios entre sesiones sin login",
       "benefits": [
-        "Tracking anónimo",
-        "Persistencia entre sesiones",
-        "Identificación privada",
-        "Experiencia fluida"
+        "Tracking automático de visitantes",
+        "Funciona entre sesiones",
+        "Identificación sin fricción",
+        "Experiencia sin interrupciones"
       ],
-      "codeExample": "const gk = useGrowthKit({\n  publicKey: 'pk_your_public_key'\n});\n// Genera automáticamente huella única\n// y rastrea usuario entre sesiones"
+      "codeExample": "const gk = useGrowthKit({\n  publicKey: 'pk_your_public_key'\n});\n// Identifica automáticamente al usuario\n// y lo reconoce entre sesiones"
     },
     {
       "id": "referrals",
-      "title": "Sistema Referidos Viral",
-      "description": "Convierte usuarios en motor de crecimiento",
+      "title": "Sistema de Referidos Viral",
+      "description": "Convierte cada usuario en tu equipo de marketing",
       "benefits": [
-        "Códigos únicos por usuario",
-        "Distribución auto de créditos",
-        "Protección anti-abuso",
-        "Tracking coeficiente viral"
+        "Código único por usuario",
+        "Créditos automáticos por referido",
+        "Protección anti-fraude incluida",
+        "Mide tu coeficiente viral"
       ],
-      "codeExample": "// Usuario obtiene su link de referido\nconst referralLink = gk.getReferralLink();\n\n// Comparte y gana créditos cuando se unan amigos\nawait gk.share();"
+      "codeExample": "// Usuario obtiene su link de referido\nconst referralLink = gk.getReferralLink();\n\n// Comparte y gana créditos cuando amigos se unan\nawait gk.share();"
     },
     {
       "id": "credits",
-      "title": "Sistema Créditos Flexible",
-      "description": "Recompensa engagement e incentiva acciones",
+      "title": "Sistema de Créditos Flexible",
+      "description": "Recompensa engagement e impulsa acciones clave",
       "benefits": [
-        "Políticas personalizables",
-        "Gasto basado en acciones",
-        "Gamificación de progreso",
-        "Mejora de retención"
+        "Configura tus propias reglas",
+        "Gasta créditos en cualquier acción",
+        "Gamifica el progreso del usuario",
+        "Aumenta retención naturalmente"
       ],
-      "codeExample": "// Usuarios ganan créditos por acciones\nawait gk.claimEmail('user@example.com');\nawait gk.verifyEmail(token);\n\n// Gasta créditos en funciones premium\nawait gk.completeAction('premium-generation');"
+      "codeExample": "// Usuarios ganan créditos por acciones\nawait gk.claimEmail('user@example.com');\nawait gk.verifyEmail(token);\n\n// Gasta créditos en features premium\nawait gk.completeAction('premium-generation');"
     },
     {
       "id": "waitlist",
-      "title": "Gestión Lista de Espera",
-      "description": "Genera anticipación y gestiona acceso",
+      "title": "Gestión de Waitlist",
+      "description": "Crea anticipación y controla el acceso",
       "benefits": [
-        "Sistema invitación auto",
-        "Gestión cola prioritaria",
-        "Registros por FOMO",
-        "Tracking preparación"
+        "Invitaciones automáticas",
+        "Cola con prioridad por referidos",
+        "Genera FOMO en tus usuarios",
+        "Mide el interés pre-lanzamiento"
       ],
-      "codeExample": "// Únete a lista de espera con invitaciones automáticas\nawait gk.joinWaitlist('early-adopter@email.com');\n\n// Admin controla lotes de invitación\nawait inviteNextBatch(30); // Invita 30 usuarios"
+      "codeExample": "// Únete a la waitlist con invitaciones automáticas\nawait gk.joinWaitlist('early-adopter@email.com');\n\n// Admin controla invitaciones en lotes\nawait inviteNextBatch(30); // Invita 30 usuarios"
     }
   ],
   "miniAppExamples": [
     {
       "id": "restore-photos",
       "name": "Restore Photos",
-      "description": "Da nueva vida a tus fotos antiguas. Corrige, restaura y anima tus recuerdos en pocos clics.",
-      "category": "SaaS & IA",
+      "description": "Dale nueva vida a tus fotos antiguas. Corrige, restaura y anima tus recuerdos en pocos clics.",
+      "category": "SaaS & AI",
       "timeframe": "3 meses",
-      "tags": ["SaaS", "IA", "Fotografía"],
+      "tags": ["SaaS", "AI", "Fotografía"],
       "testimonial": {
-        "quote": "GrowthKit transformó nuestra adquisición de usuarios. El sistema de referidos aumentó registros en 300% en solo 3 meses.",
+        "quote": "GrowthKit transformó nuestra adquisición de usuarios. El sistema de referidos disparó nuestros registros 300% en solo 3 meses.",
         "author": "Pablo Schaffner",
         "role": "Co-fundador, Restore Photos"
       }
@@ -148,12 +148,12 @@
     {
       "id": "creative-design",
       "name": "PixelCraft Studio",
-      "description": "Herramienta de diseño para gráficos de redes sociales con plantillas IA.",
+      "description": "Herramienta de diseño creativo para redes sociales con plantillas potenciadas por AI.",
       "category": "Creativo & Diseño",
       "timeframe": "4 meses",
-      "tags": ["Creativo", "Diseño", "IA", "Redes Sociales"],
+      "tags": ["Creativo", "Diseño", "AI", "Redes Sociales"],
       "testimonial": {
-        "quote": "El sistema de créditos mantiene usuarios comprometidos mientras referidos trae leads de calidad. Brillante.",
+        "quote": "El sistema de créditos mantiene a los usuarios enganchados mientras los referidos traen leads de alta calidad. Es brillante.",
         "author": "Marcus Rodriguez",
         "role": "Fundador, PixelCraft Studio"
       }
@@ -161,12 +161,12 @@
     {
       "id": "fintech-app",
       "name": "WealthTracker",
-      "description": "Gestión de finanzas personales con tracking de inversiones y presupuesto.",
+      "description": "Gestión de finanzas personales con tracking de inversiones y herramientas de presupuesto.",
       "category": "FinTech & Finanzas",
       "timeframe": "2 meses",
       "tags": ["FinTech", "Finanzas", "Inversión", "Presupuesto"],
       "testimonial": {
-        "quote": "La lista de espera creó FOMO increíble. Tuvimos 500 registros pre-lanzamiento y convertimos 80% a pago.",
+        "quote": "La waitlist creó un FOMO increíble. Conseguimos 500 registros antes del lanzamiento y convertimos el 80% a usuarios de pago.",
         "author": "Jennifer Liu",
         "role": "Product Manager, WealthTracker"
       }
@@ -179,128 +179,128 @@
       "timeframe": "5 meses",
       "tags": ["Educación", "Aprendizaje", "Cursos", "Habilidades"],
       "testimonial": {
-        "quote": "Estudiantes aman ganar créditos por completar cursos y referir amigos. Nuestras métricas están por las nubes.",
+        "quote": "A los estudiantes les encanta ganar créditos por completar cursos y referir amigos. Nuestras métricas de engagement se dispararon.",
         "author": "Dr. Alex Kumar",
         "role": "CEO, LearnForge"
       }
     }
   ],
   "examples": {
-    "badge": "Historias de Éxito",
+    "badge": "Casos de Éxito",
     "title1": "Apps reales, crecimiento real",
     "title2": "impulsado por GrowthKit",
-    "subtitle": "Descubre cómo apps de diferentes industrias transformaron su adquisición de usuarios con las funciones de crecimiento viral de GrowthKit.",
+    "subtitle": "Descubre cómo apps de diferentes industrias multiplicaron su adquisición de usuarios con los features de crecimiento viral de GrowthKit.",
     "metrics": {
-      "userGrowth": "Crecimiento Usuarios",
+      "userGrowth": "Crecimiento de Usuarios",
       "viralCoefficient": "Coeficiente Viral",
       "retention": "Retención ↑",
       "credits": "Créditos",
-      "referrals": "Referencias",
+      "referrals": "Referidos",
       "creditsEarned": "Créditos Ganados"
     },
     "resultsIn": "Resultados en",
-    "successStory": "Historia de Éxito",
+    "successStory": "Caso de Éxito",
     "growthMetrics": "Métricas de Crecimiento",
     "technologiesUsed": "Tecnologías Usadas",
-    "ctaTitle": "¿Listo para unirte a estas historias de éxito?",
-    "ctaSubtitle": "Transforma tu app en un motor de crecimiento viral con las mismas características que impulsaron estos resultados increíbles. Comienza en minutos, no meses.",
-    "ctaButton": "Empezar Tu Historia"
+    "ctaTitle": "¿Listo para tu propio caso de éxito?",
+    "ctaSubtitle": "Transforma tu app en un motor de crecimiento viral con los mismos features que impulsaron estos resultados. Comienza en minutos, no meses.",
+    "ctaButton": "Comenzar Ahora"
   },
   "integration": {
-    "badge": "Experiencia del Desarrollador",
+    "badge": "Experiencia Developer",
     "title1": "De cero a viral en",
     "title2": "2 pasos simples",
-    "subtitle1": "Elige tu configuración:",
-    "subtitleQuick": "Inicio Rápido",
-    "subtitleQuickDesc": "funciona en todas partes instantáneamente, o",
+    "subtitle1": "Elige tu setup:",
+    "subtitleQuick": "Quick Start",
+    "subtitleQuickDesc": "funciona en cualquier lugar al instante, o",
     "subtitleAdvanced": "Avanzado",
-    "subtitleAdvancedDesc": "agrega superpoderes de Next.js.",
-    "quickStart": "Rápido (10s)",
+    "subtitleAdvancedDesc": "agrega superpoderes Next.js.",
+    "quickStart": "Quick Start (10s)",
     "recommended": "Recomendado",
     "advanced": "Avanzado (Next.js)",
     "copy": "Copiar",
     "copied": "¡Copiado!",
     "quickFeatures": {
       "title": "✅ Funciona en todas partes:",
-      "noBackend": "Sin backend",
+      "noBackend": "Sin backend requerido",
       "anyFramework": "Cualquier framework JS",
-      "staticSites": "Sitios estáticos",
+      "staticSites": "Generadores de sitios estáticos",
       "codepen": "CodePen/CodeSandbox",
-      "githubPages": "GitHub Pages listo",
+      "githubPages": "GitHub Pages ready",
       "instantDeploy": "Deploy instantáneo",
-      "secureKeys": "Claves seguras",
+      "secureKeys": "Public keys seguras",
       "worksAnywhere": "Funciona donde JS funcione"
     },
     "advancedFeatures": {
-      "title": "⚡ Funciones avanzadas:",
-      "serverKeys": "Claves API servidor",
-      "customRouting": "Routing personalizado",
+      "title": "⚡ Features avanzados:",
+      "serverKeys": "API keys server-side",
+      "customRouting": "Routing de referidos custom",
       "apiProxying": "API proxying",
-      "emailFlow": "Verificación email",
+      "emailFlow": "Flow de verificación email",
       "advancedMiddleware": "Middleware avanzado",
-      "customConfig": "Config personalizada",
-      "fullStack": "Funciones full-stack",
+      "customConfig": "Configuración personalizada",
+      "fullStack": "Features full-stack",
       "maxSecurity": "Máxima seguridad"
     },
     "steps": {
       "install": {
-        "title": "Instalar el SDK",
-        "description": "Funciona con React, Vue, Svelte, vanilla JS, en cualquier lugar"
+        "title": "Instala el SDK",
+        "description": "Funciona con React, Vue, Svelte, vanilla JS, donde sea"
       },
       "useKey": {
-        "title": "Usa Tu Clave Pública",
-        "description": "¡Listo! Sin backend, sin config"
+        "title": "Usa tu Public Key",
+        "description": "¡Listo! Sin backend, sin archivos de config"
       },
       "runSetup": {
-        "title": "Ejecutar Setup",
-        "description": "Un comando hace todo automáticamente"
+        "title": "Ejecuta el comando setup",
+        "description": "Un comando lo hace todo automáticamente"
       },
       "setupComplete": {
         "title": "¡Listo! Setup completo",
-        "description": "CLI creó middleware y variables automáticamente"
+        "description": "El CLI creó el middleware y variables de entorno automáticamente"
       }
     },
-    "ctaTitle": "¿Listo para 10x tu crecimiento?",
-    "ctaSubtitle": "Únete a cientos de devs que transformaron sus apps en motores virales. Comienza tu prueba gratis hoy.",
-    "ctaButton1": "Prueba Gratis",
-    "ctaButton2": "Documentos"
+    "ctaTitle": "¿Listo para multiplicar x10 tu crecimiento?",
+    "ctaSubtitle": "Únete a cientos de developers que ya transformaron sus apps en motores virales. Comienza tu prueba gratis hoy.",
+    "ctaButton1": "Comenzar Gratis",
+    "ctaButton2": "Ver Documentación"
   },
   "cta": {
     "title1": "¿Listo para",
-    "title2": "multiplicar tu crecimiento x10",
+    "title2": "multiplicar x10 tu crecimiento",
     "title3": "?",
-    "subtitle": "Únete a cientos de desarrolladores que ya han transformado sus apps en motores de crecimiento viral. Comienza hoy y observa cómo se dispara tu adquisición de usuarios.",
-    "ctaPrimary": "Empezar Ahora",
+    "subtitle": "Únete a cientos de developers que ya transformaron sus apps en motores de crecimiento viral. Comienza hoy y mira cómo se dispara tu adquisición de usuarios.",
+    "ctaPrimary": "Comenzar Gratis Ahora",
     "ctaSecondary": "Ver Cómo Funciona",
     "stat1Value": "300%+",
-    "stat1Label": "Crecimiento Promedio",
+    "stat1Label": "Aumento Promedio",
     "stat2Value": "500+",
     "stat2Label": "Apps Activas",
     "stat3Value": "<30s",
-    "stat3Label": "Tiempo Setup",
-    "trustedBy": "Confiado por desarrolladores en",
+    "stat3Label": "Tiempo de Setup",
+    "trustedBy": "Confiado por developers en",
     "companies": {
       "startups": "Startups",
       "scaleups": "Scale-ups",
-      "enterprise": "Empresas",
+      "enterprise": "Enterprise",
       "agencies": "Agencias",
-      "indie": "Creadores Independientes"
+      "indie": "Indie Makers"
     },
     "bottomMessage": "Gratis para comenzar • Sin tarjeta de crédito • Cancela cuando quieras"
   },
   "footer": {
-    "tagline": "Transforma cualquier app en un motor de crecimiento viral con referencias, créditos y listas de espera. Construido para desarrolladores que quieren características de crecimiento de nivel empresarial sin la complejidad.",
+    "tagline": "Transforma cualquier app en un motor de crecimiento viral con referidos, créditos y waitlists. Construido para developers que quieren features de nivel enterprise sin la complejidad.",
     "product": "Producto",
     "productLinks": {
-      "features": "Características",
+      "features": "Features",
       "examples": "Ejemplos",
       "demo": "Demo",
-      "dashboard": "Panel"
+      "dashboard": "Dashboard"
     },
-    "developers": "Desarrolladores",
+    "developers": "Developers",
     "developersLinks": {
-      "sdk": "Documentación del SDK",
-      "api": "Referencia de API",
+      "sdk": "Documentación SDK",
+      "api": "API Reference",
       "github": "GitHub",
       "examples": "Ejemplos de Código"
     },
@@ -308,23 +308,23 @@
     "resourcesLinks": {
       "blog": "Blog",
       "guides": "Guías",
-      "changelog": "Registro de Cambios",
+      "changelog": "Changelog",
       "support": "Soporte"
     },
     "company": "Empresa",
     "companyLinks": {
-      "about": "Acerca de",
+      "about": "Nosotros",
       "contact": "Contacto",
-      "privacy": "Política de Privacidad",
-      "terms": "Términos de Servicio"
+      "privacy": "Privacidad",
+      "terms": "Términos"
     },
     "ctaTitle": "¿Listo para acelerar tu crecimiento?",
-    "ctaSubtitle": "Comienza con GrowthKit hoy y observa la diferencia.",
-    "ctaButton": "Construir Tu Motor de Crecimiento",
+    "ctaSubtitle": "Comienza con GrowthKit hoy y mira la diferencia.",
+    "ctaButton": "Construye tu Motor de Crecimiento",
     "copyright": "© 2025 GrowthKit por",
     "copyrightCompany": "FenixBlack",
     "copyrightSuffix": ". Todos los derechos reservados.",
-    "builtWith": "Construido con",
-    "builtWithSuffix": "para desarrolladores"
+    "builtWith": "Hecho con",
+    "builtWithSuffix": "para developers"
   }
 }
