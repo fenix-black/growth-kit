@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.4] - 2025-10-06
+
+### 🔧 Build Optimization
+- **Removed Source Maps from Published Package**: Disabled source map generation in production builds
+  - Significantly reduced package size by excluding `.map` files
+  - Enhanced security by not exposing original TypeScript source code
+  - Source maps are not needed for end-users consuming the SDK
+  - Changed `sourcemap: true` to `sourcemap: false` in all tsup build configurations
+  - Cleaner published package with only essential runtime files
+
+### 📦 Package Improvements
+- **Smaller Bundle Size**: Published package is now more lightweight without source map files
+- **Better Security**: Original source code no longer exposed to end users
+- **Cleaner Distribution**: Only necessary files included in the published package
+
 ## [0.6.3] - 2025-10-06
 
 ### ✨ Features
