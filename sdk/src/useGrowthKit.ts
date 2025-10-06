@@ -21,7 +21,7 @@ const BATCH_SIZE = 10;
 const BATCH_INTERVAL = 30000; // 30 seconds
 
 export function useGrowthKit(): GrowthKitHook {
-  const { config, setTheme } = useGrowthKitConfig();
+  const { config, setTheme, currentLanguage } = useGrowthKitConfig();
   const { state, setState, apiRef, initRef } = useGrowthKitState();
   const configRef = useRef(config);
   configRef.current = config;
@@ -44,8 +44,8 @@ export function useGrowthKit(): GrowthKitHook {
     // In proxy mode, no API key is required (it's handled server-side)
     // In public mode, public key is required
     // In direct mode, API key is required
-    apiRef.current = new GrowthKitAPI(config.apiKey, config.publicKey, config.apiUrl, config.debug, config.language);
-  }, [config.apiKey, config.publicKey, config.apiUrl, config.debug, config.language]);
+    apiRef.current = new GrowthKitAPI(config.apiKey, config.publicKey, config.apiUrl, config.debug, currentLanguage);
+  }, [config.apiKey, config.publicKey, config.apiUrl, config.debug, currentLanguage]);
 
   // Initialize fingerprint and fetch user data
   const initialize = useCallback(async () => {

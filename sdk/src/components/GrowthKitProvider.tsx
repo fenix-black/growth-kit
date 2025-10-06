@@ -10,6 +10,7 @@ import { getEffectiveTheme, onSystemThemeChange, type ThemeColors, getThemeColor
 const GrowthKitContext = createContext<{ 
   config: GrowthKitConfig;
   setLanguage?: (language: Language) => void;
+  currentLanguage: Language;
   theme: GrowthKitTheme;
   effectiveTheme: 'light' | 'dark';
   themeColors: ThemeColors;
@@ -78,6 +79,7 @@ export function GrowthKitProvider({ children, config }: GrowthKitProviderProps) 
     <GrowthKitContext.Provider value={{ 
       config, 
       setLanguage,
+      currentLanguage,
       theme: currentTheme,
       effectiveTheme,
       themeColors,

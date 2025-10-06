@@ -105,6 +105,11 @@ export async function GET(
       lastActiveAt: fingerprint.lastActiveAt || fingerprint.createdAt,
       createdAt: fingerprint.createdAt,
       lastDailyGrant: fingerprint.lastDailyGrant,
+      // Language information
+      browserLanguage: fingerprint.browserLanguage,
+      preferredLanguage: fingerprint.preferredLanguage,
+      languageSource: fingerprint.languageSource,
+      languageUpdatedAt: fingerprint.languageUpdatedAt,
       leads: fingerprint.leads.map(lead => ({
         id: lead.id,
         name: lead.name,

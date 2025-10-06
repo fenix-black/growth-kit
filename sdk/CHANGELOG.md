@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.6.6] - 2025-10-06
+
+### 🐛 Bug Fixes
+- **Language Switching Reactivity**: Fixed issue where language changes on the parent website weren't triggering API updates
+  - `useGrowthKit` now properly reacts to language changes from the provider context
+  - API client recreates when language changes, ensuring backend receives updated language data
+  - Real-time language synchronization between parent app and widget
+
+- **Admin Panel Language Display**: Fixed user details modal showing "N/A" for language information
+  - Individual user details API now includes language fields in response
+  - Proper display of `browserLanguage`, `preferredLanguage`, `languageSource`, and `languageUpdatedAt`
+
+### 🔧 Technical Improvements
+- Added `currentLanguage` to `GrowthKitContext` for proper reactive state management
+- Enhanced API client language configuration to respond to dynamic changes
+- Improved language data flow from widget to backend endpoints
+
 ## [0.6.5] - 2025-10-06
 
 ### 🐛 Bug Fixes
