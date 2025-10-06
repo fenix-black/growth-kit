@@ -1,11 +1,11 @@
 {
   "nav": {
-    "features": "Características",
+    "features": "Funciones",
     "examples": "Ejemplos",
     "integration": "Integración",
     "demo": "Demo",
     "dashboard": "Panel",
-    "getStarted": "Comenzar"
+    "getStarted": "Empezar"
   },
   "hero": {
     "badge": "Sin backend requerido • Funciona en todas partes • Configuración en 10 segundos",
@@ -19,21 +19,21 @@
     "subtitle2": "cualquier app JavaScript",
     "subtitle3": "en segundos.",
     "subtitle4": "Sin backend. Sin dependencia de frameworks. Sin complejidad.",
-    "ctaPrimary": "Comienza a Construir Hoy",
+    "ctaPrimary": "Empezar Ahora",
     "ctaSecondary": "Ver Cómo Funciona",
     "stat1Value": "0 backend",
-    "stat1Label": "Infraestructura Requerida",
+    "stat1Label": "Infraestructura",
     "stat2Value": "2 pasos",
-    "stat2Label": "Para Agregar Crecimiento Viral",
+    "stat2Label": "Para Crecimiento Viral",
     "stat3Value": "∞ plataformas",
-    "stat3Label": "React, Vue, Sitios Estáticos..."
+    "stat3Label": "React, Vue, Sitios Web..."
   },
   "features": {
-    "badge": "Características Poderosas",
+    "badge": "Funciones Poderosas",
     "title1": "Todo lo que necesitas para",
     "title2": "potenciar tu crecimiento",
-    "subtitle": "Desde seguimiento anónimo de usuarios hasta sistemas de referidos virales - obtén características de crecimiento de nivel empresarial que funcionan",
-    "subtitleHighlight": "donde sea que JavaScript funcione",
+    "subtitle": "Desde tracking anónimo hasta referidos virales - obtén funciones empresariales que funcionan",
+    "subtitleHighlight": "donde JavaScript funcione",
     "platforms": {
       "static": "🌐 Sitios Estáticos",
       "frameworks": "⚛️ React/Vue/Svelte",
@@ -78,19 +78,99 @@
     },
     "liveDemo": "Demo en Vivo"
   },
+  "examples": {
+    "badge": "Historias de Éxito",
+    "title1": "Apps reales, crecimiento real",
+    "title2": "impulsado por GrowthKit",
+    "subtitle": "Descubre cómo apps de diferentes industrias transformaron su adquisición de usuarios con las funciones de crecimiento viral de GrowthKit.",
+    "metrics": {
+      "userGrowth": "Crecimiento Usuarios",
+      "viralCoefficient": "Coeficiente Viral",
+      "retention": "Retención ↑",
+      "credits": "Créditos",
+      "referrals": "Referencias",
+      "creditsEarned": "Créditos Ganados"
+    },
+    "resultsIn": "Resultados en",
+    "successStory": "Historia de Éxito",
+    "growthMetrics": "Métricas de Crecimiento",
+    "technologiesUsed": "Tecnologías Usadas",
+    "ctaTitle": "¿Listo para unirte a estas historias de éxito?",
+    "ctaSubtitle": "Transforma tu app en un motor de crecimiento viral con las mismas características que impulsaron estos resultados increíbles. Comienza en minutos, no meses.",
+    "ctaButton": "Empezar Tu Historia"
+  },
+  "integration": {
+    "badge": "Experiencia del Desarrollador",
+    "title1": "De cero a viral en",
+    "title2": "2 pasos simples",
+    "subtitle1": "Elige tu configuración:",
+    "subtitleQuick": "Inicio Rápido",
+    "subtitleQuickDesc": "funciona en todas partes instantáneamente, o",
+    "subtitleAdvanced": "Avanzado",
+    "subtitleAdvancedDesc": "agrega superpoderes de Next.js.",
+    "quickStart": "Rápido (10s)",
+    "recommended": "Recomendado",
+    "advanced": "Avanzado (Next.js)",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "quickFeatures": {
+      "title": "✅ Funciona en todas partes:",
+      "noBackend": "Sin backend",
+      "anyFramework": "Cualquier framework JS",
+      "staticSites": "Sitios estáticos",
+      "codepen": "CodePen/CodeSandbox",
+      "githubPages": "GitHub Pages listo",
+      "instantDeploy": "Deploy instantáneo",
+      "secureKeys": "Claves seguras",
+      "worksAnywhere": "Funciona donde JS funcione"
+    },
+    "advancedFeatures": {
+      "title": "⚡ Funciones avanzadas:",
+      "serverKeys": "Claves API servidor",
+      "customRouting": "Routing personalizado",
+      "apiProxying": "API proxying",
+      "emailFlow": "Verificación email",
+      "advancedMiddleware": "Middleware avanzado",
+      "customConfig": "Config personalizada",
+      "fullStack": "Funciones full-stack",
+      "maxSecurity": "Máxima seguridad"
+    },
+    "steps": {
+      "install": {
+        "title": "Instalar el SDK",
+        "description": "Funciona con React, Vue, Svelte, vanilla JS, en cualquier lugar"
+      },
+      "useKey": {
+        "title": "Usa Tu Clave Pública",
+        "description": "¡Listo! Sin backend, sin config"
+      },
+      "runSetup": {
+        "title": "Ejecutar Setup",
+        "description": "Un comando hace todo automáticamente"
+      },
+      "setupComplete": {
+        "title": "¡Listo! Setup completo",
+        "description": "CLI creó middleware y variables automáticamente"
+      }
+    },
+    "ctaTitle": "¿Listo para 10x tu crecimiento?",
+    "ctaSubtitle": "Únete a cientos de devs que transformaron sus apps en motores virales. Comienza tu prueba gratis hoy.",
+    "ctaButton1": "Prueba Gratis",
+    "ctaButton2": "Documentos"
+  },
   "cta": {
     "title1": "¿Listo para",
     "title2": "multiplicar tu crecimiento x10",
     "title3": "?",
     "subtitle": "Únete a cientos de desarrolladores que ya han transformado sus apps en motores de crecimiento viral. Comienza hoy y observa cómo se dispara tu adquisición de usuarios.",
-    "ctaPrimary": "Comienza a Construir Ahora",
+    "ctaPrimary": "Empezar Ahora",
     "ctaSecondary": "Ver Cómo Funciona",
     "stat1Value": "300%+",
-    "stat1Label": "Aumento Promedio de Crecimiento",
+    "stat1Label": "Crecimiento Promedio",
     "stat2Value": "500+",
     "stat2Label": "Apps Activas",
     "stat3Value": "<30s",
-    "stat3Label": "Tiempo de Configuración",
+    "stat3Label": "Tiempo Setup",
     "trustedBy": "Confiado por desarrolladores en",
     "companies": {
       "startups": "Startups",
@@ -133,7 +213,7 @@
     },
     "ctaTitle": "¿Listo para acelerar tu crecimiento?",
     "ctaSubtitle": "Comienza con GrowthKit hoy y observa la diferencia.",
-    "ctaButton": "Comienza a Construir Tu Motor de Crecimiento",
+    "ctaButton": "Construir Tu Motor de Crecimiento",
     "copyright": "© 2025 GrowthKit por",
     "copyrightCompany": "FenixBlack",
     "copyrightSuffix": ". Todos los derechos reservados.",

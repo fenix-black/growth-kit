@@ -14,10 +14,12 @@ import {
 } from 'lucide-react';
 import ScrollReveal, { ScrollRevealStagger, StaggerItem } from '@/components/landing/animations/ScrollReveal';
 import { miniAppExamples } from '@/lib/landing/examples';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function RealExamplesShowcase() {
   const [selectedExample, setSelectedExample] = useState(0);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const { t } = useTranslation();
 
   const categories = [...new Set(miniAppExamples.map(app => app.category))];
 
@@ -28,10 +30,10 @@ export default function RealExamplesShowcase() {
         <ScrollReveal className="text-center mb-16">
           <div className="flex items-center justify-center space-x-2 text-fenix-magenta mb-4">
             <Star className="w-6 h-6 fill-current" />
-            <span className="text-sm font-semibold uppercase tracking-wider">Success Stories</span>
+            <span className="text-sm font-semibold uppercase tracking-wider">{t('examples.badge')}</span>
           </div>
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            Real apps, real growth
+            {t('examples.title1')}
             <br />
             <span 
               className="text-fenix-magenta"
@@ -42,12 +44,11 @@ export default function RealExamplesShowcase() {
                 backgroundClip: 'text'
               }}
             >
-              powered by GrowthKit
+              {t('examples.title2')}
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            See how mini-apps across different industries transformed their user acquisition 
-            and engagement with GrowthKit's viral growth features.
+            {t('examples.subtitle')}
           </p>
         </ScrollReveal>
 
@@ -111,14 +112,14 @@ export default function RealExamplesShowcase() {
                       <div className="text-2xl font-bold text-primary mb-1">
                         {app.metrics.userGrowth}
                       </div>
-                      <div className="text-xs text-gray-600 font-medium">User Growth</div>
+                      <div className="text-xs text-gray-600 font-medium">{t('examples.metrics.userGrowth')}</div>
                     </div>
                     <div className="text-center p-3 bg-gradient-to-r from-fenix-magenta/5 to-fenix-purple/5 rounded-lg">
                       <div className="text-2xl font-bold text-fenix-magenta mb-1">
                         {app.metrics.creditsEarned || app.metrics.referrals}
                       </div>
                       <div className="text-xs text-gray-600 font-medium">
-                        {app.metrics.creditsEarned ? 'Credits Earned' : 'Referrals'}
+                        {app.metrics.creditsEarned ? t('examples.metrics.creditsEarned') : t('examples.metrics.referrals')}
                       </div>
                     </div>
                   </div>
@@ -138,7 +139,7 @@ export default function RealExamplesShowcase() {
                   {/* Timeframe */}
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-500">
-                      Results in <span className="font-medium text-gray-700">{app.metrics.timeframe}</span>
+                      {t('examples.resultsIn')} <span className="font-medium text-gray-700">{app.metrics.timeframe}</span>
                     </div>
                     <div className={`
                       w-3 h-3 rounded-full transition-all duration-200
@@ -177,26 +178,26 @@ export default function RealExamplesShowcase() {
                     {/* Success Badge */}
                     <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
                       <TrendingUp className="w-4 h-4" />
-                      <span>Success Story</span>
+                      <span>{t('examples.successStory')}</span>
                     </div>
                   </div>
 
                   {/* Detailed Metrics */}
                   <div className="bg-gradient-to-br from-indigo-50/50 to-purple-50/50 p-6 rounded-2xl border border-primary/20 shadow-lg">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">Growth Metrics</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">{t('examples.growthMetrics')}</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 bg-white rounded-xl shadow-sm">
                         <div className="text-3xl font-bold text-primary mb-2">
                           {miniAppExamples[selectedExample].metrics.userGrowth}
                         </div>
-                        <div className="text-sm text-gray-600">User Growth</div>
+                        <div className="text-sm text-gray-600">{t('examples.metrics.userGrowth')}</div>
                       </div>
                       {miniAppExamples[selectedExample].metrics.viralCoefficient && (
                         <div className="text-center p-4 bg-white rounded-xl shadow-sm">
                           <div className="text-3xl font-bold text-fenix-purple mb-2">
                             {miniAppExamples[selectedExample].metrics.viralCoefficient}
                           </div>
-                          <div className="text-sm text-gray-600">Viral Coefficient</div>
+                          <div className="text-sm text-gray-600">{t('examples.metrics.viralCoefficient')}</div>
                         </div>
                       )}
                       {miniAppExamples[selectedExample].metrics.retentionImprovement && (
@@ -204,7 +205,7 @@ export default function RealExamplesShowcase() {
                           <div className="text-3xl font-bold text-fenix-orange mb-2">
                             {miniAppExamples[selectedExample].metrics.retentionImprovement}
                           </div>
-                          <div className="text-sm text-gray-600">Retention ↑</div>
+                          <div className="text-sm text-gray-600">{t('examples.metrics.retention')}</div>
                         </div>
                       )}
                       <div className="text-center p-4 bg-white rounded-xl shadow-sm">
@@ -213,7 +214,7 @@ export default function RealExamplesShowcase() {
                            miniAppExamples[selectedExample].metrics.referrals}
                         </div>
                         <div className="text-sm text-gray-600">
-                          {miniAppExamples[selectedExample].metrics.creditsEarned ? 'Credits' : 'Referrals'}
+                          {miniAppExamples[selectedExample].metrics.creditsEarned ? t('examples.metrics.credits') : t('examples.metrics.referrals')}
                         </div>
                       </div>
                     </div>
@@ -253,7 +254,7 @@ export default function RealExamplesShowcase() {
 
                   {/* All Tags */}
                   <div>
-                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Technologies Used</h4>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">{t('examples.technologiesUsed')}</h4>
                     <div className="flex flex-wrap gap-2">
                       {miniAppExamples[selectedExample].tags.map((tag) => (
                         <span
@@ -275,11 +276,10 @@ export default function RealExamplesShowcase() {
         <ScrollReveal className="text-center mt-20">
           <div className="bg-gradient-to-r from-primary/10 via-fenix-purple/10 to-fenix-magenta/10 rounded-3xl p-8 border border-primary/20 shadow-xl">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Ready to join these success stories?
+              {t('examples.ctaTitle')}
             </h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Transform your app into a viral growth engine with the same features that powered 
-              these incredible results. Get started in minutes, not months.
+              {t('examples.ctaSubtitle')}
             </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -289,7 +289,7 @@ export default function RealExamplesShowcase() {
                 background: 'linear-gradient(to right, #10b981, #14b8a6)',
               }}
             >
-              <span>Start Your Success Story</span>
+              <span>{t('examples.ctaButton')}</span>
               <ArrowUpRight className="w-5 h-5" />
             </motion.button>
           </div>

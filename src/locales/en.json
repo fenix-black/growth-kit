@@ -78,6 +78,86 @@
     },
     "liveDemo": "Live Demo"
   },
+  "examples": {
+    "badge": "Success Stories",
+    "title1": "Real apps, real growth",
+    "title2": "powered by GrowthKit",
+    "subtitle": "See how mini-apps across different industries transformed their user acquisition and engagement with GrowthKit's viral growth features.",
+    "metrics": {
+      "userGrowth": "User Growth",
+      "viralCoefficient": "Viral Coefficient",
+      "retention": "Retention ↑",
+      "credits": "Credits",
+      "referrals": "Referrals",
+      "creditsEarned": "Credits Earned"
+    },
+    "resultsIn": "Results in",
+    "successStory": "Success Story",
+    "growthMetrics": "Growth Metrics",
+    "technologiesUsed": "Technologies Used",
+    "ctaTitle": "Ready to join these success stories?",
+    "ctaSubtitle": "Transform your app into a viral growth engine with the same features that powered these incredible results. Get started in minutes, not months.",
+    "ctaButton": "Start Your Success Story"
+  },
+  "integration": {
+    "badge": "Developer Experience",
+    "title1": "From zero to viral in",
+    "title2": "2 simple steps",
+    "subtitle1": "Choose your setup:",
+    "subtitleQuick": "Quick Start",
+    "subtitleQuickDesc": "works everywhere instantly, or",
+    "subtitleAdvanced": "Advanced",
+    "subtitleAdvancedDesc": "adds Next.js superpowers.",
+    "quickStart": "Quick Start (10s)",
+    "recommended": "Recommended",
+    "advanced": "Advanced (Next.js)",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "quickFeatures": {
+      "title": "✅ Works everywhere:",
+      "noBackend": "No backend required",
+      "anyFramework": "Any JavaScript framework",
+      "staticSites": "Static site generators",
+      "codepen": "CodePen/CodeSandbox",
+      "githubPages": "GitHub Pages ready",
+      "instantDeploy": "Instant deployment",
+      "secureKeys": "Secure public keys",
+      "worksAnywhere": "Works anywhere JS runs"
+    },
+    "advancedFeatures": {
+      "title": "⚡ Advanced features:",
+      "serverKeys": "Server-side API keys",
+      "customRouting": "Custom referral routing",
+      "apiProxying": "API proxying",
+      "emailFlow": "Email verification flow",
+      "advancedMiddleware": "Advanced middleware",
+      "customConfig": "Custom configuration",
+      "fullStack": "Full-stack features",
+      "maxSecurity": "Maximum security"
+    },
+    "steps": {
+      "install": {
+        "title": "Install the SDK",
+        "description": "Works with React, Vue, Svelte, vanilla JS, anywhere"
+      },
+      "useKey": {
+        "title": "Use Your Public Key",
+        "description": "That's it! No backend, no config files needed"
+      },
+      "runSetup": {
+        "title": "Run Setup Command",
+        "description": "One command does everything automatically"
+      },
+      "setupComplete": {
+        "title": "That's it! Setup is complete",
+        "description": "CLI automatically created middleware and env vars"
+      }
+    },
+    "ctaTitle": "Ready to 10x your growth?",
+    "ctaSubtitle": "Join hundreds of developers who've already transformed their apps into viral growth engines. Start your free trial today.",
+    "ctaButton1": "Start Free Trial",
+    "ctaButton2": "View Documentation"
+  },
   "cta": {
     "title1": "Ready to",
     "title2": "10x your growth",

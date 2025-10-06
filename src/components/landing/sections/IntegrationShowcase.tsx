@@ -12,12 +12,14 @@ import {
   Sparkles
 } from 'lucide-react';
 import ScrollReveal, { ScrollRevealStagger, StaggerItem } from '@/components/landing/animations/ScrollReveal';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function IntegrationShowcase() {
   const [activeTab, setActiveTab] = useState<'quick' | 'advanced'>('quick');
   const [activeStep, setActiveStep] = useState(0);
   const [typingText, setTypingText] = useState('');
   const [showCopied, setShowCopied] = useState(false);
+  const { t } = useTranslation();
 
   const installCommand = 'npm install @fenixblack/growthkit';
   const setupCommand = 'npx @fenixblack/growthkit setup';
@@ -42,15 +44,15 @@ export default function IntegrationShowcase() {
   const quickStartSteps = [
     {
       step: '01',
-      title: 'Install the SDK',
-      description: 'Works with React, Vue, Svelte, vanilla JS, anywhere',
+      title: t('integration.steps.install.title'),
+      description: t('integration.steps.install.description'),
       code: installCommand,
       language: 'bash'
     },
     {
       step: '02',
-      title: 'Use Your Public Key',
-      description: 'That\'s it! No backend, no config files needed',
+      title: t('integration.steps.useKey.title'),
+      description: t('integration.steps.useKey.description'),
       code: `import { useGrowthKit } from '@fenixblack/growthkit';
 
 function App() {
@@ -74,15 +76,15 @@ function App() {
   const advancedSteps = [
     {
       step: '01',
-      title: 'Run Setup Command',
-      description: 'One command does everything automatically',
+      title: t('integration.steps.runSetup.title'),
+      description: t('integration.steps.runSetup.description'),
       code: setupCommand,
       language: 'bash'
     },
     {
       step: '02',
-      title: 'That\'s it! Setup is complete',
-      description: 'CLI automatically created middleware and env vars',
+      title: t('integration.steps.setupComplete.title'),
+      description: t('integration.steps.setupComplete.description'),
       code: `// middleware.ts - Auto-generated ✨
 export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
 
@@ -108,10 +110,10 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
         <ScrollReveal className="text-center mb-16">
           <div className="flex items-center justify-center space-x-2 text-primary mb-4">
             <Code2 className="w-6 h-6" />
-            <span className="text-sm font-semibold uppercase tracking-wider">Developer Experience</span>
+            <span className="text-sm font-semibold uppercase tracking-wider">{t('integration.badge')}</span>
           </div>
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            From zero to viral in
+            {t('integration.title1')}
             <br />
             <span 
               className="text-primary"
@@ -122,12 +124,11 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                 backgroundClip: 'text'
               }}
             >
-              2 simple steps
+              {t('integration.title2')}
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Choose your setup: <span className="font-semibold text-primary">Quick Start</span> works everywhere instantly, 
-            or <span className="font-semibold text-fenix-purple">Advanced</span> adds Next.js superpowers.
+            {t('integration.subtitle1')} <span className="font-semibold text-primary">{t('integration.subtitleQuick')}</span> {t('integration.subtitleQuickDesc')} <span className="font-semibold text-fenix-purple">{t('integration.subtitleAdvanced')}</span> {t('integration.subtitleAdvancedDesc')}
           </p>
           
           {/* Tab Switcher */}
@@ -148,9 +149,9 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                 } : {}}
               >
                 <Zap className="w-4 h-4" />
-                <span>Quick Start (10s)</span>
+                <span>{t('integration.quickStart')}</span>
                 {activeTab === 'quick' && (
-                  <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">Recommended</span>
+                  <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">{t('integration.recommended')}</span>
                 )}
               </button>
               <button
@@ -168,7 +169,7 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                 } : {}}
               >
                 <Sparkles className="w-4 h-4" />
-                <span>Advanced (Next.js)</span>
+                <span>{t('integration.advanced')}</span>
               </button>
             </div>
           </div>
@@ -258,7 +259,7 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                         className="flex items-center space-x-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-200"
                       >
                         <Copy className="w-4 h-4 text-gray-300" />
-                        <span className="text-sm text-gray-300">Copy</span>
+                        <span className="text-sm text-gray-300">{t('integration.copy')}</span>
                       </motion.button>
                     </div>
 
@@ -306,7 +307,7 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                       className="absolute top-4 right-4 bg-green-500 text-white px-3 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
                     >
                       <Check className="w-4 h-4" />
-                      <span>Copied!</span>
+                      <span>{t('integration.copied')}</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -335,28 +336,28 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                       <Sparkles className="w-5 h-5 text-fenix-purple" />
                     )}
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {activeTab === 'quick' ? '✅ Works everywhere:' : '⚡ Advanced features:'}
+                      {activeTab === 'quick' ? t('integration.quickFeatures.title') : t('integration.advancedFeatures.title')}
                     </h3>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {(activeTab === 'quick' ? [
-                      { icon: '✨', text: 'No backend required' },
-                      { icon: '🚀', text: 'Any JavaScript framework' },
-                      { icon: '📦', text: 'Static site generators' },
-                      { icon: '🎨', text: 'CodePen/CodeSandbox' },
-                      { icon: '🌐', text: 'GitHub Pages ready' },
-                      { icon: '⚡', text: 'Instant deployment' },
-                      { icon: '🔒', text: 'Secure public keys' },
-                      { icon: '📱', text: 'Works anywhere JS runs' }
+                      { icon: '✨', text: t('integration.quickFeatures.noBackend') },
+                      { icon: '🚀', text: t('integration.quickFeatures.anyFramework') },
+                      { icon: '📦', text: t('integration.quickFeatures.staticSites') },
+                      { icon: '🎨', text: t('integration.quickFeatures.codepen') },
+                      { icon: '🌐', text: t('integration.quickFeatures.githubPages') },
+                      { icon: '⚡', text: t('integration.quickFeatures.instantDeploy') },
+                      { icon: '🔒', text: t('integration.quickFeatures.secureKeys') },
+                      { icon: '📱', text: t('integration.quickFeatures.worksAnywhere') }
                     ] : [
-                      { icon: '🔐', text: 'Server-side API keys' },
-                      { icon: '🛣️', text: 'Custom referral routing' },
-                      { icon: '🔄', text: 'API proxying' },
-                      { icon: '✉️', text: 'Email verification flow' },
-                      { icon: '🎯', text: 'Advanced middleware' },
-                      { icon: '⚙️', text: 'Custom configuration' },
-                      { icon: '🏗️', text: 'Full-stack features' },
-                      { icon: '🚀', text: 'Maximum security' }
+                      { icon: '🔐', text: t('integration.advancedFeatures.serverKeys') },
+                      { icon: '🛣️', text: t('integration.advancedFeatures.customRouting') },
+                      { icon: '🔄', text: t('integration.advancedFeatures.apiProxying') },
+                      { icon: '✉️', text: t('integration.advancedFeatures.emailFlow') },
+                      { icon: '🎯', text: t('integration.advancedFeatures.advancedMiddleware') },
+                      { icon: '⚙️', text: t('integration.advancedFeatures.customConfig') },
+                      { icon: '🏗️', text: t('integration.advancedFeatures.fullStack') },
+                      { icon: '🚀', text: t('integration.advancedFeatures.maxSecurity') }
                     ]).map((feature, index) => (
                       <motion.div
                         key={feature.text}
@@ -395,11 +396,10 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
               <Zap className="w-8 h-8 text-white" />
             </motion.div>
             <h3 className="text-3xl font-bold text-white mb-4">
-              Ready to 10x your growth?
+              {t('integration.ctaTitle')}
             </h3>
             <p className="text-white mb-8 max-w-2xl mx-auto text-xl leading-relaxed font-medium">
-              Join hundreds of developers who've already transformed their apps into viral growth engines. 
-              Start your free trial today.
+              {t('integration.ctaSubtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.button
@@ -410,14 +410,14 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                   background: 'linear-gradient(to right, #10b981, #14b8a6)',
                 }}
               >
-                Start Free Trial
+                {t('integration.ctaButton1')}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-white text-gray-900 border-2 border-gray-800 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 hover:border-gray-900 transition-all duration-200 shadow-2xl"
               >
-                View Documentation
+                {t('integration.ctaButton2')}
               </motion.button>
             </div>
           </div>
