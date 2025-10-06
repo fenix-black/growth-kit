@@ -172,6 +172,8 @@ export interface TrackContext {
   url: string;
   referrer: string;
   userAgent: string;
+  browserLanguage: string;  // Detected from navigator.language
+  widgetLanguage: string;   // Set programmatically by parent website
 }
 
 export type GrowthKitHook = GrowthKitState & GrowthKitActions;

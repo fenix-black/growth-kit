@@ -161,6 +161,8 @@ interface TrackContext {
     url: string;
     referrer: string;
     userAgent: string;
+    browserLanguage: string;
+    widgetLanguage: string;
 }
 type GrowthKitHook = GrowthKitState & GrowthKitActions;
 

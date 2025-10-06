@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.6.3] - 2025-10-06
+
+### ✨ Features
+- **Browser Language Detection**: Automatic language detection for improved localization
+  - SDK now detects browser language using `navigator.language`
+  - Language data sent with fingerprint information to backend API
+  - Supports Spanish (`es`) and English (`en`) with smart fallback to English
+  - Backwards compatible with existing SDK versions
+
+### 🔧 Backend Integration
+- **Enhanced Fingerprint Tracking**: Extended fingerprint data to include language information
+  - New `browserLanguage` field captures detected browser language
+  - New `preferredLanguage` field for user-selected language preferences
+  - New `languageSource` field tracks how language was determined
+  - New `languageUpdatedAt` timestamp for language preference updates
+  - Database indexes added for optimal language-based queries
+
+### 🎯 API Enhancements
+- **Seamless Language Data Flow**: Language information integrated into existing `/v1/me` endpoint
+  - No new API endpoints required (KISS principle)
+  - Language data sent via existing `context` object
+  - Automatic language detection and storage on first visit
+  - Graceful handling of missing language data for older SDK versions
+
+### 🌍 Localization Foundation
+- **Preparation for Multi-Language Support**: Infrastructure ready for comprehensive localization
+  - Browser language detection lays groundwork for user-centric localization
+  - Database schema supports future email template and waitlist content localization
+  - Clean, backwards-compatible implementation following KISS principles
+
+### 🔄 Backwards Compatibility
+- **Zero Breaking Changes**: Existing implementations continue working unchanged
+  - Old SDK versions without language detection continue functioning normally
+  - New language fields default to English when not provided
+  - Graceful degradation ensures smooth operation across all SDK versions
+
+### 📝 Developer Experience
+- **Clean Implementation**: Simple, readable code following established patterns
+  - Reused existing API infrastructure instead of creating new endpoints
+  - Minimal code changes with maximum functionality
+  - Clear separation of concerns and maintainable architecture
+
 ## [0.6.2] - 2025-10-03
 
 ### ✨ Features

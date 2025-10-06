@@ -160,6 +160,11 @@ model Fingerprint {
   browser        String?
   device         String?
   location       Json?
+  // Language tracking fields
+  browserLanguage   String?   // Detected from navigator.language
+  preferredLanguage String?   // User-selected language preference ('en', 'es')
+  languageSource    String?   // 'browser_detected', 'user_selected', 'default'
+  languageUpdatedAt DateTime? // When language preference was last updated
   credits        Credit[]
   app            App        @relation(fields: [appId], references: [id], onDelete: Cascade)
   leads          Lead[]
@@ -172,6 +177,8 @@ model Fingerprint {
   @@index([appId])
   @@index([fingerprint])
   @@index([referralCode])
+  @@index([preferredLanguage])
+  @@index([browserLanguage])
   @@map("fingerprints")
 }
 

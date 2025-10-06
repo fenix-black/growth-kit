@@ -86,6 +86,11 @@ export async function POST(request: NextRequest) {
           browser,
           device,
           location: location.city || location.country ? location : undefined,
+          // Language tracking (backwards compatible - defaults to 'en' if not provided)
+          browserLanguage: context?.browserLanguage || 'en',
+          preferredLanguage: context?.widgetLanguage || 'en',
+          languageSource: 'browser_detected',
+          languageUpdatedAt: new Date(),
         },
         include: {
           credits: true,
@@ -106,38 +111,53 @@ export async function POST(request: NextRequest) {
         },
       });
     } else {
-      // For existing fingerprints, update location if missing
+      // For existing fingerprints, update missing data
+      const updateData: any = {};
+      
+      // Update location if missing
       if (!fingerprintRecord.location) {
         const userAgent = request.headers.get('user-agent') || '';
         const geoLocation = getGeolocation(clientIp, request.headers);
-        const browserInfo = context?.browser || detectBrowser(userAgent);
-        const deviceInfo = context?.device || detectDevice(userAgent);
-        
         if (geoLocation.city || geoLocation.country) {
-          await prisma.fingerprint.update({
-            where: { id: fingerprintRecord.id },
-            data: {
-              browser: browserInfo,
-              device: deviceInfo,
-              location: geoLocation,
+          updateData.browser = context?.browser || detectBrowser(userAgent);
+          updateData.device = context?.device || detectDevice(userAgent);
+          updateData.location = geoLocation;
+        }
+      }
+      
+      // Update language data if missing (for backwards compatibility with old fingerprints)
+      if (!fingerprintRecord.browserLanguage && context?.browserLanguage) {
+        updateData.browserLanguage = context.browserLanguage;
+      }
+      
+      if (!fingerprintRecord.preferredLanguage && context?.widgetLanguage) {
+        updateData.preferredLanguage = context.widgetLanguage;
+        updateData.languageSource = 'browser_detected';
+        updateData.languageUpdatedAt = new Date();
+      }
+      
+      // Apply updates if any
+      if (Object.keys(updateData).length > 0) {
+        await prisma.fingerprint.update({
+          where: { id: fingerprintRecord.id },
+          data: updateData,
+        });
+        
+        // Refresh the record
+        const updatedRecord = await prisma.fingerprint.findUnique({
+          where: { id: fingerprintRecord.id },
+          include: {
+            credits: {
+              orderBy: { createdAt: 'desc' },
             },
-          });
-          
-          // Refresh the record
-          const updatedRecord = await prisma.fingerprint.findUnique({
-            where: { id: fingerprintRecord.id },
-            include: {
-              credits: {
-                orderBy: { createdAt: 'desc' },
-              },
-              usage: {
-                orderBy: { createdAt: 'desc' },
-              },
+            usage: {
+              orderBy: { createdAt: 'desc' },
             },
-          });
-          if (updatedRecord) {
-            fingerprintRecord = updatedRecord;
-          }
+          },
+        });
+        
+        if (updatedRecord) {
+          fingerprintRecord = updatedRecord;
         }
       }
     }

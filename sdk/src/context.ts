@@ -11,6 +11,8 @@ export function getBrowserContext(): TrackContext {
       url: '',
       referrer: '',
       userAgent: '',
+      browserLanguage: 'en', // Default for SSR
+      widgetLanguage: 'en', // Default for SSR
     };
   }
 
@@ -18,6 +20,7 @@ export function getBrowserContext(): TrackContext {
   const browser = detectBrowser(ua);
   const os = detectOS(ua);
   const device = detectDevice();
+  const browserLanguage = detectBrowserLanguage();
 
   return {
     browser,
@@ -28,6 +31,8 @@ export function getBrowserContext(): TrackContext {
     url: window.location.href,
     referrer: document.referrer || '',
     userAgent: ua,
+    browserLanguage,
+    widgetLanguage: 'en', // Will be set programmatically by parent website later
   };
 }
 
@@ -57,6 +62,20 @@ function detectDevice(): 'desktop' | 'mobile' | 'tablet' {
   if (isTablet) return 'tablet';
   if (isMobile) return 'mobile';
   return 'desktop';
+}
+
+function detectBrowserLanguage(): string {
+  // Detect browser language from navigator
+  // Priority: navigator.language -> navigator.languages[0] -> 'en'
+  const browserLang = navigator.language || navigator.languages?.[0] || 'en';
+  
+  // Normalize to our supported languages (en/es for now)
+  if (browserLang.toLowerCase().startsWith('es')) {
+    return 'es';
+  }
+  
+  // Default to English for all other languages
+  return 'en';
 }
 
 export function generateSessionId(): string {
