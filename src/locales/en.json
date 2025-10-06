@@ -46,13 +46,16 @@
       "title": "Browser Fingerprinting",
       "description": "Track anonymous users without cookies or accounts. Works everywhere JavaScript runs.",
       "demoTitle": "User Fingerprinting",
-      "demoStatus": "Anonymous Tracking"
+      "demoStatus": "Anonymous Tracking",
+      "active": "Active"
     },
     "referrals": {
       "title": "Viral Referrals",
       "description": "Turn users into growth champions with automatic referral tracking and credit rewards.",
       "demoTitle": "Viral Referrals",
-      "demoCoefficient": "Viral Coefficient"
+      "demoCoefficient": "Viral Coefficient",
+      "sarahReferrals": "Sarah's Referrals",
+      "credits": "Credits"
     },
     "credits": {
       "title": "Flexible Credits",
@@ -88,7 +91,8 @@
         "Cross-session persistence",
         "Privacy-friendly identification",
         "Seamless user experience"
-      ]
+      ],
+      "codeExample": "const gk = useGrowthKit({\n  publicKey: 'pk_your_public_key'\n});\n// Automatically generates unique fingerprint\n// and tracks user across sessions"
     },
     {
       "id": "referrals",
@@ -99,7 +103,8 @@
         "Automatic credit distribution",
         "Anti-abuse protection",
         "Viral coefficient tracking"
-      ]
+      ],
+      "codeExample": "// User gets their referral link\nconst referralLink = gk.getReferralLink();\n\n// Share and earn credits when friends join\nawait gk.share();"
     },
     {
       "id": "credits",
@@ -110,7 +115,8 @@
         "Action-based spending",
         "Progress gamification",
         "Retention improvement"
-      ]
+      ],
+      "codeExample": "// Users earn credits for actions\nawait gk.claimEmail('user@example.com');\nawait gk.verifyEmail(token);\n\n// Spend credits for premium features\nawait gk.completeAction('premium-generation');"
     },
     {
       "id": "waitlist",
@@ -121,7 +127,8 @@
         "Priority queue management",
         "FOMO-driven signups",
         "Launch readiness tracking"
-      ]
+      ],
+      "codeExample": "// Join waitlist with automatic invitations\nawait gk.joinWaitlist('early-adopter@email.com');\n\n// Admin controls invitation batches\nawait inviteNextBatch(30); // Invite 30 users"
     }
   ],
   "miniAppExamples": [

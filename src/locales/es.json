@@ -46,13 +46,16 @@
       "title": "Huella Digital del Navegador",
       "description": "Rastrea usuarios anónimos sin cookies ni cuentas. Funciona donde sea que JavaScript funcione.",
       "demoTitle": "Huella Digital de Usuario",
-      "demoStatus": "Seguimiento Anónimo"
+      "demoStatus": "Seguimiento Anónimo",
+      "active": "Activo"
     },
     "referrals": {
       "title": "Referencias Virales",
       "description": "Convierte usuarios en campeones de crecimiento con seguimiento automático de referidos y recompensas de créditos.",
       "demoTitle": "Referencias Virales",
-      "demoCoefficient": "Coeficiente Viral"
+      "demoCoefficient": "Coeficiente Viral",
+      "sarahReferrals": "Referidos de Sarah",
+      "credits": "Créditos"
     },
     "credits": {
       "title": "Créditos Flexibles",
@@ -88,7 +91,8 @@
         "Persistencia entre sesiones",
         "Identificación privada",
         "Experiencia fluida"
-      ]
+      ],
+      "codeExample": "const gk = useGrowthKit({\n  publicKey: 'pk_your_public_key'\n});\n// Genera automáticamente huella única\n// y rastrea usuario entre sesiones"
     },
     {
       "id": "referrals",
@@ -99,7 +103,8 @@
         "Distribución auto de créditos",
         "Protección anti-abuso",
         "Tracking coeficiente viral"
-      ]
+      ],
+      "codeExample": "// Usuario obtiene su link de referido\nconst referralLink = gk.getReferralLink();\n\n// Comparte y gana créditos cuando se unan amigos\nawait gk.share();"
     },
     {
       "id": "credits",
@@ -110,7 +115,8 @@
         "Gasto basado en acciones",
         "Gamificación de progreso",
         "Mejora de retención"
-      ]
+      ],
+      "codeExample": "// Usuarios ganan créditos por acciones\nawait gk.claimEmail('user@example.com');\nawait gk.verifyEmail(token);\n\n// Gasta créditos en funciones premium\nawait gk.completeAction('premium-generation');"
     },
     {
       "id": "waitlist",
@@ -121,7 +127,8 @@
         "Gestión cola prioritaria",
         "Registros por FOMO",
         "Tracking preparación"
-      ]
+      ],
+      "codeExample": "// Únete a lista de espera con invitaciones automáticas\nawait gk.joinWaitlist('early-adopter@email.com');\n\n// Admin controla lotes de invitación\nawait inviteNextBatch(30); // Invita 30 usuarios"
     }
   ],
   "miniAppExamples": [
@@ -133,7 +140,7 @@
       "timeframe": "3 meses",
       "tags": ["SaaS", "IA", "Fotografía"],
       "testimonial": {
-        "quote": "GrowthKit transformó nuestra adquisición de usuarios. El sistema de referidos solo aumentó registros en 300% en 3 meses.",
+        "quote": "GrowthKit transformó nuestra adquisición de usuarios. El sistema de referidos aumentó registros en 300% en solo 3 meses.",
         "author": "Pablo Schaffner",
         "role": "Co-fundador, Restore Photos"
       }

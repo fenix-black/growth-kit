@@ -24,10 +24,13 @@ export default function RealExamplesShowcase() {
   const { t } = useTranslation();
   const miniAppExamplesData = t('miniAppExamples') as any[];
   
-  // Merge translated data with original metrics and screenshots
+  // Merge translated data with original metrics and screenshots (keep translated timeframe)
   const miniAppExamples = miniAppExamplesData.map((app: any, index: number) => ({
     ...app,
-    metrics: originalExamples[index].metrics,
+    metrics: {
+      ...originalExamples[index].metrics,
+      timeframe: app.timeframe // Use translated timeframe
+    },
     screenshot: originalExamples[index].screenshot
   }));
 
