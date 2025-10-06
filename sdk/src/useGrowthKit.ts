@@ -47,6 +47,9 @@ export function useGrowthKit(): GrowthKitHook {
     apiRef.current = new GrowthKitAPI(config.apiKey, config.publicKey, config.apiUrl, config.debug, currentLanguage);
   }, [config.apiKey, config.publicKey, config.apiUrl, config.debug, currentLanguage]);
 
+  // Track previous language to detect changes
+  const prevLanguageRef = useRef(currentLanguage);
+
   // Initialize fingerprint and fetch user data
   const initialize = useCallback(async () => {
     if (!apiRef.current || initRef.current) return;
@@ -381,6 +384,17 @@ export function useGrowthKit(): GrowthKitHook {
       console.warn('[GrowthKit] Refresh failed:', error instanceof Error ? error.message : 'Unknown error');
     }
   }, [state.fingerprint]);
+
+  // Refresh data when language changes (but not on initial mount)
+  useEffect(() => {
+    if (prevLanguageRef.current !== currentLanguage && state.initialized && !state.loading) {
+      if (configRef.current.debug) {
+        console.log('[GrowthKit] Language changed from', prevLanguageRef.current, 'to', currentLanguage, '- refreshing data');
+      }
+      prevLanguageRef.current = currentLanguage;
+      refresh();
+    }
+  }, [currentLanguage, state.initialized, state.loading, refresh]);
 
   // Complete an action
   const completeAction = useCallback(async (

@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.7] - 2025-10-06
+
+### 🐛 Bug Fixes
+- **Language Switching Backend Updates**: Fixed critical issue where user language changes weren't being sent to backend
+  - Widget now automatically refreshes data when language changes via `setLanguage()` method
+  - Backend correctly receives updated `widgetLanguage` and updates user's `preferredLanguage`
+  - `languageSource` properly set to `'user_selected'` when user explicitly chooses language
+  - Admin panel now shows correct user-selected language instead of browser-detected language
+
+### 🔧 Technical Improvements
+- Added automatic refresh trigger when language changes in `useGrowthKit` hook
+- Enhanced `setLanguage` method in widget to trigger backend synchronization
+- Improved language change detection with proper state tracking
+- Maintains backward compatibility and follows KISS principles
+
 ## [0.6.6] - 2025-10-06
 
 ### 🐛 Bug Fixes

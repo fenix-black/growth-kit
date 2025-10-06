@@ -2,6 +2,22 @@
 
 React SDK for GrowthKit - Intelligent waitlist and referral management system with client-side and middleware support.
 
+## ✨ What's New in v0.6.7
+
+**🔧 Language Switching Backend Sync** - Complete language preference tracking:
+- **Backend Updates**: Language changes now properly sync with backend database
+- **User Choice Priority**: User-selected language correctly overrides browser detection
+- **Admin Panel Accuracy**: Dashboard shows actual user language preference, not just browser language
+- **Automatic Refresh**: Widget automatically updates backend when language changes
+
+**Key Improvements:**
+- ✅ **Complete Data Flow**: `setLanguage()` triggers backend refresh with updated `widgetLanguage`
+- ✅ **Correct Prioritization**: User-selected language takes precedence over browser-detected
+- ✅ **Admin Dashboard Fix**: Language column shows user's actual choice, not browser default
+- ✅ **Source Tracking**: `languageSource` correctly identifies 'user_selected' vs 'browser_detected'
+
+---
+
 ## ✨ What's New in v0.6.6
 
 **🔄 Enhanced Language Reactivity** - Real-time language synchronization:

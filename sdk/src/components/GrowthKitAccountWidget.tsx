@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef, useCallback } from 'react';
 import { GrowthKitProvider, useGrowthKitConfig } from './GrowthKitProvider';
 import { useGrowthKit } from '../useGrowthKit';
 import { WaitlistForm } from './WaitlistForm';
@@ -156,6 +156,18 @@ const AccountWidgetInternal = forwardRef<
     }
   };
 
+  // Enhanced setLanguage that triggers refresh
+  const setLanguageWithRefresh = useCallback((language: 'en' | 'es') => {
+    if (setLanguage) {
+      setLanguage(language);
+      // Trigger refresh to update backend with new language preference
+      // Small delay to ensure API client is updated with new language
+      setTimeout(() => {
+        refresh();
+      }, 100);
+    }
+  }, [setLanguage, refresh]);
+
   // Expose imperative API
   useImperativeHandle(ref, () => ({
     openEarnCreditsModal: () => creditModalRef.current?.open(),
@@ -166,7 +178,7 @@ const AccountWidgetInternal = forwardRef<
       email: email || undefined,
       verified: hasVerifiedEmail,
     }),
-    setLanguage: setLanguage || (() => {}),
+    setLanguage: setLanguageWithRefresh,
   }));
 
   // Use centralized theme colors from context
