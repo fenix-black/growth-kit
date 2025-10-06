@@ -105,6 +105,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         browser: fp.browser,
         device: fp.device,
         location: fp.location,
+        // Language information
+        browserLanguage: fp.browserLanguage,
+        preferredLanguage: fp.preferredLanguage,
+        languageSource: fp.languageSource,
+        languageUpdatedAt: fp.languageUpdatedAt,
       };
     });
 

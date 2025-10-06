@@ -27,6 +27,7 @@ import { cn } from '@/components/ui/utils';
 import { AdminUnifiedTimeline } from './AdminUnifiedTimeline';
 import { UserActivityAnalytics } from './UserActivityAnalytics';
 import { UserActivityHistory } from './UserActivityHistory';
+import { LanguageIndicator } from '@/components/ui/LanguageIndicator';
 
 interface User {
   id: string;
@@ -42,6 +43,11 @@ interface User {
   browser: string | null;
   device: string | null;
   location: { city: string | null; country: string | null; region: string | null } | null;
+  // Language information
+  browserLanguage: string | null;
+  preferredLanguage: string | null;
+  languageSource: string | null;
+  languageUpdatedAt: string | null;
 }
 
 interface UserDetails extends User {
@@ -294,7 +300,7 @@ export default function UsersLeadsManager({
   };
 
   const exportToCSV = () => {
-    const headers = ['Fingerprint ID', 'Name', 'Email', 'Verified', 'Browser', 'Device', 'Location', 'Credits', 'Referrals', 'Last Active', 'Created'];
+    const headers = ['Fingerprint ID', 'Name', 'Email', 'Verified', 'Browser', 'Device', 'Location', 'Language', 'Credits', 'Referrals', 'Last Active', 'Created'];
     const rows = users.map(user => [
       user.fingerprintId,
       user.name || '',
@@ -303,6 +309,7 @@ export default function UsersLeadsManager({
       user.browser || '',
       user.device || '',
       user.location?.city || user.location?.country || '',
+      user.preferredLanguage || user.browserLanguage || 'N/A',
       user.creditBalance.toString(),
       user.referralCount.toString(),
       new Date(user.lastActiveAt).toLocaleDateString(),
@@ -425,6 +432,9 @@ export default function UsersLeadsManager({
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Location
                 </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Language
+                </th>
                 <th 
                   className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSort('credits')}
@@ -460,13 +470,13 @@ export default function UsersLeadsManager({
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                     Loading users...
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                     No users found
                   </td>
                 </tr>
@@ -524,6 +534,14 @@ export default function UsersLeadsManager({
                       ) : (
                         <span className="text-sm text-gray-400">-</span>
                       )}
+                    </td>
+                    <td className="px-4 py-4">
+                      <LanguageIndicator
+                        preferredLanguage={user.preferredLanguage}
+                        browserLanguage={user.browserLanguage}
+                        languageSource={user.languageSource}
+                        showTooltip={true}
+                      />
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center space-x-2">
@@ -699,6 +717,44 @@ export default function UsersLeadsManager({
                       <div>
                         <span className="text-gray-500 dark:text-gray-400">Last Active:</span>
                         <p className="mt-1">{new Date(selectedUser.lastActiveAt).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Language Information */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center space-x-2">
+                      <span>🌐</span>
+                      <span>Language Information</span>
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Preferred Language:</span>
+                        <div className="mt-1">
+                          <LanguageIndicator
+                            preferredLanguage={selectedUser.preferredLanguage}
+                            className="justify-start"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Browser Language:</span>
+                        <p className="mt-1 font-mono text-xs">{selectedUser.browserLanguage || 'Not detected'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Detection Method:</span>
+                        <p className="mt-1 capitalize">
+                          {selectedUser.languageSource?.replace('_', ' ') || 'Unknown'}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Last Updated:</span>
+                        <p className="mt-1">
+                          {selectedUser.languageUpdatedAt 
+                            ? new Date(selectedUser.languageUpdatedAt).toLocaleString()
+                            : 'Never'
+                          }
+                        </p>
                       </div>
                     </div>
                   </div>
