@@ -78,6 +78,106 @@
     },
     "liveDemo": "Live Demo"
   },
+  "featureDetails": [
+    {
+      "id": "fingerprinting",
+      "title": "Smart User Fingerprinting",
+      "description": "Track users across sessions without requiring login",
+      "benefits": [
+        "Anonymous user tracking",
+        "Cross-session persistence",
+        "Privacy-friendly identification",
+        "Seamless user experience"
+      ]
+    },
+    {
+      "id": "referrals",
+      "title": "Viral Referral System",
+      "description": "Turn every user into a growth engine",
+      "benefits": [
+        "Unique referral codes per user",
+        "Automatic credit distribution",
+        "Anti-abuse protection",
+        "Viral coefficient tracking"
+      ]
+    },
+    {
+      "id": "credits",
+      "title": "Flexible Credit System",
+      "description": "Reward engagement and incentivize actions",
+      "benefits": [
+        "Customizable credit policies",
+        "Action-based spending",
+        "Progress gamification",
+        "Retention improvement"
+      ]
+    },
+    {
+      "id": "waitlist",
+      "title": "Smart Waitlist Management",
+      "description": "Build anticipation and manage early access",
+      "benefits": [
+        "Automated invitation system",
+        "Priority queue management",
+        "FOMO-driven signups",
+        "Launch readiness tracking"
+      ]
+    }
+  ],
+  "miniAppExamples": [
+    {
+      "id": "restore-photos",
+      "name": "Restore Photos",
+      "description": "Breathe new life into your old photographs. Correct, restore, and animate your memories in a few clicks.",
+      "category": "SaaS & AI",
+      "timeframe": "3 months",
+      "tags": ["SaaS", "AI", "Photography"],
+      "testimonial": {
+        "quote": "GrowthKit transformed our user acquisition. The referral system alone increased our signups by 300% in just 3 months.",
+        "author": "Pablo Schaffner",
+        "role": "Co-founder, Restore Photos"
+      }
+    },
+    {
+      "id": "creative-design",
+      "name": "PixelCraft Studio",
+      "description": "Creative design tool for social media graphics with AI-powered templates",
+      "category": "Creative & Design",
+      "timeframe": "4 months",
+      "tags": ["Creative", "Design", "AI", "Social Media"],
+      "testimonial": {
+        "quote": "The credit system keeps users engaged while the referral program brings in high-quality leads. It's brilliant.",
+        "author": "Marcus Rodriguez",
+        "role": "Founder, PixelCraft Studio"
+      }
+    },
+    {
+      "id": "fintech-app",
+      "name": "WealthTracker",
+      "description": "Personal finance management with investment tracking and budgeting tools",
+      "category": "FinTech & Finance",
+      "timeframe": "2 months",
+      "tags": ["FinTech", "Finance", "Investment", "Budgeting"],
+      "testimonial": {
+        "quote": "The waitlist feature created incredible FOMO. We had 500 signups before launch and converted 80% to paid users.",
+        "author": "Jennifer Liu",
+        "role": "Product Manager, WealthTracker"
+      }
+    },
+    {
+      "id": "edu-platform",
+      "name": "LearnForge",
+      "description": "Online learning platform with interactive courses and skill assessments",
+      "category": "Education & Learning",
+      "timeframe": "5 months",
+      "tags": ["Education", "Learning", "Courses", "Skills"],
+      "testimonial": {
+        "quote": "Students love earning credits for completing courses and referring friends. Our engagement metrics are through the roof.",
+        "author": "Dr. Alex Kumar",
+        "role": "CEO, LearnForge"
+      }
+    }
+  ],
   "examples": {
     "badge": "Success Stories",
     "title1": "Real apps, real growth",

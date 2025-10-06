@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Language, getLanguageFromCookie, setLanguageCookie } from '@/lib/language';
 import enTranslations from '@/locales/en.json';
 import esTranslations from '@/locales/es.json';
@@ -30,16 +30,17 @@ export function useTranslation() {
     }
   }, []);
 
-  const changeLanguage = (newLang: Language) => {
+  const changeLanguage = useCallback((newLang: Language) => {
     setLanguage(newLang);
     setLanguageCookie(newLang);
-  };
+  }, []);
 
   /**
    * Translate a key using dot notation
    * Example: t('hero.title') -> "Intelligent Waitlist & Referral Management"
+   * Memoized to update when language changes
    */
-  const t = (key: string): string => {
+  const t = useCallback((key: string): any => {
     // Use English as fallback during SSR or before client hydration
     const currentLang = language || 'en';
     const keys = key.split('.');
@@ -50,7 +51,7 @@ export function useTranslation() {
     }
     
     return value || key; // Return key if translation not found
-  };
+  }, [language]); // Re-create when language changes
 
   return { 
     language: language || 'en', 

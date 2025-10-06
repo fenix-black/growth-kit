@@ -13,15 +13,25 @@ import {
   Quote
 } from 'lucide-react';
 import ScrollReveal, { ScrollRevealStagger, StaggerItem } from '@/components/landing/animations/ScrollReveal';
-import { miniAppExamples } from '@/lib/landing/examples';
 import { useTranslation } from '@/hooks/useTranslation';
+
+// Import original examples for metrics and screenshots (not translatable)
+import { miniAppExamples as originalExamples } from '@/lib/landing/examples';
 
 export default function RealExamplesShowcase() {
   const [selectedExample, setSelectedExample] = useState(0);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const { t } = useTranslation();
+  const miniAppExamplesData = t('miniAppExamples') as any[];
+  
+  // Merge translated data with original metrics and screenshots
+  const miniAppExamples = miniAppExamplesData.map((app: any, index: number) => ({
+    ...app,
+    metrics: originalExamples[index].metrics,
+    screenshot: originalExamples[index].screenshot
+  }));
 
-  const categories = [...new Set(miniAppExamples.map(app => app.category))];
+  const categories = [...new Set(miniAppExamples.map((app: any) => app.category))];
 
   return (
     <section id="examples" className="py-20 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
@@ -126,7 +136,7 @@ export default function RealExamplesShowcase() {
 
                   {/* Tags */}
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {app.tags.slice(0, 3).map((tag) => (
+                    {app.tags.slice(0, 3).map((tag: string) => (
                       <span
                         key={tag}
                         className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
@@ -256,7 +266,7 @@ export default function RealExamplesShowcase() {
                   <div>
                     <h4 className="text-sm font-semibold text-gray-900 mb-3">{t('examples.technologiesUsed')}</h4>
                     <div className="flex flex-wrap gap-2">
-                      {miniAppExamples[selectedExample].tags.map((tag) => (
+                      {miniAppExamples[selectedExample].tags.map((tag: string) => (
                         <span
                           key={tag}
                           className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-full transition-colors duration-200"

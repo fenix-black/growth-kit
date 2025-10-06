@@ -14,12 +14,26 @@ import {
   ArrowRight
 } from 'lucide-react';
 import ScrollReveal, { ScrollRevealStagger, StaggerItem } from '@/components/landing/animations/ScrollReveal';
-import { featureDetails } from '@/lib/landing/examples';
 import { useTranslation } from '@/hooks/useTranslation';
+
+// Icon and color mapping (not translatable)
+const featureMetadata: Record<string, { icon: string; color: string }> = {
+  fingerprinting: { icon: 'Fingerprint', color: 'primary' },
+  referrals: { icon: 'Share2', color: 'fenix-purple' },
+  credits: { icon: 'Coins', color: 'fenix-orange' },
+  waitlist: { icon: 'Clock', color: 'fenix-magenta' }
+};
 
 export default function FeaturesDemo() {
   const [activeFeature, setActiveFeature] = useState(0);
   const { t } = useTranslation();
+  const featureDetailsData = t('featureDetails') as any[];
+  
+  // Add icon and color metadata
+  const featureDetails = featureDetailsData.map((feature: any) => ({
+    ...feature,
+    ...featureMetadata[feature.id]
+  }));
 
   const iconMap = {
     'Fingerprint': Fingerprint,
@@ -165,7 +179,7 @@ export default function FeaturesDemo() {
                             className="mt-4 pt-4 border-t border-gray-200"
                           >
                             <div className="grid grid-cols-2 gap-2 mb-4">
-                              {feature.benefits.map((benefit, idx) => (
+                              {feature.benefits.map((benefit: string, idx: number) => (
                                 <div key={idx} className="flex items-center space-x-2 text-sm text-gray-600">
                                   <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0"></div>
                                   <span>{benefit}</span>

@@ -78,6 +78,106 @@
     },
     "liveDemo": "Demo en Vivo"
   },
+  "featureDetails": [
+    {
+      "id": "fingerprinting",
+      "title": "Huella Digital Inteligente",
+      "description": "Rastrea usuarios entre sesiones sin login",
+      "benefits": [
+        "Tracking anónimo",
+        "Persistencia entre sesiones",
+        "Identificación privada",
+        "Experiencia fluida"
+      ]
+    },
+    {
+      "id": "referrals",
+      "title": "Sistema Referidos Viral",
+      "description": "Convierte usuarios en motor de crecimiento",
+      "benefits": [
+        "Códigos únicos por usuario",
+        "Distribución auto de créditos",
+        "Protección anti-abuso",
+        "Tracking coeficiente viral"
+      ]
+    },
+    {
+      "id": "credits",
+      "title": "Sistema Créditos Flexible",
+      "description": "Recompensa engagement e incentiva acciones",
+      "benefits": [
+        "Políticas personalizables",
+        "Gasto basado en acciones",
+        "Gamificación de progreso",
+        "Mejora de retención"
+      ]
+    },
+    {
+      "id": "waitlist",
+      "title": "Gestión Lista de Espera",
+      "description": "Genera anticipación y gestiona acceso",
+      "benefits": [
+        "Sistema invitación auto",
+        "Gestión cola prioritaria",
+        "Registros por FOMO",
+        "Tracking preparación"
+      ]
+    }
+  ],
+  "miniAppExamples": [
+    {
+      "id": "restore-photos",
+      "name": "Restore Photos",
+      "description": "Da nueva vida a tus fotos antiguas. Corrige, restaura y anima tus recuerdos en pocos clics.",
+      "category": "SaaS & IA",
+      "timeframe": "3 meses",
+      "tags": ["SaaS", "IA", "Fotografía"],
+      "testimonial": {
+        "quote": "GrowthKit transformó nuestra adquisición de usuarios. El sistema de referidos solo aumentó registros en 300% en 3 meses.",
+        "author": "Pablo Schaffner",
+        "role": "Co-fundador, Restore Photos"
+      }
+    },
+    {
+      "id": "creative-design",
+      "name": "PixelCraft Studio",
+      "description": "Herramienta de diseño para gráficos de redes sociales con plantillas IA.",
+      "category": "Creativo & Diseño",
+      "timeframe": "4 meses",
+      "tags": ["Creativo", "Diseño", "IA", "Redes Sociales"],
+      "testimonial": {
+        "quote": "El sistema de créditos mantiene usuarios comprometidos mientras referidos trae leads de calidad. Brillante.",
+        "author": "Marcus Rodriguez",
+        "role": "Fundador, PixelCraft Studio"
+      }
+    },
+    {
+      "id": "fintech-app",
+      "name": "WealthTracker",
+      "description": "Gestión de finanzas personales con tracking de inversiones y presupuesto.",
+      "category": "FinTech & Finanzas",
+      "timeframe": "2 meses",
+      "tags": ["FinTech", "Finanzas", "Inversión", "Presupuesto"],
+      "testimonial": {
+        "quote": "La lista de espera creó FOMO increíble. Tuvimos 500 registros pre-lanzamiento y convertimos 80% a pago.",
+        "author": "Jennifer Liu",
+        "role": "Product Manager, WealthTracker"
+      }
+    },
+    {
+      "id": "edu-platform",
+      "name": "LearnForge",
+      "description": "Plataforma de aprendizaje online con cursos interactivos y evaluaciones de habilidades.",
+      "category": "Educación & Aprendizaje",
+      "timeframe": "5 meses",
+      "tags": ["Educación", "Aprendizaje", "Cursos", "Habilidades"],
+      "testimonial": {
+        "quote": "Estudiantes aman ganar créditos por completar cursos y referir amigos. Nuestras métricas están por las nubes.",
+        "author": "Dr. Alex Kumar",
+        "role": "CEO, LearnForge"
+      }
+    }
+  ],
   "examples": {
     "badge": "Historias de Éxito",
     "title1": "Apps reales, crecimiento real",

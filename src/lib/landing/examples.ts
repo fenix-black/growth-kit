@@ -3,7 +3,7 @@ export interface MiniAppExample {
   name: string;
   description: string;
   category: string;
-  url?: string; // Optional - for real apps that can be shared
+  url?: string;
   metrics: {
     userGrowth: string;
     viralCoefficient?: string;
@@ -105,29 +105,6 @@ export const miniAppExamples: MiniAppExample[] = [
   }
 ];
 
-// Dashboard screenshot placeholders
-export const dashboardScreenshots = {
-  overview: {
-    title: 'Analytics Dashboard',
-    description: 'Real-time metrics across all your apps',
-    image: '/landing/screenshots/dashboard-overview-PLACEHOLDER.svg',
-    features: ['User Growth Tracking', 'Referral Analytics', 'Credit Management', 'Revenue Insights']
-  },
-  appsManagement: {
-    title: 'Multi-App Management',
-    description: 'Manage all your growth-enabled apps from one place',
-    image: '/landing/screenshots/apps-management-PLACEHOLDER.svg',
-    features: ['App Configuration', 'API Key Management', 'Policy Settings', 'Usage Monitoring']
-  },
-  userDetails: {
-    title: 'User Insights',
-    description: 'Deep dive into user behavior and referral patterns',
-    image: '/landing/screenshots/dashboard-overview-PLACEHOLDER.svg',
-    features: ['User Journey Tracking', 'Referral Trees', 'Credit History', 'Engagement Metrics']
-  }
-};
-
-// Feature demonstrations data
 export const featureDetails = [
   {
     id: 'fingerprinting',
@@ -203,3 +180,25 @@ await gk.joinWaitlist('early-adopter@email.com');
 await inviteNextBatch(30); // Invite 30 users`
   }
 ];
+
+// Dashboard screenshot placeholders
+export const dashboardScreenshots = {
+  overview: {
+    title: 'Analytics Dashboard',
+    description: 'Real-time metrics across all your apps',
+    image: '/landing/screenshots/dashboard-overview-PLACEHOLDER.svg',
+    features: ['User Growth Tracking', 'Referral Analytics', 'Credit Management', 'Revenue Insights']
+  },
+  appsManagement: {
+    title: 'Multi-App Management',
+    description: 'Manage all your growth-enabled apps from one place',
+    image: '/landing/screenshots/apps-management-PLACEHOLDER.svg',
+    features: ['App Configuration', 'API Key Management', 'Policy Settings', 'Usage Monitoring']
+  },
+  userDetails: {
+    title: 'User Insights',
+    description: 'Deep dive into user behavior and referral patterns',
+    image: '/landing/screenshots/dashboard-overview-PLACEHOLDER.svg',
+    features: ['User Journey Tracking', 'Referral Trees', 'Credit History', 'Engagement Metrics']
+  }
+};
