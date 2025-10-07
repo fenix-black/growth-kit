@@ -160,11 +160,10 @@ const AccountWidgetInternal = forwardRef<
   const setLanguageWithRefresh = useCallback((language: 'en' | 'es') => {
     if (setLanguage) {
       setLanguage(language);
-      // Trigger refresh to update backend with new language preference
       // The API client's language will be updated via useEffect in useGrowthKit
-      refresh();
+      // and refresh will be called automatically after the language is updated
     }
-  }, [setLanguage, refresh]);
+  }, [setLanguage]);
 
   // Expose imperative API
   useImperativeHandle(ref, () => ({

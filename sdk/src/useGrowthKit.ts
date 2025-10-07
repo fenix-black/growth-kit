@@ -59,6 +59,7 @@ export function useGrowthKit(): GrowthKitHook {
 
   // Track previous language to detect changes
   const prevLanguageRef = useRef(currentLanguage);
+  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize fingerprint and fetch user data
   const initialize = useCallback(async () => {
@@ -399,13 +400,25 @@ export function useGrowthKit(): GrowthKitHook {
   useEffect(() => {
     if (prevLanguageRef.current !== currentLanguage && state.initialized && !state.loading) {
       if (configRef.current.debug) {
-        console.log('[GrowthKit] Language changed from', prevLanguageRef.current, 'to', currentLanguage, '- refreshing data');
+        console.log('[GrowthKit] Language changed from', prevLanguageRef.current, 'to', currentLanguage, '- scheduling refresh');
       }
       prevLanguageRef.current = currentLanguage;
-      // Don't refresh here - let the widget's setLanguageWithRefresh handle it
-      // This avoids duplicate refresh calls
+      
+      // Clear any existing timeout to prevent multiple refreshes
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+      
+      // Debounce the refresh call to prevent multiple rapid requests
+      refreshTimeoutRef.current = setTimeout(() => {
+        if (configRef.current.debug) {
+          console.log('[GrowthKit] Executing debounced refresh for language change');
+        }
+        refresh();
+        refreshTimeoutRef.current = null;
+      }, 100); // 100ms debounce
     }
-  }, [currentLanguage, state.initialized, state.loading]);
+  }, [currentLanguage, state.initialized, state.loading, refresh]);
 
   // Complete an action
   const completeAction = useCallback(async (
@@ -792,6 +805,9 @@ export function useGrowthKit(): GrowthKitHook {
       window.removeEventListener('beforeunload', handleUnload);
       if (batchTimerRef.current) {
         clearTimeout(batchTimerRef.current);
+      }
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
       }
       // Send any remaining events
       sendEvents();
