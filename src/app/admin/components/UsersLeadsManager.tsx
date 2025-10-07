@@ -28,6 +28,7 @@ import { AdminUnifiedTimeline } from './AdminUnifiedTimeline';
 import { UserActivityAnalytics } from './UserActivityAnalytics';
 import { UserActivityHistory } from './UserActivityHistory';
 import { LanguageIndicator } from '@/components/ui/LanguageIndicator';
+import { ReferralIndicator } from '@/components/ui/ReferralIndicator';
 import { formatLocationForDisplay, formatLocationForCSV } from '@/lib/utils/location';
 
 interface User {
@@ -38,6 +39,16 @@ interface User {
   emailVerified: boolean;
   creditBalance: number;
   referralCount: number;
+  referralSource: {
+    referralId: string;
+    referredAt: string | null;
+    referrer: {
+      id: string;
+      fingerprintId: string;
+      name: string | null;
+      email: string | null;
+    } | null;
+  } | null;
   lastActiveAt: string;
   createdAt: string;
   referralCode: string;
@@ -502,8 +513,11 @@ export default function UsersLeadsManager({
                           <Fingerprint className="w-10 h-10 text-teal-500" />
                         </div>
                         <div className="space-y-1">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {displayName}
+                          <div className="flex items-center space-x-2 text-sm font-medium text-gray-900 dark:text-white">
+                            <span>{displayName}</span>
+                            {user.referralSource && (
+                              <ReferralIndicator referralSource={user.referralSource} />
+                            )}
                           </div>
                           {user.browser && user.device && (
                             <div className="text-xs text-gray-500">

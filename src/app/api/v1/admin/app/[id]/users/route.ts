@@ -70,6 +70,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         referrals: {
           where: { claimedAt: { not: null } },
         },
+        referredBy: {
+          include: {
+            referrer: {
+              include: {
+                leads: {
+                  where: { emailVerified: true },
+                  orderBy: { createdAt: 'desc' },
+                  take: 1,
+                },
+              },
+            },
+          },
+        },
         _count: {
           select: { referrals: true },
         },
@@ -91,6 +104,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       // Count successful referrals
       const referralCount = fp.referrals.length;
 
+      // Get referral source info
+      const referralSource = fp.referredBy ? {
+        referralId: fp.referredBy.id,
+        referredAt: fp.referredBy.claimedAt,
+        referrer: fp.referredBy.referrer ? {
+          id: fp.referredBy.referrer.id,
+          fingerprintId: fp.referredBy.referrer.fingerprint,
+          name: fp.referredBy.referrer.leads[0]?.name || null,
+          email: fp.referredBy.referrer.leads[0]?.email || null,
+        } : null,
+      } : null;
+
       return {
         id: fp.id,
         fingerprintId: fp.fingerprint,
@@ -99,6 +124,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         emailVerified: latestLead?.emailVerified || false,
         creditBalance,
         referralCount,
+        referralSource,
         lastActiveAt: fp.lastActiveAt || fp.createdAt,
         createdAt: fp.createdAt,
         referralCode: fp.referralCode,
