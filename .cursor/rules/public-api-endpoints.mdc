@@ -1,0 +1,61 @@
+---
+description: Guidelines for SDK widget API endpoints - always use public endpoints when making changes for client-side SDK
+---
+
+# SDK Widget API Endpoint Guidelines
+
+## Critical Rule: SDK Widget Uses Public Endpoints
+
+The GrowthKit SDK widget operates in **public key mode** and calls `/api/public/*` endpoints, NOT `/api/v1/*` endpoints.
+
+### Endpoint Mapping
+When the SDK widget makes API calls, it uses these public endpoints:
+- SDK calls `/api/public/user` (NOT `/api/v1/me`)
+- SDK calls `/api/public/track` (NOT `/api/v1/track`) 
+- SDK calls `/api/public/waitlist/join` (NOT `/api/v1/waitlist`)
+- SDK calls `/api/public/claim/name` (NOT `/api/v1/claim/name`)
+- SDK calls `/api/public/claim/email` (NOT `/api/v1/claim/email`)
+
+### When Making Changes
+
+**✅ ALWAYS DO THIS:**
+1. When adding new functionality to the SDK widget, implement it in `/api/public/*` endpoints
+2. When fixing bugs that affect the SDK widget, check and update `/api/public/*` endpoints
+3. When adding new fields or logic (like language tracking), add it to BOTH:
+   - `/api/v1/*` endpoints (for direct API usage)
+   - `/api/public/*` endpoints (for SDK widget usage)
+
+**❌ NEVER DO THIS:**
+- Only update `/api/v1/*` endpoints and assume the SDK widget will work
+- Forget to sync changes between `/api/v1/*` and `/api/public/*` endpoints
+
+### Authentication Differences
+- `/api/v1/*` endpoints use API key authentication (`Authorization: Bearer gk_xxxxx`)
+- `/api/public/*` endpoints use public key + JWT token authentication
+- The SDK automatically handles public key authentication via `verifyPublicToken()`
+
+### Example: Language Tracking Implementation
+When we added language preference tracking:
+1. ✅ Added logic to `/api/v1/me/route.ts` 
+2. ✅ Added the SAME logic to `/api/public/user/route.ts`
+3. ✅ Widget now properly updates language preferences
+
+### Key Files to Check
+When making SDK-related changes, always check these public endpoint files:
+- [/api/public/user/route.ts](mdc:src/app/api/public/user/route.ts) - Main user data endpoint
+- [/api/public/track/route.ts](mdc:src/app/api/public/track/route.ts) - Event tracking
+- [/api/public/waitlist/join/route.ts](mdc:src/app/api/public/waitlist/join/route.ts) - Waitlist functionality
+- [/api/public/claim/name/route.ts](mdc:src/app/api/public/claim/name/route.ts) - Name claiming
+- [/api/public/claim/email/route.ts](mdc:src/app/api/public/claim/email/route.ts) - Email claiming
+
+### Testing Strategy
+1. Test changes with the actual SDK widget, not just direct API calls
+2. Check browser Network tab to see which endpoints the widget actually calls
+3. Use the monitoring scripts in [scripts/](mdc:scripts/) to verify database changes
+4. Verify both `/api/v1/*` and `/api/public/*` endpoints work correctly
+
+### Common Mistake to Avoid
+❌ **"I updated /api/v1/me but the widget still doesn't work"**
+✅ **"I updated both /api/v1/me AND /api/public/user so both direct API and SDK widget work"**
+
+Remember: The SDK widget is the primary way users interact with GrowthKit, so public endpoints are just as important as the direct API endpoints.

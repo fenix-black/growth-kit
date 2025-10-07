@@ -70,7 +70,10 @@ export async function POST(request: NextRequest) {
       return corsErrors.notFound(origin);
     }
     
-    // For existing fingerprints, backfill location if missing
+    // For existing fingerprints, backfill missing data
+    const updateData: any = {};
+    
+    // Update location if missing
     if (!fingerprintRecord.location) {
       const clientIp = getClientIp(request.headers);
       const userAgent = request.headers.get('user-agent') || '';
@@ -80,14 +83,46 @@ export async function POST(request: NextRequest) {
       const device = context?.device || detectDevice(userAgent);
       
       if (location.city || location.country) {
-        await prisma.fingerprint.update({
-          where: { id: fingerprintRecord.id },
-          data: {
-            browser,
-            device,
-            location,
-          },
-        });
+        updateData.browser = browser;
+        updateData.device = device;
+        updateData.location = location;
+      }
+    }
+    
+    // Update language data if missing or if widget language has changed
+    if (!fingerprintRecord.browserLanguage && context?.browserLanguage) {
+      updateData.browserLanguage = context.browserLanguage;
+    }
+    
+    // Update preferred language if missing OR if widget language is different
+    const newPreferredLanguage = context?.widgetLanguage || context?.browserLanguage;
+    if (newPreferredLanguage && (!fingerprintRecord.preferredLanguage || fingerprintRecord.preferredLanguage !== newPreferredLanguage)) {
+      updateData.preferredLanguage = newPreferredLanguage;
+      // Only mark as 'user_selected' if widgetLanguage differs from browserLanguage
+      updateData.languageSource = (context?.widgetLanguage && context?.widgetLanguage !== context?.browserLanguage)
+        ? 'user_selected'
+        : 'browser_detected';
+      updateData.languageUpdatedAt = new Date();
+    }
+    
+    // Apply updates if any
+    if (Object.keys(updateData).length > 0) {
+      await prisma.fingerprint.update({
+        where: { id: fingerprintRecord.id },
+        data: updateData,
+      });
+      
+      // Refresh the record
+      const updatedRecord = await prisma.fingerprint.findUnique({
+        where: { id: fingerprintRecord.id },
+        include: {
+          credits: { orderBy: { createdAt: 'desc' } },
+          usage: { orderBy: { createdAt: 'desc' } },
+        },
+      });
+      
+      if (updatedRecord) {
+        fingerprintRecord = updatedRecord;
       }
     }
 
@@ -122,7 +157,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user should be grandfathered BEFORE processing any claims
     let isGrandfathered = false;
-    if (appWithWaitlist?.waitlistEnabled && appWithWaitlist.waitlistEnabledAt) {
+    if (appWithWaitlist?.waitlistEnabled && appWithWaitlist.waitlistEnabledAt && fingerprintRecord) {
       isGrandfathered = fingerprintRecord.createdAt < appWithWaitlist.waitlistEnabledAt;
     }
 
