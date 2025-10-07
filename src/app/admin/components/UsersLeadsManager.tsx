@@ -30,6 +30,7 @@ import { UserActivityHistory } from './UserActivityHistory';
 import { LanguageIndicator } from '@/components/ui/LanguageIndicator';
 import { ReferralIndicator } from '@/components/ui/ReferralIndicator';
 import { formatLocationForDisplay, formatLocationForCSV } from '@/lib/utils/location';
+import { formatCreditReason } from '@/lib/utils/credits';
 
 interface User {
   id: string;
@@ -919,7 +920,9 @@ export default function UsersLeadsManager({
                       {selectedUser.creditHistory.map((credit) => (
                         <div key={credit.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                           <div>
-                            <p className="text-sm">{credit.reason}</p>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                              {formatCreditReason(credit.reason)}
+                            </p>
                             <p className="text-xs text-gray-500">
                               {new Date(credit.createdAt).toLocaleString()}
                             </p>

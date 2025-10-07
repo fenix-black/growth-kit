@@ -31,6 +31,7 @@ import {
   EChartsGauge,
   chartColorSchemes
 } from '@/components/ui/charts';
+import { formatCreditReason, getCreditReasonColor } from '@/lib/utils/credits';
 
 interface App {
   id: string;
@@ -62,18 +63,8 @@ interface Metrics {
 }
 
 
-// Helper function to map credit reasons to colors
-const getColorForReason = (reason: string): string => {
-  const colorMap: Record<string, string> = {
-    'daily_grant': '#10b981',     // primary green
-    'referral': '#a855f7',        // purple
-    'email_verification': '#f97316', // orange
-    'name_claim': '#d946ef',      // magenta
-    'custom': '#06b6d4',          // cyan
-    'action': '#14b8a6',          // teal
-  };
-  return colorMap[reason] || '#8b5cf6'; // default violet
-};
+// Use centralized credit reason utilities for consistent naming
+const getColorForReason = getCreditReasonColor;
 
 export default function DashboardOverview() {
   const router = useRouter();
@@ -158,7 +149,7 @@ export default function DashboardOverview() {
             ...prev,
             growth: growth.timeSeries || [],
             credits: credits.distribution.map((item: any) => ({
-              name: item.reason,
+              name: formatCreditReason(item.reason),
               value: item.percentage,
               color: getColorForReason(item.reason)
             })),
