@@ -1,104 +1,29 @@
 # @fenixblack/growthkit
 
-React SDK for GrowthKit - Intelligent waitlist and referral management system with client-side and middleware support.
+React SDK for GrowthKit - Intelligent waitlist and referral management system for client-side applications.
 
-## ✨ What's New in v0.6.7
+> 📝 **Version History**: See [CHANGELOG.md](./CHANGELOG.md) for updates  
+> 🔧 **Advanced Setup**: See [MIDDLEWARE.md](./MIDDLEWARE.md) for Next.js server-side integration
 
-**🔧 Language Switching Backend Sync** - Complete language preference tracking:
-- **Backend Updates**: Language changes now properly sync with backend database
-- **User Choice Priority**: User-selected language correctly overrides browser detection
-- **Admin Panel Accuracy**: Dashboard shows actual user language preference, not just browser language
-- **Automatic Refresh**: Widget automatically updates backend when language changes
+## Table of Contents
 
-**Key Improvements:**
-- ✅ **Complete Data Flow**: `setLanguage()` triggers backend refresh with updated `widgetLanguage`
-- ✅ **Correct Prioritization**: User-selected language takes precedence over browser-detected
-- ✅ **Admin Dashboard Fix**: Language column shows user's actual choice, not browser default
-- ✅ **Source Tracking**: `languageSource` correctly identifies 'user_selected' vs 'browser_detected'
-
----
-
-## ✨ What's New in v0.6.6
-
-**🔄 Enhanced Language Reactivity** - Real-time language synchronization:
-- **Instant Updates**: Widget responds immediately to language changes from parent app
-- **Complete Admin Integration**: Language data properly displays in admin panel
-- **Reactive State Management**: Uses React Context for seamless language switching
-- **Full Data Flow**: Language changes trigger API updates and backend synchronization
-
-**Key Improvements:**
-- ✅ **Dynamic Switching**: `setLanguage()` method triggers immediate API client recreation
-- ✅ **Admin Panel Fix**: User details modal shows complete language information
-- ✅ **Real-time Sync**: Parent app language changes instantly reflected in widget UI
-- ✅ **Context-driven**: Proper React state management for language reactivity
-
----
-
-## ✨ What's New in v0.6.5
-
-**🐛 Fixed Widget Language Integration** - Widget language now properly syncs:
-- **Dynamic Language Support**: Widget language correctly reflects parent app configuration
-- **Accurate Tracking**: Distinguishes between auto-detected and user-selected languages
-- **Better Analytics**: `languageSource` now accurately identifies user language choices
-- **Seamless Updates**: Language changes propagate correctly to backend
-
-**Key Improvements:**
-- ✅ **Correct Detection**: Auto-detected languages marked as `'browser_detected'`
-- ✅ **User Choice Tracking**: Explicit language switches marked as `'user_selected'`
-- ✅ **Data Quality**: More accurate language preference data for personalization
-- ✅ **API Integration**: Widget language parameter properly passed to all API calls
-
----
-
-**v0.6.3 - Browser Language Detection**
-
-**🌍 Browser Language Detection** - Automatic localization foundation:
-- **Smart Detection**: Automatically detects user's browser language (`navigator.language`)
-- **Seamless Integration**: Language data flows through existing API infrastructure
-- **Backwards Compatible**: Zero breaking changes, works with all SDK versions
-- **Localization Ready**: Foundation for comprehensive multi-language support
-
----
-
-**v0.6.2 - Product Waitlists & Embedded Widgets**
-
-**🎯 Product-Specific Waitlists** - Create multiple waitlists per app:
-- **Tag-Based System**: Separate waitlists for different products, features, or tiers
-- **Multi-Product Support**: Same email can join multiple product waitlists
-- **Per-Product Analytics**: Track signups and conversions by product
-- **Custom Fields**: Collect product-specific data from users
-- **Independent Schedules**: Auto-invite timing per product
-
-**📍 Embedded Waitlist Widgets** - Auto-inject waitlist forms anywhere:
-- **Auto-Injection**: Automatically inject forms using CSS selectors
-- **Manual Placement**: Place widgets exactly where you need them
-- **Inline Display**: Seamlessly integrate into existing pages
-- **Smart Detection**: Avoids duplicate injections
-
-```tsx
-// Auto-inject into any element
-<AutoWaitlistInjector />
-
-// Or place manually
-<EmbedWaitlistWidget variant="standard" />
-```
-
-[See Product Waitlists Documentation →](#product-waitlists)
-
----
-
-**v0.6.1 - Branded Waitlist Screens**
-- **App Logo Support**: Upload your logo or use a URL (PNG/JPG/WebP)
-- **Custom Branding**: Your app name, description, and brand color automatically applied
-- **3 Modern Layouts**: Centered, Split, or Minimal - choose what fits your app
-- **Smart Fallbacks**: Works beautifully even without customization
-- **Zero Config**: Configure once in admin, works everywhere automatically
-
-[See Waitlist Branding Documentation →](#waitlistform)
+- [Quick Start](#-quick-start-10-seconds)
+- [Installation](#installation)
+- [Complete Widget Example](#-complete-widget-integration-example)
+- [Getting Your Public Key](#getting-your-public-key)
+- [Configuration Options](#-configuration-options)
+- [Components](#components)
+  - [GrowthKitAccountWidget](#growthkitaccountwidget)
+  - [WaitlistForm](#waitlistform)
+  - [GrowthKitGate](#growthkitgate)
+- [API Reference](#api-reference)
+- [Localization](#localization-support)
+- [Theming](#theming-support)
+- [Product Waitlists](#product-waitlists)
+- [TypeScript](#typescript-support)
 
 ## ⚡ Quick Start (10 seconds)
 
-### Option 1: Client-Side Only (Recommended for most apps)
 ```bash
 npm install @fenixblack/growthkit
 ```
@@ -106,35 +31,23 @@ npm install @fenixblack/growthkit
 **That's it!** Just use your public key:
 
 ```tsx
-import { useGrowthKit } from '@fenixblack/growthkit';
+import { GrowthKitAccountWidget } from '@fenixblack/growthkit';
 
 function App() {
-  const gk = useGrowthKit({
-    publicKey: 'pk_your_public_key_here' // Get this from your dashboard
-  });
-  
-  return <div>Credits: {gk.credits}</div>;
+  return (
+    <GrowthKitAccountWidget
+      config={{ publicKey: 'pk_your_public_key_here' }}
+      position="top-right"
+    >
+      <YourApp />
+    </GrowthKitAccountWidget>
+  );
 }
 ```
 
-✅ **Works with**: Static sites, SPAs, GitHub Pages, Netlify, Vercel, CodePen  
+✅ **Works with**: Static sites, SPAs, React, Next.js, Vue, GitHub Pages, Netlify, Vercel  
 ✅ **No backend required**: Direct secure communication with GrowthKit  
-✅ **Safe for client-side**: Public keys are designed to be exposed  
-
-### Option 2: Next.js with Middleware (Advanced)
-```bash
-npx @fenixblack/growthkit setup
-```
-**For full-stack Next.js apps that need:**
-- Server-side API key security
-- Custom referral link routing  
-- Advanced middleware features
-
-**That's it!** The CLI will automatically:
-- Detect your Next.js project
-- Create `middleware.ts` with auto-middleware
-- Set up environment variables
-- Provide next steps
+✅ **Safe for client-side**: Public keys are designed to be exposed
 
 ## Installation
 
@@ -144,7 +57,184 @@ npm install @fenixblack/growthkit
 yarn add @fenixblack/growthkit
 ```
 
-## 🌍 Integration Examples
+## Getting Your Public Key
+
+Before you start, you'll need your public API key:
+
+1. Log into your [GrowthKit Dashboard](https://growth.fenixblack.ai)
+2. Select your app (or create a new one)
+3. Go to **API Tokens** tab in app settings
+4. Copy your **Public Key** (starts with `pk_`)
+
+> **🔒 Security Note**: Public keys are safe to use in client-side code. They're designed to be exposed and automatically handle secure token generation.
+
+## 🎯 Complete Widget Integration Example
+
+Here's a complete, copy-paste ready example showing how to integrate the GrowthKit widget in your app:
+
+### React App (Most Common)
+
+```tsx
+import React from 'react';
+import { GrowthKitAccountWidget } from '@fenixblack/growthkit';
+
+function App() {
+  return (
+    <GrowthKitAccountWidget
+      config={{
+        publicKey: 'pk_your_public_key_here', // Get this from your dashboard
+        theme: 'auto',                        // Options: 'light', 'dark', 'auto'
+        language: 'en',                       // Options: 'en', 'es'
+      }}
+      position="top-right"                    // Where to display the widget
+      showName={true}                         // Show user's name
+      showEmail={true}                        // Show user's email
+    >
+      {/* Your entire app goes here */}
+      <div>
+        <h1>Welcome to My App</h1>
+        <p>The widget appears in the top-right corner automatically!</p>
+        
+        {/* Your app content */}
+        <YourComponents />
+      </div>
+    </GrowthKitAccountWidget>
+  );
+}
+
+export default App;
+```
+
+**That's it!** The widget automatically:
+- ✅ Displays credit balance in the corner
+- ✅ Tracks referrals when users share
+- ✅ Manages email verification
+- ✅ Handles user profile (name/email)
+- ✅ Shows referral link and stats
+- ✅ Works with any React app
+
+### Next.js App Router
+
+```tsx
+// app/layout.tsx
+'use client';
+
+import { GrowthKitAccountWidget } from '@fenixblack/growthkit';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <GrowthKitAccountWidget
+          config={{
+            publicKey: 'pk_your_public_key_here',
+            theme: 'auto',
+          }}
+          position="top-right"
+        >
+          {children}
+        </GrowthKitAccountWidget>
+      </body>
+    </html>
+  );
+}
+```
+
+### Static HTML / Vanilla JS
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My App with GrowthKit</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@fenixblack/growthkit@latest/dist/index.umd.js"></script>
+</head>
+<body>
+  <div id="root">
+    <h1>Welcome to My App</h1>
+    <p>Your content here...</p>
+  </div>
+
+  <script>
+    // Initialize GrowthKit widget
+    const { GrowthKitAccountWidget } = window.GrowthKit;
+    const config = {
+      publicKey: 'pk_your_public_key_here',
+      theme: 'auto'
+    };
+
+    // Wrap your app with the widget
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(
+      React.createElement(GrowthKitAccountWidget, { 
+        config, 
+        position: 'top-right' 
+      }, document.getElementById('root').innerHTML)
+    );
+  </script>
+</body>
+</html>
+```
+
+### What Users See
+
+Once integrated, your users will see:
+
+1. **Corner Widget**: Minimalist credit counter (e.g., "⭐ 10 credits")
+2. **On Hover**: Expands to show:
+   - Full credit balance
+   - User's name and email (if claimed)
+   - Referral stats
+   - Share button
+3. **Interactive Modals**:
+   - Name claiming flow
+   - Email verification
+   - Referral sharing interface
+   - Credit earning opportunities
+
+### Advanced: Accessing the Hook Directly
+
+If you need more control, use the hook directly:
+
+```tsx
+import { useGrowthKit, GrowthKitProvider } from '@fenixblack/growthkit';
+
+function MyComponent() {
+  const gk = useGrowthKit();
+
+  return (
+    <div>
+      <h1>Credits: {gk.credits}</h1>
+      <button onClick={() => gk.share()}>Share & Earn</button>
+      <p>Your link: {gk.getReferralLink()}</p>
+      
+      {/* Track custom actions */}
+      <button 
+        onClick={() => gk.completeAction('custom_action')}
+        disabled={!gk.canPerformAction('custom_action')}
+      >
+        Do Something (costs credits)
+      </button>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <GrowthKitProvider config={{ publicKey: 'pk_your_key_here' }}>
+      <MyComponent />
+    </GrowthKitProvider>
+  );
+}
+```
+
+---
+
+## 🌍 More Integration Examples
 
 ### React SPA (Create React App, Vite, etc.)
 ```tsx
@@ -221,261 +311,6 @@ export default function ClientWidget() {
 }
 ```
 
-### Getting Your Public Key
-
-1. Go to your GrowthKit admin dashboard
-2. Navigate to **API Tokens** tab in your app settings
-3. Copy your **Public Key** (starts with `pk_`)
-
-> **🔒 Security**: Public keys are safe to use in client-side code. They generate time-limited tokens that are scoped to individual users.
-
-## Import Paths
-
-The SDK provides four separate entry points optimized for different environments:
-
-### Main Package (React Components & Hooks)
-```tsx
-// For React components and hooks (client-side)
-import { 
-  useGrowthKit, 
-  GrowthKitGate, 
-  WaitlistForm,
-  GrowthKitAccountWidget,
-  useTranslation,
-  useLocalization,
-  // Theme utilities
-  getThemeColors,
-  getEffectiveTheme,
-  lightTheme,
-  darkTheme
-} from '@fenixblack/growthkit';
-
-// TypeScript types
-import type { 
-  Language, 
-  Translations, 
-  GrowthKitTheme,
-  ThemeColors,
-  GrowthKitAccountWidgetRef,
-  AppBranding,        // v0.6.1+
-  WaitlistFormProps   // v0.6.1+
-} from '@fenixblack/growthkit';
-```
-
-### Middleware (Edge Runtime Compatible)
-```ts
-// Zero-config middleware (recommended)
-export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
-
-// Or advanced configuration
-import { createGrowthKitMiddleware } from '@fenixblack/growthkit/middleware';
-```
-
-### Auto-Middleware (Zero Config)
-```ts
-// For instant setup with zero configuration
-export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
-```
-
-### Server Utilities (Node.js)
-```ts
-// For server-side utilities (Node.js)
-import { GrowthKitServer, createGrowthKitServer } from '@fenixblack/growthkit/server';
-```
-
-## CLI Setup Tool
-
-GrowthKit provides an interactive CLI for zero-effort setup:
-
-```bash
-# Interactive setup wizard
-npx @fenixblack/growthkit setup
-
-# Show help
-npx @fenixblack/growthkit help
-```
-
-### What the CLI does:
-✅ **Project Detection**: Automatically detects Next.js projects  
-✅ **File Generation**: Creates `middleware.ts` with auto-middleware  
-✅ **Environment Setup**: Configures `.env.local` with your API credentials  
-✅ **Dependency Check**: Verifies GrowthKit is installed  
-✅ **Next Steps**: Provides clear instructions for integration  
-
-### Requirements:
-- Next.js project (creates middleware for referral handling)
-- GrowthKit API key (get from your dashboard)
-
-## Manual Setup (3 Steps)
-
-### 1. Add Middleware (handles referral links & email verification)
-
-**Automated**: Run `npx @fenixblack/growthkit setup` (recommended)
-
-**Manual**: Create `middleware.ts` in your Next.js root:
-
-```ts
-// middleware.ts - Zero configuration required! 🚀
-export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
-```
-
-**That's it!** The auto-middleware automatically handles:
-- **Referral links**: `/r/ABC123` → exchanges code for claim token → redirects to `/?ref=token`
-- **Email verification**: `/verify?token=xyz` → verifies email → redirects to `/?verified=true`  
-- **Invitation codes**: `/invite/INV-XXXXXX` → redirects with code → grants invitation credits
-- **API Proxying**: `/api/growthkit/*` → securely proxies widget API calls with server-side credentials
-- **Smart defaults**: All routes, debug mode, and configuration handled automatically
-
-### 2. Set Environment Variables
-
-```env
-# .env.local - Server-side only (secure)
-GROWTHKIT_API_KEY=gk_your_api_key_here
-GROWTHKIT_API_URL=https://growth.fenixblack.ai/api
-```
-
-> 💡 **Developer Experience**: Setup time reduced from 15-30 minutes to 30 seconds with auto-middleware!
-
-**🔒 Security Note**: The API key is server-side only and never exposed to the client. The middleware handles all API proxying automatically.
-
-### Advanced Middleware Configuration (Optional)
-
-If you need custom paths or settings, use the advanced configuration:
-
-```ts
-// middleware.ts - Custom configuration
-import { createGrowthKitMiddleware } from '@fenixblack/growthkit/middleware';
-
-export const middleware = createGrowthKitMiddleware({
-  apiKey: process.env.GROWTHKIT_API_KEY!,
-  apiUrl: process.env.GROWTHKIT_API_URL!,
-  referralPath: '/r',     // Custom referral path
-  redirectTo: '/home',    // Custom redirect destination
-  debug: true,            // Force debug mode
-});
-
-export const config = {
-  matcher: ['/r/:code*', '/verify', '/invite/:code*', '/api/growthkit/:path*']
-};
-```
-
-## Migration from v1.x (Legacy Direct Mode)
-
-If you're upgrading from a previous version that used `NEXT_PUBLIC_GROWTHKIT_API_KEY`:
-
-### 1. Simplify your middleware (recommended):
-```tsx
-// Replace your entire middleware.ts with this one line:
-export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
-```
-
-Or manually update your middleware matcher to include API proxying:
-```tsx
-export const config = {
-  matcher: ['/r/:code*', '/verify', '/invite/:code*', '/api/growthkit/:path*']
-};
-```
-
-### 2. Update your environment variables:
-```env
-# Remove these (old, insecure):
-# NEXT_PUBLIC_GROWTHKIT_API_KEY=...
-# NEXT_PUBLIC_GROWTHKIT_API_URL=...
-
-# Keep these (secure):
-GROWTHKIT_API_KEY=gk_your_api_key_here
-GROWTHKIT_API_URL=https://growth.fenixblack.ai/api
-```
-
-### 3. Update your GrowthKitProvider config:
-```tsx
-// Old way (still works but shows deprecation warning):
-<GrowthKitProvider config={{ 
-  apiKey: process.env.NEXT_PUBLIC_GROWTHKIT_API_KEY 
-}}>
-
-// New way (secure):
-<GrowthKitProvider config={{ 
-  debug: process.env.NODE_ENV === 'development'
-}}>
-```
-
-The SDK automatically detects proxy mode when no `apiKey` is provided and routes all requests through your middleware's secure proxy.
-
-### 3. Use the Hook
-
-```tsx
-import { useGrowthKit } from '@fenixblack/growthkit';
-
-function App() {
-  const gk = useGrowthKit({
-    // No apiKey needed - uses secure proxy mode automatically
-    debug: process.env.NODE_ENV === 'development'
-  });
-  
-  // That's it! The hook handles everything securely
-  return <div>Credits: {gk.credits}</div>;
-}
-```
-
-## Quick Start
-
-```tsx
-import { useGrowthKit } from '@fenixblack/growthkit';
-import { useEffect } from 'react';
-import toast from 'react-hot-toast';
-
-function App() {
-  const gk = useGrowthKit({
-    publicKey: 'pk_your_key_here', // Get from dashboard → API Tokens
-    debug: true,                   // Optional: Enable debug mode
-  });
-
-  // Handle email verification redirects from middleware
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    
-    if (params.get('verified') === 'true') {
-      toast.success('Email verified! +1 credit earned');
-      gk.refresh(); // Refresh credits
-      window.history.replaceState({}, '', '/');
-    } else if (params.get('verified') === 'false') {
-      toast.error('Verification failed');
-      window.history.replaceState({}, '', '/');
-    }
-  }, [gk]);
-
-  // The hook automatically:
-  // 1. Generates a browser fingerprint
-  // 2. Checks for referral cookies (if user came from /r/CODE link)
-  // 3. Registers the user and applies any referral credits
-  // 4. Fetches current credits and usage
-
-  if (gk.loading) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div>
-      <h1>Credits: {gk.credits}</h1>
-      <p>Your Referral Link: {gk.getReferralLink()}</p>
-      
-      {/* Users can perform actions that consume credits */}
-      <button 
-        onClick={() => gk.completeAction('generate')}
-        disabled={!gk.canPerformAction('generate')}
-      >
-        Generate ({gk.policy?.actions.generate?.creditsRequired || 1} credits)
-      </button>
-
-      {/* Users can share to earn more credits */}
-      <button onClick={() => gk.share()}>
-        Share & Earn Credits
-      </button>
-    </div>
-  );
-}
-```
 
 ## Localization Support
 
@@ -525,60 +360,26 @@ function App() {
 }
 ```
 
-## 🔧 Configuration Modes
+## 🔧 Configuration Options
 
-GrowthKit supports three integration modes to fit different application architectures:
-
-### 1. Public Key Mode (Recommended)
-**Best for**: Static sites, SPAs, client-side apps, prototypes
+Configure the widget with your public key and optional settings:
 
 ```tsx
 const config = {
-  publicKey: 'pk_your_key_here', // Get from dashboard → API Tokens
-  debug: true,                   // Optional: Enable debug mode
-  language: 'en',                // Optional: Set language
-  theme: 'auto',                 // Optional: Set theme
+  publicKey: 'pk_your_key_here', // Required: Get from dashboard → API Tokens
+  theme: 'auto',                 // Optional: 'light' | 'dark' | 'auto' (default: 'auto')
+  language: 'en',                // Optional: 'en' | 'es' (default: 'en')
+  debug: false,                  // Optional: Enable debug logging (default: false)
 };
 ```
 
-**Features:**
-- ✅ No backend required
-- ✅ Secure token-based authentication
-- ✅ Works everywhere JavaScript runs
-- ✅ Perfect for static site generators
+**All options:**
+- ✅ **publicKey** (required): Your app's public API key
+- ✅ **theme**: Visual theme for the widget
+- ✅ **language**: Interface language
+- ✅ **debug**: Show detailed logs in console
 
-### 2. Proxy Mode (Middleware)
-**Best for**: Next.js full-stack apps with custom routing needs
-
-```tsx
-const config = {
-  // No keys needed - middleware handles everything
-  debug: process.env.NODE_ENV === 'development',
-  language: 'en',
-  theme: 'auto',
-};
-```
-
-**Setup**: Run `npx @fenixblack/growthkit setup`
-
-**Features:**
-- ✅ Maximum security (API key server-side only)
-- ✅ Custom referral link routing
-- ✅ Advanced middleware features
-- ✅ Zero client-side configuration
-
-### 3. Direct API Mode (Legacy)
-**Best for**: Advanced use cases with custom security requirements
-
-```tsx
-const config = {
-  apiKey: 'gk_your_private_key', // Private API key
-  apiUrl: 'https://growth.fenixblack.ai/api',
-  debug: true,
-};
-```
-
-**⚠️ Warning**: Private API keys should not be exposed in client-side code in production.
+> **🔧 Advanced**: For server-side middleware integration in Next.js apps, see [MIDDLEWARE.md](./MIDDLEWARE.md)
 
 ### Programmatic Language Switching
 
@@ -655,47 +456,74 @@ function CustomComponent() {
 - **String Interpolation**: Dynamic content like "Earn {{credits}} credits"
 - **Persistent State**: Widget remembers language preference
 
-## Hook Properties
+## API Reference
 
-The `useGrowthKit` hook returns an object with the following properties:
+### useGrowthKit Hook
+
+The `useGrowthKit` hook provides access to all GrowthKit functionality:
 
 ```typescript
-{
-  // User State
-  credits: number;              // Current credit balance
-  usage: number;                // Total credits used
-  name: string | null;          // User's claimed name
-  email: string | null;         // User's claimed email
-  hasClaimedName: boolean;      // Whether user has claimed a name
-  hasClaimedEmail: boolean;     // Whether user has claimed an email
-  hasVerifiedEmail: boolean;    // Whether email is verified
-  
-  // Referral System
-  referralCode: string | null;  // User's unique referral code
-  getReferralLink: () => string; // Get shareable referral link
-  share: (options?) => void;    // Share referral link
-  
-  // Actions
-  completeAction: (action: string, options?) => Promise<boolean>;
-  canPerformAction: (action: string) => boolean;
-  claimName: (name: string) => Promise<boolean>;
-  claimEmail: (email: string) => Promise<boolean>;
-  verifyEmail: (token: string) => Promise<boolean>;
-  
-  // App State
-  loading: boolean;             // Initial loading state
-  initialized: boolean;         // Whether SDK is initialized
-  app?: AppBranding;            // App branding information (v0.6.1+)
-  error: Error | null;          // Any error that occurred
-  policy: GrowthKitPolicy;      // App credit policy
-  refresh: () => Promise<void>; // Refresh user data
-  
-  // Localization (when using translation hooks)
-  language?: 'en' | 'es';       // Current language
-  setLanguage?: (lang: 'en' | 'es') => void; // Change language
-  
-  // Theming
-  setTheme: (theme: 'light' | 'dark' | 'auto') => void; // Change theme
+const gk = useGrowthKit();
+
+// User State
+gk.credits: number              // Current credit balance
+gk.usage: number                // Total credits used
+gk.name: string | null          // User's claimed name
+gk.email: string | null         // User's claimed email
+gk.hasClaimedName: boolean      // Whether user has claimed a name
+gk.hasClaimedEmail: boolean     // Whether user has claimed an email
+gk.hasVerifiedEmail: boolean    // Whether email is verified
+
+// Referral System
+gk.referralCode: string | null  // User's unique referral code
+gk.getReferralLink(): string    // Get shareable referral link
+gk.share(options?): void        // Share referral link (opens native share or copies)
+
+// Actions
+gk.completeAction(action: string, options?): Promise<boolean>
+gk.canPerformAction(action: string): boolean
+gk.claimName(name: string): Promise<boolean>
+gk.claimEmail(email: string): Promise<boolean>
+gk.verifyEmail(token: string): Promise<boolean>
+
+// App State
+gk.loading: boolean             // Initial loading state
+gk.initialized: boolean         // Whether SDK is initialized
+gk.app?: AppBranding            // App branding information
+gk.error: Error | null          // Any error that occurred
+gk.policy: GrowthKitPolicy      // App credit policy
+gk.refresh(): Promise<void>     // Refresh user data
+
+// Customization
+gk.language: 'en' | 'es'        // Current language
+gk.setLanguage(lang): void      // Change language
+gk.setTheme(theme): void        // Change theme ('light' | 'dark' | 'auto')
+```
+
+**Example Usage:**
+
+```tsx
+function MyComponent() {
+  const gk = useGrowthKit();
+
+  return (
+    <div>
+      <h1>You have {gk.credits} credits</h1>
+      
+      <button 
+        onClick={() => gk.completeAction('generate')}
+        disabled={!gk.canPerformAction('generate')}
+      >
+        Generate Image (1 credit)
+      </button>
+      
+      <button onClick={() => gk.share()}>
+        Share & Earn 5 Credits
+      </button>
+      
+      <p>Your link: {gk.getReferralLink()}</p>
+    </div>
+  );
 }
 ```
 
@@ -1358,32 +1186,25 @@ function MarketingLandingPage() {
 }
 ```
 
-## Server-Side Usage
+## TypeScript Support
 
-```ts
-import { createGrowthKitServer } from '@fenixblack/growthkit/server';
+The SDK is written in TypeScript and provides full type definitions:
 
-const gk = createGrowthKitServer();
-
-// Get user data
-const user = await gk.getUser('fingerprint-123');
-
-// Track actions
-await gk.completeAction('fingerprint-123', 'generate');
-
-// Add to waitlist
-await gk.addToWaitlist('user@example.com', 'fingerprint-123');
+```tsx
+import type { 
+  GrowthKitConfig,
+  GrowthKitHook,
+  Language, 
+  Translations, 
+  GrowthKitTheme,
+  ThemeColors,
+  GrowthKitAccountWidgetRef,
+  AppBranding,
+  WaitlistFormProps
+} from '@fenixblack/growthkit';
 ```
 
-## Architecture Benefits
-
-This SDK follows modern best practices:
-
-1. **Separate Entry Points**: Different builds for different environments (React, Edge Runtime, Node.js)
-2. **Tree Shaking**: Import only what you need
-3. **Type Safety**: Full TypeScript support with proper types for each environment
-4. **Performance**: Optimized bundles for each runtime
-5. **Developer Experience**: Clear import paths that indicate where code runs
+All components, hooks, and utilities are fully typed for the best developer experience.
 
 ## License
 
