@@ -23,6 +23,14 @@ interface GrowthKitProviderProps {
 }
 
 export function GrowthKitProvider({ children, config }: GrowthKitProviderProps) {
+  // Apply default apiUrl if not provided
+  // When using publicKey mode, default to production API
+  // This ensures widgets that make direct fetch calls (like ProductWaitlistWidget) work correctly
+  const normalizedConfig: GrowthKitConfig = {
+    ...config,
+    apiUrl: config.apiUrl || (config.publicKey ? 'https://growth.fenixblack.ai/api' : config.apiUrl),
+  };
+  
   // Initialize language from config, defaulting to 'en'
   const [currentLanguage, setCurrentLanguage] = useState<Language>(config.language || 'en');
   
@@ -77,7 +85,7 @@ export function GrowthKitProvider({ children, config }: GrowthKitProviderProps) 
   
   return (
     <GrowthKitContext.Provider value={{ 
-      config, 
+      config: normalizedConfig, 
       setLanguage,
       currentLanguage,
       theme: currentTheme,
