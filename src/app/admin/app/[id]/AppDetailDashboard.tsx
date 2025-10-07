@@ -110,6 +110,32 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
     fetchAppDetails();
   }, [appId]);
 
+  // Auto-generate public key if missing when API tokens tab is viewed
+  useEffect(() => {
+    const generatePublicKeyIfMissing = async () => {
+      if (activeTab === 'api-keys' && app && !app.publicKey && !loading) {
+        try {
+          // Call endpoint to generate public key for this app
+          const response = await fetch(`/api/v1/admin/app/${appId}/generate-public-key`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.SERVICE_KEY || 'growth-kit-service-admin-key-2025'}`,
+            },
+          });
+
+          if (response.ok) {
+            // Refresh app details to get the new public key
+            await fetchAppDetails();
+          }
+        } catch (error) {
+          console.error('Error generating public key:', error);
+        }
+      }
+    };
+
+    generatePublicKeyIfMissing();
+  }, [activeTab, app?.publicKey, appId, loading]);
+
   const fetchAppDetails = async () => {
     try {
       const response = await fetch(`/api/v1/admin/app/${appId}`, {

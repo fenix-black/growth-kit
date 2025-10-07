@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyServiceKey } from '@/lib/security/auth';
 import { successResponse, errors } from '@/lib/utils/response';
-import { generateApiKey, hashApiKey } from '@/lib/security/apiKeys';
+import { generateApiKey, hashApiKey, generatePublicKey } from '@/lib/security/apiKeys';
 import { trackAdminActivity } from '@/lib/admin-activity-tracking';
 
 export async function POST(request: NextRequest) {
@@ -69,7 +69,9 @@ export async function POST(request: NextRequest) {
         },
       });
     } else {
-      // Create new app
+      // Create new app with public key
+      const publicKey = generatePublicKey();
+      
       app = await prisma.app.create({
         data: {
           name,
@@ -82,19 +84,7 @@ export async function POST(request: NextRequest) {
           redirectUrl,
           policyJson,
           isActive,
-        },
-      });
-
-      // Generate initial API key for new app
-      const { key, hint } = generateApiKey();
-      const hashedKey = await hashApiKey(key);
-
-      await prisma.apiKey.create({
-        data: {
-          appId: app.id,
-          keyHint: hint,
-          hashedKey,
-          scope: 'full',
+          publicKey, // Generate public key for client-side usage
         },
       });
 
@@ -117,11 +107,11 @@ export async function POST(request: NextRequest) {
         metadata: { name, domain }
       });
 
-      // Return the app with the initial API key (only time it's shown)
+      // Return the app with the initial public key
       return successResponse({
         app,
-        initialApiKey: key,
-        message: 'App created successfully. Save the API key as it won\'t be shown again.',
+        publicKey,
+        message: 'App created successfully. Public key is available in the API Tokens tab.',
       }, 201);
     }
 
