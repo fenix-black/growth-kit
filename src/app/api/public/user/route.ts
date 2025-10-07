@@ -8,6 +8,7 @@ import { withCorsHeaders } from '@/lib/middleware/cors';
 import { verifyClaim } from '@/lib/security/hmac';
 import { getClientIp } from '@/lib/middleware/rateLimitSafe';
 import { isInvitationCode, isCodeExpired } from '@/lib/utils/invitationCode';
+import { shouldBlockBot } from '@/lib/security/botDetection';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -29,6 +30,33 @@ export async function POST(request: NextRequest) {
     // Verify origin is allowed for this app
     if (origin && app.corsOrigins.length > 0 && !app.corsOrigins.includes(origin)) {
       return corsErrors.forbidden(origin);
+    }
+
+    // Bot detection - return success but don't create records
+    const userAgent = request.headers.get('user-agent');
+    if (shouldBlockBot(userAgent)) {
+      // Return a success response that looks normal but doesn't interact with database
+      const mockResponse = {
+        fingerprint: fingerprint.fingerprint,
+        credits: 0,
+        usage: 0,
+        referralCode: null,
+        creditsPaused: false,
+        waitlist: null,
+        branding: {
+          name: app.name,
+          description: app.description || null,
+          logoUrl: app.logoUrl || null,
+          primaryColor: app.primaryColor || null,
+          hideGrowthKitBranding: app.hideGrowthKitBranding || false,
+        }
+      };
+
+      return withCorsHeaders(
+        successResponse(mockResponse),
+        origin,
+        app.corsOrigins
+      );
     }
 
     // Parse request body (for compatibility with original /v1/me endpoint)

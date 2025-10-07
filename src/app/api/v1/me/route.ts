@@ -10,6 +10,7 @@ import { corsErrors } from '@/lib/utils/corsResponse';
 import { isValidFingerprint } from '@/lib/utils/validation';
 import { isInvitationCode, isCodeExpired } from '@/lib/utils/invitationCode';
 import { getGeolocation, detectBrowser, detectDevice } from '@/lib/utils/geolocation';
+import { shouldBlockBot } from '@/lib/security/botDetection';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -47,6 +48,36 @@ export async function POST(request: NextRequest) {
     );
     if (!fingerprintRateLimit.success) {
       return fingerprintRateLimit.response!;
+    }
+
+    // Bot detection - return success but don't create records
+    const userAgent = request.headers.get('user-agent');
+    if (shouldBlockBot(userAgent)) {
+      // Return a success response that looks normal but doesn't create database records
+      const mockResponse = {
+        fingerprint,
+        credits: 0,
+        usage: 0,
+        referralCode: null,
+        creditsPaused: false,
+        policy: authContext.app.policyJson,
+        waitlist: null,
+        branding: {
+          name: authContext.app.name,
+          description: authContext.app.description,
+          logoUrl: authContext.app.logoUrl,
+          primaryColor: authContext.app.primaryColor,
+          backgroundColor: authContext.app.backgroundColor,
+          cardBackgroundColor: authContext.app.cardBackgroundColor,
+          hideGrowthKitBranding: authContext.app.hideGrowthKitBranding,
+        }
+      };
+
+      return withCorsHeaders(
+        successResponse(mockResponse),
+        origin,
+        authContext.app.corsOrigins
+      );
     }
 
     // Upsert fingerprint record
