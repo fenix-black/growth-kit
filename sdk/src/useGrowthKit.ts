@@ -60,6 +60,10 @@ export function useGrowthKit(): GrowthKitHook {
   // Track previous language to detect changes
   const prevLanguageRef = useRef(currentLanguage);
   const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Use a global flag to prevent multiple refreshes from different hook instances
+  const globalRefreshKey = `growthkit_refresh_${config.publicKey || config.apiKey || 'default'}`;
+  const isRefreshingRef = useRef(false);
 
   // Initialize fingerprint and fetch user data
   const initialize = useCallback(async () => {
@@ -400,25 +404,46 @@ export function useGrowthKit(): GrowthKitHook {
   useEffect(() => {
     if (prevLanguageRef.current !== currentLanguage && state.initialized && !state.loading) {
       if (configRef.current.debug) {
-        console.log('[GrowthKit] Language changed from', prevLanguageRef.current, 'to', currentLanguage, '- scheduling refresh');
+        console.log('[GrowthKit] Language changed from', prevLanguageRef.current, 'to', currentLanguage, '- checking for refresh');
       }
       prevLanguageRef.current = currentLanguage;
       
-      // Clear any existing timeout to prevent multiple refreshes
-      if (refreshTimeoutRef.current) {
-        clearTimeout(refreshTimeoutRef.current);
-      }
-      
-      // Debounce the refresh call to prevent multiple rapid requests
-      refreshTimeoutRef.current = setTimeout(() => {
-        if (configRef.current.debug) {
-          console.log('[GrowthKit] Executing debounced refresh for language change');
+      // Use a global flag to coordinate refreshes between multiple hook instances
+      if (typeof window !== 'undefined') {
+        const windowAny = window as any;
+        
+        // Check if another instance is already handling the refresh
+        if (windowAny[globalRefreshKey]) {
+          if (configRef.current.debug) {
+            console.log('[GrowthKit] Another instance is already handling the refresh, skipping');
+          }
+          return;
         }
-        refresh();
-        refreshTimeoutRef.current = null;
-      }, 100); // 100ms debounce
+        
+        // Mark that we're handling the refresh
+        windowAny[globalRefreshKey] = true;
+        
+        // Clear any existing timeout to prevent multiple refreshes
+        if (refreshTimeoutRef.current) {
+          clearTimeout(refreshTimeoutRef.current);
+        }
+        
+        // Debounce the refresh call to prevent multiple rapid requests
+        refreshTimeoutRef.current = setTimeout(() => {
+          if (configRef.current.debug) {
+            console.log('[GrowthKit] Executing debounced refresh for language change');
+          }
+          refresh();
+          refreshTimeoutRef.current = null;
+          
+          // Clear the global flag after refresh
+          if (windowAny[globalRefreshKey]) {
+            delete windowAny[globalRefreshKey];
+          }
+        }, 200); // Increased to 200ms for better debouncing
+      }
     }
-  }, [currentLanguage, state.initialized, state.loading, refresh]);
+  }, [currentLanguage, state.initialized, state.loading, refresh, globalRefreshKey]);
 
   // Complete an action
   const completeAction = useCallback(async (
@@ -809,10 +834,17 @@ export function useGrowthKit(): GrowthKitHook {
       if (refreshTimeoutRef.current) {
         clearTimeout(refreshTimeoutRef.current);
       }
+      // Clear global refresh flag if set
+      if (typeof window !== 'undefined') {
+        const windowAny = window as any;
+        if (windowAny[globalRefreshKey]) {
+          delete windowAny[globalRefreshKey];
+        }
+      }
       // Send any remaining events
       sendEvents();
     };
-  }, [sendEvents]);
+  }, [sendEvents, globalRefreshKey]);
 
   // Join product waitlist
   const joinProductWaitlist = useCallback(async (
