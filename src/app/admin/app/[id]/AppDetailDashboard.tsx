@@ -892,7 +892,6 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  icon={<Copy size={16} />}
                   onClick={() => handleCopyToClipboard(app.publicKey!, 'publicKey')}
                   className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-900/30"
                 >
