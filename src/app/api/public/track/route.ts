@@ -5,7 +5,7 @@ import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { generateSessionId } from '@/lib/utils/validation';
 import { corsErrors } from '@/lib/utils/corsResponse';
 import { successResponse } from '@/lib/utils/response';
-import { withCorsHeaders } from '@/lib/middleware/cors';
+import { withCorsHeaders, isOriginAllowed } from '@/lib/middleware/cors';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
     
     const { app, fingerprint } = authContext;
 
-    // Verify origin is allowed for this app
-    if (origin && app.corsOrigins.length > 0 && !app.corsOrigins.includes(origin)) {
+    // Verify origin is allowed for this app (includes default origins)
+    if (origin && !isOriginAllowed(origin, app.corsOrigins)) {
       return corsErrors.forbidden(origin);
     }
 

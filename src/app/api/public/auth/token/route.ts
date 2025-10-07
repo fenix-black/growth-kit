@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db';
 import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { corsErrors } from '@/lib/utils/corsResponse';
 import { successResponse } from '@/lib/utils/response';
-import { withCorsHeaders } from '@/lib/middleware/cors';
+import { withCorsHeaders, isOriginAllowed } from '@/lib/middleware/cors';
 import jwt from 'jsonwebtoken';
 import { generateReferralCode } from '@/lib/security/hmac';
 import { getClientIp } from '@/lib/middleware/rateLimitSafe';
@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
       return corsErrors.unauthorized(origin);
     }
 
-    // Verify origin is allowed for this app
-    if (origin && app.corsOrigins.length > 0 && !app.corsOrigins.includes(origin)) {
+    // Verify origin is allowed for this app (includes default origins)
+    if (origin && !isOriginAllowed(origin, app.corsOrigins)) {
       return corsErrors.forbidden(origin);
     }
 

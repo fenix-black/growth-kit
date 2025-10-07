@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyAppAuth } from '@/lib/security/auth';
 import { checkRateLimit, getClientIp } from '@/lib/middleware/rateLimitSafe';
-import { withCorsHeaders } from '@/lib/middleware/cors';
+import { withCorsHeaders, isOriginAllowed } from '@/lib/middleware/cors';
 import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { successResponse, errors } from '@/lib/utils/response';
-import { corsErrors } from '@/lib/utils/corsResponse';import { isValidFingerprint, isValidEmail } from '@/lib/utils/validation';
+import { corsErrors } from '@/lib/utils/corsResponse';
+import { isValidFingerprint, isValidEmail } from '@/lib/utils/validation';
 import { sendVerificationEmail } from '@/lib/email/send';
 import crypto from 'crypto';
 
@@ -21,6 +22,11 @@ export async function POST(request: NextRequest) {
     const authContext = await verifyAppAuth(request.headers);
     if (!authContext) {
       return corsErrors.unauthorized(origin);
+    }
+
+    // Verify origin is allowed for this app (includes default origins)
+    if (origin && !isOriginAllowed(origin, authContext.app.corsOrigins)) {
+      return corsErrors.forbidden(origin);
     }
 
     // Rate limiting

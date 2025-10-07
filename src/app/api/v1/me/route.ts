@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db';
 import { verifyAppAuth } from '@/lib/security/auth';
 import { generateReferralCode, verifyClaim } from '@/lib/security/hmac';
 import { checkRateLimit, getClientIp } from '@/lib/middleware/rateLimitSafe';
-import { withCorsHeaders } from '@/lib/middleware/cors';
+import { withCorsHeaders, isOriginAllowed } from '@/lib/middleware/cors';
 import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
 import { successResponse, errors } from '@/lib/utils/response';
 import { corsErrors } from '@/lib/utils/corsResponse';
@@ -24,6 +24,11 @@ export async function POST(request: NextRequest) {
     const authContext = await verifyAppAuth(request.headers);
     if (!authContext) {
       return corsErrors.unauthorized(origin);
+    }
+
+    // Verify origin is allowed for this app (includes default origins)
+    if (origin && !isOriginAllowed(origin, authContext.app.corsOrigins)) {
+      return corsErrors.forbidden(origin);
     }
 
     // Rate limiting by IP
