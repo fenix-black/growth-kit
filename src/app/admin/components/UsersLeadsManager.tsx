@@ -28,6 +28,7 @@ import { AdminUnifiedTimeline } from './AdminUnifiedTimeline';
 import { UserActivityAnalytics } from './UserActivityAnalytics';
 import { UserActivityHistory } from './UserActivityHistory';
 import { LanguageIndicator } from '@/components/ui/LanguageIndicator';
+import { formatLocationForDisplay, formatLocationForCSV } from '@/lib/utils/location';
 
 interface User {
   id: string;
@@ -308,7 +309,7 @@ export default function UsersLeadsManager({
       user.emailVerified ? 'Yes' : 'No',
       user.browser || '',
       user.device || '',
-      user.location?.city || user.location?.country || '',
+      formatLocationForCSV(user.location),
       user.preferredLanguage || user.browserLanguage || 'N/A',
       user.creditBalance.toString(),
       user.referralCount.toString(),
@@ -522,18 +523,17 @@ export default function UsersLeadsManager({
                       </div>
                     </td>
                     <td className="px-4 py-4">
-                      {user.location?.city || user.location?.country ? (
-                        <div className="flex items-center space-x-1 text-sm text-gray-900 dark:text-white">
-                          <MapPin size={14} className="text-gray-400" />
-                          <span>
-                            {user.location.city && user.location.country 
-                              ? `${user.location.city}, ${user.location.country}`
-                              : user.location.city || user.location.country}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-400">-</span>
-                      )}
+                      {(() => {
+                        const formattedLocation = formatLocationForDisplay(user.location);
+                        return formattedLocation ? (
+                          <div className="flex items-center space-x-1 text-sm text-gray-900 dark:text-white">
+                            <MapPin size={14} className="text-gray-400" />
+                            <span>{formattedLocation}</span>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400">-</span>
+                        );
+                      })()}
                     </td>
                     <td className="px-4 py-4">
                       <LanguageIndicator

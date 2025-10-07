@@ -1,0 +1,53 @@
+---
+description: Systematic debugging methodology for complex client-server issues - lessons from language persistence bug
+---
+
+# Widget Debugging Lessons
+
+## The Golden Rule: Never Assume - Always Verify
+
+When debugging widget issues that "should work" but don't, follow this process:
+
+### 1. **Check the Browser Network Tab First**
+- Don't assume which endpoint the widget is calling
+- Look at the actual HTTP requests being made
+- Verify the request payload matches expectations
+
+### 2. **Test the Database Directly**
+- Write a simple script to test if the server logic works in isolation
+- This quickly tells you if the problem is client-side or server-side
+- **Never add server logs for debugging** - we can't see them on Vercel
+- Use database scripts to interact directly with the production database instead
+
+### 3. **Check ALL Similar Endpoints**
+- SDK widgets use `/api/public/*` endpoints (public key auth)
+- Middleware/direct API uses `/api/v1/*` endpoints (API key auth)
+- Admin dashboard uses `/api/v1/admin/*` and `/api/admin/*` endpoints (service key auth)
+- If you add logic to one, check if similar endpoints need the same logic
+
+### 4. **Look for Multiple Hook Instances**
+- Multiple components using `useGrowthKit()` can cause duplicate API calls
+- Check if the same action triggers multiple requests
+- Use global coordination flags or debouncing to prevent duplicates
+
+## Quick Investigation Checklist
+
+For "widget works but data doesn't persist" issues:
+
+- [ ] **Network Tab**: Which endpoint is actually being called?
+- [ ] **Database Script**: Does the server logic work when called directly?
+- [ ] **Endpoint Parity**: Does the called endpoint have the same logic as similar endpoints?
+- [ ] **Multiple Instances**: Are multiple components triggering the same action?
+
+## Real Example: Language Persistence Bug
+
+**Problem**: Language changes in widget UI but database still shows old language
+
+**Investigation**:
+1. ✅ Network tab showed widget calling `/api/public/user` 
+2. ✅ Database script proved logic worked when called directly (not server logs!)
+3. ❌ `/api/public/user` was missing the language update logic that existed in `/v1/me`
+4. ✅ Fixed by adding same logic to public endpoint
+5. ✅ Bonus: Fixed 6 duplicate requests from multiple hook instances
+
+**Key Insight**: The widget wasn't broken - it was calling a different endpoint than expected!
