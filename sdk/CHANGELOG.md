@@ -5,6 +5,18 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.14] - 2025-10-07
+
+### Added
+- **Public Complete Endpoint**: Added `/api/public/complete` endpoint for `completeAction` method when using public key authentication
+
+### Fixed
+- **completeAction with Public Key**: `completeAction` method now correctly uses `/public/complete` endpoint when SDK is in public key mode
+- **completeAction Request Body**: Optimized `completeAction` to exclude fingerprint from request body in public mode (fingerprint is already in JWT token)
+
+### Changed
+- Enhanced endpoint transformation mapping to include `/v1/complete` → `/public/complete`
+
 ## [0.6.13] - 2025-10-07
 
 ### Fixed

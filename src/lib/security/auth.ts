@@ -90,6 +90,10 @@ export interface PublicAuthContext {
     hideGrowthKitBranding: boolean | null;
     corsOrigins: string[];
     isActive: boolean;
+    trackUsdValue: boolean;
+    allowCustomCredits: boolean | null;
+    maxCustomCredits: number | null;
+    policyJson: any;
   };
   fingerprint: {
     id: string;
@@ -140,6 +144,10 @@ export async function verifyPublicToken(headers: Headers): Promise<PublicAuthCon
           hideGrowthKitBranding: true,
           corsOrigins: true,
           isActive: true,
+          trackUsdValue: true,
+          allowCustomCredits: true,
+          maxCustomCredits: true,
+          policyJson: true,
         },
       })
     );

@@ -195,6 +195,7 @@ export class GrowthKitAPI {
     const endpointMap: Record<string, string> = {
       '/v1/me': '/public/user',
       '/v1/track': '/public/track',
+      '/v1/complete': '/public/complete',
       '/v1/waitlist': '/public/waitlist/join',
       '/v1/referral/visit': '/public/referral/check',
       '/v1/referral/check': '/public/referral/check',
@@ -395,15 +396,25 @@ export class GrowthKitAPI {
     usdValue?: number,
     metadata?: any
   ): Promise<APIResponse<CompleteResponse>> {
+    // In public mode, fingerprint is in the JWT token, not the body
+    const bodyData = this.isPublicMode 
+      ? {
+          action,
+          ...(creditsRequired !== undefined && { creditsRequired }),
+          ...(usdValue !== undefined && { usdValue }),
+          ...(metadata && { metadata }),
+        }
+      : {
+          fingerprint,
+          action,
+          ...(creditsRequired !== undefined && { creditsRequired }),
+          ...(usdValue !== undefined && { usdValue }),
+          metadata,
+        };
+
     return this.request<CompleteResponse>('/v1/complete', {
       method: 'POST',
-      body: JSON.stringify({
-        fingerprint,
-        action,
-        ...(creditsRequired !== undefined && { creditsRequired }),
-        ...(usdValue !== undefined && { usdValue }),
-        metadata,
-      }),
+      body: JSON.stringify(bodyData),
     });
   }
 
