@@ -96,6 +96,8 @@ interface ShareOptions {
     title?: string;
     text?: string;
     url?: string;
+    files?: (File | Blob)[];
+    filenames?: string[];
 }
 interface APIResponse<T = any> {
     success: boolean;

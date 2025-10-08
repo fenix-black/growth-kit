@@ -17,6 +17,7 @@ React SDK for GrowthKit - Intelligent waitlist and referral management system fo
   - [WaitlistForm](#waitlistform)
   - [GrowthKitGate](#growthkitgate)
 - [API Reference](#api-reference)
+- [Sharing with Images & Videos](#sharing-with-images--videos) ⭐ **NEW**
 - [Localization](#localization-support)
 - [Theming](#theming-support)
 - [Product Waitlists](#product-waitlists)
@@ -526,6 +527,330 @@ function MyComponent() {
   );
 }
 ```
+
+## Sharing with Images & Videos
+
+The `share()` method supports sharing user-generated content like images and videos along with your referral link. This is perfect for viral loops where users can share what they created with your app.
+
+### Key Features
+
+- ✅ **Native Share API**: Uses device's native sharing on mobile (WhatsApp, Instagram, etc.)
+- ✅ **Blob Support**: Share images/videos generated from Canvas, video recording, etc.
+- ✅ **File Support**: Share File objects directly
+- ✅ **Auto-filenames**: Automatically generates filenames based on MIME type
+- ✅ **Custom Names**: Optionally provide custom filenames
+- ✅ **Smart Fallbacks**: Downloads files when native share unavailable
+- ✅ **Referral Link**: Always includes your referral link by default
+
+### Basic Sharing (Text Only)
+
+```tsx
+import { useGrowthKit } from '@fenixblack/growthkit';
+
+function ShareButton() {
+  const { share } = useGrowthKit();
+  
+  return (
+    <button onClick={() => share()}>
+      Share & Earn Credits
+    </button>
+  );
+}
+```
+
+### Custom Text & Title
+
+```tsx
+function CustomShare() {
+  const { share } = useGrowthKit();
+  
+  const handleShare = () => {
+    share({
+      title: 'Check out my creation!',
+      text: 'I made this with MyApp - try it yourself!',
+      // url automatically includes referral link
+    });
+  };
+  
+  return <button onClick={handleShare}>Share</button>;
+}
+```
+
+### Share Canvas Image
+
+Perfect for image generators, editors, design tools:
+
+```tsx
+function ImageGenerator() {
+  const { share } = useGrowthKit();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  const handleShare = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    // Convert canvas to blob
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      
+      share({
+        title: 'Check out what I created!',
+        text: 'Made with MyApp - get started for free!',
+        files: [blob],
+        filenames: ['my-creation.png'], // Optional custom filename
+      });
+    }, 'image/png');
+  };
+  
+  return (
+    <div>
+      <canvas ref={canvasRef} width={800} height={600} />
+      <button onClick={handleShare}>Share My Creation</button>
+    </div>
+  );
+}
+```
+
+### Share Video
+
+Perfect for video editors, screen recorders, animation tools:
+
+```tsx
+function VideoShare() {
+  const { share } = useGrowthKit();
+  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+  
+  const handleRecord = async () => {
+    // Example: Record screen or generate video
+    const stream = await navigator.mediaDevices.getDisplayMedia();
+    const mediaRecorder = new MediaRecorder(stream);
+    const chunks: Blob[] = [];
+    
+    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      setVideoBlob(blob);
+    };
+    
+    mediaRecorder.start();
+    setTimeout(() => mediaRecorder.stop(), 5000); // Record 5 seconds
+  };
+  
+  const handleShare = () => {
+    if (!videoBlob) return;
+    
+    share({
+      title: 'My awesome video!',
+      text: 'Created with MyApp',
+      files: [videoBlob],
+      filenames: ['my-video.webm'],
+    });
+  };
+  
+  return (
+    <div>
+      <button onClick={handleRecord}>Record Video</button>
+      <button onClick={handleShare} disabled={!videoBlob}>
+        Share Video
+      </button>
+    </div>
+  );
+}
+```
+
+### Share Multiple Files
+
+```tsx
+function MultipleImagesShare() {
+  const { share } = useGrowthKit();
+  
+  const handleShareGallery = async () => {
+    // Generate or collect multiple images
+    const blobs = await generateMultipleImages();
+    
+    share({
+      title: 'My gallery',
+      text: 'Check out these images I created!',
+      files: blobs,
+      // Auto-generated filenames: share-1234567890-0.png, share-1234567890-1.png, etc.
+    });
+  };
+  
+  return <button onClick={handleShareGallery}>Share Gallery</button>;
+}
+```
+
+### Share Options Reference
+
+```typescript
+interface ShareOptions {
+  // Text content
+  title?: string;              // Share dialog title
+  text?: string;               // Message to share
+  url?: string;                // Override URL (default: referral link)
+  
+  // File sharing (NEW)
+  files?: (File | Blob)[];     // Images, videos, or other files
+  filenames?: string[];        // Custom filenames (optional)
+}
+```
+
+### How It Works
+
+**On Mobile (Native Share)**
+1. Opens device's native share sheet
+2. User can share to WhatsApp, Instagram, Messages, etc.
+3. Includes both the media files and referral link
+
+**On Desktop (Fallback)**
+1. If native share unavailable, downloads the files
+2. Copies message + referral link to clipboard
+3. User can manually paste the link after uploading
+
+### Supported File Types
+
+- **Images**: PNG, JPEG, GIF, WebP, SVG
+- **Videos**: MP4, WebM, OGG, MOV
+- **Other**: Any file type the Web Share API supports
+
+### Best Practices
+
+**1. Always provide meaningful content**
+```tsx
+// ✅ Good - specific message
+share({
+  title: 'AI-Generated Artwork',
+  text: 'I just created this with AI! Try it yourself:',
+  files: [imageBlob]
+});
+
+// ❌ Avoid - generic message
+share({ files: [imageBlob] });
+```
+
+**2. Use appropriate file formats**
+```tsx
+// ✅ Good - widely supported
+canvas.toBlob(blob => share({ files: [blob] }), 'image/png');
+
+// ⚠️ Less compatible
+canvas.toBlob(blob => share({ files: [blob] }), 'image/webp');
+```
+
+**3. Handle errors gracefully**
+```tsx
+const handleShare = async () => {
+  const success = await share({
+    title: 'My creation',
+    files: [blob]
+  });
+  
+  if (success) {
+    toast.success('Shared successfully!');
+  } else {
+    toast.info('Share cancelled or downloaded');
+  }
+};
+```
+
+**4. Optimize file sizes**
+```tsx
+// Compress images before sharing
+canvas.toBlob((blob) => {
+  share({ files: [blob] });
+}, 'image/jpeg', 0.8); // 80% quality
+```
+
+### Real-World Examples
+
+**AI Image Generator**
+```tsx
+function AIImageGenerator() {
+  const { share, completeAction } = useGrowthKit();
+  const [generatedImage, setGeneratedImage] = useState<Blob | null>(null);
+  
+  const generateImage = async () => {
+    await completeAction('generate', { creditsRequired: 1 });
+    const blob = await createAIImage();
+    setGeneratedImage(blob);
+  };
+  
+  const shareImage = () => {
+    if (!generatedImage) return;
+    
+    share({
+      title: 'My AI Art',
+      text: 'Just created this with AI! Get free credits:',
+      files: [generatedImage],
+      filenames: ['ai-art.png']
+    });
+  };
+  
+  return (
+    <div>
+      <button onClick={generateImage}>Generate (1 credit)</button>
+      {generatedImage && (
+        <button onClick={shareImage}>Share & Earn 5 Credits</button>
+      )}
+    </div>
+  );
+}
+```
+
+**Meme Generator**
+```tsx
+function MemeGenerator() {
+  const { share } = useGrowthKit();
+  
+  const exportAndShare = async () => {
+    const canvas = document.getElementById('meme-canvas') as HTMLCanvasElement;
+    
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      
+      share({
+        title: 'My Meme',
+        text: 'Made this meme in seconds! Make yours:',
+        files: [blob],
+        filenames: ['my-meme.png']
+      });
+    }, 'image/png');
+  };
+  
+  return <button onClick={exportAndShare}>Share Meme</button>;
+}
+```
+
+**Video Clip Editor**
+```tsx
+function VideoClipEditor() {
+  const { share } = useGrowthKit();
+  const [editedVideo, setEditedVideo] = useState<Blob | null>(null);
+  
+  const shareVideo = () => {
+    if (!editedVideo) return;
+    
+    share({
+      title: 'My Video Clip',
+      text: 'Edited with MyApp - try it free!',
+      files: [editedVideo],
+      filenames: [`clip-${Date.now()}.mp4`]
+    });
+  };
+  
+  return <button onClick={shareVideo}>Share Video</button>;
+}
+```
+
+### Browser Compatibility
+
+| Feature | Chrome | Safari | Firefox | Edge |
+|---------|--------|--------|---------|------|
+| Text Share | ✅ | ✅ | ✅ | ✅ |
+| File Share (Mobile) | ✅ | ✅ | ⚠️ | ✅ |
+| File Share (Desktop) | ⚠️ | ❌ | ❌ | ⚠️ |
+
+**Note**: When file sharing is not supported, the SDK automatically falls back to downloading files and copying the message to clipboard.
 
 ## Theming Support
 

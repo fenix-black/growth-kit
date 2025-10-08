@@ -99,6 +99,10 @@ export interface ShareOptions {
   title?: string;
   text?: string;
   url?: string;
+  // Support for sharing locally generated images/videos
+  files?: (File | Blob)[];
+  // Optional custom filenames for blobs (if not provided, auto-generated)
+  filenames?: string[];
 }
 
 export interface APIResponse<T = any> {

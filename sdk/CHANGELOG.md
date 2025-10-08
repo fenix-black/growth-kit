@@ -5,6 +5,36 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2025-10-08
+
+### Added
+- **🎉 Share Images & Videos**: Major enhancement to `share()` method supporting locally generated images and videos
+  - Share Blob objects from Canvas (`canvas.toBlob()`)
+  - Share File objects directly
+  - Share videos from MediaRecorder or other sources
+  - Support for multiple files in a single share
+  - Custom filename support via optional `filenames` array
+  - Auto-generated filenames based on MIME type and timestamp
+  - Smart fallback: Downloads files when native share unavailable
+  - Enhanced error handling (AbortError, NotAllowedError, DataError)
+  - **Referral link included by default** in all shares
+  - Supports common formats: PNG, JPEG, GIF, WebP, SVG, MP4, WebM, OGG, MOV
+- Comprehensive documentation with real-world examples (AI generators, meme makers, video editors)
+- Browser compatibility table for file sharing
+
+### Changed
+- `ShareOptions` interface now includes:
+  - `files?: (File | Blob)[]` - Array of files to share
+  - `filenames?: string[]` - Optional custom filenames
+  - `url` now defaults to referral link (can be overridden)
+- Enhanced `share()` method with `navigator.canShare()` check for better file compatibility
+- Improved fallback strategy: Downloads files + copies message to clipboard when native share unavailable
+
+### Technical
+- Added helper functions: `getExtensionFromMimeType`, `blobToFile`, `downloadFile`
+- Better debugging logs for file sharing in debug mode
+- Type-safe implementation with proper File/Blob handling
+
 ## [0.6.14] - 2025-10-07
 
 ### Added

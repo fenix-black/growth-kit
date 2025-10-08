@@ -636,6 +636,50 @@ export function useGrowthKit(): GrowthKitHook {
     return `${baseUrl}/?ref=${state.referralCode}`;
   }, [state.referralCode]);
 
+  // Helper: Get file extension from MIME type
+  const getExtensionFromMimeType = (mimeType: string): string => {
+    const mimeMap: Record<string, string> = {
+      'image/png': 'png',
+      'image/jpeg': 'jpg',
+      'image/jpg': 'jpg',
+      'image/gif': 'gif',
+      'image/webp': 'webp',
+      'image/svg+xml': 'svg',
+      'video/mp4': 'mp4',
+      'video/webm': 'webm',
+      'video/ogg': 'ogv',
+      'video/quicktime': 'mov',
+    };
+    return mimeMap[mimeType] || 'bin';
+  };
+
+  // Helper: Convert Blob to File with proper filename
+  const blobToFile = (blob: Blob, filename?: string, index: number = 0): File => {
+    // If filename provided, use it
+    if (filename) {
+      return new File([blob], filename, { type: blob.type });
+    }
+    
+    // Generate filename from MIME type and timestamp
+    const ext = getExtensionFromMimeType(blob.type);
+    const timestamp = Date.now();
+    const generatedName = `share-${timestamp}-${index}.${ext}`;
+    
+    return new File([blob], generatedName, { type: blob.type });
+  };
+
+  // Helper: Trigger file download (fallback when native share not available)
+  const downloadFile = (file: File) => {
+    const url = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // Share functionality
   const share = useCallback(async (options?: ShareOptions): Promise<boolean> => {
     const referralLink = getReferralLink();
@@ -643,6 +687,7 @@ export function useGrowthKit(): GrowthKitHook {
     if (config.debug) {
       console.log('[GrowthKit] Share - Referral Code:', state.referralCode);
       console.log('[GrowthKit] Share - Referral Link:', referralLink);
+      console.log('[GrowthKit] Share - Options:', options);
     }
     
     // If no referral code, can't share
@@ -653,36 +698,119 @@ export function useGrowthKit(): GrowthKitHook {
     
     const shareTitle = options?.title || 'Check out this app!';
     const shareText = options?.text || 'Join me and get free credits!';
+    // Always use referral link by default, but allow override
+    const shareUrl = options?.url !== undefined ? options.url : referralLink;
+    
+    // Process files if provided
+    let shareFiles: File[] | undefined;
+    if (options?.files && options.files.length > 0) {
+      shareFiles = options.files.map((fileOrBlob, index) => {
+        // If already a File, use it
+        if (fileOrBlob instanceof File) {
+          return fileOrBlob;
+        }
+        // Convert Blob to File with custom or generated filename
+        const customFilename = options.filenames?.[index];
+        return blobToFile(fileOrBlob, customFilename, index);
+      });
+
+      if (config.debug) {
+        console.log('[GrowthKit] Share - Files prepared:', shareFiles.map(f => ({
+          name: f.name,
+          type: f.type,
+          size: f.size
+        })));
+      }
+    }
     
     try {
-      // Use native share API if available
+      // Check if native share API is available
       if (navigator.share) {
-        // Include both text and URL but keep them separate to avoid duplication
-        await navigator.share({
+        // Prepare share data
+        const shareData: ShareData = {
           title: shareTitle,
           text: shareText,
-          url: referralLink,
-        });
-        return true;
+          url: shareUrl,
+        };
+
+        // Add files if provided and supported
+        if (shareFiles && shareFiles.length > 0) {
+          shareData.files = shareFiles;
+        }
+
+        // Check if the data can be shared (important for files)
+        if (navigator.canShare && !navigator.canShare(shareData)) {
+          if (config.debug) {
+            console.warn('[GrowthKit] Share data not supported by this device:', shareData);
+          }
+          // Fall through to fallback
+        } else {
+          // Attempt native share
+          await navigator.share(shareData);
+          return true;
+        }
       }
 
-      // Fallback to clipboard - copy the full message with link
-      const fullMessage = `${shareText} ${referralLink}`;
-      await navigator.clipboard.writeText(fullMessage);
-      
-      // Show some feedback (you might want to use a toast library)
-      if (config.debug) {
-        console.log('Copied to clipboard:', fullMessage);
+      // Fallback handling
+      if (shareFiles && shareFiles.length > 0) {
+        // If files are included but native share not available, download them
+        if (config.debug) {
+          console.log('[GrowthKit] Native share not available, downloading files...');
+        }
+        
+        shareFiles.forEach(file => downloadFile(file));
+        
+        // Also copy the text + URL to clipboard
+        const fullMessage = shareUrl ? `${shareText} ${shareUrl}` : shareText;
+        try {
+          await navigator.clipboard.writeText(fullMessage);
+          if (config.debug) {
+            console.log('[GrowthKit] Files downloaded, message copied to clipboard');
+          }
+        } catch (clipboardError) {
+          if (config.debug) {
+            console.warn('[GrowthKit] Clipboard copy failed:', clipboardError);
+          }
+        }
+        
+        return true;
+      } else {
+        // No files - fallback to clipboard for text + URL
+        const fullMessage = shareUrl ? `${shareText} ${shareUrl}` : shareText;
+        await navigator.clipboard.writeText(fullMessage);
+        
+        if (config.debug) {
+          console.log('[GrowthKit] Copied to clipboard:', fullMessage);
+        }
+        
+        return true;
+      }
+    } catch (error) {
+      // Handle various share API errors
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          // User cancelled the share dialog - this is normal
+          if (config.debug) {
+            console.log('[GrowthKit] Share cancelled by user');
+          }
+          return false;
+        } else if (error.name === 'NotAllowedError') {
+          console.error('[GrowthKit] Share permission denied');
+        } else if (error.name === 'DataError') {
+          console.error('[GrowthKit] Share data invalid (files may be too large)');
+        } else {
+          console.error('[GrowthKit] Share failed:', error.message);
+        }
+      } else {
+        console.error('[GrowthKit] Share failed:', error);
       }
       
-      return true;
-    } catch (error) {
-      console.error('Share failed:', error);
-      
-      // Last fallback: open a new window with pre-filled tweet
-      const tweetText = `${shareText} ${referralLink}`;
-      const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
-      window.open(tweetUrl, '_blank');
+      // Last fallback: open Twitter with pre-filled text (only if no files)
+      if (!shareFiles || shareFiles.length === 0) {
+        const tweetText = shareUrl ? `${shareText} ${shareUrl}` : shareText;
+        const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+        window.open(tweetUrl, '_blank');
+      }
       
       return false;
     }
