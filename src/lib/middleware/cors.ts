@@ -28,7 +28,8 @@ function isDefaultOriginAllowed(origin: string): boolean {
     for (const pattern of DEFAULT_ALLOWED_ORIGINS) {
       if (pattern.startsWith('*.')) {
         const domain = pattern.slice(2);
-        if (hostname.endsWith(domain)) {
+        // Match if hostname ends with .domain or is exactly domain
+        if (hostname === domain || hostname.endsWith('.' + domain)) {
           return true;
         }
       }
@@ -53,7 +54,9 @@ function isConfiguredOriginAllowed(origin: string, allowedOrigins: string[]): bo
       try {
         const domain = allowed.slice(2);
         const originUrl = new URL(origin);
-        return originUrl.hostname.endsWith(domain);
+        const hostname = originUrl.hostname;
+        // Match if hostname ends with .domain or is exactly domain
+        return hostname === domain || hostname.endsWith('.' + domain);
       } catch {
         return false;
       }
