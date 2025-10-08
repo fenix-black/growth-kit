@@ -75,9 +75,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             referrer: {
               include: {
                 leads: {
-                  where: { emailVerified: true },
                   orderBy: { createdAt: 'desc' },
-                  take: 1,
                 },
               },
             },
@@ -111,8 +109,23 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         referrer: fp.referredBy.referrer ? {
           id: fp.referredBy.referrer.id,
           fingerprintId: fp.referredBy.referrer.fingerprint,
-          name: fp.referredBy.referrer.leads[0]?.name || null,
-          email: fp.referredBy.referrer.leads[0]?.email || null,
+          // Prefer verified leads with names, then any lead with a name, then any verified lead, then any lead
+          name: (() => {
+            const leads = fp.referredBy.referrer.leads;
+            const verifiedWithName = leads.find(l => l.emailVerified && l.name);
+            const anyWithName = leads.find(l => l.name);
+            const verified = leads.find(l => l.emailVerified);
+            const any = leads[0];
+            return (verifiedWithName || anyWithName || verified || any)?.name || null;
+          })(),
+          email: (() => {
+            const leads = fp.referredBy.referrer.leads;
+            const verifiedWithName = leads.find(l => l.emailVerified && l.name);
+            const anyWithName = leads.find(l => l.name);
+            const verified = leads.find(l => l.emailVerified);
+            const any = leads[0];
+            return (verifiedWithName || anyWithName || verified || any)?.email || null;
+          })(),
         } : null,
       } : null;
 
