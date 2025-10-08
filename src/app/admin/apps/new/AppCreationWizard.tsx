@@ -120,8 +120,8 @@ export default function AppCreationWizard() {
   const [cardOpacity, setCardOpacity] = useState(5);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [extractingColors, setExtractingColors] = useState(false);
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-  const [newApiKey, setNewApiKey] = useState<string | null>(null);
+  const [showPublicKeyModal, setShowPublicKeyModal] = useState(false);
+  const [newPublicKey, setNewPublicKey] = useState<string | null>(null);
   const [showCopySuccess, setShowCopySuccess] = useState(false);
   
   const [formData, setFormData] = useState<FormData>({
@@ -370,6 +370,7 @@ export default function AppCreationWizard() {
         nameClaimCredits: formData.nameClaimCredits,
         emailClaimCredits: formData.emailClaimCredits,
         emailVerifyCredits: formData.emailVerifyCredits,
+        invitationCredits: formData.dailyCredits, // Credits given to new visitors (same as daily credits)
         dailyReferralCap: formData.dailyReferralCap,
         actions: {
           default: { creditsRequired: 1 }
@@ -414,10 +415,10 @@ export default function AppCreationWizard() {
         // Refresh the apps cache to show the new app in sidebar
         mutate();
         
-        if (data.data.initialApiKey) {
-          // Show API key modal instead of alert
-          setNewApiKey(data.data.initialApiKey);
-          setShowApiKeyModal(true);
+        if (data.data.publicKey) {
+          // Show public key modal instead of alert
+          setNewPublicKey(data.data.publicKey);
+          setShowPublicKeyModal(true);
         } else {
           router.push('/admin/apps');
         }
@@ -1387,38 +1388,41 @@ export default function AppCreationWizard() {
         </div>
       </div>
 
-      {/* API Key Success Modal */}
-      {showApiKeyModal && newApiKey && (
+      {/* Public Key Success Modal */}
+      {showPublicKeyModal && newPublicKey && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
               🎉 App Created Successfully!
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Your app <strong>{formData.name}</strong> is ready to use. Save this API key now - it won't be shown again!
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              Your app <strong>{formData.name}</strong> is ready to use. Here's your public token for client-side integration:
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mb-4">
+              💡 Use this public token in your client application (React, Next.js, etc.). It's safe to expose in your frontend code.
             </p>
             <div className="bg-gray-100 dark:bg-gray-700 rounded p-4 mb-4">
               <code className="text-sm text-gray-900 dark:text-gray-100 break-all font-mono">
-                {newApiKey}
+                {newPublicKey}
               </code>
             </div>
             <div className="flex justify-end space-x-3">
               <Button
                 variant="ghost"
                 onClick={() => {
-                  navigator.clipboard.writeText(newApiKey);
+                  navigator.clipboard.writeText(newPublicKey);
                   setShowCopySuccess(true);
                   setTimeout(() => setShowCopySuccess(false), 2000);
                 }}
                 icon={showCopySuccess ? <CheckCircle className="h-5 w-5 text-emerald-500" /> : <Copy className="h-5 w-5" />}
               >
-                {showCopySuccess ? 'Copied!' : 'Copy API Key'}
+                {showCopySuccess ? 'Copied!' : 'Copy Public Token'}
               </Button>
               <Button
                 variant="primary"
                 onClick={() => {
-                  setShowApiKeyModal(false);
-                  setNewApiKey(null);
+                  setShowPublicKeyModal(false);
+                  setNewPublicKey(null);
                   router.push('/admin/apps');
                 }}
               >

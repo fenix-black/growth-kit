@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db';
 import { successResponse, errors } from '@/lib/utils/response';
 import { verifyAdminSession } from '@/lib/auth/admin';
 import { cookies } from 'next/headers';
-import { generateApiKey, hashApiKey } from '@/lib/security/apiKeys';
+import { generateApiKey, hashApiKey, generatePublicKey } from '@/lib/security/apiKeys';
 import { trackAdminActivity } from '@/lib/admin-activity-tracking';
 
 export async function GET(request: NextRequest) {
@@ -118,11 +118,17 @@ export async function POST(request: NextRequest) {
       corsOrigins = [], 
       redirectUrl, 
       policyJson,
-      isActive = true 
+      isActive = true,
+      trackUsdValue = true // Default to true for new apps
     } = body;
 
     if (!name || !domain || !redirectUrl || !policyJson) {
       return errors.badRequest('Missing required fields: name, domain, redirectUrl, policyJson');
+    }
+
+    // Ensure invitationCredits is set in policyJson (default to 5 if missing)
+    if (!policyJson.invitationCredits) {
+      policyJson.invitationCredits = 5;
     }
 
     let organizationId = null;
@@ -143,6 +149,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Generate public key for client-side usage
+    const publicKey = generatePublicKey();
+
     // Create new app
     const app = await prisma.app.create({
       data: {
@@ -156,6 +165,8 @@ export async function POST(request: NextRequest) {
         redirectUrl,
         policyJson,
         isActive,
+        trackUsdValue, // Set trackUsdValue (defaults to true)
+        publicKey, // Generate public key for client-side usage
         organizationId, // Assign to user's organization if available
       },
       include: {
@@ -171,7 +182,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Generate initial API key for new app
+    // Generate initial API key for new app (for server-side usage)
     const { key, hint } = generateApiKey();
     const hashedKey = await hashApiKey(key);
 
@@ -205,8 +216,8 @@ export async function POST(request: NextRequest) {
 
     return successResponse({
       app,
-      initialApiKey: key,
-      message: 'App created successfully. Save the API key as it won\'t be shown again.',
+      publicKey, // Return public key for client-side usage (not API key)
+      message: 'App created successfully. Save the public key to use in your client application.',
     }, 201);
   } catch (error) {
     console.error('Error creating app:', error);
