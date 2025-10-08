@@ -8,6 +8,7 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'localhost',           // localhost on any port
   '127.0.0.1',          // 127.0.0.1 on any port
   '*.vusercontent.net',  // Vercel v0 preview sites
+  '*.vercel.app',        // Vercel deployment domains
 ];
 
 /**
