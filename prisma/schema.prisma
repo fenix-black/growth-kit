@@ -113,6 +113,7 @@ model App {
   maxCreditBalance            Int?
   creditsPaused               Boolean       @default(false)
   creditsPausedAt             DateTime?
+  isolatedAccounts            Boolean       @default(true)
   apiKeys                     ApiKey[]
   tenant                      Tenant?       @relation(fields: [tenantId], references: [id])
   organization                Organization? @relation(fields: [organizationId], references: [id])

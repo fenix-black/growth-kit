@@ -61,6 +61,9 @@ interface User {
   preferredLanguage: string | null;
   languageSource: string | null;
   languageUpdatedAt: string | null;
+  // Shared user information
+  isSharedUser?: boolean;
+  sourceAppId?: string;
 }
 
 interface UserDetails extends User {
@@ -518,6 +521,11 @@ export default function UsersLeadsManager({
                             <span>{displayName}</span>
                             {user.referralSource && (
                               <ReferralIndicator referralSource={user.referralSource} />
+                            )}
+                            {user.isSharedUser && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                                🔗 Shared
+                              </span>
                             )}
                           </div>
                           {user.browser && user.device && (

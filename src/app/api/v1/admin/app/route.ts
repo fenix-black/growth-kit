@@ -25,7 +25,8 @@ export async function POST(request: NextRequest) {
       corsOrigins = [], 
       redirectUrl, 
       policyJson,
-      isActive = true 
+      isActive = true,
+      isolatedAccounts = true
     } = body;
 
     if (!name || !domain || !redirectUrl || !policyJson) {
@@ -84,8 +85,9 @@ export async function POST(request: NextRequest) {
           redirectUrl,
           policyJson,
           isActive,
+          isolatedAccounts,
           publicKey, // Generate public key for client-side usage
-        },
+        } as any,
       });
 
       // Log event
@@ -169,6 +171,7 @@ export async function PUT(request: NextRequest) {
       inviteTime,
       masterReferralCode,
       masterReferralCredits,
+      isolatedAccounts,
       metadata,
     } = body;
 
@@ -192,6 +195,7 @@ export async function PUT(request: NextRequest) {
     if (inviteTime !== undefined) updateData.inviteTime = inviteTime;
     if (masterReferralCode !== undefined) updateData.masterReferralCode = masterReferralCode;
     if (masterReferralCredits !== undefined) updateData.masterReferralCredits = masterReferralCredits;
+    if (isolatedAccounts !== undefined) updateData.isolatedAccounts = isolatedAccounts;
 
     // Handle metadata - merge with existing
     if (metadata !== undefined) {

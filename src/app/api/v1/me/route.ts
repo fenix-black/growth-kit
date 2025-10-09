@@ -631,11 +631,46 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Calculate total credits
-    const totalCredits = fingerprintRecord?.credits.reduce(
-      (sum, credit) => sum + credit.amount,
-      0
-    ) || 0;
+    // Calculate total credits - handle shared accounts
+    let totalCredits = 0;
+    
+    if (!(authContext.app as any).isolatedAccounts && authContext.app.organizationId) {
+      // Shared accounts enabled - calculate credits across all shared apps
+      const sharedApps = await prisma.app.findMany({
+        where: {
+          organizationId: authContext.app.organizationId,
+          isolatedAccounts: false,
+        } as any,
+        select: { id: true },
+      });
+      
+      const sharedAppIds = sharedApps.map(app => app.id);
+      
+      // Get all fingerprints across shared apps with the same fingerprint value
+      const sharedFingerprints = await prisma.fingerprint.findMany({
+        where: {
+          fingerprint: fingerprintRecord!.fingerprint,
+          appId: { in: sharedAppIds },
+        },
+        select: {
+          credits: {
+            select: { amount: true },
+          },
+        },
+      });
+      
+      // Sum credits from all shared fingerprints
+      totalCredits = sharedFingerprints.reduce(
+        (sum, fp) => sum + fp.credits.reduce((creditSum, credit) => creditSum + credit.amount, 0),
+        0
+      );
+    } else {
+      // Isolated accounts - use only current app's credits
+      totalCredits = fingerprintRecord?.credits.reduce(
+        (sum, credit) => sum + credit.amount,
+        0
+      ) || 0;
+    }
 
     // Count usage
     const usageCount = fingerprintRecord?.usage.length || 0;

@@ -57,6 +57,7 @@ interface FormData {
   trackUsdValue: boolean;
   customActions: string;
   embedSelector?: string;
+  isolatedAccounts: boolean;
 }
 
 const steps = [
@@ -150,6 +151,7 @@ export default function AppCreationWizard() {
     waitlistMessages: ['Join our waitlist to get early access!'],
     backgroundColor: '#ffffff',
     cardBackgroundColor: '#f8fafc',
+    isolatedAccounts: true, // Default to isolated accounts
   });
 
   // Smart defaults: Auto-populate CORS and redirect based on domain
@@ -407,6 +409,7 @@ export default function AppCreationWizard() {
           invitationQuota: formData.invitationQuota,
           invitationCronTime: formData.invitationCronTime,
           trackUsdValue: formData.trackUsdValue,
+          isolatedAccounts: formData.isolatedAccounts,
         }),
       });
 

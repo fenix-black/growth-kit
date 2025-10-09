@@ -59,6 +59,7 @@ interface AppDetails {
   initialCreditsPerDay: number;
   creditsPaused: boolean;
   creditsPausedAt?: string;
+  isolatedAccounts: boolean;
   todayUsdSpent?: number;
   createdAt: string;
   _count: {
@@ -166,6 +167,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           maxCustomCredits: appData.maxCustomCredits ?? 100,
           initialCreditsPerDay: appData.initialCreditsPerDay ?? 3,
           creditsPaused: appData.creditsPaused ?? false,
+          isolatedAccounts: appData.isolatedAccounts ?? true,
         });
         // Initialize JSON text state
         setPolicyJsonText(JSON.stringify(appData.policyJson || {}, null, 2));
@@ -223,6 +225,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           maxCustomCredits: editedApp.maxCustomCredits,
           initialCreditsPerDay: editedApp.initialCreditsPerDay,
           creditsPaused: editedApp.creditsPaused,
+          isolatedAccounts: editedApp.isolatedAccounts,
         }),
       });
 
@@ -404,6 +407,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                           maxCustomCredits: app?.maxCustomCredits ?? 100,
                           initialCreditsPerDay: app?.initialCreditsPerDay ?? 3,
                           creditsPaused: app?.creditsPaused ?? false,
+                          isolatedAccounts: app?.isolatedAccounts ?? true,
                         });
                         // Reset JSON text state
                         setPolicyJsonText(JSON.stringify(app?.policyJson || {}, null, 2));
@@ -436,6 +440,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                         maxCustomCredits: app.maxCustomCredits ?? 100,
                         initialCreditsPerDay: app.initialCreditsPerDay ?? 3,
                         creditsPaused: app.creditsPaused ?? false,
+                        isolatedAccounts: app.isolatedAccounts ?? true,
                       });
                       // Initialize JSON text state for editing
                       setPolicyJsonText(JSON.stringify(app.policyJson || {}, null, 2));
@@ -636,6 +641,29 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
                     }
                   </button>
                   <span className="text-sm font-medium text-gray-700">Waitlist Enabled</span>
+                </label>
+              </div>
+              <div>
+                <label className="flex items-center space-x-3">
+                  <button
+                    onClick={() => isEditing && setEditedApp({ ...editedApp, isolatedAccounts: !editedApp.isolatedAccounts })}
+                    disabled={!isEditing}
+                    className="cursor-pointer"
+                  >
+                    {(isEditing ? editedApp.isolatedAccounts : app.isolatedAccounts) ? 
+                      <ToggleRight className="h-6 w-6 text-primary" /> : 
+                      <ToggleLeft className="h-6 w-6 text-gray-400" />
+                    }
+                  </button>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-700">Isolated Accounts</span>
+                    <span className="text-xs text-gray-500">
+                      {(isEditing ? editedApp.isolatedAccounts : app.isolatedAccounts) 
+                        ? "Each app maintains separate user accounts and credit balances"
+                        : "Share user accounts and credit balances across all apps in this organization"
+                      }
+                    </span>
+                  </div>
                 </label>
               </div>
             </div>
