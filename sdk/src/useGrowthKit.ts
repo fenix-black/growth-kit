@@ -510,7 +510,14 @@ export function useGrowthKit(): GrowthKitHook {
             timestamp: new Date().toISOString()
           });
         }
-        console.warn('[GrowthKit] Action failed:', response.error || 'Unknown error');
+        // Handle temporarily unavailable errors silently (they look like business errors to client)
+        if (response.error === 'temporarily_unavailable') {
+          if (configRef.current.debug) {
+            console.warn('[GrowthKit] Action temporarily unavailable due to network issues');
+          }
+        } else {
+          console.warn('[GrowthKit] Action failed:', response.error || 'Unknown error');
+        }
         return false;
       }
     } catch (error) {
@@ -522,7 +529,9 @@ export function useGrowthKit(): GrowthKitHook {
           timestamp: new Date().toISOString()
         });
       }
-      console.warn('[GrowthKit] Complete action failed:', error instanceof Error ? error.message : 'Unknown error');
+      // Network errors are handled by the retry system and become 'temporarily_unavailable'
+      // This catch block should only handle unexpected errors
+      console.warn('[GrowthKit] Unexpected action error:', error instanceof Error ? error.message : 'Unknown error');
       return false;
     }
   }, [state.fingerprint]);

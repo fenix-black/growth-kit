@@ -5,6 +5,16 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2025-10-09
+
+### Fixed
+- **🔄 Resilient Token Management**: Enhanced authentication reliability for client-side widgets
+  - Infinite retry with exponential backoff for token acquisition (never gives up)
+  - 3-attempt retry for credit-consuming actions with clean error handling
+  - Proactive token refresh before expiry (80% of lifetime)
+  - Network errors now return `temporarily_unavailable` instead of technical failures
+  - Credit integrity protection - no more free services during connectivity issues
+
 ## [0.7.0] - 2025-10-08
 
 ### Added

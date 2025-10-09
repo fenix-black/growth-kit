@@ -335,9 +335,12 @@ declare class GrowthKitAPI {
     private debug;
     private token;
     private tokenExpiry;
+    private tokenRetryCount;
+    private tokenRetryTimeout;
     private retryingRequest;
     private language;
     constructor(apiKey?: string, publicKey?: string, apiUrl?: string, debug?: boolean, language?: 'en' | 'es');
+    destroy(): void;
     private detectApiUrl;
     private detectProxyUrl;
     setFingerprint(fingerprint: string): void;
@@ -345,9 +348,13 @@ declare class GrowthKitAPI {
     private isTokenValid;
     private getStoredToken;
     private storeToken;
+    private requestTokenWithRetry;
+    private scheduleTokenRefresh;
     private requestToken;
     private ensureValidToken;
     private transformEndpointForPublic;
+    private requestWithRetry;
+    private isNetworkError;
     private request;
     getMe(fingerprint: string, claim?: string): Promise<APIResponse<MeResponse>>;
     completeAction(fingerprint: string, action?: string, creditsRequired?: number, usdValue?: number, metadata?: any): Promise<APIResponse<CompleteResponse>>;

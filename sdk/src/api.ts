@@ -18,6 +18,8 @@ export class GrowthKitAPI {
   private debug: boolean = false;
   private token: string | null = null;
   private tokenExpiry: Date | null = null;
+  private tokenRetryCount = 0;
+  private tokenRetryTimeout: NodeJS.Timeout | null = null;
   private retryingRequest: boolean = false;
   private language: 'en' | 'es' = 'en'; // Widget language preference
 
@@ -37,6 +39,14 @@ export class GrowthKitAPI {
       console.log('[GrowthKit] Using public key mode - secure for client-side usage');
     } else if (!this.isProxyMode && !this.isPublicMode && typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
       console.warn('[GrowthKit] Using direct API mode with client-side API key. Consider upgrading to proxy mode or public key mode for better security.');
+    }
+  }
+
+  // Clean up resources
+  destroy(): void {
+    if (this.tokenRetryTimeout) {
+      clearTimeout(this.tokenRetryTimeout);
+      this.tokenRetryTimeout = null;
     }
   }
 
@@ -119,57 +129,103 @@ export class GrowthKitAPI {
     }
   }
 
-  private async requestToken(): Promise<boolean> {
+  private async requestTokenWithRetry(): Promise<boolean> {
     if (!this.isPublicMode || !this.publicKey || !this.fingerprint) {
       return false;
     }
 
-    try {
-      const url = `${this.apiUrl}/public/auth/token`;
-      
-      if (this.debug) {
-        console.log('[GrowthKit] Requesting new token...');
-      }
+    const attempt = async (): Promise<boolean> => {
+      try {
+        const url = `${this.apiUrl}/public/auth/token`;
+        
+        if (this.debug) {
+          console.log(`[GrowthKit] Requesting token (attempt ${this.tokenRetryCount + 1})...`);
+        }
 
-      // Get browser context to send with token request
-      const context = getBrowserContext();
+        // Get browser context to send with token request
+        const context = getBrowserContext();
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // User-Agent is automatically included by the browser
-          // We're getting additional context for better tracking
-        },
-        body: JSON.stringify({
-          publicKey: this.publicKey,
-          fingerprint: this.fingerprint,
-          context, // Include browser context
-        }),
-      });
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            publicKey: this.publicKey,
+            fingerprint: this.fingerprint,
+            context,
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error(`Token request failed: ${response.status}`);
-      }
+        if (!response.ok) {
+          throw new Error(`Token request failed: ${response.status}`);
+        }
 
-      const data = await response.json();
-      const tokenData = data.data || data;
-      
-      this.token = tokenData.token;
-      this.tokenExpiry = new Date(tokenData.expiresAt);
-      this.storeToken(tokenData.token, tokenData.expiresAt);
-      
-      if (this.debug) {
-        console.log('[GrowthKit] Token obtained successfully');
+        const data = await response.json();
+        const tokenData = data.data || data;
+        
+        this.token = tokenData.token;
+        this.tokenExpiry = new Date(tokenData.expiresAt);
+        this.storeToken(tokenData.token, tokenData.expiresAt);
+        this.tokenRetryCount = 0; // Reset retry count on success
+        
+        if (this.debug) {
+          console.log('[GrowthKit] Token obtained successfully');
+        }
+        
+        // Schedule proactive refresh at 80% of token lifetime
+        this.scheduleTokenRefresh();
+        
+        return true;
+      } catch (error) {
+        if (this.debug) {
+          console.error(`[GrowthKit] Token request failed (attempt ${this.tokenRetryCount + 1}):`, error);
+        }
+        
+        // Calculate exponential backoff: 1s, 2s, 4s, 8s, 16s, 30s (capped)
+        const delay = Math.min(1000 * Math.pow(2, this.tokenRetryCount), 30000);
+        this.tokenRetryCount++;
+        
+        if (this.debug) {
+          console.log(`[GrowthKit] Retrying token request in ${delay}ms...`);
+        }
+        
+        // Clear any existing timeout
+        if (this.tokenRetryTimeout) {
+          clearTimeout(this.tokenRetryTimeout);
+        }
+        
+        // Schedule retry with exponential backoff
+        return new Promise((resolve) => {
+          this.tokenRetryTimeout = setTimeout(() => {
+            attempt().then(resolve);
+          }, delay);
+        });
       }
-      
-      return true;
-    } catch (error) {
-      if (this.debug) {
-        console.error('[GrowthKit] Token request failed:', error);
-      }
-      return false;
+    };
+    
+    return attempt();
+  }
+
+  private scheduleTokenRefresh(): void {
+    if (!this.tokenExpiry || !this.isPublicMode) return;
+    
+    const now = new Date();
+    const timeUntilExpiry = this.tokenExpiry.getTime() - now.getTime();
+    const refreshTime = timeUntilExpiry * 0.8; // Refresh at 80% of lifetime
+    
+    if (refreshTime > 0) {
+      setTimeout(() => {
+        if (this.debug) {
+          console.log('[GrowthKit] Proactively refreshing token...');
+        }
+        this.requestTokenWithRetry();
+      }, refreshTime);
     }
+  }
+
+  private async requestToken(): Promise<boolean> {
+    return this.requestTokenWithRetry();
   }
 
   private async ensureValidToken(): Promise<boolean> {
@@ -183,11 +239,14 @@ export class GrowthKitAPI {
     if (stored) {
       this.token = stored.token;
       this.tokenExpiry = stored.expiry;
+      
+      // Schedule proactive refresh for restored token
+      this.scheduleTokenRefresh();
       return true;
     }
     
-    // Request new token
-    return await this.requestToken();
+    // Request new token with retry logic
+    return await this.requestTokenWithRetry();
   }
 
   private transformEndpointForPublic(endpoint: string): string {
@@ -207,6 +266,68 @@ export class GrowthKitAPI {
     };
 
     return endpointMap[endpoint] || endpoint;
+  }
+
+  private async requestWithRetry<T = any>(
+    endpoint: string,
+    options: RequestInit = {},
+    maxAttempts: number = 1
+  ): Promise<APIResponse<T>> {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const response = await this.request(endpoint, options);
+        
+        // If successful, return immediately
+        if (response.success) {
+          return response;
+        }
+        
+        // If it's a business logic error (not network), don't retry
+        if (response.error && !this.isNetworkError(response.error)) {
+          return response;
+        }
+        
+        lastError = new Error(response.error || 'Unknown error');
+        
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+        
+        if (this.debug) {
+          console.warn(`[GrowthKit] Request attempt ${attempt}/${maxAttempts} failed:`, lastError.message);
+        }
+      }
+      
+      // Wait before retry (except on last attempt)
+      if (attempt < maxAttempts) {
+        const delay = attempt === 1 ? 1000 : 2000; // 1s, then 2s
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    // All attempts failed, return temporarily unavailable
+    return {
+      success: false,
+      error: 'temporarily_unavailable',
+    };
+  }
+  
+  private isNetworkError(errorMessage: string): boolean {
+    const networkErrorPatterns = [
+      'Failed to fetch',
+      'Network request failed',
+      'fetch is not defined',
+      'Failed to obtain authentication token',
+      'Token request failed',
+      'ECONNREFUSED',
+      'ETIMEDOUT',
+      'ENOTFOUND'
+    ];
+    
+    return networkErrorPatterns.some(pattern => 
+      errorMessage.toLowerCase().includes(pattern.toLowerCase())
+    );
   }
 
   private async request<T = any>(
@@ -412,49 +533,53 @@ export class GrowthKitAPI {
           metadata,
         };
 
-    return this.request<CompleteResponse>('/v1/complete', {
+    // Credit-consuming actions get 3 attempts with retry logic
+    return this.requestWithRetry<CompleteResponse>('/v1/complete', {
       method: 'POST',
       body: JSON.stringify(bodyData),
-    });
+    }, 3);
   }
 
   async claimName(
     fingerprint: string,
     name: string
   ): Promise<APIResponse<ClaimResponse>> {
-    return this.request<ClaimResponse>('/v1/claim/name', {
+    // Name claiming is a credit-earning action, use retry logic
+    return this.requestWithRetry<ClaimResponse>('/v1/claim/name', {
       method: 'POST',
       body: JSON.stringify({
         fingerprint,
         name,
       }),
-    });
+    }, 3);
   }
 
   async claimEmail(
     fingerprint: string,
     email: string
   ): Promise<APIResponse<ClaimResponse>> {
-    return this.request<ClaimResponse>('/v1/claim/email', {
+    // Email claiming is a credit-earning action, use retry logic
+    return this.requestWithRetry<ClaimResponse>('/v1/claim/email', {
       method: 'POST',
       body: JSON.stringify({
         fingerprint,
         email,
       }),
-    });
+    }, 3);
   }
 
   async verifyEmail(
     fingerprint: string,
     token: string
   ): Promise<APIResponse<VerifyResponse>> {
-    return this.request<VerifyResponse>('/v1/verify/email', {
+    // Email verification is a credit-earning action, use retry logic
+    return this.requestWithRetry<VerifyResponse>('/v1/verify/email', {
       method: 'POST',
       body: JSON.stringify({
         fingerprint,
         token,
       }),
-    });
+    }, 3);
   }
 
   async joinWaitlist(

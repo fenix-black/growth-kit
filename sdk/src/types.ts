@@ -112,6 +112,8 @@ export interface APIResponse<T = any> {
   message?: string;
 }
 
+export type APIErrorCode = 'insufficient_credits' | 'temporarily_unavailable' | string;
+
 export interface MeResponse {
   fingerprint: string;
   credits: number;
