@@ -32,27 +32,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return errors.notFound();
     }
 
-    // Determine which apps to include based on isolated accounts setting
-    let appIds = [appId]; // Always include current app
-    let sharedAppIds: string[] = [];
-    
-    if (!(app as any).isolatedAccounts && app.organizationId) {
-      // Get all apps in same org with shared accounts
-      const sharedApps = await prisma.app.findMany({
-        where: {
-          organizationId: app.organizationId,
-          isolatedAccounts: false,
-        } as any,
-        select: { id: true },
-      });
-      
-      sharedAppIds = sharedApps.map(a => a.id).filter(id => id !== appId);
-      appIds = [...appIds, ...sharedAppIds];
-    }
-
-    // Build where clause
+    // Build where clause - only show users who actually used this specific app
     const whereClause: any = {
-      appId: { in: appIds },
+      appId,
     };
 
     // Search filter
@@ -167,9 +149,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         preferredLanguage: fp.preferredLanguage,
         languageSource: fp.languageSource,
         languageUpdatedAt: fp.languageUpdatedAt,
-        // Shared user indicator
-        isSharedUser: sharedAppIds.includes(fp.appId),
-        sourceAppId: fp.appId,
       };
     });
 
