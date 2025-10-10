@@ -738,6 +738,33 @@ export async function POST(request: NextRequest) {
       } as any;
     }
 
+    // Get user profile data for response
+    let profileData = {
+      name: lead?.name || null,
+      email: lead?.email || null,
+      hasClaimedName: !!lead?.name,
+      hasClaimedEmail: !!lead?.email,
+      hasVerifiedEmail: lead?.emailVerified || false,
+    };
+
+    // For shared apps, override with OrgUserAccount data
+    if (!(app as any).isolatedAccounts && (fingerprintRecord as any).orgUserAccountId) {
+      const orgAccount = await (prisma as any).orgUserAccount.findUnique({
+        where: { id: (fingerprintRecord as any).orgUserAccountId },
+        select: { name: true, email: true, emailVerified: true },
+      });
+
+      if (orgAccount) {
+        profileData = {
+          name: orgAccount.name || lead?.name || null,
+          email: orgAccount.email || lead?.email || null,
+          hasClaimedName: !!(orgAccount.name || lead?.name),
+          hasClaimedEmail: !!(orgAccount.email || lead?.email),
+          hasVerifiedEmail: orgAccount.emailVerified || lead?.emailVerified || false,
+        };
+      }
+    }
+
     // Build response to match original /v1/me format exactly
     const userData = {
       fingerprint: fingerprintRecord.fingerprint,
@@ -746,11 +773,7 @@ export async function POST(request: NextRequest) {
       usage: usage,
       creditsPaused: appWithWaitlist?.creditsPaused || false,
       // User profile data (flat structure to match original)
-      name: lead?.name || null,
-      email: lead?.email || null,
-      hasClaimedName: !!lead?.name,
-      hasClaimedEmail: !!lead?.email,
-      hasVerifiedEmail: lead?.emailVerified || false,
+      ...profileData,
       // Use actual policy from app
       policy: appWithWaitlist?.policyJson || {
         referralCredits: 5,

@@ -61,6 +61,8 @@ interface User {
   preferredLanguage: string | null;
   languageSource: string | null;
   languageUpdatedAt: string | null;
+  // Consolidated account indicator
+  isConsolidatedAccount?: boolean;
 }
 
 interface UserDetails extends User {
@@ -518,6 +520,11 @@ export default function UsersLeadsManager({
                             <span>{displayName}</span>
                             {user.referralSource && (
                               <ReferralIndicator referralSource={user.referralSource} />
+                            )}
+                            {user.isConsolidatedAccount && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                📋 Consolidated
+                              </span>
                             )}
                           </div>
                           {user.browser && user.device && (

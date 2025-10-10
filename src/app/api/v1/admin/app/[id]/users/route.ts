@@ -154,6 +154,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         preferredLanguage: (fp as any).preferredLanguage,
         languageSource: (fp as any).languageSource,
         languageUpdatedAt: (fp as any).languageUpdatedAt,
+        // Consolidated account indicator
+        isConsolidatedAccount: isSharedApp && !!orgAccount,
       };
     });
 

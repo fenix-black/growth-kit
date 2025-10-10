@@ -826,6 +826,33 @@ export async function POST(request: NextRequest) {
       };
     }
 
+    // Get user profile data for response
+    let profileData = {
+      name: userLead?.name || null,
+      email: userLead?.email || null,
+      hasClaimedName: !!userLead?.name,
+      hasClaimedEmail: !!userLead?.email,
+      hasVerifiedEmail: userLead?.emailVerified || false,
+    };
+
+    // For shared apps, use OrgUserAccount data
+    if (!(authContext.app as any).isolatedAccounts && (fingerprintRecord as any).orgUserAccountId) {
+      const orgAccount = await (prisma as any).orgUserAccount.findUnique({
+        where: { id: (fingerprintRecord as any).orgUserAccountId },
+        select: { name: true, email: true, emailVerified: true },
+      });
+
+      if (orgAccount) {
+        profileData = {
+          name: orgAccount.name || userLead?.name || null,
+          email: orgAccount.email || userLead?.email || null,
+          hasClaimedName: !!(orgAccount.name || userLead?.name),
+          hasClaimedEmail: !!(orgAccount.email || userLead?.email),
+          hasVerifiedEmail: orgAccount.emailVerified || userLead?.emailVerified || false,
+        };
+      }
+    }
+
     // Build response
     const response = successResponse({
       fingerprint: fingerprintRecord!.fingerprint,
@@ -834,11 +861,7 @@ export async function POST(request: NextRequest) {
       usage: usageCount,
       creditsPaused: app.creditsPaused,
       // User profile data
-      name: userLead?.name || null,
-      email: userLead?.email || null,
-      hasClaimedName: !!userLead?.name,
-      hasClaimedEmail: !!userLead?.email,
-      hasVerifiedEmail: userLead?.emailVerified || false,
+      ...profileData,
       policy: policy || {
         referralCredits: 5,
         referredCredits: 3,
