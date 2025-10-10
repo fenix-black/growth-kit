@@ -26,7 +26,12 @@ export async function POST(request: NextRequest) {
       redirectUrl, 
       policyJson,
       isActive = true,
-      isolatedAccounts = true
+      isolatedAccounts = true,
+      trackUsdValue,
+      allowCustomCredits,
+      maxCustomCredits,
+      initialCreditsPerDay,
+      creditsPaused
     } = body;
 
     if (!name || !domain || !redirectUrl || !policyJson) {
@@ -67,6 +72,12 @@ export async function POST(request: NextRequest) {
           redirectUrl,
           policyJson,
           isActive,
+          isolatedAccounts,
+          trackUsdValue,
+          allowCustomCredits,
+          maxCustomCredits,
+          initialCreditsPerDay,
+          creditsPaused,
         },
       });
     } else {
@@ -171,7 +182,6 @@ export async function PUT(request: NextRequest) {
       inviteTime,
       masterReferralCode,
       masterReferralCredits,
-      isolatedAccounts,
       metadata,
     } = body;
 
@@ -195,7 +205,6 @@ export async function PUT(request: NextRequest) {
     if (inviteTime !== undefined) updateData.inviteTime = inviteTime;
     if (masterReferralCode !== undefined) updateData.masterReferralCode = masterReferralCode;
     if (masterReferralCredits !== undefined) updateData.masterReferralCredits = masterReferralCredits;
-    if (isolatedAccounts !== undefined) updateData.isolatedAccounts = isolatedAccounts;
 
     // Handle metadata - merge with existing
     if (metadata !== undefined) {
