@@ -631,37 +631,58 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Handle OrgUserAccount creation for shared apps
+    // Handle OrgUserAccount creation/linking for shared apps
     if (!(authContext.app as any).isolatedAccounts && authContext.app.organizationId && fingerprintRecord && !(fingerprintRecord as any).orgUserAccountId) {
-      // Check for existing profile data from current app
-      const existingLead = await prisma.lead.findFirst({
+      // First, check if an OrgUserAccount already exists for this fingerprint string in other shared apps
+      const existingFingerprint = await prisma.fingerprint.findFirst({
         where: {
-          appId: authContext.app.id,
-          fingerprintId: fingerprintRecord.id,
+          fingerprint: fingerprintRecord.fingerprint,
+          appId: { not: authContext.app.id }, // Different app
+          orgUserAccountId: { not: null }, // Has an account linked
+          app: {
+            organizationId: authContext.app.organizationId,
+            isolatedAccounts: false,
+          } as any,
         },
-        select: {
-          name: true,
-          email: true,
-          emailVerified: true,
-        },
+        select: { orgUserAccountId: true },
       });
 
-      // Create new OrgUserAccount with existing profile data
-      const orgUserAccount = await (prisma as any).orgUserAccount.create({
-        data: {
-          organizationId: authContext.app.organizationId,
-          name: existingLead?.name || null,
-          email: existingLead?.email || null,
-          emailVerified: existingLead?.emailVerified || false,
-          profileMetadata: null,
-          lastActiveAt: new Date(),
-        },
-      });
+      let orgUserAccountId;
+      if (existingFingerprint?.orgUserAccountId) {
+        // Link to existing OrgUserAccount
+        orgUserAccountId = existingFingerprint.orgUserAccountId;
+      } else {
+        // Check for existing profile data from current app
+        const existingLead = await prisma.lead.findFirst({
+          where: {
+            appId: authContext.app.id,
+            fingerprintId: fingerprintRecord.id,
+          },
+          select: {
+            name: true,
+            email: true,
+            emailVerified: true,
+          },
+        });
+
+        // Create new OrgUserAccount with existing profile data
+        const orgUserAccount = await (prisma as any).orgUserAccount.create({
+          data: {
+            organizationId: authContext.app.organizationId,
+            name: existingLead?.name || null,
+            email: existingLead?.email || null,
+            emailVerified: existingLead?.emailVerified || false,
+            profileMetadata: null,
+            lastActiveAt: new Date(),
+          },
+        });
+        orgUserAccountId = orgUserAccount.id;
+      }
 
       // Link fingerprint to the account
       await prisma.fingerprint.update({
         where: { id: fingerprintRecord.id },
-        data: { orgUserAccountId: orgUserAccount.id } as any,
+        data: { orgUserAccountId } as any,
       });
     }
 

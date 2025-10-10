@@ -583,24 +583,45 @@ export async function POST(request: NextRequest) {
       return corsErrors.serverError('Failed to retrieve user data after processing', origin);
     }
 
-    // Handle OrgUserAccount creation for shared apps
+    // Handle OrgUserAccount creation/linking for shared apps
     if (!(appWithWaitlist as any).isolatedAccounts && (appWithWaitlist as any).organizationId && !(fingerprintRecord as any).orgUserAccountId) {
-      // Create new OrgUserAccount with current profile data
-      const orgUserAccount = await (prisma as any).orgUserAccount.create({
-        data: {
-          organizationId: (appWithWaitlist as any).organizationId,
-          name: lead?.name || null,
-          email: lead?.email || null,
-          emailVerified: lead?.emailVerified || false,
-          profileMetadata: null,
-          lastActiveAt: new Date(),
+      // First, check if an OrgUserAccount already exists for this fingerprint string in other shared apps
+      const existingFingerprint = await prisma.fingerprint.findFirst({
+        where: {
+          fingerprint: fingerprintRecord.fingerprint,
+          appId: { not: app.id }, // Different app
+          orgUserAccountId: { not: null }, // Has an account linked
+          app: {
+            organizationId: (appWithWaitlist as any).organizationId,
+            isolatedAccounts: false,
+          } as any,
         },
+        select: { orgUserAccountId: true },
       });
+
+      let orgUserAccountId;
+      if (existingFingerprint?.orgUserAccountId) {
+        // Link to existing OrgUserAccount
+        orgUserAccountId = existingFingerprint.orgUserAccountId;
+      } else {
+        // Create new OrgUserAccount
+        const orgUserAccount = await (prisma as any).orgUserAccount.create({
+          data: {
+            organizationId: (appWithWaitlist as any).organizationId,
+            name: lead?.name || null,
+            email: lead?.email || null,
+            emailVerified: lead?.emailVerified || false,
+            profileMetadata: null,
+            lastActiveAt: new Date(),
+          },
+        });
+        orgUserAccountId = orgUserAccount.id;
+      }
 
       // Link fingerprint to the account
       await prisma.fingerprint.update({
         where: { id: fingerprintRecord.id },
-        data: { orgUserAccountId: orgUserAccount.id } as any,
+        data: { orgUserAccountId } as any,
       });
     }
 
