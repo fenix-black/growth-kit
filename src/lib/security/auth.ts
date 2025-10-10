@@ -165,6 +165,7 @@ export async function verifyPublicToken(headers: Headers): Promise<PublicAuthCon
           id: true,
           fingerprint: true,
           appId: true,
+          orgUserAccountId: true,
         },
       })
     );
