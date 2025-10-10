@@ -148,6 +148,8 @@ export async function verifyPublicToken(headers: Headers): Promise<PublicAuthCon
           allowCustomCredits: true,
           maxCustomCredits: true,
           policyJson: true,
+          isolatedAccounts: true,
+          organizationId: true,
         },
       })
     );

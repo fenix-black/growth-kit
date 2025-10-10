@@ -174,6 +174,8 @@ export async function POST(request: NextRequest) {
         masterReferralCode: true,
         masterReferralCredits: true,
         initialCreditsPerDay: true,
+        isolatedAccounts: true,
+        organizationId: true,
       },
     });
     
@@ -582,11 +584,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle OrgUserAccount creation for shared apps
-    if (!(app as any).isolatedAccounts && (app as any).organizationId && !(fingerprintRecord as any).orgUserAccountId) {
+    if (!(appWithWaitlist as any).isolatedAccounts && (appWithWaitlist as any).organizationId && !(fingerprintRecord as any).orgUserAccountId) {
       // Create new OrgUserAccount with current profile data
       const orgUserAccount = await (prisma as any).orgUserAccount.create({
         data: {
-          organizationId: (app as any).organizationId,
+          organizationId: (appWithWaitlist as any).organizationId,
           name: lead?.name || null,
           email: lead?.email || null,
           emailVerified: lead?.emailVerified || false,
@@ -605,11 +607,11 @@ export async function POST(request: NextRequest) {
     // Calculate total credits - handle shared accounts
     let totalCredits = 0;
     
-    if (!(app as any).isolatedAccounts && (app as any).organizationId) {
+    if (!(appWithWaitlist as any).isolatedAccounts && (appWithWaitlist as any).organizationId) {
       // Shared accounts enabled - calculate credits across all shared apps
       const sharedApps = await prisma.app.findMany({
         where: {
-          organizationId: (app as any).organizationId,
+          organizationId: (appWithWaitlist as any).organizationId,
           isolatedAccounts: false,
         } as any,
         select: { id: true },
@@ -748,7 +750,7 @@ export async function POST(request: NextRequest) {
     };
 
     // For shared apps, override with OrgUserAccount data
-    if (!(app as any).isolatedAccounts && (fingerprintRecord as any).orgUserAccountId) {
+    if (!(appWithWaitlist as any).isolatedAccounts && (fingerprintRecord as any).orgUserAccountId) {
       const orgAccount = await (prisma as any).orgUserAccount.findUnique({
         where: { id: (fingerprintRecord as any).orgUserAccountId },
         select: { name: true, email: true, emailVerified: true },
