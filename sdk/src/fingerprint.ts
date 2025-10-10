@@ -5,6 +5,8 @@ let fpAgent: any = null;
 
 // Storage key for persistent fingerprint
 const FINGERPRINT_STORAGE_KEY = 'growthkit_fingerprint';
+const FINGERPRINT_VERSION_KEY = 'growthkit_fingerprint_version';
+const CURRENT_FP_VERSION = '2'; // Increment this to force regeneration
 
 export async function getFingerprint(): Promise<string> {
   // Return cached fingerprint if available
@@ -20,8 +22,15 @@ export async function getFingerprint(): Promise<string> {
 
   // Try to get stored fingerprint first (persists across page reloads)
   try {
+    const storedVersion = localStorage.getItem(FINGERPRINT_VERSION_KEY);
     const stored = localStorage.getItem(FINGERPRINT_STORAGE_KEY);
-    if (stored) {
+    
+    // Check if version mismatch - force regeneration if so
+    if (storedVersion !== CURRENT_FP_VERSION) {
+      console.log('[GrowthKit] Fingerprint version mismatch, clearing and regenerating');
+      localStorage.removeItem(FINGERPRINT_STORAGE_KEY);
+      localStorage.removeItem(FINGERPRINT_VERSION_KEY);
+    } else if (stored) {
       // Validate stored fingerprint format - FingerprintJS generates 32-char hex hashes
       // or fallback format starts with "fallback_"
       const isValidFormat = /^[a-f0-9]{32}$/.test(stored) || stored.startsWith('fallback_') || stored.startsWith('ssr_placeholder_');
@@ -34,6 +43,7 @@ export async function getFingerprint(): Promise<string> {
         // Invalid/old format - clear it and regenerate
         console.log('[GrowthKit] Clearing incompatible fingerprint format, will regenerate');
         localStorage.removeItem(FINGERPRINT_STORAGE_KEY);
+        localStorage.removeItem(FINGERPRINT_VERSION_KEY);
       }
     }
   } catch (error) {
@@ -74,6 +84,7 @@ export async function getFingerprint(): Promise<string> {
     // Store fingerprint in localStorage for persistence across page reloads
     try {
       localStorage.setItem(FINGERPRINT_STORAGE_KEY, fingerprint);
+      localStorage.setItem(FINGERPRINT_VERSION_KEY, CURRENT_FP_VERSION);
       console.log('[GrowthKit] Fingerprint stored in localStorage');
     } catch (error) {
       console.warn('[GrowthKit] Could not store fingerprint:', error);
@@ -91,6 +102,7 @@ export async function getFingerprint(): Promise<string> {
     // Store fallback fingerprint too
     try {
       localStorage.setItem(FINGERPRINT_STORAGE_KEY, fallback);
+      localStorage.setItem(FINGERPRINT_VERSION_KEY, CURRENT_FP_VERSION);
     } catch (storageError) {
       // Silent fail if localStorage is unavailable
     }
@@ -137,6 +149,7 @@ export function clearFingerprintCache(): void {
   // Also clear from localStorage
   try {
     localStorage.removeItem(FINGERPRINT_STORAGE_KEY);
+    localStorage.removeItem(FINGERPRINT_VERSION_KEY);
   } catch (error) {
     // Silent fail if localStorage is unavailable
   }
