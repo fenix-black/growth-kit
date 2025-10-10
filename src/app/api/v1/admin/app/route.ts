@@ -26,12 +26,7 @@ export async function POST(request: NextRequest) {
       redirectUrl, 
       policyJson,
       isActive = true,
-      isolatedAccounts = true,
-      trackUsdValue,
-      allowCustomCredits,
-      maxCustomCredits,
-      initialCreditsPerDay,
-      creditsPaused
+      isolatedAccounts = true
     } = body;
 
     if (!name || !domain || !redirectUrl || !policyJson) {
@@ -73,11 +68,6 @@ export async function POST(request: NextRequest) {
           policyJson,
           isActive,
           isolatedAccounts,
-          trackUsdValue,
-          allowCustomCredits,
-          maxCustomCredits,
-          initialCreditsPerDay,
-          creditsPaused,
         },
       });
     } else {
@@ -167,7 +157,13 @@ export async function PUT(request: NextRequest) {
     // Parse request body
     const body = await request.json();
     const { 
-      id, 
+      id,
+      name,
+      domain,
+      isActive,
+      corsOrigins,
+      redirectUrl,
+      policyJson,
       waitlistEnabled,
       waitlistMessages,
       waitlistLayout,
@@ -182,6 +178,15 @@ export async function PUT(request: NextRequest) {
       inviteTime,
       masterReferralCode,
       masterReferralCredits,
+      trackUsdValue,
+      allowCustomCredits,
+      maxCustomCredits,
+      initialCreditsPerDay,
+      creditsPaused,
+      isolatedAccounts,
+      autoApproveWaitlist,
+      invitationQuota,
+      invitationCronTime,
       metadata,
     } = body;
 
@@ -191,6 +196,12 @@ export async function PUT(request: NextRequest) {
 
     // Build update data object
     const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (domain !== undefined) updateData.domain = domain;
+    if (isActive !== undefined) updateData.isActive = isActive;
+    if (corsOrigins !== undefined) updateData.corsOrigins = corsOrigins;
+    if (redirectUrl !== undefined) updateData.redirectUrl = redirectUrl;
+    if (policyJson !== undefined) updateData.policyJson = policyJson;
     if (waitlistEnabled !== undefined) updateData.waitlistEnabled = waitlistEnabled;
     if (waitlistMessages !== undefined) updateData.waitlistMessages = waitlistMessages;
     if (waitlistLayout !== undefined) updateData.waitlistLayout = waitlistLayout;
@@ -205,6 +216,15 @@ export async function PUT(request: NextRequest) {
     if (inviteTime !== undefined) updateData.inviteTime = inviteTime;
     if (masterReferralCode !== undefined) updateData.masterReferralCode = masterReferralCode;
     if (masterReferralCredits !== undefined) updateData.masterReferralCredits = masterReferralCredits;
+    if (trackUsdValue !== undefined) updateData.trackUsdValue = trackUsdValue;
+    if (allowCustomCredits !== undefined) updateData.allowCustomCredits = allowCustomCredits;
+    if (maxCustomCredits !== undefined) updateData.maxCustomCredits = maxCustomCredits;
+    if (initialCreditsPerDay !== undefined) updateData.initialCreditsPerDay = initialCreditsPerDay;
+    if (creditsPaused !== undefined) updateData.creditsPaused = creditsPaused;
+    if (isolatedAccounts !== undefined) updateData.isolatedAccounts = isolatedAccounts;
+    if (autoApproveWaitlist !== undefined) updateData.autoApproveWaitlist = autoApproveWaitlist;
+    if (invitationQuota !== undefined) updateData.invitationQuota = invitationQuota;
+    if (invitationCronTime !== undefined) updateData.invitationCronTime = invitationCronTime;
 
     // Handle metadata - merge with existing
     if (metadata !== undefined) {
