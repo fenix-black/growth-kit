@@ -646,7 +646,7 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
               <div>
                 <label className="flex items-center space-x-3">
                   <button
-                    onClick={() => isEditing && setEditedApp(prev => ({ ...prev, isolatedAccounts: !prev.isolatedAccounts }))}
+                    onClick={() => isEditing && setEditedApp({ ...editedApp, isolatedAccounts: !editedApp.isolatedAccounts })}
                     disabled={!isEditing}
                     className="cursor-pointer"
                   >

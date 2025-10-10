@@ -135,7 +135,8 @@ export async function PUT(
       'creditsPaused': 'creditsPaused',
       'allowCustomCredits': 'allowCustomCredits',
       'maxCustomCredits': 'maxCustomCredits',
-      'initialCreditsPerDay': 'initialCreditsPerDay'
+      'initialCreditsPerDay': 'initialCreditsPerDay',
+      'isolatedAccounts': 'isolatedAccounts'
     };
     
     const updateData: any = {};
@@ -195,6 +196,9 @@ export async function PUT(
         return errors.badRequest('Invalid initialCreditsPerDay: must be between 0 and 100');
       }
       updateData.initialCreditsPerDay = initialCredits;
+    }
+    if (updateData.isolatedAccounts !== undefined && typeof updateData.isolatedAccounts !== 'boolean') {
+      return errors.badRequest('Invalid isolatedAccounts value');
     }
 
     // Check if waitlist is being enabled (false -> true)
