@@ -22,9 +22,19 @@ export async function getFingerprint(): Promise<string> {
   try {
     const stored = localStorage.getItem(FINGERPRINT_STORAGE_KEY);
     if (stored) {
-      cachedFingerprint = stored;
-      console.log('[GrowthKit] Using stored fingerprint:', stored.substring(0, 10) + '...');
-      return stored;
+      // Validate stored fingerprint format - FingerprintJS generates 32-char hex hashes
+      // or fallback format starts with "fallback_"
+      const isValidFormat = /^[a-f0-9]{32}$/.test(stored) || stored.startsWith('fallback_') || stored.startsWith('ssr_placeholder_');
+      
+      if (isValidFormat) {
+        cachedFingerprint = stored;
+        console.log('[GrowthKit] Using stored fingerprint:', stored.substring(0, 10) + '...');
+        return stored;
+      } else {
+        // Invalid/old format - clear it and regenerate
+        console.log('[GrowthKit] Clearing incompatible fingerprint format, will regenerate');
+        localStorage.removeItem(FINGERPRINT_STORAGE_KEY);
+      }
     }
   } catch (error) {
     // localStorage might be blocked (Safari private mode, etc.)
