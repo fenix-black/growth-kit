@@ -581,6 +581,27 @@ export async function POST(request: NextRequest) {
       return corsErrors.serverError('Failed to retrieve user data after processing', origin);
     }
 
+    // Handle OrgUserAccount creation for shared apps
+    if (!(app as any).isolatedAccounts && (app as any).organizationId && !(fingerprintRecord as any).orgUserAccountId) {
+      // Create new OrgUserAccount with current profile data
+      const orgUserAccount = await (prisma as any).orgUserAccount.create({
+        data: {
+          organizationId: (app as any).organizationId,
+          name: lead?.name || null,
+          email: lead?.email || null,
+          emailVerified: lead?.emailVerified || false,
+          profileMetadata: null,
+          lastActiveAt: new Date(),
+        },
+      });
+
+      // Link fingerprint to the account
+      await prisma.fingerprint.update({
+        where: { id: fingerprintRecord.id },
+        data: { orgUserAccountId: orgUserAccount.id } as any,
+      });
+    }
+
     // Calculate total credits - handle shared accounts
     let totalCredits = 0;
     

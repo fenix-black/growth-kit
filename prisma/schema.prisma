@@ -37,6 +37,7 @@ model Organization {
   apps              App[]
   invitations       OrganizationInvitation[]
   creditTransactions OrganizationCreditTransaction[]
+  orgUserAccounts   OrgUserAccount[]
 
   @@map("organizations")
 }
@@ -166,6 +167,8 @@ model Fingerprint {
   preferredLanguage String?   // User-selected language preference ('en', 'es')
   languageSource    String?   // 'browser_detected', 'user_selected', 'default'
   languageUpdatedAt DateTime? // When language preference was last updated
+  // Shared accounts
+  orgUserAccountId  String?   // Link to consolidated account (null for isolated apps)
   credits        Credit[]
   app            App        @relation(fields: [appId], references: [id], onDelete: Cascade)
   leads          Lead[]
@@ -173,6 +176,7 @@ model Fingerprint {
   referrals      Referral[] @relation("Referrer")
   usage          Usage[]
   activities     Activity[]
+  orgUserAccount OrgUserAccount? @relation(fields: [orgUserAccountId], references: [id])
 
   @@unique([appId, fingerprint])
   @@index([appId])
@@ -180,6 +184,7 @@ model Fingerprint {
   @@index([referralCode])
   @@index([preferredLanguage])
   @@index([browserLanguage])
+  @@index([orgUserAccountId])
   @@map("fingerprints")
 }
 
@@ -359,4 +364,23 @@ model OrganizationCreditTransaction {
   
   @@index([organizationId, createdAt])
   @@map("organization_credit_transactions")
+}
+
+model OrgUserAccount {
+  id               String    @id @default(cuid())
+  organizationId   String
+  name             String?
+  email            String?
+  emailVerified    Boolean   @default(false)
+  profileMetadata  Json?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastActiveAt     DateTime?
+  
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fingerprints     Fingerprint[]
+  
+  @@index([organizationId])
+  @@index([email])
+  @@map("org_user_accounts")
 }
