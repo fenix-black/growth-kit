@@ -684,6 +684,15 @@ export async function POST(request: NextRequest) {
         where: { id: fingerprintRecord.id },
         data: { orgUserAccountId } as any,
       });
+
+      // Refresh fingerprintRecord to get the updated orgUserAccountId
+      fingerprintRecord = await prisma.fingerprint.findUnique({
+        where: { id: fingerprintRecord.id },
+        include: {
+          credits: { orderBy: { createdAt: 'desc' } },
+          usage: { orderBy: { createdAt: 'desc' } },
+        },
+      }) || fingerprintRecord;
     }
 
     // Calculate total credits - handle shared accounts
