@@ -106,6 +106,14 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      // Update OrgUserAccount if this is a shared app
+      if (!(authContext.app as any).isolatedAccounts && (fingerprintRecord as any).orgUserAccountId) {
+        await (prisma as any).orgUserAccount.update({
+          where: { id: (fingerprintRecord as any).orgUserAccountId },
+          data: { updatedAt: new Date() },
+        });
+      }
+
       // Send verification email
       const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}`;
       
@@ -170,6 +178,14 @@ export async function POST(request: NextRequest) {
             emailVerified: false,
           },
         });
+
+        // Update OrgUserAccount if this is a shared app
+        if (!(authContext.app as any).isolatedAccounts && (fingerprintRecord as any).orgUserAccountId) {
+          await (prisma as any).orgUserAccount.update({
+            where: { id: (fingerprintRecord as any).orgUserAccountId },
+            data: { email: normalizedEmail, emailVerified: false, updatedAt: new Date() },
+          });
+        }
 
         // Send verification email for new email
         const verificationLink = `${authContext.app.domain}/verify?token=${verifyToken}`;
@@ -280,6 +296,14 @@ export async function POST(request: NextRequest) {
         verifyExpiresAt,
       },
     });
+
+    // Update OrgUserAccount if this is a shared app
+    if (!(authContext.app as any).isolatedAccounts && (fingerprintRecord as any).orgUserAccountId) {
+      await (prisma as any).orgUserAccount.update({
+        where: { id: (fingerprintRecord as any).orgUserAccountId },
+        data: { email: normalizedEmail, emailVerified: false, updatedAt: new Date() },
+      });
+    }
 
     // Award initial credits for email claim
     // Award credits for email claim (only if credits are not paused)

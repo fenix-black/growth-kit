@@ -65,6 +65,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Update OrgUserAccount if this is a shared app
+    if (!(app as any).isolatedAccounts && (fingerprint as any).orgUserAccountId) {
+      await (prisma as any).orgUserAccount.update({
+        where: { id: (fingerprint as any).orgUserAccountId },
+        data: { emailVerified: true, updatedAt: new Date() },
+      });
+    }
+
     // Award credits for email verification (if not paused)
     let creditsAwarded = 0;
     const appSettings = await prisma.app.findUnique({

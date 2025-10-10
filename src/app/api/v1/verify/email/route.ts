@@ -93,6 +93,14 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      // Update OrgUserAccount if this is a shared app
+      if (!(authContext.app as any).isolatedAccounts && (lead.fingerprint as any)?.orgUserAccountId) {
+        await (tx as any).orgUserAccount.update({
+          where: { id: (lead.fingerprint as any).orgUserAccountId },
+          data: { emailVerified: true, updatedAt: new Date() },
+        });
+      }
+
       // If user had other verified emails, invalidate them (keeping only the newest verified one)
       if (otherVerifiedEmails.length > 0) {
         await tx.lead.updateMany({

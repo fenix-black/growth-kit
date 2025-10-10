@@ -81,10 +81,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             },
           },
         },
+        orgUserAccount: true,
         _count: {
           select: { referrals: true },
         },
-      },
+      } as any,
       skip: (page - 1) * limit,
       take: limit,
       orderBy: Object.keys(orderBy).length > 0 ? orderBy : { createdAt: 'desc' },
@@ -93,62 +94,66 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Process and enrich data
     const users = fingerprints.map(fp => {
       // Calculate credit balance
-      const creditBalance = fp.credits.reduce((sum, credit) => sum + credit.amount, 0);
+      const creditBalance = (fp as any).credits.reduce((sum: number, credit: any) => sum + credit.amount, 0);
 
       // Get latest verified lead
-      const verifiedLead = fp.leads.find(lead => lead.emailVerified);
-      const latestLead = verifiedLead || fp.leads[0];
+      const verifiedLead = (fp as any).leads.find((lead: any) => lead.emailVerified);
+      const latestLead = verifiedLead || (fp as any).leads[0];
 
       // Count successful referrals
-      const referralCount = fp.referrals.length;
+      const referralCount = (fp as any).referrals.length;
 
       // Get referral source info
-      const referralSource = fp.referredBy ? {
-        referralId: fp.referredBy.id,
-        referredAt: fp.referredBy.claimedAt,
-        referrer: fp.referredBy.referrer ? {
-          id: fp.referredBy.referrer.id,
-          fingerprintId: fp.referredBy.referrer.fingerprint,
+      const referralSource = (fp as any).referredBy ? {
+        referralId: (fp as any).referredBy.id,
+        referredAt: (fp as any).referredBy.claimedAt,
+        referrer: (fp as any).referredBy.referrer ? {
+          id: (fp as any).referredBy.referrer.id,
+          fingerprintId: (fp as any).referredBy.referrer.fingerprint,
           // Prefer verified leads with names, then any lead with a name, then any verified lead, then any lead
           name: (() => {
-            const leads = fp.referredBy.referrer.leads;
-            const verifiedWithName = leads.find(l => l.emailVerified && l.name);
-            const anyWithName = leads.find(l => l.name);
-            const verified = leads.find(l => l.emailVerified);
+            const leads = (fp as any).referredBy.referrer.leads;
+            const verifiedWithName = leads.find((l: any) => l.emailVerified && l.name);
+            const anyWithName = leads.find((l: any) => l.name);
+            const verified = leads.find((l: any) => l.emailVerified);
             const any = leads[0];
             return (verifiedWithName || anyWithName || verified || any)?.name || null;
           })(),
           email: (() => {
-            const leads = fp.referredBy.referrer.leads;
-            const verifiedWithName = leads.find(l => l.emailVerified && l.name);
-            const anyWithName = leads.find(l => l.name);
-            const verified = leads.find(l => l.emailVerified);
+            const leads = (fp as any).referredBy.referrer.leads;
+            const verifiedWithName = leads.find((l: any) => l.emailVerified && l.name);
+            const anyWithName = leads.find((l: any) => l.name);
+            const verified = leads.find((l: any) => l.emailVerified);
             const any = leads[0];
             return (verifiedWithName || anyWithName || verified || any)?.email || null;
           })(),
         } : null,
       } : null;
 
+      // For shared apps, use OrgUserAccount data; for isolated apps, use Lead data
+      const isSharedApp = !(app as any).isolatedAccounts;
+      const orgAccount = (fp as any).orgUserAccount;
+      
       return {
-        id: fp.id,
-        fingerprintId: fp.fingerprint,
-        name: latestLead?.name || null,
-        email: latestLead?.email || null,
-        emailVerified: latestLead?.emailVerified || false,
+        id: (fp as any).id,
+        fingerprintId: (fp as any).fingerprint,
+        name: (isSharedApp && orgAccount?.name) || latestLead?.name || null,
+        email: (isSharedApp && orgAccount?.email) || latestLead?.email || null,
+        emailVerified: (isSharedApp && orgAccount?.emailVerified) || latestLead?.emailVerified || false,
         creditBalance,
         referralCount,
         referralSource,
-        lastActiveAt: fp.lastActiveAt || fp.createdAt,
-        createdAt: fp.createdAt,
-        referralCode: fp.referralCode,
-        browser: fp.browser,
-        device: fp.device,
-        location: fp.location,
+        lastActiveAt: (fp as any).lastActiveAt || (fp as any).createdAt,
+        createdAt: (fp as any).createdAt,
+        referralCode: (fp as any).referralCode,
+        browser: (fp as any).browser,
+        device: (fp as any).device,
+        location: (fp as any).location,
         // Language information
-        browserLanguage: fp.browserLanguage,
-        preferredLanguage: fp.preferredLanguage,
-        languageSource: fp.languageSource,
-        languageUpdatedAt: fp.languageUpdatedAt,
+        browserLanguage: (fp as any).browserLanguage,
+        preferredLanguage: (fp as any).preferredLanguage,
+        languageSource: (fp as any).languageSource,
+        languageUpdatedAt: (fp as any).languageUpdatedAt,
       };
     });
 

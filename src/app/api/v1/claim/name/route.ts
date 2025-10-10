@@ -100,6 +100,14 @@ export async function POST(request: NextRequest) {
       data: { name: sanitizedName },
     });
 
+    // Update OrgUserAccount if this is a shared app
+    if (!(authContext.app as any).isolatedAccounts && (fingerprintRecord as any).orgUserAccountId) {
+      await (prisma as any).orgUserAccount.update({
+        where: { id: (fingerprintRecord as any).orgUserAccountId },
+        data: { name: sanitizedName, updatedAt: new Date() },
+      });
+    }
+
     // Award credits for name claim (only if credits are not paused)
     let nameCredits = 0;
     if (!authContext.app.creditsPaused) {
