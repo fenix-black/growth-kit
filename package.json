@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "npm run build:sdk && next build --turbopack",
+    "build:sdk": "cd sdk && npm install && npm run build:all",
     "start": "next start",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",

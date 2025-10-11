@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrowthKit UMD Bundle Test</title>
+</head>
+<body>
+  <h1>GrowthKit UMD Bundle Test</h1>
+  <div id="status">Loading...</div>
+  <div id="root"></div>
+
+  <script src="dist/bundle.umd.js"></script>
+  <script>
+    // Test if GrowthKit is available globally
+    const statusDiv = document.getElementById('status');
+    
+    if (typeof GrowthKit !== 'undefined') {
+      statusDiv.innerHTML = '<strong style="color: green;">✓ GrowthKit loaded successfully!</strong>';
+      console.log('GrowthKit exports:', Object.keys(GrowthKit));
+      
+      // Check for key exports
+      const requiredExports = [
+        'useGrowthKit',
+        'GrowthKitProvider',
+        'WaitlistForm',
+        'getFingerprint',
+        'VERSION'
+      ];
+      
+      const missing = requiredExports.filter(exp => !(exp in GrowthKit));
+      
+      if (missing.length === 0) {
+        statusDiv.innerHTML += '<br><strong style="color: green;">✓ All required exports found</strong>';
+        statusDiv.innerHTML += '<br>Version: ' + (GrowthKit.VERSION || 'Unknown');
+      } else {
+        statusDiv.innerHTML += '<br><strong style="color: orange;">⚠ Missing exports: ' + missing.join(', ') + '</strong>';
+      }
+      
+      statusDiv.innerHTML += '<br><br><strong>Available exports:</strong><br><pre>' + 
+        Object.keys(GrowthKit).join(', ') + '</pre>';
+    } else {
+      statusDiv.innerHTML = '<strong style="color: red;">✗ GrowthKit not found in global scope</strong>';
+    }
+  </script>
+</body>
+</html>
+

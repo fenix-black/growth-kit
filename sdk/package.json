@@ -37,6 +37,8 @@
   },
   "scripts": {
     "build": "npm run clean && tsup",
+    "build:umd": "tsup --config tsup.umd.config.ts",
+    "build:all": "npm run clean && tsup && tsup --config tsup.umd.config.ts",
     "dev": "tsup --watch",
     "clean": "rm -rf dist"
   },

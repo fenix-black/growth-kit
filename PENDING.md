@@ -33,7 +33,7 @@ todo:
     - ✅ Admin UI: Toggle in App Settings → Basic Info for existing apps
     - ✅ App Creation: Automatic inclusion in new app creation flow
     - ✅ SDK Widgets: Updated both `/api/v1/*` and `/api/public/*` endpoints for shared credit calculation
-    - ✅ Users View: Added "🔗 Shared" indicators in Users & Leads tab
+    - ✅ Admin Clarity: Each app's "Users & Leads" tab only shows users who actually used that specific app (not shared users)
     - ✅ KISS Implementation: Virtual aggregation (no data model changes), fingerprint-based identity, organization-scoped sharing
 
 - [ ] admin. add app description field (OK) and keywords, to have better insights as to why a user wanted to use them (tracking)
@@ -53,3 +53,9 @@ todo:
     - Added browser, device, and location tracking using geoip-lite
     - Updated Users & Leads UI with fingerprint icon, browser/device info, and location column
     - Privacy-friendly: city-level location only, no invasive tracking
+
+- [ ] idea: show ads from growthkit network in exchange for credits; we pay credits for watching ads to users. We allow orgs on growthkit to create campaigns to promote their services; we charge orgs.
+
+- [ ] add a 'storage' to the orgaccountuser, so the sdk can 'save' results to the user's account. We could then provide a 'last actions' section modal within the widget so the user could see their previous results (for example, the last 3 with each app name) so they could re-download them again or be remembered (marketing) that they could use those apps again.
+
+ - [ ] remotely update the widget when deploying new versions to server.
