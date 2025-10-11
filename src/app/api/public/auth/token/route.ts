@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
   
   try {
     const body = await request.json();
-    const { publicKey, fingerprint, context } = body;
+    const { publicKey, fingerprint, fingerprint2, fingerprint3, context } = body;
     
     // Extract browser context from headers (primary) or request body (fallback)
     const clientIp = getClientIp(request.headers);
@@ -63,10 +63,11 @@ export async function POST(request: NextRequest) {
       return corsErrors.forbidden(origin);
     }
 
-    // Generate server fingerprint for dual matching
-    const serverFingerprint = generateServerFingerprint(clientIp, request.headers);
+    // Generate server fingerprint
+    const serverFingerprint = generateServerFingerprint(clientIp, request.headers, context);
     
-    // Find fingerprint record - try client fingerprint first, then server fingerprint
+    // Find fingerprint record using priority-based matching (most unique first)
+    // 1. Try primary fingerprint (FingerprintJS)
     let fingerprintRecord = await prisma.fingerprint.findUnique({
       where: {
         appId_fingerprint: {
@@ -75,8 +76,31 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+    let matchedBy: string | null = fingerprintRecord ? 'primary' : null;
 
-    // If not found by client fingerprint, try server fingerprint
+    // 2. Try fingerprint2 (canvas) if primary didn't match
+    if (!fingerprintRecord && fingerprint2) {
+      fingerprintRecord = await prisma.fingerprint.findFirst({
+        where: {
+          appId: app.id,
+          fingerprint2: fingerprint2,
+        },
+      });
+      if (fingerprintRecord) matchedBy = 'canvas';
+    }
+
+    // 3. Try fingerprint3 (browser signature) if still not found
+    if (!fingerprintRecord && fingerprint3) {
+      fingerprintRecord = await prisma.fingerprint.findFirst({
+        where: {
+          appId: app.id,
+          fingerprint3: fingerprint3,
+        },
+      });
+      if (fingerprintRecord) matchedBy = 'browser-sig';
+    }
+
+    // 4. Try serverFingerprint as last resort (least unique)
     if (!fingerprintRecord) {
       fingerprintRecord = await prisma.fingerprint.findFirst({
         where: {
@@ -84,17 +108,22 @@ export async function POST(request: NextRequest) {
           serverFingerprint: serverFingerprint,
         },
       });
+      if (fingerprintRecord) matchedBy = 'server';
+    }
 
-      // If found by server fingerprint, update the client fingerprint (FingerprintJS changed)
-      if (fingerprintRecord) {
-        fingerprintRecord = await prisma.fingerprint.update({
-          where: { id: fingerprintRecord.id },
-          data: { 
-            fingerprint,
-            lastActiveAt: new Date(),
-          },
-        });
-      }
+    // If found by fallback method, update all fingerprint values to current
+    if (fingerprintRecord && matchedBy !== 'primary') {
+      fingerprintRecord = await prisma.fingerprint.update({
+        where: { id: fingerprintRecord.id },
+        data: { 
+          fingerprint,
+          fingerprint2: fingerprint2 || fingerprintRecord.fingerprint2,
+          fingerprint3: fingerprint3 || fingerprintRecord.fingerprint3,
+          serverFingerprint,
+          lastActiveAt: new Date(),
+        },
+      });
+      console.log(`[GrowthKit] Matched by ${matchedBy}, updated all fingerprints`);
     }
 
     if (!fingerprintRecord) {
@@ -104,6 +133,8 @@ export async function POST(request: NextRequest) {
         data: {
           appId: app.id,
           fingerprint,
+          fingerprint2: fingerprint2 || null,
+          fingerprint3: fingerprint3 || null,
           serverFingerprint,
           referralCode,
           lastActiveAt: new Date(),

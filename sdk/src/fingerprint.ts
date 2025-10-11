@@ -1,12 +1,15 @@
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
+import { getCanvasFingerprint, getBrowserSignatureFingerprint } from './additionalFingerprints';
 
 let cachedFingerprint: string | null = null;
+let cachedFingerprint2: string | null = null;
+let cachedFingerprint3: string | null = null;
 let fpAgent: any = null;
 
 // Storage key for persistent fingerprint
 const FINGERPRINT_STORAGE_KEY = 'growthkit_fingerprint';
 const FINGERPRINT_VERSION_KEY = 'growthkit_fingerprint_version';
-const CURRENT_FP_VERSION = '2'; // Increment this to force regeneration
+const CURRENT_FP_VERSION = '4'; // v4: Multi-fingerprint support (canvas + browser sig + server)
 
 export async function getFingerprint(): Promise<string> {
   // Return cached fingerprint if available
@@ -143,8 +146,59 @@ function generateFallbackFingerprint(): string {
   return `fallback_${Math.abs(hash).toString(36)}`;
 }
 
+/**
+ * Get all fingerprint methods for enhanced cross-domain matching
+ * Returns primary fingerprint plus additional methods for fallback
+ * 
+ * @returns Object with all fingerprint values
+ */
+export async function getAllFingerprints(): Promise<{
+  fingerprint: string;
+  fingerprint2: string;
+  fingerprint3: string;
+}> {
+  // Get primary fingerprint (cached or fresh)
+  const primary = await getFingerprint();
+  
+  // Get additional fingerprints (generate fresh each time for now, can cache later if needed)
+  if (typeof window === 'undefined') {
+    return {
+      fingerprint: primary,
+      fingerprint2: '',
+      fingerprint3: '',
+    };
+  }
+  
+  // Return cached additional fingerprints if available
+  if (cachedFingerprint2 && cachedFingerprint3) {
+    return {
+      fingerprint: primary,
+      fingerprint2: cachedFingerprint2,
+      fingerprint3: cachedFingerprint3,
+    };
+  }
+  
+  // Generate additional fingerprints in parallel
+  const [canvas, browserSig] = await Promise.all([
+    getCanvasFingerprint(),
+    getBrowserSignatureFingerprint(),
+  ]);
+  
+  // Cache for this session
+  cachedFingerprint2 = canvas;
+  cachedFingerprint3 = browserSig;
+  
+  return {
+    fingerprint: primary,
+    fingerprint2: canvas,
+    fingerprint3: browserSig,
+  };
+}
+
 export function clearFingerprintCache(): void {
   cachedFingerprint = null;
+  cachedFingerprint2 = null;
+  cachedFingerprint3 = null;
   
   // Also clear from localStorage
   try {

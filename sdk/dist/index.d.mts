@@ -330,6 +330,8 @@ declare class GrowthKitAPI {
     private publicKey;
     private apiUrl;
     private fingerprint;
+    private fingerprint2;
+    private fingerprint3;
     private isProxyMode;
     private isPublicMode;
     private debug;
@@ -344,6 +346,11 @@ declare class GrowthKitAPI {
     private detectApiUrl;
     private detectProxyUrl;
     setFingerprint(fingerprint: string): void;
+    setAllFingerprints(fingerprints: {
+        fingerprint: string;
+        fingerprint2: string;
+        fingerprint3: string;
+    }): void;
     setLanguage(language: 'en' | 'es'): void;
     private isTokenValid;
     private getStoredToken;
@@ -502,6 +509,17 @@ declare function getReferralClaimFromRequest(request: NextRequest): string | nul
 declare function createGrowthKitServer(): GrowthKitServer;
 
 declare function getFingerprint(): Promise<string>;
+/**
+ * Get all fingerprint methods for enhanced cross-domain matching
+ * Returns primary fingerprint plus additional methods for fallback
+ *
+ * @returns Object with all fingerprint values
+ */
+declare function getAllFingerprints(): Promise<{
+    fingerprint: string;
+    fingerprint2: string;
+    fingerprint3: string;
+}>;
 declare function clearFingerprintCache(): void;
 
 /**
@@ -523,4 +541,4 @@ interface LogoProps {
 
 declare const VERSION = "0.6.13";
 
-export { APIResponse, AppBranding, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GROWTHKIT_LOGO_ICON_BASE64, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, LogoProps, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };
+export { APIResponse, AppBranding, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GROWTHKIT_LOGO_ICON_BASE64, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, LogoProps, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getAllFingerprints, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };

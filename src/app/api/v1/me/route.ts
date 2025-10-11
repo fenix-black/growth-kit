@@ -634,8 +634,8 @@ export async function POST(request: NextRequest) {
 
     // Handle OrgUserAccount creation/linking for shared apps
     if (!(authContext.app as any).isolatedAccounts && authContext.app.organizationId && fingerprintRecord && !(fingerprintRecord as any).orgUserAccountId) {
-      // Generate server-side fingerprint for cross-domain matching
-      const serverFingerprint = generateServerFingerprint(clientIp, request.headers);
+      // Generate server-side fingerprint for cross-domain matching (includes context for enhanced uniqueness)
+      const serverFingerprint = generateServerFingerprint(clientIp, request.headers, context);
       
       // Update current fingerprint with serverFingerprint if not set
       if (!(fingerprintRecord as any).serverFingerprint) {
@@ -645,15 +645,16 @@ export async function POST(request: NextRequest) {
         });
       }
       
-      // Check if an OrgUserAccount already exists matching EITHER fingerprint in other shared apps
-      const existingFingerprint = await prisma.fingerprint.findFirst({
+      // Check if an OrgUserAccount already exists using priority-based matching
+      // Try in order: primary -> canvas -> browser-sig -> server (most to least unique)
+      let existingFingerprint = null;
+      
+      // 1. Try primary fingerprint
+      existingFingerprint = await prisma.fingerprint.findFirst({
         where: {
-          OR: [
-            { fingerprint: fingerprintRecord.fingerprint },
-            { serverFingerprint: serverFingerprint },
-          ],
-          appId: { not: authContext.app.id }, // Different app
-          orgUserAccountId: { not: null }, // Has an account linked
+          fingerprint: fingerprintRecord.fingerprint,
+          appId: { not: authContext.app.id },
+          orgUserAccountId: { not: null },
           app: {
             organizationId: authContext.app.organizationId,
             isolatedAccounts: false,
@@ -661,6 +662,54 @@ export async function POST(request: NextRequest) {
         },
         select: { orgUserAccountId: true },
       });
+      
+      // 2. Try canvas fingerprint if no match yet
+      if (!existingFingerprint && (fingerprintRecord as any).fingerprint2) {
+        existingFingerprint = await prisma.fingerprint.findFirst({
+          where: {
+            fingerprint2: (fingerprintRecord as any).fingerprint2,
+            appId: { not: authContext.app.id },
+            orgUserAccountId: { not: null },
+            app: {
+              organizationId: authContext.app.organizationId,
+              isolatedAccounts: false,
+            } as any,
+          },
+          select: { orgUserAccountId: true },
+        });
+      }
+      
+      // 3. Try browser signature fingerprint if still no match
+      if (!existingFingerprint && (fingerprintRecord as any).fingerprint3) {
+        existingFingerprint = await prisma.fingerprint.findFirst({
+          where: {
+            fingerprint3: (fingerprintRecord as any).fingerprint3,
+            appId: { not: authContext.app.id },
+            orgUserAccountId: { not: null },
+            app: {
+              organizationId: authContext.app.organizationId,
+              isolatedAccounts: false,
+            } as any,
+          },
+          select: { orgUserAccountId: true },
+        });
+      }
+      
+      // 4. Try server fingerprint as last resort (least unique - avoid false positives)
+      if (!existingFingerprint && serverFingerprint) {
+        existingFingerprint = await prisma.fingerprint.findFirst({
+          where: {
+            serverFingerprint: serverFingerprint,
+            appId: { not: authContext.app.id },
+            orgUserAccountId: { not: null },
+            app: {
+              organizationId: authContext.app.organizationId,
+              isolatedAccounts: false,
+            } as any,
+          },
+          select: { orgUserAccountId: true },
+        });
+      }
 
       let orgUserAccountId;
       if (existingFingerprint?.orgUserAccountId) {

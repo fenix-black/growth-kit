@@ -13,6 +13,8 @@ export class GrowthKitAPI {
   private publicKey: string | null;
   private apiUrl: string;
   private fingerprint: string | null = null;
+  private fingerprint2: string | null = null;
+  private fingerprint3: string | null = null;
   private isProxyMode: boolean;
   private isPublicMode: boolean;
   private debug: boolean = false;
@@ -84,6 +86,12 @@ export class GrowthKitAPI {
     this.fingerprint = fingerprint;
   }
 
+  setAllFingerprints(fingerprints: { fingerprint: string; fingerprint2: string; fingerprint3: string }) {
+    this.fingerprint = fingerprints.fingerprint;
+    this.fingerprint2 = fingerprints.fingerprint2;
+    this.fingerprint3 = fingerprints.fingerprint3;
+  }
+
   setLanguage(language: 'en' | 'es') {
     this.language = language;
   }
@@ -153,6 +161,8 @@ export class GrowthKitAPI {
           body: JSON.stringify({
             publicKey: this.publicKey,
             fingerprint: this.fingerprint,
+            fingerprint2: this.fingerprint2,
+            fingerprint3: this.fingerprint3,
             context,
           }),
         });

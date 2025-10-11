@@ -153,8 +153,10 @@ model ApiKey {
 model Fingerprint {
   id             String     @id @default(cuid())
   appId          String
-  fingerprint    String     // Client-side fingerprint from FingerprintJS
-  serverFingerprint String? // Server-side fingerprint (IP + headers hash) for cross-domain matching
+  fingerprint    String     // Primary: FingerprintJS (client-side, most unique)
+  fingerprint2   String?    // Secondary: Canvas fingerprint (client-side, very unique)
+  fingerprint3   String?    // Tertiary: Browser signature hash (client-side, fairly unique)
+  serverFingerprint String? // Fallback: Server-side (IP + headers + screen, least unique)
   referralCode   String?    @unique
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
@@ -182,6 +184,8 @@ model Fingerprint {
   @@unique([appId, fingerprint])
   @@index([appId])
   @@index([fingerprint])
+  @@index([fingerprint2])
+  @@index([fingerprint3])
   @@index([serverFingerprint])
   @@index([referralCode])
   @@index([preferredLanguage])

@@ -5,6 +5,36 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2025-10-11
+
+### Added
+- **🔐 Multi-Fingerprint System**: Enhanced user identification with 4-tier fingerprinting for shared accounts
+  - Primary: FingerprintJS (most unique, uses canvas, WebGL, audio, fonts)
+  - Secondary: Canvas fingerprint (custom canvas rendering hash)
+  - Tertiary: Browser signature (screen + navigator + timezone + WebGL)
+  - Fallback: Server-side fingerprint (IP + headers + screen resolution)
+- **Priority-based Matching**: Tries fingerprints in order of uniqueness to avoid false positives
+- **Cross-Domain Account Linking**: Reliably matches users across different app domains
+- **Automatic Fingerprint Migration**: Updates fingerprints when methods drift over time
+- **getAllFingerprints()**: New export for advanced use cases needing all fingerprint values
+
+### Changed
+- `useGrowthKit` now generates all fingerprint methods automatically
+- Token requests include all fingerprint values for enhanced matching
+- Fingerprint version bumped to v4 (auto-clears old incompatible formats)
+
+### Fixed
+- **Domain-Independent Matching**: Shared accounts now work reliably across different domains
+- **Fingerprint Drift Handling**: System automatically updates fingerprints when client values change
+- **False Positive Prevention**: Priority-based matching prevents linking different users in same household
+- **localStorage Migration**: Version checking auto-clears incompatible old fingerprints
+
+### Technical
+- New `additionalFingerprints.ts` module for canvas and browser signature generation
+- Enhanced server-side fingerprint includes screen resolution and viewport
+- All fingerprint methods cached in-memory for session performance
+- Backend uses cascading fallback queries for maximum reliability
+
 ## [0.7.1] - 2025-10-09
 
 ### Fixed

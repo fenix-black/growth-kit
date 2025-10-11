@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { GrowthKitAPI } from './api';
-import { getFingerprint } from './fingerprint';
+import { getAllFingerprints } from './fingerprint';
 import { useGrowthKitConfig } from './components/GrowthKitProvider';
 import { useGrowthKitState } from './components/GrowthKitStateProvider';
 import { getBrowserContext, generateSessionId } from './context';
@@ -77,12 +77,16 @@ export function useGrowthKit(): GrowthKitHook {
         console.log('[GrowthKit] Starting initialization...');
       }
 
-      // Get browser fingerprint
-      const fingerprint = await getFingerprint();
-      apiRef.current.setFingerprint(fingerprint);
+      // Get all browser fingerprints (primary + fallbacks)
+      const fingerprints = await getAllFingerprints();
+      apiRef.current.setAllFingerprints(fingerprints);
 
       if (configRef.current.debug) {
-        console.log('[GrowthKit] Fingerprint obtained:', fingerprint.substring(0, 10) + '...');
+        console.log('[GrowthKit] Fingerprints obtained:', {
+          primary: fingerprints.fingerprint.substring(0, 10) + '...',
+          canvas: fingerprints.fingerprint2 ? fingerprints.fingerprint2.substring(0, 10) + '...' : 'none',
+          browser: fingerprints.fingerprint3 ? fingerprints.fingerprint3.substring(0, 10) + '...' : 'none',
+        });
       }
 
       // Check for URL parameters
@@ -100,7 +104,7 @@ export function useGrowthKit(): GrowthKitHook {
       // Process parameters
       if (refClaim) {
         try {
-          const referralResponse = await apiRef.current.checkReferral(fingerprint, refClaim);
+          const referralResponse = await apiRef.current.checkReferral(fingerprints.fingerprint, refClaim);
           if (configRef.current.debug) {
             console.log('[GrowthKit] Referral processed:', referralResponse);
           }
@@ -114,7 +118,7 @@ export function useGrowthKit(): GrowthKitHook {
       if (invitation) {
         try {
           // Process invitation code (different from referral)
-          const invitationResponse = await apiRef.current.redeemInvitation(fingerprint, invitation);
+          const invitationResponse = await apiRef.current.redeemInvitation(fingerprints.fingerprint, invitation);
           if (configRef.current.debug) {
             console.log('[GrowthKit] Invitation processed:', invitationResponse);
           }
@@ -127,7 +131,7 @@ export function useGrowthKit(): GrowthKitHook {
 
       if (verifyToken) {
         try {
-          const verifyResponse = await apiRef.current.verifyEmail(fingerprint, verifyToken);
+          const verifyResponse = await apiRef.current.verifyEmail(fingerprints.fingerprint, verifyToken);
           if (configRef.current.debug) {
             console.log('[GrowthKit] Email verification processed:', verifyResponse);
           }
@@ -152,7 +156,7 @@ export function useGrowthKit(): GrowthKitHook {
       }
       
       // Fetch user data
-      const response = await apiRef.current.getMe(fingerprint);
+      const response = await apiRef.current.getMe(fingerprints.fingerprint);
       
       if (configRef.current.debug) {
         console.log('[GrowthKit] API Response Data:', response);
@@ -163,7 +167,7 @@ export function useGrowthKit(): GrowthKitHook {
         if (configRef.current.debug) {
           console.error('[GrowthKit] API Error Details:', {
             endpoint: '/v1/me',
-            fingerprint: fingerprint.substring(0, 10) + '...',
+            fingerprint: fingerprints.fingerprint.substring(0, 10) + '...',
             claim: refClaim,
             error: response.error,
             timestamp: new Date().toISOString(),
@@ -179,7 +183,7 @@ export function useGrowthKit(): GrowthKitHook {
           loading: false,
           initialized: true,
           error: new Error(response.error || 'Failed to fetch user data'),
-          fingerprint,
+          fingerprint: fingerprints.fingerprint,
           // Set minimal default state
           credits: 0,
           usage: 0,
@@ -239,7 +243,7 @@ export function useGrowthKit(): GrowthKitHook {
         loading: false,
         initialized: true,
         error: null,
-        fingerprint,
+        fingerprint: fingerprints.fingerprint,
         credits: data.credits,
         usage: data.usage,
         creditsPaused: data.creditsPaused || false,
