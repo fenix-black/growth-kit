@@ -9,6 +9,10 @@ interface GrowthKitConfig {
     debug?: boolean;
     language?: 'en' | 'es';
     theme?: GrowthKitTheme;
+    autoUpdate?: boolean;
+    updateCheckTTL?: number;
+    updateTimeout?: number;
+    updateDebug?: boolean;
 }
 interface GrowthKitPolicy {
     referralCredits: number;
@@ -539,6 +543,50 @@ interface LogoProps {
     style?: React.CSSProperties;
 }
 
+/**
+ * SDK Auto-Update Loader
+ * Manages automatic updates of the SDK by fetching the latest version from the CDN
+ */
+interface SdkVersionInfo {
+    version: string;
+    buildHash: string;
+    buildTime: string;
+    fullVersion: string;
+    bundleUrl: string;
+    forceUpdate: boolean;
+    minVersion?: string;
+    reason?: string;
+}
+interface SdkLoaderConfig {
+    enabled: boolean;
+    apiUrl: string;
+    cacheTTL: number;
+    timeout: number;
+    debug: boolean;
+}
+/**
+ * Get current bundled SDK version
+ */
+declare function getCurrentVersion(): string;
+/**
+ * Get current SDK load source
+ */
+declare function getSdkLoadSource(): 'bundled' | 'cache' | 'cdn';
+/**
+ * Check for SDK updates
+ * This is a passive check - it logs but doesn't actually reload the SDK yet
+ */
+declare function checkForUpdates(config: SdkLoaderConfig): Promise<{
+    hasUpdate: boolean;
+    currentVersion: string;
+    latestVersion?: string;
+    forceUpdate: boolean;
+}>;
+/**
+ * Track SDK version usage on the server
+ */
+declare function trackSdkVersion(apiUrl: string, appId: string, fingerprintId: string, sdkVersion: string, loadSource: 'bundled' | 'cache' | 'cdn', debug?: boolean): Promise<void>;
+
 declare const VERSION = "0.6.13";
 
-export { APIResponse, AppBranding, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GROWTHKIT_LOGO_ICON_BASE64, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, LogoProps, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getAllFingerprints, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };
+export { APIResponse, AppBranding, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GROWTHKIT_LOGO_ICON_BASE64, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, LogoProps, MeResponse, SdkLoaderConfig, SdkVersionInfo, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, checkForUpdates, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getAllFingerprints, getButtonHoverStyles, getCurrentVersion, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getSdkLoadSource, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, trackSdkVersion, useGrowthKit, useLocalization, useTranslation };

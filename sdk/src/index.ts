@@ -80,5 +80,14 @@ export { GrowthKitAPI } from './api';
 export { useLocalization, useTranslation } from './localization';
 export type { Language, Translations } from './localization';
 
+// SDK Loader exports (auto-update)
+export {
+  checkForUpdates,
+  getCurrentVersion,
+  getSdkLoadSource,
+  trackSdkVersion,
+} from './sdkLoader';
+export type { SdkVersionInfo, SdkLoaderConfig } from './sdkLoader';
+
 // Version
 export const VERSION = '0.6.13';

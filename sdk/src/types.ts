@@ -7,6 +7,11 @@ export interface GrowthKitConfig {
   debug?: boolean;
   language?: 'en' | 'es';
   theme?: GrowthKitTheme;
+  // Auto-update configuration
+  autoUpdate?: boolean;           // Enable auto-updates (default: false for now)
+  updateCheckTTL?: number;        // Time between version checks in ms (default: 120000 = 2 min)
+  updateTimeout?: number;         // Timeout for version check in ms (default: 3000)
+  updateDebug?: boolean;          // Debug logging for updates (default: same as debug)
 }
 
 export interface GrowthKitPolicy {

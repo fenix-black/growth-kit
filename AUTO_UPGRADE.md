@@ -40,27 +40,33 @@
 - [x] Create test HTML file for manual verification
 - [x] Fix build issues (ensure both regular and UMD bundles coexist)
 
-### Phase 3: Database Schema
-- [ ] Add `SdkVersionUsage` table to Prisma schema
+### Phase 3: Database Schema ✅
+- [x] Add `SdkVersionUsage` table to Prisma schema
   - Fields: id, fingerprintId, appId, sdkVersion, loadSource, createdAt
+  - Optional fields: bundleSize, loadTime
   - Relations to Fingerprint and App
-  - Indexes for querying
-- [ ] Run `npx prisma db push`
-- [ ] Verify table created in production database
+  - Indexes for querying (appId+sdkVersion, fingerprintId, createdAt)
+- [x] Run `npx prisma db push`
+- [x] Verify table created successfully
 
-### Phase 4: Loader Logic (SDK)
-- [ ] Create loader wrapper in SDK
-  - Version check logic with 2-min TTL
+### Phase 4: Loader Logic (SDK) ✅
+- [x] Create SDK loader utility (`sdk/src/sdkLoader.ts`)
+  - Version check logic with configurable TTL (default 2-min)
   - localStorage cache management
-  - Fetch from CDN with fallback to bundled
+  - Passive update detection (logs warnings, no auto-reload yet)
   - Force update detection
-- [ ] Update `GrowthKitProvider` to use loader
-  - Add `autoUpdate`, `updateCheckTTL`, `updateStrategy` config options
-  - Background loading with bundled fallback
-- [ ] Log SDK version to server on initialization
-  - Send version in API calls or separate tracking call
-  - Create `SdkVersionUsage` record
-- [ ] Add debug logging for version checks (dev mode)
+- [x] Update `GrowthKitProvider` to integrate loader
+  - Add `autoUpdate`, `updateCheckTTL`, `updateTimeout`, `updateDebug` config options
+  - Periodic version checks with configurable interval
+  - Console warnings when updates available
+- [x] Add version tracking utilities
+  - `getCurrentVersion()`, `getSdkLoadSource()`, `trackSdkVersion()` functions
+  - Export from both `index.ts` and `browser.ts`
+- [x] Add debug logging for version checks
+  - Controlled by `updateDebug` config option
+  - Logs current version, check intervals, and update availability
+- [x] Update TypeScript types for auto-update config
+- [x] Test build successfully (326KB UMD bundle)
 
 ### Phase 5: Testing & Rollout
 - [ ] Publish new SDK version (v0.9.0)
