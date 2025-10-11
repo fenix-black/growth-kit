@@ -6,6 +6,7 @@ import { GrowthKitStateProvider } from './GrowthKitStateProvider';
 import { AutoWaitlistInjector } from './AutoWaitlistInjector';
 import { LocalizationContext, getTranslations, type Language } from '../localization';
 import { getEffectiveTheme, onSystemThemeChange, type ThemeColors, getThemeColors } from '../theme';
+import { checkForUpdates, getCurrentVersion, getSdkLoadSource } from '../sdkLoader';
 
 const GrowthKitContext = createContext<{ 
   config: GrowthKitConfig;
@@ -82,6 +83,63 @@ export function GrowthKitProvider({ children, config }: GrowthKitProviderProps) 
   
   // Get theme colors for effective theme (resolved from 'auto' if needed)
   const themeColors = getThemeColors(effectiveTheme);
+  
+  // Auto-update check (passive - logs but doesn't reload yet)
+  useEffect(() => {
+    // Only check if auto-update is explicitly enabled
+    if (!normalizedConfig.autoUpdate) {
+      return;
+    }
+    
+    const checkInterval = normalizedConfig.updateCheckTTL || 120000; // 2 min default
+    const updateDebug = normalizedConfig.updateDebug ?? normalizedConfig.debug ?? false;
+    
+    if (updateDebug) {
+      console.log('[GrowthKit] Auto-update enabled:', {
+        currentVersion: getCurrentVersion(),
+        loadSource: getSdkLoadSource(),
+        checkInterval: `${checkInterval}ms`,
+      });
+    }
+    
+    const performCheck = async () => {
+      const result = await checkForUpdates({
+        enabled: true,
+        apiUrl: normalizedConfig.apiUrl || 'https://growth.fenixblack.ai/api',
+        cacheTTL: checkInterval,
+        timeout: normalizedConfig.updateTimeout || 3000,
+        debug: updateDebug,
+      });
+      
+      if (result.hasUpdate) {
+        if (updateDebug) {
+          console.log('[GrowthKit] Update available:', {
+            current: result.currentVersion,
+            latest: result.latestVersion,
+            forceUpdate: result.forceUpdate,
+          });
+        }
+        
+        if (result.forceUpdate) {
+          console.warn(
+            `[GrowthKit] IMPORTANT: A critical SDK update is available. ` +
+            `Current: ${result.currentVersion}, Latest: ${result.latestVersion}. ` +
+            `Please refresh the page to load the latest version.`
+          );
+        }
+      }
+    };
+    
+    // Initial check
+    performCheck();
+    
+    // Periodic checks
+    const intervalId = setInterval(performCheck, checkInterval);
+    
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [normalizedConfig.autoUpdate, normalizedConfig.apiUrl, normalizedConfig.updateCheckTTL, normalizedConfig.updateTimeout, normalizedConfig.updateDebug, normalizedConfig.debug]);
   
   return (
     <GrowthKitContext.Provider value={{ 
