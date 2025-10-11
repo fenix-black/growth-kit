@@ -11,6 +11,7 @@ import { isValidFingerprint } from '@/lib/utils/validation';
 import { isInvitationCode, isCodeExpired } from '@/lib/utils/invitationCode';
 import { getGeolocation, detectBrowser, detectDevice } from '@/lib/utils/geolocation';
 import { shouldBlockBot } from '@/lib/security/botDetection';
+import { generateServerFingerprint } from '@/lib/utils/serverFingerprint';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -633,10 +634,24 @@ export async function POST(request: NextRequest) {
 
     // Handle OrgUserAccount creation/linking for shared apps
     if (!(authContext.app as any).isolatedAccounts && authContext.app.organizationId && fingerprintRecord && !(fingerprintRecord as any).orgUserAccountId) {
-      // First, check if an OrgUserAccount already exists for this fingerprint string in other shared apps
+      // Generate server-side fingerprint for cross-domain matching
+      const serverFingerprint = generateServerFingerprint(clientIp, request.headers);
+      
+      // Update current fingerprint with serverFingerprint if not set
+      if (!(fingerprintRecord as any).serverFingerprint) {
+        await prisma.fingerprint.update({
+          where: { id: fingerprintRecord.id },
+          data: { serverFingerprint } as any,
+        });
+      }
+      
+      // Check if an OrgUserAccount already exists matching EITHER fingerprint in other shared apps
       const existingFingerprint = await prisma.fingerprint.findFirst({
         where: {
-          fingerprint: fingerprintRecord.fingerprint,
+          OR: [
+            { fingerprint: fingerprintRecord.fingerprint },
+            { serverFingerprint: serverFingerprint },
+          ],
           appId: { not: authContext.app.id }, // Different app
           orgUserAccountId: { not: null }, // Has an account linked
           app: {

@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken';
 import { generateReferralCode } from '@/lib/security/hmac';
 import { getClientIp } from '@/lib/middleware/rateLimitSafe';
 import { getGeolocation, detectBrowser, detectDevice } from '@/lib/utils/geolocation';
+import { generateServerFingerprint } from '@/lib/utils/serverFingerprint';
 
 export async function OPTIONS(request: NextRequest) {
   return handleSimpleOptions(request);
@@ -74,11 +75,13 @@ export async function POST(request: NextRequest) {
 
     if (!fingerprintRecord) {
       const referralCode = generateReferralCode();
+      const serverFingerprint = generateServerFingerprint(clientIp, request.headers);
       
       fingerprintRecord = await prisma.fingerprint.create({
         data: {
           appId: app.id,
           fingerprint,
+          serverFingerprint,
           referralCode,
           lastActiveAt: new Date(),
           browser,
