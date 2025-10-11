@@ -53,3 +53,5 @@ todo:
     - Added browser, device, and location tracking using geoip-lite
     - Updated Users & Leads UI with fingerprint icon, browser/device info, and location column
     - Privacy-friendly: city-level location only, no invasive tracking
+
+- [ ] add support for showing ads in exchange for credits. These ads would be managed from the growthkit admin, from a 'Campaigns' sidebar menu option, managed per organization.

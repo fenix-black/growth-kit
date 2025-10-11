@@ -28,16 +28,22 @@ async function findLandingApp() {
     console.log('🔑 Public Key:', app.publicKey || 'NOT SET');
     console.log('🌐 CORS Origins:', app.corsOrigins);
     
+    const expectedKey = process.env.EXPECTED_PUBLIC_KEY;
+    
     if (!app.publicKey) {
       console.log('\n⚠️  This app has NO public key!');
-      console.log('The key we generated earlier (pk_EOWjR0N6yydMXnOLQnY-SQ) should be correct.');
-      console.log('\n✅ Your .env.local is correct!');
-    } else if (app.publicKey !== 'pk_EOWjR0N6yydMXnOLQnY-SQ') {
-      console.log('\n⚠️  Mismatch detected!');
-      console.log(`\n📝 Update your .env.local to:`);
-      console.log(`NEXT_PUBLIC_GROWTHKIT_PUBLIC_KEY=${app.publicKey}`);
+      console.log('\n💡 Generate a public key using:');
+      console.log('   node scripts/generate-public-key.js <appId>');
     } else {
-      console.log('\n✅ Public key matches!');
+      console.log('\n✅ App has a public key!');
+      
+      if (expectedKey && app.publicKey !== expectedKey) {
+        console.log('\n⚠️  Key mismatch detected!');
+        console.log(`\n📝 Update your .env.local to:`);
+        console.log(`NEXT_PUBLIC_GROWTHKIT_PUBLIC_KEY=${app.publicKey}`);
+      } else if (expectedKey) {
+        console.log('✅ Public key matches expected value!');
+      }
     }
     
     if (!app.corsOrigins.includes('http://localhost:3001')) {
