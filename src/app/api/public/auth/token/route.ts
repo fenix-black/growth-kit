@@ -63,7 +63,10 @@ export async function POST(request: NextRequest) {
       return corsErrors.forbidden(origin);
     }
 
-    // Find or create fingerprint record
+    // Generate server fingerprint for dual matching
+    const serverFingerprint = generateServerFingerprint(clientIp, request.headers);
+    
+    // Find fingerprint record - try client fingerprint first, then server fingerprint
     let fingerprintRecord = await prisma.fingerprint.findUnique({
       where: {
         appId_fingerprint: {
@@ -73,9 +76,29 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // If not found by client fingerprint, try server fingerprint
+    if (!fingerprintRecord) {
+      fingerprintRecord = await prisma.fingerprint.findFirst({
+        where: {
+          appId: app.id,
+          serverFingerprint: serverFingerprint,
+        },
+      });
+
+      // If found by server fingerprint, update the client fingerprint (FingerprintJS changed)
+      if (fingerprintRecord) {
+        fingerprintRecord = await prisma.fingerprint.update({
+          where: { id: fingerprintRecord.id },
+          data: { 
+            fingerprint,
+            lastActiveAt: new Date(),
+          },
+        });
+      }
+    }
+
     if (!fingerprintRecord) {
       const referralCode = generateReferralCode();
-      const serverFingerprint = generateServerFingerprint(clientIp, request.headers);
       
       fingerprintRecord = await prisma.fingerprint.create({
         data: {
