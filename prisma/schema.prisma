@@ -124,6 +124,7 @@ model App {
   referrals                   Referral[]
   waitlist                    Waitlist[]
   activities                  Activity[]
+  sdkVersionUsage             SdkVersionUsage[]
 
   @@index([tenantId])
   @@index([organizationId])
@@ -180,6 +181,7 @@ model Fingerprint {
   usage          Usage[]
   activities     Activity[]
   orgUserAccount OrgUserAccount? @relation(fields: [orgUserAccountId], references: [id])
+  sdkVersionUsage SdkVersionUsage[]
 
   @@unique([appId, fingerprint])
   @@index([appId])
@@ -389,4 +391,23 @@ model OrgUserAccount {
   @@index([organizationId])
   @@index([email])
   @@map("org_user_accounts")
+}
+
+model SdkVersionUsage {
+  id            String      @id @default(cuid())
+  fingerprintId String
+  appId         String
+  sdkVersion    String      // e.g., "0.8.0+20250111.abc123"
+  loadSource    String      // "cdn" | "bundled" | "cache"
+  bundleSize    Int?        // Optional: track bundle size in bytes
+  loadTime      Int?        // Optional: track load performance in ms
+  createdAt     DateTime    @default(now())
+  
+  fingerprint   Fingerprint @relation(fields: [fingerprintId], references: [id], onDelete: Cascade)
+  app           App         @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  @@index([appId, sdkVersion])
+  @@index([fingerprintId])
+  @@index([createdAt])
+  @@map("sdk_version_usage")
 }

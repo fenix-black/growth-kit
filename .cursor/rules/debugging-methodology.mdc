@@ -1,53 +1,159 @@
 ---
-description: Systematic debugging methodology for complex client-server issues - lessons from language persistence bug
+alwaysApply: false
+description: Systematic debugging methodology for complex client-server issues - lessons from shared accounts implementation
 ---
 
-# Widget Debugging Lessons
+# Debugging Methodology - KISS Approach
 
-## The Golden Rule: Never Assume - Always Verify
+## Core Principle: Verify, Don't Assume
 
-When debugging widget issues that "should work" but don't, follow this process:
+When implementing features that span database, API, and client code, always **verify with scripts** before modifying code.
 
-### 1. **Check the Browser Network Tab First**
-- Don't assume which endpoint the widget is calling
-- Look at the actual HTTP requests being made
-- Verify the request payload matches expectations
+## Common Issues Checklist
 
-### 2. **Test the Database Directly**
-- Write a simple script to test if the server logic works in isolation
-- This quickly tells you if the problem is client-side or server-side
-- **Never add server logs for debugging** - we can't see them on Vercel
-- Use database scripts to interact directly with the production database instead
+### 1. Missing Fields in Queries
+**Problem:** Code references a field, but it's not selected in the Prisma query.
 
-### 3. **Check ALL Similar Endpoints**
-- SDK widgets use `/api/public/*` endpoints (public key auth)
-- Middleware/direct API uses `/api/v1/*` endpoints (API key auth)
-- Admin dashboard uses `/api/v1/admin/*` and `/api/admin/*` endpoints (service key auth)
-- If you add logic to one, check if similar endpoints need the same logic
+**Example from shared accounts bug:**
+```typescript
+// Code checks: (app as any).isolatedAccounts
+// But query only had: select: { id: true, name: true, ... }
+// Missing: isolatedAccounts: true
+```
 
-### 4. **Look for Multiple Hook Instances**
-- Multiple components using `useGrowthKit()` can cause duplicate API calls
-- Check if the same action triggers multiple requests
-- Use global coordination flags or debouncing to prevent duplicates
+**Prevention:**
+- When adding new fields to schema, search for ALL queries that fetch that model
+- Use `grep` to find all `prisma.app.findUnique`, `prisma.app.findMany`, etc.
+- Check both direct queries AND auth helper functions like `verifyPublicToken`
+- Verify field is in ALL relevant queries, not just some
 
-## Quick Investigation Checklist
+### 2. Field Mapping Allow-Lists
+**Problem:** Backend has explicit field mappings that act as allow-lists. New fields get silently ignored.
 
-For "widget works but data doesn't persist" issues:
+**Example:**
+```typescript
+const fieldMapping = {
+  'name': 'name',
+  'isActive': 'isActive',
+  // Missing: 'isolatedAccounts': 'isolatedAccounts'
+};
+```
 
-- [ ] **Network Tab**: Which endpoint is actually being called?
-- [ ] **Database Script**: Does the server logic work when called directly?
-- [ ] **Endpoint Parity**: Does the called endpoint have the same logic as similar endpoints?
-- [ ] **Multiple Instances**: Are multiple components triggering the same action?
+**Prevention:**
+- Search for `fieldMapping` or similar objects when adding new updateable fields
+- Check both `/api/v1/admin/app/route.ts` AND `/api/v1/admin/app/[id]/route.ts`
+- Test the save functionality immediately after adding the field
 
-## Real Example: Language Persistence Bug
+### 3. Stale State After Updates
+**Problem:** Update database record, but continue using old in-memory variable with stale values.
 
-**Problem**: Language changes in widget UI but database still shows old language
+**Example:**
+```typescript
+await prisma.fingerprint.update({ 
+  data: { orgUserAccountId: newId } 
+});
+// fingerprintRecord still has orgUserAccountId: null in memory!
+if (fingerprintRecord.orgUserAccountId) { // ❌ This checks the OLD value
+```
 
-**Investigation**:
-1. ✅ Network tab showed widget calling `/api/public/user` 
-2. ✅ Database script proved logic worked when called directly (not server logs!)
-3. ❌ `/api/public/user` was missing the language update logic that existed in `/v1/me`
-4. ✅ Fixed by adding same logic to public endpoint
-5. ✅ Bonus: Fixed 6 duplicate requests from multiple hook instances
+**Prevention:**
+- After updating a record that's used later in the same request, **refetch it**
+- Pattern: `record = await prisma.model.findUnique({ where: { id: record.id } }) || record`
 
-**Key Insight**: The widget wasn't broken - it was calling a different endpoint than expected!
+### 4. Auth Context Inconsistencies
+**Problem:** `verifyPublicToken` and `verifyAppAuth` return different fields.
+
+**Prevention:**
+- Keep auth helper functions aligned - if one selects a field, both should
+- Review both `/lib/security/auth.ts` functions when adding new app fields
+- Check what each endpoint type needs: public endpoints vs admin endpoints
+
+### 5. TypeScript `as any` Casts Hide Issues
+**Problem:** Using `(app as any).newField` masks when fields aren't actually loaded.
+
+**Prevention:**
+- Every `as any` cast is a red flag - means TypeScript doesn't know about the field
+- After using `as any`, immediately verify the field is in the Prisma query
+- Consider this a code smell that needs investigation
+
+## Debugging Workflow
+
+### Step 1: Create Debug Scripts FIRST
+Before modifying code, write scripts to inspect database state:
+
+```javascript
+// scripts/debug-[feature].js
+const fingerprints = await prisma.fingerprint.findMany({
+  where: { appId: testAppId },
+  include: { orgUserAccount: true, leads: true }
+});
+console.log('Current state:', fingerprints);
+```
+
+**When to create debug scripts:**
+- Feature doesn't work as expected
+- Data appears inconsistent between apps/pages
+- Before assuming what's wrong
+
+### Step 2: Verify Assumptions
+Use scripts to check:
+- Are the values what you expect?
+- Are relationships linked correctly?
+- Are fields actually populated or NULL?
+
+### Step 3: Trace the Data Flow
+For each piece of data, verify:
+1. Is it in the database? (check with script)
+2. Is it in the Prisma query? (check select clause)
+3. Is it in the auth context? (check helper functions)
+4. Is it in the API response? (check return statements)
+5. Is it in the frontend state? (check network tab)
+
+### Step 4: Fix Systematically
+- Fix one layer at a time (database → query → logic → response)
+- Rebuild and re-test after each fix
+- Use debug scripts to verify each fix worked
+
+## Specific Patterns for This Codebase
+
+### When Adding New App Settings
+1. Add to schema: `prisma/schema.prisma`
+2. Run: `npx prisma db push`
+3. Add to ALL app queries:
+   - `/lib/security/auth.ts` → `verifyPublicToken` select
+   - `/lib/security/auth.ts` → `verifyAppAuth` (uses `include: { app: true }` - auto-included ✅)
+   - Any other `prisma.app.findUnique/findMany` that needs it
+4. Add to field mappings:
+   - `/api/v1/admin/app/route.ts` → PUT handler
+   - `/api/v1/admin/app/[id]/route.ts` → `fieldMapping` object
+5. Add to admin UI:
+   - `AppDetailDashboard.tsx` → `editedApp` state initialization
+   - `AppDetailDashboard.tsx` → toggle/input UI
+   - `AppDetailDashboard.tsx` → save handler payload
+   - `AppCreationWizard.tsx` → form data and submit payload
+
+### When Adding Cross-App Data Sharing
+1. **Always check:** Does the identifier (fingerprint, email, etc.) match across apps?
+2. **Create scripts** to verify matching before implementing logic
+3. **Test localStorage behavior** across different domains
+4. **Refresh records** after linking/updating relationships
+
+### When Features Don't Work After Deployment
+1. **Check which endpoint** the widget actually calls (public vs v1)
+2. **Verify auth helpers** return all needed fields
+3. **Create scripts** to inspect database state
+4. **Check network requests** to see what's actually being sent/received
+5. **Don't trust caching** - test with hard refresh or incognito
+
+## Key Takeaways
+
+1. **Debug scripts are faster than guessing** - write them first
+2. **Queries must match code logic** - every field referenced must be selected
+3. **Refresh after updates** - don't trust stale in-memory values
+4. **Test both directions** - public endpoints AND admin endpoints
+5. **Field mappings matter** - explicit allow-lists silently ignore new fields
+6. **KISS means systematic, not simple** - thorough debugging is faster than quick fixes
+
+---
+
+*This methodology was developed while implementing the shared accounts feature and fixing multiple interconnected issues with fingerprint matching, profile syncing, and credit consolidation.*
