@@ -9,6 +9,7 @@ import type { CreditExhaustionModalRef } from './CreditExhaustionModal';
 import type { GrowthKitConfig, GrowthKitTheme } from '../types';
 import { useTranslation } from '../localization';
 import { GROWTHKIT_LOGO_ICON_BASE64 } from '../assets';
+import { ChatWidget } from './ChatWidget';
 
 // Helper function to get footer logo URL from config with theme support
 const getFooterLogoUrl = (apiUrl?: string, isDark?: boolean, customUrl?: string): string => {
@@ -92,6 +93,32 @@ const AccountWidgetInternal = forwardRef<
 
   const { t } = useTranslation();
   const { config, setLanguage, themeColors, effectiveTheme } = useGrowthKitConfig();
+
+  // Check if chat mode is enabled
+  const [chatConfig, setChatConfig] = useState<{ enabled: boolean } | null>(null);
+  const [chatConfigLoaded, setChatConfigLoaded] = useState(false);
+
+  useEffect(() => {
+    const checkChatMode = async () => {
+      if (!initialized || chatConfigLoaded) return;
+      
+      try {
+        // Import API class and create instance
+        const { GrowthKitAPI } = await import('../api');
+        const api = new GrowthKitAPI(config.apiKey, config.publicKey, config.apiUrl);
+        
+        const chatConfigData = await api.getChatConfig();
+        setChatConfig(chatConfigData);
+      } catch (error) {
+        // Chat not available, continue with normal widget
+        setChatConfig({ enabled: false });
+      } finally {
+        setChatConfigLoaded(true);
+      }
+    };
+
+    checkChatMode();
+  }, [initialized, chatConfigLoaded, config.apiKey, config.publicKey, config.apiUrl]);
 
   // Generate footer logo URL from config with theme support
   const finalFooterLogoUrl = getFooterLogoUrl(config.apiUrl, effectiveTheme === 'dark', footerLogoUrl);
@@ -529,6 +556,18 @@ const AccountWidgetInternal = forwardRef<
       )}
     </div>
   );
+
+  // If chat mode is enabled, render ChatWidget instead of credits widget
+  if (chatConfig?.enabled) {
+    // ChatWidget doesn't support 'inline', default to 'bottom-right'
+    const chatPosition = position === 'inline' ? 'bottom-right' : position;
+    return (
+      <>
+        <ChatWidget position={chatPosition} />
+        {children}
+      </>
+    );
+  }
 
   return (
     <>
