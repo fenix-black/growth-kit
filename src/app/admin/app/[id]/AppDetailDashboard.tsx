@@ -673,6 +673,49 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
               <div>
                 <label className="flex items-center space-x-3">
                   <button
+                    onClick={async () => {
+                      const newEnabledState = !app?.chatConfig?.enabled;
+                      try {
+                        const response = await fetch('/api/admin/chat/config', {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            appId: app.id,
+                            enabled: newEnabledState,
+                            ...(newEnabledState && {
+                              botName: 'Assistant',
+                              welcomeMessage: 'Hi! How can I help you today?'
+                            })
+                          })
+                        });
+                        
+                        if (response.ok) {
+                          // Reactively update app data
+                          await fetchAppDetails();
+                        }
+                      } catch (error) {
+                        console.error('Toggle chat error:', error);
+                        alert('Failed to toggle chat mode');
+                      }
+                    }}
+                    className="cursor-pointer"
+                  >
+                    {app?.chatConfig?.enabled ? 
+                      <ToggleRight className="h-6 w-6 text-primary" /> : 
+                      <ToggleLeft className="h-6 w-6 text-gray-400" />
+                    }
+                  </button>
+                  <span className="text-sm font-medium text-gray-700">Chat Mode Enabled</span>
+                </label>
+                {app?.chatConfig?.enabled && (
+                  <p className="text-xs text-gray-500 mt-1 ml-9">
+                    Configure chat settings in the "Chat" tab
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="flex items-center space-x-3">
+                  <button
                     onClick={() => isEditing && setEditedApp({ ...editedApp, isolatedAccounts: !editedApp.isolatedAccounts })}
                     disabled={!isEditing}
                     className="cursor-pointer"

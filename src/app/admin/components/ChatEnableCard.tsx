@@ -30,7 +30,7 @@ export function ChatEnableCard({ appId, chatEnabled, onUpdate }: ChatEnableCardP
 
       if (!response.ok) throw new Error('Failed to enable chat');
       
-      alert('Chat mode enabled! Check the new "Chat" tab.');
+      // Reactively update parent component
       onUpdate();
     } catch (error) {
       console.error('Enable chat error:', error);

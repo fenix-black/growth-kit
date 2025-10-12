@@ -49,6 +49,18 @@ export async function GET(
             expiresAt: true,
           },
         },
+        chatConfig: {
+          select: {
+            id: true,
+            enabled: true,
+            botName: true,
+            welcomeMessage: true,
+            systemPrompt: true,
+            enableCalendar: true,
+            enableRAG: true,
+            enableHumanHandoff: true,
+          },
+        },
       },
     });
 
@@ -257,6 +269,18 @@ export async function PUT(
             createdAt: true,
             lastUsedAt: true,
             expiresAt: true,
+          },
+        },
+        chatConfig: {
+          select: {
+            id: true,
+            enabled: true,
+            botName: true,
+            welcomeMessage: true,
+            systemPrompt: true,
+            enableCalendar: true,
+            enableRAG: true,
+            enableHumanHandoff: true,
           },
         },
       },
