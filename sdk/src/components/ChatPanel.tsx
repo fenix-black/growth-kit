@@ -22,8 +22,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   sessionId,
   onClose
 }) => {
-  const hook = useGrowthKit();
-  const { app, credits } = hook;
+  const { app, credits, api } = useGrowthKit();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastPoll, setLastPoll] = useState<string | null>(null);
@@ -34,10 +33,10 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   // Fetch chat config and initialize with welcome message
   useEffect(() => {
     const fetchConfig = async () => {
-      if (!apiRef.current) return;
+      if (!api) return;
       
       try {
-        const config = await apiRef.current.getChatConfig();
+        const config = await api.getChatConfig();
         setChatConfig(config);
         
         if (config.enabled && config.welcomeMessage) {
@@ -61,29 +60,21 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     };
 
     fetchConfig();
-  }, []);
+  }, [api]);
 
-  // Get API from hook internals
-  const apiRef = useRef<GrowthKitAPI | null>(null);
-  useEffect(() => {
-    // Access the API instance from the hook's internal ref
-    // @ts-ignore - accessing internal API ref
-    if (hook.apiRef?.current) {
-      // @ts-ignore
-      apiRef.current = hook.apiRef.current;
-    }
-  }, [hook]);
+  // Use API directly from hook
 
   // Polling for new messages
   useEffect(() => {
-    if (!apiRef.current) return;
+    if (!api) return;
 
     const poll = async () => {
       try {
-        const response = await apiRef.current!.pollChatMessages(sessionId, lastPoll);
-        if (response.messages && response.messages.length > 0) {
-          setMessages(prev => [...prev, ...response.messages as Message[]]);
-          setLastPoll(response.messages[response.messages.length - 1].createdAt);
+        const since = lastPoll || null;
+        const response = await api.pollChatMessages(sessionId, since);
+        if (response && response.length > 0) {
+          setMessages(prev => [...prev, ...response as Message[]]);
+          setLastPoll(response[response.length - 1].createdAt);
         }
       } catch (error) {
         console.error('Polling error:', error);
@@ -94,10 +85,15 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     return () => {
       if (pollInterval.current) clearInterval(pollInterval.current);
     };
-  }, [sessionId, lastPoll, apiRef.current]);
+  }, [sessionId, lastPoll, api]);
 
   const sendMessage = async (content: string) => {
-    if (!content.trim() || !apiRef.current) return;
+    if (!content.trim() || !api) {
+      console.log('Cannot send message:', { content: content.trim(), api: !!api });
+      return;
+    }
+
+    console.log('Sending message:', content);
 
     // Add user message immediately
     const userMsg: Message = {
@@ -110,7 +106,8 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     setIsLoading(true);
 
     try {
-      const response = await apiRef.current.sendChatMessage(sessionId, content);
+      const response = await api.sendChatMessage(sessionId, content);
+      console.log('Send message response:', response);
       
       if (response.response) {
         const assistantMsg: Message = {

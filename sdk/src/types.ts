@@ -1,5 +1,12 @@
 export type GrowthKitTheme = 'light' | 'dark' | 'auto';
 
+// API interface for type definitions
+export interface GrowthKitAPI {
+  getChatConfig(): Promise<any>;
+  sendChatMessage(sessionId: string, message: string): Promise<any>;
+  pollChatMessages(sessionId: string, since?: string | null): Promise<any>;
+}
+
 export interface GrowthKitConfig {
   apiKey?: string;
   publicKey?: string;
@@ -93,6 +100,7 @@ export interface GrowthKitActions {
   canPerformAction: (action?: string) => boolean;
   track: (eventName: string, properties?: Record<string, any>) => void;
   setTheme: (theme: GrowthKitTheme) => void;
+  api: GrowthKitAPI | null;
 }
 
 export interface ShareOptions {

@@ -17,7 +17,7 @@ export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({
   const { app } = useGrowthKit();
   const branding = app;
 
-  if (isOpen) return null;
+  // Don't hide the button when open - transform it instead
 
   const getPositionStyles = () => {
     switch (position) {
@@ -65,7 +65,9 @@ export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({
         e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
       }}
     >
-      <span style={{ fontSize: '24px' }}>💬</span>
+      <span style={{ fontSize: '24px' }}>
+        {isOpen ? '✕' : '💬'}
+      </span>
       {credits > 0 && (
         <span style={{ 
           fontSize: '10px', 

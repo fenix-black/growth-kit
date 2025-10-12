@@ -1037,6 +1037,7 @@ export function useGrowthKit(): GrowthKitHook {
     canPerformAction,
     track,
     setTheme: setTheme || (() => {}), // Fallback for when setTheme is not available
+    api: apiRef.current,
   };
 
   return {

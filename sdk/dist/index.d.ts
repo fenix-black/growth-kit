@@ -2,6 +2,11 @@ import React$1 from 'react';
 import { NextRequest, NextFetchEvent } from 'next/server';
 
 type GrowthKitTheme = 'light' | 'dark' | 'auto';
+interface GrowthKitAPI$1 {
+    getChatConfig(): Promise<any>;
+    sendChatMessage(sessionId: string, message: string): Promise<any>;
+    pollChatMessages(sessionId: string, since?: string | null): Promise<any>;
+}
 interface GrowthKitConfig {
     apiKey?: string;
     publicKey?: string;
@@ -91,6 +96,7 @@ interface GrowthKitActions {
     canPerformAction: (action?: string) => boolean;
     track: (eventName: string, properties?: Record<string, any>) => void;
     setTheme: (theme: GrowthKitTheme) => void;
+    api: GrowthKitAPI$1 | null;
 }
 interface ShareOptions {
     title?: string;
