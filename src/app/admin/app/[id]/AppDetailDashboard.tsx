@@ -33,6 +33,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { ChatTab } from '../../components/ChatTab';
+import { ChatEnableCard } from '../../components/ChatEnableCard';
 
 interface AppDetails {
   id: string;
@@ -505,6 +506,17 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
       {/* Tab Content */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Chat Enable Card - Only show if chat not enabled */}
+          {!app?.chatConfig?.enabled && (
+            <div className="lg:col-span-2">
+              <ChatEnableCard 
+                appId={appId} 
+                chatEnabled={app?.chatConfig?.enabled || false}
+                onUpdate={fetchAppDetails}
+              />
+            </div>
+          )}
+          
           <ContentCard title="App Statistics">
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-50 p-4 rounded-lg">
