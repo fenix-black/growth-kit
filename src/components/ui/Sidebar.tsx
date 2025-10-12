@@ -249,10 +249,15 @@ export default function Sidebar({
             </div>
             
             {/* Credits Display */}
-            {!collapsed && currentOrgId && (
+            {!collapsed && currentOrgId && organizations && organizations.length > 0 && (
               <div className="flex items-center px-3 py-2 mb-2 text-sm text-gray-600 dark:text-gray-400">
                 <Coins size={16} className="text-yellow-500 mr-2" />
-                <span>{organizations.find(org => org.id === currentOrgId)?.creditBalance?.toLocaleString() || '0'} credits</span>
+                <span>
+                  {(() => {
+                    const currentOrg = organizations.find(org => org.id === currentOrgId);
+                    return currentOrg?.creditBalance?.toLocaleString() || '0';
+                  })()} credits
+                </span>
               </div>
             )}
             

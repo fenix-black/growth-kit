@@ -24,39 +24,8 @@ export async function GET(request: NextRequest) {
       include: {
         organizations: {
           include: {
-            users: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                createdAt: true,
-              }
-            },
-            _count: {
-              select: {
-                apps: true,
-                users: true,
-              }
-            }
-          },
-          select: {
-            id: true,
-            name: true,
-            creditBalance: true,
-            users: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                createdAt: true,
-              }
-            },
-            _count: {
-              select: {
-                apps: true,
-                users: true,
-              }
-            }
+            users: true,
+            _count: true
           }
         }
       }
