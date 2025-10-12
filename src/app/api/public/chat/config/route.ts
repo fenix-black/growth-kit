@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { verifyAppAuth } from '@/lib/security/auth';
+import { verifyPublicToken } from '@/lib/security/auth';
 import { corsErrors } from '@/lib/utils/corsResponse';
 import { corsHeaders } from '@/lib/middleware/cors';
 import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
   const origin = request.headers.get('origin');
   
   try {
-    // Verify API key authentication
-    const authContext = await verifyAppAuth(request.headers);
+    // Verify public token authentication (JWT from SDK)
+    const authContext = await verifyPublicToken(request.headers);
     if (!authContext) {
       return corsErrors.unauthorized(origin);
     }
