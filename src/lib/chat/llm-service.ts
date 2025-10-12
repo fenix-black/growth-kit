@@ -21,13 +21,13 @@ export class LLMService {
     model: string = 'openai/gpt-oss-120b'
   ): Promise<LLMResponse> {
     try {
-      const completion = await this.groq.chat.completions.create({
+      const requestPayload = {
         model,
         messages: [
-          { role: 'system', content: systemPrompt },
-          ...messages.map(m => ({ role: m.role, content: m.content }))
+          { role: 'system' as const, content: systemPrompt },
+          ...messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
         ],
-        temperature: 0.7,
+        temperature: 0.2,
         max_tokens: 1024,
         ...(functions && functions.length > 0 && {
           tools: functions.map(f => ({
@@ -36,7 +36,9 @@ export class LLMService {
           })),
           tool_choice: 'auto' as const
         })
-      });
+      };
+      
+      const completion = await this.groq.chat.completions.create(requestPayload);
 
       const response = completion.choices[0];
       
