@@ -5,7 +5,7 @@ import { ContextBuilder } from '@/lib/chat/context-builder';
 import { ChatCreditManager } from '@/lib/chat/credit-manager';
 import { MessageRouter } from '@/lib/chat/message-router';
 import { CalendarService } from '@/lib/chat/calendar-service';
-import { verifyAppAuth } from '@/lib/security/auth';
+import { verifyPublicToken } from '@/lib/security/auth';
 import { corsErrors } from '@/lib/utils/corsResponse';
 import { corsHeaders } from '@/lib/middleware/cors';
 import { handleSimpleOptions } from '@/lib/middleware/corsSimple';
@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin');
   
   try {
-    // Verify API key authentication
-    const authContext = await verifyAppAuth(request.headers);
+    // Verify public token authentication (JWT from SDK)
+    const authContext = await verifyPublicToken(request.headers);
     if (!authContext) {
       return corsErrors.unauthorized(origin);
     }

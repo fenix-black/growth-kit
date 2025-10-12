@@ -94,11 +94,14 @@ export interface PublicAuthContext {
     allowCustomCredits: boolean | null;
     maxCustomCredits: number | null;
     policyJson: any;
+    isolatedAccounts: boolean | null;
+    organizationId: string | null;
   };
   fingerprint: {
     id: string;
     fingerprint: string;
     appId: string;
+    orgUserAccountId: string | null;
   };
   token: {
     appId: string;
