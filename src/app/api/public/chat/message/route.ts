@@ -26,19 +26,42 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { message, sessionId, fingerprint } = body;
+    const { message, sessionId, fingerprint, fingerprint2, fingerprint3 } = body;
 
     if (!message || !sessionId || !fingerprint) {
       return corsErrors.badRequest('Missing required fields', origin);
     }
 
-    // Get or create fingerprint record
-    const fingerprintRecord = await prisma.fingerprint.findFirst({
+    // Find fingerprint record using priority-based matching (same as auth token endpoint)
+    // 1. Try primary fingerprint (FingerprintJS)
+    let fingerprintRecord = await prisma.fingerprint.findUnique({
       where: {
-        appId: authContext.app.id,
-        fingerprint
-      }
+        appId_fingerprint: {
+          appId: authContext.app.id,
+          fingerprint,
+        },
+      },
     });
+
+    // 2. Try fingerprint2 (canvas) if primary didn't match
+    if (!fingerprintRecord && fingerprint2) {
+      fingerprintRecord = await prisma.fingerprint.findFirst({
+        where: {
+          appId: authContext.app.id,
+          fingerprint2: fingerprint2,
+        },
+      });
+    }
+
+    // 3. Try fingerprint3 (browser signature) if still not found
+    if (!fingerprintRecord && fingerprint3) {
+      fingerprintRecord = await prisma.fingerprint.findFirst({
+        where: {
+          appId: authContext.app.id,
+          fingerprint3: fingerprint3,
+        },
+      });
+    }
 
     if (!fingerprintRecord) {
       return corsErrors.badRequest('Fingerprint not found', origin);

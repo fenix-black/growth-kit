@@ -57,6 +57,28 @@ export function useGrowthKit(): GrowthKitHook {
     }
   }, [currentLanguage, config.debug]);
 
+  // Set all fingerprints on API instance when they become available
+  useEffect(() => {
+    if (apiRef.current && state.fingerprint) {
+      // Get all fingerprints from the state (they should be available)
+      const allFingerprints = {
+        fingerprint: state.fingerprint,
+        fingerprint2: state.fingerprint2 || '',
+        fingerprint3: state.fingerprint3 || ''
+      };
+      
+      apiRef.current.setAllFingerprints(allFingerprints);
+      
+      if (config.debug) {
+        console.log('[GrowthKit] Set all fingerprints on API:', {
+          primary: state.fingerprint.substring(0, 10) + '...',
+          canvas: state.fingerprint2 ? state.fingerprint2.substring(0, 10) + '...' : 'none',
+          browser: state.fingerprint3 ? state.fingerprint3.substring(0, 10) + '...' : 'none'
+        });
+      }
+    }
+  }, [state.fingerprint, state.fingerprint2, state.fingerprint3, config.debug]);
+
   // Track previous language to detect changes
   const prevLanguageRef = useRef(currentLanguage);
   const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -244,6 +266,8 @@ export function useGrowthKit(): GrowthKitHook {
         initialized: true,
         error: null,
         fingerprint: fingerprints.fingerprint,
+        fingerprint2: fingerprints.fingerprint2,
+        fingerprint3: fingerprints.fingerprint3,
         credits: data.credits,
         usage: data.usage,
         creditsPaused: data.creditsPaused || false,

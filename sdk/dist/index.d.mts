@@ -54,6 +54,8 @@ interface GrowthKitState {
     initialized: boolean;
     error: Error | null;
     fingerprint: string | null;
+    fingerprint2: string | null;
+    fingerprint3: string | null;
     credits: number;
     usage: number;
     referralCode: string | null;

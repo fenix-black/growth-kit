@@ -17,6 +17,8 @@ const initialState: GrowthKitState = {
   hasClaimedEmail: false,
   hasVerifiedEmail: false,
   fingerprint: null,
+  fingerprint2: null,
+  fingerprint3: null,
   error: null,
   referralCode: null,
   policy: null,

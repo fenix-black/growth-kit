@@ -661,12 +661,20 @@ export class GrowthKitAPI {
     sessionId: string,
     message: string
   ): Promise<{ response: string; creditsUsed: number; status?: string }> {
+    console.log('sendChatMessage called with:', { sessionId, message, fingerprint: this.fingerprint });
+    
+    if (!this.fingerprint) {
+      throw new Error('Fingerprint not available');
+    }
+    
     const result = await this.request('/public/chat/message', {
       method: 'POST',
       body: JSON.stringify({
         sessionId,
         message,
-        fingerprint: this.fingerprint
+        fingerprint: this.fingerprint,
+        fingerprint2: this.fingerprint2,
+        fingerprint3: this.fingerprint3
       }),
     });
 
