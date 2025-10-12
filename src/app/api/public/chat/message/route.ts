@@ -250,9 +250,9 @@ function getCalendarFunctions() {
       parameters: {
         type: 'object',
         properties: {
-          meetingTypeId: {
+          meetingType: {
             type: 'string',
-            description: 'The ID of the meeting type'
+            description: 'The name of the meeting type (e.g., "Demo", "Consultation")'
           },
           startTime: {
             type: 'string',
@@ -271,7 +271,7 @@ function getCalendarFunctions() {
             description: 'Additional notes for the meeting'
           }
         },
-        required: ['meetingTypeId', 'startTime', 'attendeeName', 'attendeeEmail']
+        required: ['meetingType', 'startTime', 'attendeeName', 'attendeeEmail']
       }
     }
   ];
@@ -316,13 +316,23 @@ async function executeFunctionCall(
   }
 
   if (functionCall.name === 'book_meeting') {
-    const { meetingTypeId, startTime, attendeeName, attendeeEmail, notes } = functionCall.arguments;
+    const { meetingType, startTime, attendeeName, attendeeEmail, notes } = functionCall.arguments;
+
+    // Find meeting type by name
+    const meetingTypes = await CalendarService.getMeetingTypes(appId);
+    const type = meetingTypes.find(t => 
+      t.name.toLowerCase().includes(meetingType.toLowerCase())
+    );
+
+    if (!type) {
+      return { error: 'Meeting type not found' };
+    }
 
     const bookingId = await CalendarService.createBooking(
       appId,
       conversationId,
       {
-        meetingTypeId,
+        meetingTypeId: type.id,
         startTime: new Date(startTime),
         attendeeName,
         attendeeEmail,
