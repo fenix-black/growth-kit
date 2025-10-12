@@ -18,6 +18,7 @@ export interface ConversationContext {
 export interface LLMResponse {
   content: string;
   functionCalls?: FunctionCall[];
+  rawToolCalls?: any[]; // Groq's full tool_calls structure with IDs
   creditsUsed: number;
 }
 

@@ -15,7 +15,7 @@ export class LLMService {
    * Send messages to LLM and get response
    */
   async chat(
-    messages: ChatMessage[],
+    messages: any[], // Accept any message format for flexibility
     systemPrompt: string,
     functions?: any[],
     model: string = 'openai/gpt-oss-120b'
@@ -25,7 +25,7 @@ export class LLMService {
         model,
         messages: [
           { role: 'system' as const, content: systemPrompt },
-          ...messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
+          ...messages // Pass through directly without mapping
         ],
         temperature: 0.2,
         max_tokens: 1024,
@@ -41,11 +41,12 @@ export class LLMService {
       const completion = await this.groq.chat.completions.create(requestPayload);
 
       const response = completion.choices[0];
+      const rawToolCalls = response.message.tool_calls; // Preserve full structure
       
-      // Check for function calls
+      // Parse function calls for convenience
       const functionCalls: FunctionCall[] = [];
-      if (response.message.tool_calls) {
-        for (const toolCall of response.message.tool_calls) {
+      if (rawToolCalls) {
+        for (const toolCall of rawToolCalls) {
           if (toolCall.type === 'function') {
             functionCalls.push({
               name: toolCall.function.name,
@@ -58,6 +59,7 @@ export class LLMService {
       return {
         content: response.message.content || '',
         functionCalls: functionCalls.length > 0 ? functionCalls : undefined,
+        rawToolCalls: rawToolCalls || undefined, // Include raw tool calls
         creditsUsed: 1 // Base cost, will be adjusted for RAG
       };
     } catch (error) {

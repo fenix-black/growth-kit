@@ -145,44 +145,75 @@ export async function POST(request: NextRequest) {
     // Define calendar functions for LLM
     const functions = config.enableCalendar ? getCalendarFunctions() : [];
 
+    // Build first call messages
+    const firstCallMessages = context.messages.map(m => ({
+      role: m.role,
+      content: m.content
+    }));
+    firstCallMessages.push({ role: 'user', content: message });
+
     // Get LLM response
     const llmService = new LLMService();
     let llmResponse = await llmService.chat(
-      [...context.messages, { role: 'user', content: message }],
+      firstCallMessages,
       systemPrompt,
       functions,
       config.llmModel
     );
 
-    // Handle function calls
-    if (llmResponse.functionCalls) {
-      for (const functionCall of llmResponse.functionCalls) {
+    // Handle function calls with proper Groq pattern
+    if (llmResponse.functionCalls && llmResponse.rawToolCalls) {
+      // Build message history with assistant + tool messages
+      const messagesForSecondCall: any[] = [
+        ...firstCallMessages,
+        {
+          role: 'assistant',
+          content: llmResponse.content || '',
+          tool_calls: llmResponse.rawToolCalls // Full structure with IDs
+        }
+      ];
+      
+      // Execute functions and add tool role messages
+      for (const toolCall of llmResponse.rawToolCalls) {
         try {
+          const functionCall = llmResponse.functionCalls.find(
+            fc => fc.name === toolCall.function.name
+          );
+          
+          if (!functionCall) {
+            throw new Error(`Function call not found: ${toolCall.function.name}`);
+          }
+          
           const result = await executeFunctionCall(
             functionCall,
             authContext.app.id,
             conversationId
           );
-          functionCall.result = result;
+          
+          // Add tool message (NOT assistant message)
+          messagesForSecondCall.push({
+            role: 'tool',
+            tool_call_id: toolCall.id,
+            name: toolCall.function.name,
+            content: JSON.stringify(result || { success: true })
+          });
         } catch (error) {
-          console.error('Function call error:', error);
-          functionCall.result = { error: 'Failed to execute function' };
+          console.error('Function execution error:', error);
+          // Add error as tool message
+          messagesForSecondCall.push({
+            role: 'tool',
+            tool_call_id: toolCall.id,
+            name: toolCall.function.name,
+            content: JSON.stringify({ error: 'Function execution failed' })
+          });
         }
       }
-
-      // Get final response after function execution
+      
+      // Second call - NO functions parameter (not even empty array!)
       llmResponse = await llmService.chat(
-        [
-          ...context.messages,
-          { role: 'user', content: message },
-          { 
-            role: 'assistant', 
-            content: llmResponse.content,
-            metadata: { functionCalls: llmResponse.functionCalls }
-          }
-        ],
+        messagesForSecondCall,
         systemPrompt,
-        [],
+        undefined, // Don't pass functions at all
         config.llmModel
       );
     }
