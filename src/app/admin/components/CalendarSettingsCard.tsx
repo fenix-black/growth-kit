@@ -33,12 +33,56 @@ export function CalendarSettingsCard({ app }: CalendarSettingsCardProps) {
     { name: 'Consultation', durationMinutes: 60, description: '1-hour consultation' }
   ]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load existing calendar configuration
+  useEffect(() => {
+    const loadCalendarConfig = async () => {
+      try {
+        const response = await fetch(`/api/admin/chat/calendar?appId=${app.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.data.calendarConfig) {
+            setTimezone(data.data.calendarConfig.timezone);
+            setWorkingHours(data.data.calendarConfig.workingHours);
+            setMeetingTypes(data.data.meetingTypes.map((mt: any) => ({
+              id: mt.id,
+              name: mt.name,
+              description: mt.description,
+              durationMinutes: mt.durationMinutes
+            })));
+          }
+        }
+      } catch (error) {
+        console.error('Error loading calendar config:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCalendarConfig();
+  }, [app.id]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Save calendar configuration
-      // This will be implemented in the actual API
+      const response = await fetch(`/api/admin/chat/calendar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          appId: app.id,
+          timezone,
+          workingHours,
+          meetingTypes
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save calendar settings');
+      }
+
       alert('Calendar settings saved successfully!');
     } catch (error) {
       console.error('Save error:', error);
@@ -59,6 +103,16 @@ export function CalendarSettingsCard({ app }: CalendarSettingsCardProps) {
   const removeMeetingType = (index: number) => {
     setMeetingTypes(meetingTypes.filter((_, i) => i !== index));
   };
+
+  if (isLoading) {
+    return (
+      <ContentCard title="Calendar Settings">
+        <div className="flex items-center justify-center py-8">
+          <div className="text-gray-500">Loading calendar configuration...</div>
+        </div>
+      </ContentCard>
+    );
+  }
 
   return (
     <ContentCard title="Calendar Settings">

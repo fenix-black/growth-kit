@@ -33,8 +33,7 @@ export class LLMService {
           tools: functions.map(f => ({
             type: 'function' as const,
             function: f
-          })),
-          tool_choice: 'auto' as const
+          }))
         })
       });
 

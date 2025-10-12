@@ -157,12 +157,17 @@ export async function POST(request: NextRequest) {
     // Handle function calls
     if (llmResponse.functionCalls) {
       for (const functionCall of llmResponse.functionCalls) {
-        const result = await executeFunctionCall(
-          functionCall,
-          authContext.app.id,
-          conversationId
-        );
-        functionCall.result = result;
+        try {
+          const result = await executeFunctionCall(
+            functionCall,
+            authContext.app.id,
+            conversationId
+          );
+          functionCall.result = result;
+        } catch (error) {
+          console.error('Function call error:', error);
+          functionCall.result = { error: 'Failed to execute function' };
+        }
       }
 
       // Get final response after function execution
