@@ -21,6 +21,7 @@ interface App {
 interface Organization {
   id: string;
   name: string;
+  creditBalance: number;
 }
 
 interface AdminContextType {

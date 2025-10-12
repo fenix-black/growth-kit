@@ -16,6 +16,7 @@ interface DashboardLayoutProps {
   organizations: Array<{
     id: string;
     name: string;
+    creditBalance: number;
   }>;
   currentAppId?: string;
   currentOrgId?: string;

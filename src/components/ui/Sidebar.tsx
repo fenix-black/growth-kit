@@ -35,6 +35,7 @@ interface SidebarProps {
   organizations: Array<{
     id: string;
     name: string;
+    creditBalance: number;
   }>;
   currentAppId?: string;
   currentOrgId?: string;
@@ -248,10 +249,10 @@ export default function Sidebar({
             </div>
             
             {/* Credits Display */}
-            {!collapsed && (
+            {!collapsed && currentOrgId && (
               <div className="flex items-center px-3 py-2 mb-2 text-sm text-gray-600 dark:text-gray-400">
                 <Coins size={16} className="text-yellow-500 mr-2" />
-                <span>1,250 credits</span>
+                <span>{organizations.find(org => org.id === currentOrgId)?.creditBalance?.toLocaleString() || '0'} credits</span>
               </div>
             )}
             
