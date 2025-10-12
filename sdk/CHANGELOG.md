@@ -5,6 +5,37 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2025-10-12
+
+### Added
+- **💬 Chat Mode - Complete AI Chat System**:
+  - New `ChatWidget` component for AI-powered conversations
+  - `ChatFloatingButton` with position awareness and credit display
+  - `ChatPanel` with dynamic height and responsive design
+  - `ChatMessages` with auto-scroll and typing indicators
+  - `ChatInput` with auto-resize textarea
+  - All chat components exported from main package
+  
+- **🤖 Chat API Methods**:
+  - `sendChatMessage(sessionId, message)` - Send message, get AI response
+  - `pollChatMessages(sessionId, since?)` - Poll for new messages (HTTP-based)
+  - Full integration with existing GrowthKit API and auth system
+  
+- **✨ Chat Features**:
+  - RAG-powered responses using knowledge base
+  - Calendar booking capability with LLM function calling
+  - Human handoff support for seamless AI → Human transitions
+  - HTTP polling architecture (Vercel-compatible, no WebSocket)
+  - Position-aware widget inheriting existing positioning settings
+  - Dynamic panel sizing based on screen height
+  - Mobile-responsive design
+  - Credit consumption integration (1 credit simple, 2 credits with RAG)
+
+### Changed
+- Widget mode detection: Automatically switches between waitlist and chat modes
+- Enhanced API client with chat-specific endpoints
+- Component exports expanded to include all chat components
+
 ## [0.9.0] - 2025-10-11
 
 ### Changed

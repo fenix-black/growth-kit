@@ -8,6 +8,16 @@ Transform GrowthKit widgets from static waitlist forms into intelligent conversa
 
 **"Every visitor interaction becomes a meaningful conversation that drives engagement, captures insights, and converts leads through AI-powered chat with seamless human handoff and intelligent scheduling."**
 
+## MVP Philosophy: Complete but Simple
+
+**All four core features in MVP, but KISS implementations:**
+1. **💬 AI Chat** - Groq LLM with conversation context (HTTP polling, not WebSocket)
+2. **📚 Knowledge Base** - Upstash Vector RAG with simple document upload (text chunking, vector search)
+3. **📅 Calendar** - Fixed hourly time slots, basic availability (no complex rules)
+4. **👤 Human Handoff** - Message routing, take over/release (single owner, no teams)
+
+**Stage 2 & 3**: Polish, advanced features, and enterprise capabilities
+
 ---
 
 ## Product Requirements
@@ -41,6 +51,23 @@ Transform GrowthKit widgets from static waitlist forms into intelligent conversa
 - Human Handoff intervention: 2 credits
 - Conversation analysis (background): 0 credits
 
+### Enhanced Fingerprint System Integration
+
+**Multi-Fingerprint Support**: Leverages improved fingerprint tracking for better user identification:
+- Primary: FingerprintJS (client-side, most unique)
+- Secondary: Canvas fingerprint (fallback option)  
+- Tertiary: Browser signature hash (additional validation)
+- Server fingerprint: IP + headers fallback
+
+**Language-Aware Chat**: Utilizes fingerprint language fields:
+- `browserLanguage`: Auto-detected user language
+- `preferredLanguage`: User-selected language preference
+- System prompts can be customized based on detected/preferred language
+
+**Cross-App Conversations** (Future): With shared accounts (`orgUserAccountId`):
+- Potential for conversation continuity across organization apps
+- Consolidated user profiles for better context
+
 ### Data Models (New Prisma Schema Additions)
 
 ```prisma
@@ -49,23 +76,32 @@ model ChatConfiguration {
   id                    String    @id @default(cuid())
   appId                 String    @unique
   enabled               Boolean   @default(false)
-  llmProvider           String    @default("groq") // groq, openai, anthropic
-  llmModel              String    @default("llama-3.1-70b-versatile")
   systemPrompt          String?
   botName               String    @default("Assistant")
   welcomeMessage        String?
-  fallbackMessage       String?
+  
+  // Feature toggles (all enabled by default for MVP)
+  enableCalendar        Boolean   @default(true)   // MVP feature
+  enableHumanHandoff    Boolean   @default(true)   // MVP feature
+  enableRAG             Boolean   @default(true)   // MVP feature
+  
+  // LLM configuration
+  llmProvider           String    @default("groq")
+  llmModel              String    @default("openai/gpt-oss-120b")
   maxContextLength      Int       @default(8000)
-  enableRAG             Boolean   @default(false)
-  enableCalendar        Boolean   @default(false)
-  enableHumanHandoff    Boolean   @default(false)
+  
+  // Advanced features for later stages
   enableAnalytics       Boolean   @default(true)
+  fallbackMessage       String?
+  
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   
+  // Widget positioning inherited from App model
+  
   app                   App       @relation(fields: [appId], references: [id], onDelete: Cascade)
   conversations         ChatConversation[]
-  knowledgeDocuments    ChatKnowledgeDocument[]
+  knowledgeDocuments    ChatKnowledgeDocument[] // Stage 2
   calendarConfig        ChatCalendarConfig?
   
   @@map("chat_configurations")
@@ -262,104 +298,124 @@ model Fingerprint {
 
 ## Implementation Plan
 
-### Stage 1: MVP (Chat + Calendar)
-**Goal**: Ship working chat with AI scheduling that consumes organization credits
-**Priority**: Core features with KISS architecture
+### Stage 1: MVP (Complete Feature Set)
+**Goal**: AI chat with knowledge base, scheduling, and human handoff
+**Priority**: All core features - chat + RAG + calendar + handoff - the complete value proposition
 
-#### Database Foundation (Simple Schema)
-- [ ] Add minimal chat models (ChatConfiguration, ChatConversation, ChatMessage)
-- [ ] Add simple calendar models (ChatCalendarConfig, ChatMeetingType, ChatBooking)
-- [ ] Run `npx prisma db push` to apply schema changes
+#### Database Foundation (Complete Schema)
+- [x] Add chat models (ChatConfiguration, ChatConversation, ChatMessage)
+- [x] Add calendar models (ChatCalendarConfig, ChatMeetingType, ChatBooking)
+- [x] Add knowledge base models (ChatKnowledgeDocument, ChatKnowledgeChunk)
+- [x] Run `npx prisma db push` to apply schema changes
 
-#### Simple Backend (No WebSocket Initially)
-- [ ] HTTP-based chat API (POST /api/public/chat/message)
-- [ ] Groq API client with basic error handling
-- [ ] Organization credit consumption (1 credit per message)
-- [ ] Simple conversation context (last 10 messages)
-- [ ] Calendar functions: check_availability(), book_meeting()
+#### Simple Backend (HTTP Only)
+- [x] HTTP-based chat API (POST /api/public/chat/message)
+- [x] Groq API client with basic error handling
+- [x] Organization credit consumption (1 credit simple, 2 credits with RAG)
+- [x] Conversation context (last 10 messages + RAG results)
+- [x] Calendar functions: check_availability(), book_meeting()
+- [x] Upstash Vector integration (reuse existing Upstash account)
+- [x] Document processing and embedding generation
+- [x] RAG query and context injection
 
 #### Simple Calendar System
-- [ ] Fixed time slots approach (9am, 10am, 11am, etc.)
-- [ ] Single timezone per app (app owner's timezone)
-- [ ] Simple availability: working days + hours only
-- [ ] Basic conflict detection (check existing bookings)
-- [ ] Email notifications using existing email system
+- [x] Fixed time slots approach (9am, 10am, 11am, etc.)
+- [x] Single timezone per app (app owner's timezone)
+- [x] Simple availability: working days + hours only
+- [x] Basic conflict detection (check existing bookings)
+- [x] Email notifications using existing email system
 
-#### Clean Widget UI (Modal-based)
-- [ ] Chat button that opens modal dialog
-- [ ] Simple message bubbles interface
-- [ ] Polling for new messages (every 2 seconds)
-- [ ] Loading states and basic error handling
-- [ ] Calendar booking UI within chat
+#### Integrated Widget UI (Position-Aware)
+- [x] Chat mode replaces waitlist capsule when enabled
+- [x] Floating button shows credits (inherits existing widget positioning)
+- [x] Slide-up/down chat panel (direction based on widget position)
+- [x] Dynamic height based on screen size (70vh max, 400px min)
+- [x] Message bubbles with auto-scroll to bottom
+- [x] Polling for new messages (every 2 seconds)
+- [x] Input field with send button
+- [x] Loading states and basic error handling
 
-#### Streamlined Admin Interface
-- [ ] Single "Chat & Calendar" settings page
-- [ ] Enable chat toggle + basic system prompt
-- [ ] Simple calendar setup (working hours, meeting types)
-- [ ] Conversation list view (simple table)
-- [ ] Basic credit usage counter
+#### Complete Admin Interface (Conditional "Chat" Tab)
+- [x] Add new "Chat" tab to app details (only visible when `app.chatConfig?.enabled === true`)
+- [x] Initial setup: Chat enabled via ChatSettingsCard toggle
+- [x] Once enabled, "Chat" tab appears alongside Overview, Branding, Waitlist
+- [x] Within Chat tab, display all cards:
+  - [x] ChatSettingsCard: Bot name, system prompt, disable toggle
+  - [x] KnowledgeBaseCard: Upload docs, view, delete (simple table)
+  - [x] CalendarSettingsCard: Working hours, timezone, meeting types
+  - [x] LiveConversationsCard: Active chats table with "Take Over" buttons
+- [x] Dedicated admin chat page (`/admin/chat/live/[conversationId]`) for human handoff
+- [x] "Release to AI" button in admin chat interface
+- [x] Credit tracking integrated into message system
 
 **MVP Success Criteria**:
-- ✅ Users can chat with AI that knows about the product
+- ✅ Users can chat with AI powered by uploaded knowledge base (RAG)
+- ✅ AI answers accurately using company documents and information
 - ✅ AI can check availability and book meetings automatically
 - ✅ Booking confirmations sent via email
-- ✅ App owners can configure chat and availability easily
-- ✅ All conversations saved with credit tracking
+- ✅ App owners can upload/manage knowledge base documents
+- ✅ App owners can view live conversations in admin dashboard
+- ✅ App owners can "take over" any conversation (human handoff)
+- ✅ Smooth transition: AI → Human → AI with context preservation
+- ✅ App owners can configure chat, knowledge, and availability easily
+- ✅ All conversations saved with proper credit tracking (1 vs 2 credits)
 - ✅ Clean, responsive UI on mobile and desktop
 
 ---
 
-### Stage 2: Incremental (Intelligence & Scheduling)
-**Goal**: Add RAG knowledge base and calendar booking
-**Priority**: Core differentiating features
+### Stage 2: Polish & Enhancements
+**Goal**: Improve UX and add nice-to-have features
+**Priority**: Polish and optimizations
 
-#### Knowledge Base (RAG System)
-- [ ] Upstash Vector integration for embeddings storage
-- [ ] Document upload interface (PDF, TXT, DOCX support)
-- [ ] Content processing pipeline (chunking, embedding generation)
-- [ ] Vector similarity search integration
-- [ ] RAG-enhanced response generation with source citations
-- [ ] Knowledge management UI (upload, view, delete documents)
+#### Calendar Integration
+- [ ] Generate subscribable ICS calendar feed endpoint
+- [ ] Display calendar URL in app details (e.g., `https://growthkit.app/cal/[appId]/bookings.ics`)
+- [ ] App owners can subscribe in Apple Calendar, Google Calendar, Outlook, etc.
+- [ ] Real-time sync of all chat bookings to owner's personal calendar
+- [ ] Include booking details (attendee name, email, meeting type, notes)
 
-#### Internal Calendar System
-- [ ] Calendar configuration models (availability rules, meeting types)
-- [ ] Admin UI for working hours and timezone configuration
-- [ ] Meeting type management (duration, description, buffer times)
-- [ ] Availability calculation logic with conflict detection
-- [ ] LLM function calling for calendar operations
-- [ ] Booking creation, management, and email notifications
+#### RAG Improvements (Optional)
+- [ ] PDF document support (MVP only supports text files)
+- [ ] Source citations in AI responses
+- [ ] Document preview before upload
+
+#### Language & Localization Support
+- [ ] Language detection from fingerprint data (browserLanguage, preferredLanguage)
+- [ ] Language-specific system prompts and responses
+- [ ] Multi-language knowledge base support
+- [ ] Timezone-aware scheduling using fingerprint location data
 
 #### Context Enhancement System
 - [ ] Page context capture (URL, title, content extraction)
 - [ ] User activity integration from existing Activity model
 - [ ] Dynamic context API for app owners to add custom context
 - [ ] Context injection in conversation flows
+- [ ] Cross-app context sharing (for shared accounts)
 
-#### Conversation Management
+#### Advanced Conversation Management
 - [ ] Admin conversation list view with filtering and search
-- [ ] Individual conversation detail view
+- [ ] Individual conversation detail view with user profile integration
 - [ ] Conversation status management (active, ended, archived)
-- [ ] Basic conversation export functionality
+- [ ] Conversation export with fingerprint metadata
+- [ ] User identification improvements using multi-fingerprint data
 
-**Incremental Success Criteria**:
-- ✅ AI answers questions using uploaded knowledge base
-- ✅ AI can check availability and book meetings automatically
-- ✅ Conversations include relevant page and user context
-- ✅ App owners can manage knowledge base and calendar settings
-- ✅ Email confirmations sent for all bookings
+**Stage 2 Success Criteria**:
+- ✅ App owners can subscribe to calendar feed and see bookings in their own calendar apps
+- ✅ Real-time sync of GrowthKit bookings to personal calendars
+- ✅ Better document format support if needed (PDF)
+- ✅ Multi-language support for international users
+- ✅ Enhanced context from user activity and fingerprint data
 
 ---
 
-### Stage 3: Advanced (Human Handoff & Intelligence)
+### Stage 3: Advanced (Analytics & Automation)
 **Goal**: Advanced features for enterprise users
 **Priority**: Competitive differentiators and enterprise features
 
-#### Human Takeover System
-- [ ] Real-time admin chat interface with live message updates
-- [ ] "Take Over" conversation functionality with smooth handoff
-- [ ] Message routing logic (AI vs human) with proper state management
-- [ ] Typing indicators and presence status for admins
-- [ ] "Release to AI" functionality with context preservation
+#### Enhanced Human Takeover Features
+- [ ] Typing indicators and presence status
+- [ ] Conversation notes and tagging
+- [ ] Handoff history and analytics
 
 #### Conversation Intelligence
 - [ ] Background conversation analysis using LLM
@@ -369,18 +425,10 @@ model Fingerprint {
 - [ ] Integration with existing Activity system for lead profiles
 
 #### Advanced Chat Features
-- [ ] BYOK support for multiple LLM providers (OpenAI, Anthropic)
-- [ ] A/B testing system for different prompts and configurations
 - [ ] Advanced analytics and reporting dashboard
-- [ ] Webhook system for external integrations
-- [ ] Rate limiting and abuse prevention
 
 #### Enterprise Capabilities
-- [ ] Advanced conversation search and filtering
-- [ ] Bulk conversation operations and management
-- [ ] Enhanced security and compliance features
 - [ ] Advanced customization options for branding
-- [ ] Performance monitoring and optimization tools
 
 **Advanced Success Criteria**:
 - ✅ Seamless human takeover with zero conversation disruption
@@ -444,31 +492,45 @@ GET    /api/admin/chat/analytics/insights
 - `prisma/schema.prisma` - Add all chat models
 
 ### Backend Services  
-- `src/lib/chat/llm-service.ts` - Groq integration
-- `src/lib/chat/rag-service.ts` - Vector search
-- `src/lib/chat/calendar-service.ts` - Booking logic
-- `src/lib/chat/context-builder.ts` - Context assembly
-- `src/lib/chat/websocket-server.ts` - Real-time communication
+- `src/lib/chat/llm-service.ts` - Groq integration with function calling
+- `src/lib/chat/calendar-service.ts` - Booking logic and availability
+- `src/lib/chat/context-builder.ts` - Context assembly (history + RAG)
 - `src/lib/chat/credit-manager.ts` - Organization credit consumption
+- `src/lib/chat/message-router.ts` - Route messages (AI vs human)
+- `src/lib/chat/rag-service.ts` - Upstash Vector search
+- `src/lib/chat/document-processor.ts` - Chunking and embedding generation
+- `src/lib/chat/upstash-vector.ts` - Upstash Vector client (reuse existing config)
 
-### API Routes
-- `src/app/api/public/chat/ws/route.ts` - WebSocket endpoint
-- `src/app/api/public/chat/message/route.ts` - HTTP fallback
-- `src/app/api/admin/chat/` - All admin endpoints
+### API Routes (HTTP Polling)
+- `src/app/api/public/chat/message/route.ts` - Send message, get AI response (with RAG)
+- `src/app/api/public/chat/messages/route.ts` - Poll for new messages
+- `src/app/api/public/cal/[appId]/bookings.ics/route.ts` - ICS calendar feed (Stage 2)
+- `src/app/api/admin/chat/config/route.ts` - Settings management
+- `src/app/api/admin/chat/knowledge/route.ts` - Upload/list/delete documents
+- `src/app/api/admin/chat/knowledge/process/route.ts` - Process uploaded docs
+- `src/app/api/admin/chat/conversations/route.ts` - List conversations
+- `src/app/api/admin/chat/takeover/route.ts` - Human handoff
+- `src/app/api/admin/chat/release/route.ts` - Release back to AI
+- `src/app/api/admin/chat/send/route.ts` - Admin sends message
 
 ### SDK Updates
-- `sdk/src/components/ChatWidget.tsx` - Main chat UI
-- `sdk/src/components/ChatButton.tsx` - Floating button
-- `sdk/src/lib/chat-client.ts` - WebSocket client
-- `sdk/src/api.ts` - Add chat methods
+- `sdk/src/components/ChatWidget.tsx` - Main widget (chat mode)
+- `sdk/src/components/ChatFloatingButton.tsx` - Position-aware button
+- `sdk/src/components/ChatPanel.tsx` - Slide-up chat panel
+- `sdk/src/components/ChatMessages.tsx` - Message bubbles with auto-scroll
+- `sdk/src/components/ChatInput.tsx` - Input field + send button
+- `sdk/src/lib/chat-client.ts` - HTTP polling client
+- `sdk/src/api.ts` - Add chat API methods
 
-### Admin Dashboard
-- `src/app/admin/chat/` - All admin interfaces
-- `src/app/admin/chat/settings/page.tsx` - Configuration
-- `src/app/admin/chat/conversations/page.tsx` - Conversation list
-- `src/app/admin/chat/knowledge/page.tsx` - Knowledge management
-- `src/app/admin/chat/calendar/page.tsx` - Calendar setup
-- `src/app/admin/chat/live/page.tsx` - Live chat interface
+### Admin Dashboard (Conditional "Chat" Tab in App Details)
+- `src/app/admin/app/[id]/AppDetailDashboard.tsx` - Conditionally show "Chat" tab when enabled
+- `src/app/admin/components/ChatTab.tsx` - Container for all chat-related cards
+- `src/app/admin/components/ChatEnableCard.tsx` - Initial "Enable Chat Mode" card (Overview tab)
+- `src/app/admin/components/ChatSettingsCard.tsx` - Chat settings (disable toggle, prompt, bot name)
+- `src/app/admin/components/KnowledgeBaseCard.tsx` - Upload/manage documents
+- `src/app/admin/components/CalendarSettingsCard.tsx` - Working hours, meeting types
+- `src/app/admin/components/LiveConversationsCard.tsx` - Active chats with "Take Over" buttons
+- `src/app/admin/chat/live/[conversationId]/page.tsx` - Dedicated page for admin chat interface
 
 ---
 

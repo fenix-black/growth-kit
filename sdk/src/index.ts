@@ -43,11 +43,17 @@ export {
   WaitlistForm,
   CreditExhaustionModal,
   GrowthKitAccountWidget,
+  ChatWidget,
+  ChatFloatingButton,
+  ChatPanel,
+  ChatMessages,
+  ChatInput,
 } from './components';
 export type {
   WaitlistFormProps,
   CreditExhaustionModalRef,
   GrowthKitAccountWidgetRef,
+  ChatWidgetProps,
 } from './components';
 
 // Middleware exports for Next.js
@@ -81,4 +87,4 @@ export { useLocalization, useTranslation } from './localization';
 export type { Language, Translations } from './localization';
 
 // Version
-export const VERSION = '0.9.0';
+export const VERSION = '0.9.1';

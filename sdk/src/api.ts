@@ -652,4 +652,74 @@ export class GrowthKitAPI {
       }),
     });
   }
+
+  // ============================================
+  // CHAT API METHODS
+  // ============================================
+
+  async sendChatMessage(
+    sessionId: string,
+    message: string
+  ): Promise<{ response: string; creditsUsed: number; status?: string }> {
+    const result = await this.request('/public/chat/message', {
+      method: 'POST',
+      body: JSON.stringify({
+        sessionId,
+        message,
+        fingerprint: this.fingerprint
+      }),
+    });
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to send message');
+    }
+
+    return result.data;
+  }
+
+  async pollChatMessages(
+    sessionId: string,
+    since?: string | null
+  ): Promise<{
+    messages: Array<{
+      id: string;
+      role: string;
+      content: string;
+      createdAt: string;
+    }>;
+    status: string;
+    conversationId: string;
+  }> {
+    const result = await this.request('/public/chat/messages', {
+      method: 'POST',
+      body: JSON.stringify({
+        sessionId,
+        since
+      }),
+    });
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to fetch messages');
+    }
+
+    return result.data;
+  }
+
+  async getChatConfig(): Promise<{
+    enabled: boolean;
+    botName?: string;
+    welcomeMessage?: string;
+    enableCalendar?: boolean;
+    enableRAG?: boolean;
+  }> {
+    const result = await this.request('/public/chat/config', {
+      method: 'GET'
+    });
+
+    if (!result.success) {
+      return { enabled: false };
+    }
+
+    return result.data;
+  }
 }

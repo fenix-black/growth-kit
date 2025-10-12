@@ -1,0 +1,215 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useGrowthKit } from '../useGrowthKit';
+import { ChatMessages } from './ChatMessages';
+import { ChatInput } from './ChatInput';
+import { GrowthKitAPI } from '../api';
+
+export interface ChatPanelProps {
+  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+  sessionId: string;
+  onClose: () => void;
+}
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  createdAt: string;
+}
+
+export const ChatPanel: React.FC<ChatPanelProps> = ({ 
+  position = 'bottom-right',
+  sessionId,
+  onClose
+}) => {
+  const hook = useGrowthKit();
+  const { app, credits } = hook;
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastPoll, setLastPoll] = useState<string | null>(null);
+  const [chatConfig, setChatConfig] = useState<{ botName?: string; welcomeMessage?: string } | null>(null);
+  const pollInterval = useRef<NodeJS.Timeout | null>(null);
+  const branding = app;
+
+  // Fetch chat config and initialize with welcome message
+  useEffect(() => {
+    const fetchConfig = async () => {
+      if (!apiRef.current) return;
+      
+      try {
+        const config = await apiRef.current.getChatConfig();
+        setChatConfig(config);
+        
+        if (config.enabled && config.welcomeMessage) {
+          setMessages([{
+            id: 'welcome',
+            role: 'assistant',
+            content: config.welcomeMessage,
+            createdAt: new Date().toISOString()
+          }]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch chat config:', error);
+        // Fallback welcome message
+        setMessages([{
+          id: 'welcome',
+          role: 'assistant',
+          content: 'Hi! How can I help you today?',
+          createdAt: new Date().toISOString()
+        }]);
+      }
+    };
+
+    fetchConfig();
+  }, []);
+
+  // Get API from hook internals
+  const apiRef = useRef<GrowthKitAPI | null>(null);
+  useEffect(() => {
+    // Access the API instance from the hook's internal ref
+    // @ts-ignore - accessing internal API ref
+    if (hook.apiRef?.current) {
+      // @ts-ignore
+      apiRef.current = hook.apiRef.current;
+    }
+  }, [hook]);
+
+  // Polling for new messages
+  useEffect(() => {
+    if (!apiRef.current) return;
+
+    const poll = async () => {
+      try {
+        const response = await apiRef.current!.pollChatMessages(sessionId, lastPoll);
+        if (response.messages && response.messages.length > 0) {
+          setMessages(prev => [...prev, ...response.messages as Message[]]);
+          setLastPoll(response.messages[response.messages.length - 1].createdAt);
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    };
+
+    pollInterval.current = setInterval(poll, 2000);
+    return () => {
+      if (pollInterval.current) clearInterval(pollInterval.current);
+    };
+  }, [sessionId, lastPoll, apiRef.current]);
+
+  const sendMessage = async (content: string) => {
+    if (!content.trim() || !apiRef.current) return;
+
+    // Add user message immediately
+    const userMsg: Message = {
+      id: `temp-${Date.now()}`,
+      role: 'user',
+      content,
+      createdAt: new Date().toISOString()
+    };
+    setMessages(prev => [...prev, userMsg]);
+    setIsLoading(true);
+
+    try {
+      const response = await apiRef.current.sendChatMessage(sessionId, content);
+      
+      if (response.response) {
+        const assistantMsg: Message = {
+          id: `response-${Date.now()}`,
+          role: 'assistant',
+          content: response.response,
+          createdAt: new Date().toISOString()
+        };
+        setMessages(prev => [...prev, assistantMsg]);
+      }
+    } catch (error) {
+      console.error('Send message error:', error);
+      // Show error message
+      const errorMsg: Message = {
+        id: `error-${Date.now()}`,
+        role: 'system',
+        content: 'Sorry, something went wrong. Please try again.',
+        createdAt: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getPositionStyles = () => {
+    const baseStyles: React.CSSProperties = {
+      position: 'fixed',
+      zIndex: 9998,
+      width: '400px',
+      height: 'min(70vh, 600px)',
+      minHeight: '400px',
+      maxHeight: 'calc(100vh - 120px)',
+      backgroundColor: '#ffffff',
+      borderRadius: '12px',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    };
+
+    switch (position) {
+      case 'bottom-right':
+        return { ...baseStyles, bottom: '90px', right: '20px' };
+      case 'bottom-left':
+        return { ...baseStyles, bottom: '90px', left: '20px' };
+      case 'top-right':
+        return { ...baseStyles, top: '90px', right: '20px' };
+      case 'top-left':
+        return { ...baseStyles, top: '90px', left: '20px' };
+      default:
+        return { ...baseStyles, bottom: '90px', right: '20px' };
+    }
+  };
+
+  return (
+    <div style={getPositionStyles()}>
+      {/* Header */}
+      <div style={{
+        padding: '16px 20px',
+        borderBottom: '1px solid #e5e7eb',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: branding?.primaryColor || '#3B82F6',
+        color: '#ffffff'
+      }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>
+            {chatConfig?.botName || 'Assistant'}
+          </h3>
+          {credits > 0 && (
+            <span style={{ fontSize: '12px', opacity: 0.9 }}>
+              {credits} credits
+            </span>
+          )}
+        </div>
+        <button
+          onClick={onClose}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#ffffff',
+            fontSize: '24px',
+            cursor: 'pointer',
+            padding: '0',
+            lineHeight: 1
+          }}
+        >
+          ×
+        </button>
+      </div>
+
+      {/* Messages */}
+      <ChatMessages messages={messages} isLoading={isLoading} />
+
+      {/* Input */}
+      <ChatInput onSend={sendMessage} disabled={isLoading} />
+    </div>
+  );
+};
+

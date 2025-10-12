@@ -29,8 +29,10 @@ import {
   Trash2,
   Clock,
   FileText,
-  DollarSign
+  DollarSign,
+  MessageSquare
 } from 'lucide-react';
+import { ChatTab } from '../../components/ChatTab';
 
 interface AppDetails {
   id: string;
@@ -62,6 +64,12 @@ interface AppDetails {
   isolatedAccounts: boolean;
   todayUsdSpent?: number;
   createdAt: string;
+  chatConfig?: {
+    enabled: boolean;
+    botName?: string;
+    systemPrompt?: string;
+    welcomeMessage?: string;
+  } | null;
   _count: {
     apiKeys: number;
     fingerprints: number;
@@ -81,7 +89,7 @@ interface AppDetails {
   }>;
 }
 
-const tabs = [
+const baseTabs = [
   { id: 'overview', name: 'Overview', icon: FileText },
   { id: 'settings', name: 'Settings', icon: Settings },
   { id: 'users-leads', name: 'Users & Leads', icon: Users },
@@ -467,7 +475,14 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="flex space-x-8">
-          {tabs.map((tab) => (
+          {(() => {
+            // Conditionally add chat tab if enabled
+            const tabs = [...baseTabs];
+            if (app?.chatConfig?.enabled) {
+              tabs.splice(4, 0, { id: 'chat', name: 'Chat', icon: MessageSquare });
+            }
+            return tabs;
+          })().map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -997,6 +1012,10 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
           embedded={true}
           onClose={() => setActiveTab('overview')}
         />
+      )}
+
+      {activeTab === 'chat' && app?.chatConfig?.enabled && (
+        <ChatTab app={app as any} />
       )}
 
       {/* API Key Modal */}

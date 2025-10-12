@@ -379,6 +379,28 @@ declare class GrowthKitAPI {
     }>>;
     checkReferral(fingerprint: string, referralCode: string): Promise<APIResponse<any>>;
     redeemInvitation(fingerprint: string, invitationCode: string): Promise<APIResponse<any>>;
+    sendChatMessage(sessionId: string, message: string): Promise<{
+        response: string;
+        creditsUsed: number;
+        status?: string;
+    }>;
+    pollChatMessages(sessionId: string, since?: string | null): Promise<{
+        messages: Array<{
+            id: string;
+            role: string;
+            content: string;
+            createdAt: string;
+        }>;
+        status: string;
+        conversationId: string;
+    }>;
+    getChatConfig(): Promise<{
+        enabled: boolean;
+        botName?: string;
+        welcomeMessage?: string;
+        enableCalendar?: boolean;
+        enableRAG?: boolean;
+    }>;
 }
 
 interface GrowthKitGateProps {
@@ -450,6 +472,44 @@ interface GrowthKitAccountWidgetRef {
     setLanguage: (language: 'en' | 'es') => void;
 }
 declare const GrowthKitAccountWidget: React$1.ForwardRefExoticComponent<GrowthKitAccountWidgetProps & React$1.RefAttributes<GrowthKitAccountWidgetRef>>;
+
+interface ChatWidgetProps {
+    position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+}
+declare const ChatWidget: React$1.FC<ChatWidgetProps>;
+
+interface ChatFloatingButtonProps {
+    position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+    credits: number;
+    onClick: () => void;
+    isOpen: boolean;
+}
+declare const ChatFloatingButton: React$1.FC<ChatFloatingButtonProps>;
+
+interface ChatPanelProps {
+    position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+    sessionId: string;
+    onClose: () => void;
+}
+declare const ChatPanel: React$1.FC<ChatPanelProps>;
+
+interface Message {
+    id: string;
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    createdAt: string;
+}
+interface ChatMessagesProps {
+    messages: Message[];
+    isLoading?: boolean;
+}
+declare const ChatMessages: React$1.FC<ChatMessagesProps>;
+
+interface ChatInputProps {
+    onSend: (message: string) => void;
+    disabled?: boolean;
+}
+declare const ChatInput: React$1.FC<ChatInputProps>;
 
 interface GrowthKitMiddlewareConfig {
     apiKey: string;
@@ -539,6 +599,6 @@ interface LogoProps {
     style?: React.CSSProperties;
 }
 
-declare const VERSION = "0.9.0";
+declare const VERSION = "0.9.1";
 
-export { APIResponse, AppBranding, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GROWTHKIT_LOGO_ICON_BASE64, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, LogoProps, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getAllFingerprints, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };
+export { APIResponse, AppBranding, ChatFloatingButton, ChatInput, ChatMessages, ChatPanel, ChatWidget, ChatWidgetProps, ClaimResponse, CompleteActionOptions, CompleteResponse, CreditExhaustionModal, CreditExhaustionModalRef, GROWTHKIT_LOGO_ICON_BASE64, GrowthKitAPI, GrowthKitAccountWidget, GrowthKitAccountWidgetRef, GrowthKitActions, GrowthKitConfig, GrowthKitGate, GrowthKitHook, GrowthKitMiddlewareConfig, GrowthKitPolicy, GrowthKitProvider, GrowthKitServer, GrowthKitServerConfig, GrowthKitState, GrowthKitTheme, Language, LogoProps, MeResponse, ShareOptions, ThemeColors, TrackContext, TrackedEvent, Translations, VERSION, VerifyResponse, WaitlistData, WaitlistForm, WaitlistFormProps, WaitlistResponse, clearFingerprintCache, createGrowthKitMiddleware, createGrowthKitServer, createThemeVariables, darkTheme, getAllFingerprints, getButtonHoverStyles, getEffectiveTheme, getFingerprint, getFingerprintFromRequest, getFocusStyles, getReferralClaimFromRequest, getThemeColors, growthKitMiddleware, lightTheme, onSystemThemeChange, useGrowthKit, useLocalization, useTranslation };
