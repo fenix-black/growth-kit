@@ -16,10 +16,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Missing appId' }, { status: 400 });
   }
 
+  // Calculate active threshold (5 minutes ago)
+  const activeThreshold = new Date(Date.now() - 5 * 60 * 1000);
+
   const conversations = await prisma.chatConversation.findMany({
     where: {
       appId,
-      ...(status && { status })
+      ...(status && { status }),
+      // Only show conversations active in last 5 minutes
+      lastActiveAt: {
+        gte: activeThreshold
+      }
     },
     include: {
       fingerprint: {
@@ -42,7 +49,7 @@ export async function GET(request: NextRequest) {
         select: { messages: true }
       }
     },
-    orderBy: { updatedAt: 'desc' },
+    orderBy: { lastActiveAt: 'desc' }, // Order by most recently active
     take: 50
   });
 

@@ -6,6 +6,7 @@ import ContentCard from '@/components/ui/ContentCard';
 import Button from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
+import { getMessagePreview } from '@/lib/utils/markdown';
 
 interface Conversation {
   id: string;
@@ -106,7 +107,7 @@ export function LiveConversationsCard({ app }: LiveConversationsCardProps) {
                       </span>
                     </div>
                     <div className="text-sm text-gray-600 line-clamp-2">
-                      {conv.messages[0]?.content || 'No messages yet'}
+                      {conv.messages[0]?.content ? getMessagePreview(conv.messages[0].content, 150) : 'No messages yet'}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">

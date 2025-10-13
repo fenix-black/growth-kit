@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       return corsErrors.badRequest('Missing sessionId', origin);
     }
 
-    // Get conversation
+    // Get conversation and update lastActiveAt (indicates user is actively viewing chat)
     const conversation = await prisma.chatConversation.findUnique({
       where: { sessionId },
       select: { id: true, status: true }
@@ -38,6 +38,12 @@ export async function POST(request: NextRequest) {
         { headers: corsHeaders(origin, authContext?.app.corsOrigins || []) }
       );
     }
+
+    // Update lastActiveAt to mark conversation as active (user has chat open)
+    await prisma.chatConversation.update({
+      where: { sessionId },
+      data: { lastActiveAt: new Date() }
+    });
 
     // Get messages since timestamp
     const sinceDate = since ? new Date(since) : new Date(0);

@@ -442,6 +442,7 @@ model ChatConversation {
   humanTakeoverAt       DateTime?
   humanTakeoverBy       String?
   endedAt               DateTime?
+  lastActiveAt          DateTime? // Updated when user polls for messages (indicates chat is open)
   metadata              Json?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
@@ -456,6 +457,7 @@ model ChatConversation {
   @@index([appId, createdAt])
   @@index([fingerprintId])
   @@index([status])
+  @@index([lastActiveAt]) // Index for filtering active conversations
   @@map("chat_conversations")
 }
 
