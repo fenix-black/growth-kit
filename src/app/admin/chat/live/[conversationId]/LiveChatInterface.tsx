@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import { formatDistanceToNow } from 'date-fns';
+import { marked } from 'marked';
 
 interface Message {
   id: string;
@@ -22,6 +23,12 @@ interface Conversation {
   };
 }
 
+// Configure marked for safe rendering
+marked.setOptions({
+  breaks: true,
+  gfm: true,
+});
+
 export function LiveChatInterface({ conversationId }: { conversationId: string }) {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -30,6 +37,17 @@ export function LiveChatInterface({ conversationId }: { conversationId: string }
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  // Render markdown for a message
+  const renderMarkdown = (content: string) => {
+    try {
+      const html = marked.parse(content) as string;
+      return { __html: html };
+    } catch (error) {
+      console.error('Markdown parsing error:', error);
+      return { __html: content };
+    }
+  };
 
   // Fetch conversation and messages
   const fetchData = async () => {
@@ -148,7 +166,10 @@ export function LiveChatInterface({ conversationId }: { conversationId: string }
                   : 'bg-white text-gray-900 border'
               }`}
             >
-              <div className="text-sm">{message.content}</div>
+              <div 
+                className="text-sm admin-chat-message"
+                dangerouslySetInnerHTML={renderMarkdown(message.content)}
+              />
               <div className={`text-xs mt-1 ${
                 message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
               }`}>
@@ -182,6 +203,121 @@ export function LiveChatInterface({ conversationId }: { conversationId: string }
           </Button>
         </div>
       </div>
+
+      {/* Markdown Styling */}
+      <style jsx>{`
+        .admin-chat-message p {
+          margin: 0 0 8px 0;
+        }
+        
+        .admin-chat-message p:last-child {
+          margin-bottom: 0;
+        }
+        
+        .admin-chat-message strong {
+          font-weight: 600;
+        }
+        
+        .admin-chat-message em {
+          font-style: italic;
+        }
+        
+        .admin-chat-message code {
+          background-color: rgba(0, 0, 0, 0.05);
+          padding: 2px 4px;
+          border-radius: 3px;
+          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+          font-size: 13px;
+        }
+        
+        .admin-chat-message pre {
+          background-color: rgba(0, 0, 0, 0.05);
+          padding: 10px;
+          border-radius: 6px;
+          overflow-x: auto;
+          margin: 8px 0;
+        }
+        
+        .admin-chat-message pre code {
+          background-color: transparent;
+          padding: 0;
+        }
+        
+        .admin-chat-message ul, .admin-chat-message ol {
+          margin: 8px 0;
+          padding-left: 20px;
+        }
+        
+        .admin-chat-message li {
+          margin: 4px 0;
+        }
+        
+        .admin-chat-message a {
+          color: #3B82F6;
+          text-decoration: underline;
+          font-weight: 500;
+        }
+        
+        .admin-chat-message blockquote {
+          border-left: 3px solid rgba(0, 0, 0, 0.1);
+          padding-left: 12px;
+          margin: 8px 0;
+          font-style: italic;
+        }
+        
+        .admin-chat-message h1, .admin-chat-message h2, .admin-chat-message h3, 
+        .admin-chat-message h4, .admin-chat-message h5, .admin-chat-message h6 {
+          margin: 12px 0 8px 0;
+          font-weight: 600;
+        }
+        
+        .admin-chat-message h1 { font-size: 1.5em; }
+        .admin-chat-message h2 { font-size: 1.3em; }
+        .admin-chat-message h3 { font-size: 1.1em; }
+        
+        .admin-chat-message hr {
+          border: none;
+          border-top: 1px solid rgba(0, 0, 0, 0.1);
+          margin: 12px 0;
+        }
+
+        /* Table styling */
+        .admin-chat-message table {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 12px 0;
+          font-size: 13px;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          overflow: hidden;
+        }
+        
+        .admin-chat-message thead {
+          background-color: #f3f4f6;
+        }
+        
+        .admin-chat-message th {
+          padding: 8px 12px;
+          text-align: left;
+          font-weight: 600;
+          border-bottom: 2px solid #d1d5db;
+          color: #374151;
+        }
+        
+        .admin-chat-message td {
+          padding: 8px 12px;
+          border-bottom: 1px solid #e5e7eb;
+          color: #1f2937;
+        }
+        
+        .admin-chat-message tbody tr:last-child td {
+          border-bottom: none;
+        }
+        
+        .admin-chat-message tbody tr:hover {
+          background-color: #f9fafb;
+        }
+      `}</style>
     </div>
   );
 }

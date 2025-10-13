@@ -258,6 +258,43 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
           border-top: 1px solid rgba(0, 0, 0, 0.1);
           margin: 12px 0;
         }
+
+        /* Table styling */
+        .chat-message table {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 12px 0;
+          font-size: 13px;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          overflow: hidden;
+        }
+        
+        .chat-message thead {
+          background-color: #f3f4f6;
+        }
+        
+        .chat-message th {
+          padding: 8px 12px;
+          text-align: left;
+          font-weight: 600;
+          border-bottom: 2px solid #d1d5db;
+          color: #374151;
+        }
+        
+        .chat-message td {
+          padding: 8px 12px;
+          border-bottom: 1px solid #e5e7eb;
+          color: #1f2937;
+        }
+        
+        .chat-message tbody tr:last-child td {
+          border-bottom: none;
+        }
+        
+        .chat-message tbody tr:hover {
+          background-color: #f9fafb;
+        }
       `}</style>
     </div>
   );
