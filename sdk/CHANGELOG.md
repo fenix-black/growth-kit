@@ -8,15 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.8] - 2025-10-12
 
 ### Fixed
-- **Precise Timestamps**: Now using `date-fns` library for accurate, human-readable relative times
-- Messages show proper granularity: "less than a minute ago", "12 seconds ago", "2 minutes ago", etc.
-- Timestamps automatically update as time passes
-
-### Added
-- Added `date-fns` dependency for professional time formatting
+- **Auto-Refreshing Timestamps**: Timestamps now update every 10 seconds automatically
+- **Shorter Format**: Compact, clean timestamp format:
+  - "just now" (< 5 seconds)
+  - "12s ago" (seconds)
+  - "5m ago" (minutes)
+  - "2h ago" (hours)
+  - "3d ago" (days)
+  - Falls back to full format for older messages
 
 ### Changed
-- Replaced custom `formatRelativeTime` with `date-fns` `formatDistanceToNow` for better accuracy and localization support
+- Replaced verbose timestamps with compact format (e.g., "20s ago" instead of "less than 20 seconds ago")
+- Added auto-refresh mechanism that updates all timestamps every 10 seconds
+- Custom `formatRelativeTime` function for precise, compact time display
 
 ## [0.9.7] - 2025-10-12
 

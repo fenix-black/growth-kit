@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { marked } from 'marked';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -24,13 +24,54 @@ marked.setOptions({
   gfm: true, // GitHub Flavored Markdown
 });
 
+// Custom short relative time format
+const formatRelativeTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 5) {
+    return 'just now';
+  }
+
+  if (diffInSeconds < 60) {
+    return `${diffInSeconds}s ago`;
+  }
+
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}m ago`;
+  }
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return `${diffInHours}h ago`;
+  }
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) {
+    return `${diffInDays}d ago`;
+  }
+
+  return formatDistanceToNow(date, { addSuffix: true });
+};
+
 export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [, setTick] = useState(0);
 
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Update timestamps every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick(prev => prev + 1);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Render markdown for a message
   const renderMarkdown = (content: string) => {
@@ -112,7 +153,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
                 color: timestampColor,
                 opacity: 0.9
               }}>
-                {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true, includeSeconds: true })}{senderLabel}
+                {formatRelativeTime(message.createdAt)}{senderLabel}
               </div>
             </div>
           </div>
