@@ -5,6 +5,14 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.10] - 2025-10-12
+
+### Fixed
+- **Message Persistence on Reopen**: User messages now persist when closing and reopening chat panel
+- Implemented "initial load" flag to include all messages (user + bot) on first poll
+- Subsequent polls continue to skip user messages to prevent duplicates from optimistic updates
+- Simple, KISS solution with single boolean flag - no storage or API changes needed
+
 ## [0.9.9] - 2025-10-12
 
 ### Changed

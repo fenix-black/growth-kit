@@ -31,6 +31,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [lastPoll, setLastPoll] = useState<string | null>(null);
   const [chatConfig, setChatConfig] = useState<{ botName?: string; welcomeMessage?: string } | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
   const branding = app;
 
@@ -82,12 +83,18 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
             const existingIds = new Set(prev.map(m => m.id));
             const newMessages = response.messages.filter(
               (msg: Message) => !existingIds.has(msg.id) && 
-              // Skip user messages from polling (we add them optimistically)
-              msg.role !== 'user'
+              // On initial load, include all messages (including user's)
+              // After that, skip user messages (we add them optimistically)
+              (isInitialLoad || msg.role !== 'user')
             );
             return [...prev, ...newMessages as Message[]];
           });
           setLastPoll(response.messages[response.messages.length - 1].createdAt);
+          
+          // After first successful poll, mark initial load as complete
+          if (isInitialLoad) {
+            setIsInitialLoad(false);
+          }
         }
       } catch (error) {
         console.error('Polling error:', error);

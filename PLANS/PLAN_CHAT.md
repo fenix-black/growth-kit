@@ -400,6 +400,9 @@ model Fingerprint {
 - [ ] User identification improvements using multi-fingerprint data
 - [ ] Admin conversation list view with filtering and search
 
+### UI Customization - this is also really needed
+- [ ] Advanced customization options for branding: custom colors, like how we customize the 'waitlist' mode colors, but within the admin 'Chat' tab.
+
 **Stage 2 Success Criteria**:
 - ✅ App owners can subscribe to calendar feed and see bookings in their own calendar apps
 - ✅ Real-time sync of GrowthKit bookings to personal calendars
@@ -427,9 +430,6 @@ model Fingerprint {
 
 #### Advanced Chat Features - not too relevant right now
 - [ ] Advanced analytics and reporting dashboard
-
-#### Enterprise Capabilities - this is also really needed
-- [ ] Advanced customization options for branding
 
 **Advanced Success Criteria**:
 - ✅ Seamless human takeover with zero conversation disruption
