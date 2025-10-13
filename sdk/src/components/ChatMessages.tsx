@@ -152,10 +152,12 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
             key={message.id}
             style={{
               display: 'flex',
-              justifyContent: isUser ? 'flex-end' : 'flex-start',
-              marginBottom: '12px'
+              flexDirection: 'column',
+              alignItems: isUser ? 'flex-end' : 'flex-start',
+              marginBottom: '16px'
             }}
           >
+            {/* Message bubble */}
             <div
               style={{
                 maxWidth: '75%',
@@ -174,14 +176,18 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
                 className="chat-message"
                 dangerouslySetInnerHTML={renderMarkdown(message.content)}
               />
-              <div style={{
-                fontSize: '11px',
-                marginTop: '6px',
-                color: timestampColor,
-                opacity: 0.9
-              }}>
-                {formatRelativeTime(message.createdAt)}{senderLabel}
-              </div>
+            </div>
+            
+            {/* Timestamp below bubble */}
+            <div style={{
+              fontSize: '11px',
+              marginTop: '4px',
+              color: '#9ca3af',
+              opacity: 0.8,
+              paddingLeft: isUser ? '0' : '8px',
+              paddingRight: isUser ? '8px' : '0'
+            }}>
+              {formatRelativeTime(message.createdAt)}{senderLabel}
             </div>
           </div>
         );
