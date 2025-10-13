@@ -112,7 +112,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
                 color: timestampColor,
                 opacity: 0.9
               }}>
-                {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}{senderLabel}
+                {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true, includeSeconds: true })}{senderLabel}
               </div>
             </div>
           </div>
