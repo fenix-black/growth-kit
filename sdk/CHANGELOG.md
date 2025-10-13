@@ -5,6 +5,23 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.6] - 2025-10-12
+
+### Added
+- **Message Timestamps**: All messages now display relative timestamps (e.g., "2 minutes ago", "just now")
+- **Sender Labels**: Messages show sender information:
+  - User messages: "• You"
+  - Human agent messages: "• Human"
+  - Bot messages: No label (default)
+- Custom `formatRelativeTime` utility for human-readable timestamps without external dependencies
+
+### Changed
+- Restructured message bubble layout to accommodate timestamp and sender label
+- Timestamp colors adapt to message type:
+  - User messages: Light blue timestamps
+  - Human messages: Green timestamps
+  - Bot messages: Gray timestamps
+
 ## [0.9.5] - 2025-10-12
 
 ### Added

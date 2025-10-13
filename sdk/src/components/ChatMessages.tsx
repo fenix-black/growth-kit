@@ -23,6 +23,30 @@ marked.setOptions({
   gfm: true, // GitHub Flavored Markdown
 });
 
+// Format relative time (e.g., "2 minutes ago")
+const formatRelativeTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return 'just now';
+  }
+
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+  }
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+  }
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+};
+
 export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -57,14 +81,25 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
         let backgroundColor = '#ffffff'; // Default for bot messages
         let color = '#1f2937';
         let border = 'none';
+        let timestampColor = '#6b7280'; // Gray for timestamp
         
         if (isUser) {
           backgroundColor = '#3B82F6';
           color = '#ffffff';
+          timestampColor = '#dbeafe'; // Light blue for user message timestamps
         } else if (isHuman) {
           backgroundColor = '#d1fae5'; // Light green for human messages
           color = '#065f46'; // Dark green text
           border = '1px solid #6ee7b7'; // Green border
+          timestampColor = '#059669'; // Green for human message timestamps
+        }
+        
+        // Build sender label
+        let senderLabel = '';
+        if (isUser) {
+          senderLabel = ' • You';
+        } else if (isHuman) {
+          senderLabel = ' • Human';
         }
         
         return (
@@ -77,7 +112,6 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
             }}
           >
             <div
-              className="chat-message"
               style={{
                 maxWidth: '75%',
                 padding: '10px 14px',
@@ -90,8 +124,20 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
                 fontSize: '14px',
                 lineHeight: '1.5'
               }}
-              dangerouslySetInnerHTML={renderMarkdown(message.content)}
-            />
+            >
+              <div 
+                className="chat-message"
+                dangerouslySetInnerHTML={renderMarkdown(message.content)}
+              />
+              <div style={{
+                fontSize: '11px',
+                marginTop: '6px',
+                color: timestampColor,
+                opacity: 0.9
+              }}>
+                {formatRelativeTime(message.createdAt)}{senderLabel}
+              </div>
+            </div>
           </div>
         );
       })}
