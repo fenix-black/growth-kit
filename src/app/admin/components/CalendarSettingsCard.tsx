@@ -130,6 +130,7 @@ export function CalendarSettingsCard({ app }: CalendarSettingsCardProps) {
             <option value="America/Chicago">Central Time (CT)</option>
             <option value="America/Denver">Mountain Time (MT)</option>
             <option value="America/Los_Angeles">Pacific Time (PT)</option>
+            <option value="America/Santiago">Chile (Santiago) - GMT-3/GMT-4</option>
             <option value="Europe/London">London (GMT)</option>
             <option value="Europe/Paris">Paris (CET)</option>
             <option value="Asia/Tokyo">Tokyo (JST)</option>
@@ -140,30 +141,33 @@ export function CalendarSettingsCard({ app }: CalendarSettingsCardProps) {
         <div>
           <label className="block text-sm font-medium mb-2">Working Hours</label>
           <div className="space-y-2 mt-2">
-            {Object.entries(workingHours).map(([day, hours]) => (
-              <div key={day} className="flex items-center gap-2">
-                <div className="w-24 capitalize">{day}</div>
-                <input
-                  type="time"
-                  value={hours.start}
-                  onChange={(e) => setWorkingHours({
-                    ...workingHours,
-                    [day]: { ...hours, start: e.target.value }
-                  })}
-                  className="w-32 px-2 py-1 border rounded"
-                />
-                <span>to</span>
-                <input
-                  type="time"
-                  value={hours.end}
-                  onChange={(e) => setWorkingHours({
-                    ...workingHours,
-                    [day]: { ...hours, end: e.target.value }
-                  })}
-                  className="w-32 px-2 py-1 border rounded"
-                />
-              </div>
-            ))}
+            {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => {
+              const hours = workingHours[day as keyof typeof workingHours];
+              return (
+                <div key={day} className="flex items-center gap-2">
+                  <div className="w-24 capitalize">{day}</div>
+                  <input
+                    type="time"
+                    value={hours.start}
+                    onChange={(e) => setWorkingHours({
+                      ...workingHours,
+                      [day]: { ...hours, start: e.target.value }
+                    })}
+                    className="w-32 px-2 py-1 border rounded"
+                  />
+                  <span>to</span>
+                  <input
+                    type="time"
+                    value={hours.end}
+                    onChange={(e) => setWorkingHours({
+                      ...workingHours,
+                      [day]: { ...hours, end: e.target.value }
+                    })}
+                    className="w-32 px-2 py-1 border rounded"
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
 

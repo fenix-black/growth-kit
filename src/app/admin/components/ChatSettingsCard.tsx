@@ -45,16 +45,6 @@ export function ChatSettingsCard({ app }: ChatSettingsCardProps) {
   return (
     <ContentCard title="Chat Settings">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Enable Chat Mode</label>
-          <input
-            type="checkbox"
-            checked={config.enabled}
-            onChange={(e) => setConfig({ ...config, enabled: e.target.checked })}
-            className="w-4 h-4"
-          />
-        </div>
-
         <div>
           <label htmlFor="botName" className="block text-sm font-medium mb-2">Bot Name</label>
           <input
