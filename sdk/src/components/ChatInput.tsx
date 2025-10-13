@@ -18,9 +18,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
         // Focus back on the input for quick follow-up messages
-        setTimeout(() => {
+        // Use requestAnimationFrame for better timing after DOM updates
+        requestAnimationFrame(() => {
           textareaRef.current?.focus();
-        }, 0);
+        });
       }
     }
   };
