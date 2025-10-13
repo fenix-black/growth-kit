@@ -7,20 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.8] - 2025-10-12
 
-### Fixed
-- **Auto-Refreshing Timestamps**: Timestamps now update every 10 seconds automatically
-- **Shorter Format**: Compact, clean timestamp format:
+### Added
+- **Smart Adaptive Timestamps**: Intelligent auto-refresh system that adapts to message age
+  - Recent messages (< 1min): Update every 4-6 seconds
+  - Mid-age messages (1-5min): Update every 8-12 seconds
+  - Older messages (> 5min): Update every 12-18 seconds
+  - ±20% randomness for natural, organic feel
+- **Hybrid Timestamp Format**: Smart display that adapts to message age:
   - "just now" (< 5 seconds)
-  - "12s ago" (seconds)
-  - "5m ago" (minutes)
-  - "2h ago" (hours)
-  - "3d ago" (days)
-  - Falls back to full format for older messages
+  - "12s ago" (5-59 seconds)
+  - "3m ago" (1-4 minutes)
+  - "14:35" (≥ 5 minutes - absolute time in user's timezone)
 
 ### Changed
 - Replaced verbose timestamps with compact format (e.g., "20s ago" instead of "less than 20 seconds ago")
-- Added auto-refresh mechanism that updates all timestamps every 10 seconds
+- Implemented hybrid smart + random refresh algorithm for optimal performance and UX
 - Custom `formatRelativeTime` function for precise, compact time display
+
+### Performance
+- Reduces unnecessary updates as conversation ages
+- More efficient CPU usage compared to fixed-interval updates
+- Automatic cleanup prevents memory leaks
 
 ## [0.9.7] - 2025-10-12
 

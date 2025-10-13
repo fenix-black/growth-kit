@@ -39,21 +39,18 @@ const formatRelativeTime = (dateString: string): string => {
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) {
-    return `${diffInMinutes}m ago`;
+  
+  // For messages older than 5 minutes, show absolute time
+  if (diffInMinutes >= 5) {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const formattedHours = hours.toString().padStart(2, '0');
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    return `${formattedHours}:${formattedMinutes}`;
   }
 
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) {
-    return `${diffInHours}h ago`;
-  }
-
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) {
-    return `${diffInDays}d ago`;
-  }
-
-  return formatDistanceToNow(date, { addSuffix: true });
+  // For messages between 1-5 minutes, show relative time
+  return `${diffInMinutes}m ago`;
 };
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading }) => {
@@ -65,13 +62,43 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Update timestamps every 10 seconds
+  // Smart adaptive timestamp updates with randomness
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTick(prev => prev + 1);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
+    let timeoutId: NodeJS.Timeout;
+
+    const scheduleNextUpdate = () => {
+      // Find the age of the most recent message
+      const now = Date.now();
+      const mostRecentAge = messages.length > 0
+        ? Math.floor((now - new Date(messages[messages.length - 1].createdAt).getTime()) / 1000)
+        : 0;
+
+      // Determine base interval based on message age
+      let baseInterval;
+      if (mostRecentAge < 60) {
+        baseInterval = 5000;  // < 1min: every 5s
+      } else if (mostRecentAge < 300) {
+        baseInterval = 10000; // 1-5min: every 10s
+      } else {
+        baseInterval = 15000; // > 5min: every 15s
+      }
+
+      // Add ±20% randomness for natural feel
+      const randomness = 0.8 + Math.random() * 0.4; // 0.8 to 1.2
+      const interval = baseInterval * randomness;
+
+      timeoutId = setTimeout(() => {
+        setTick(prev => prev + 1);
+        scheduleNextUpdate(); // Schedule the next update
+      }, interval);
+    };
+
+    scheduleNextUpdate();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [messages]);
 
   // Render markdown for a message
   const renderMarkdown = (content: string) => {
