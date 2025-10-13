@@ -488,7 +488,6 @@ declare const ChatWidget: React$1.FC<ChatWidgetProps>;
 
 interface ChatFloatingButtonProps {
     position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
-    credits: number;
     onClick: () => void;
     isOpen: boolean;
 }

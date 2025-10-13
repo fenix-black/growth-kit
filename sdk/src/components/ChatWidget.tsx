@@ -32,7 +32,6 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     <>
       <ChatFloatingButton
         position={position}
-        credits={credits}
         onClick={isOpen ? handleClose : handleOpen}
         isOpen={isOpen}
       />

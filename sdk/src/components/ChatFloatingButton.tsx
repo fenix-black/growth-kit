@@ -3,21 +3,17 @@ import { useGrowthKit } from '../useGrowthKit';
 
 export interface ChatFloatingButtonProps {
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
-  credits: number;
   onClick: () => void;
   isOpen: boolean;
 }
 
 export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({ 
   position = 'bottom-right',
-  credits,
   onClick,
   isOpen
 }) => {
   const { app } = useGrowthKit();
   const branding = app;
-
-  // Don't hide the button when open - transform it instead
 
   const getPositionStyles = () => {
     switch (position) {
@@ -50,7 +46,6 @@ export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         cursor: 'pointer',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -65,17 +60,17 @@ export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({
         e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
       }}
     >
-      <span style={{ fontSize: '24px' }}>
-        {isOpen ? '✕' : '💬'}
-      </span>
-      {credits > 0 && (
-        <span style={{ 
-          fontSize: '10px', 
-          fontWeight: 'bold',
-          marginTop: '2px'
-        }}>
-          {credits}
-        </span>
+      {isOpen ? (
+        // Close icon (X)
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      ) : (
+        // Chat bubble icon
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+        </svg>
       )}
     </button>
   );

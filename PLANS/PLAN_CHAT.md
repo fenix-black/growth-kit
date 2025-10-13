@@ -379,11 +379,11 @@ model Fingerprint {
 - [ ] Document preview before upload
 
 #### Language & Localization Support
-- [ ] Chat widget UI (client) support for also spanish (as the rest of the widget)
-- [ ] schedule invitation email customization per language
+- [ ] Chat widget UI (client) support for also spanish (as the rest of the widget, using the internal 'setLanguage' widget method)
+- [ ] schedule invitation email customization per language (maybe it would be good to also enable this email customization for the other templates as well, or leave them better prepared)
 - [ ] Language detection from fingerprint data (browserLanguage, preferredLanguage)
-- [ ] Language-specific system prompts and responses
-- [ ] Multi-language knowledge base support
+- [ ] Language-specific system prompts and responses (bot name, welcome message, system prompt, and meeting types descriptions)
+- [ ] Multi-language knowledge base support (this is not necesary)
 - [ ] Timezone-aware scheduling using fingerprint location data
 
 #### Context Enhancement System
