@@ -72,9 +72,9 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       try {
         const since = lastPoll || null;
         const response = await api.pollChatMessages(sessionId, since);
-        if (response && response.length > 0) {
-          setMessages(prev => [...prev, ...response as Message[]]);
-          setLastPoll(response[response.length - 1].createdAt);
+        if (response && response.messages && response.messages.length > 0) {
+          setMessages(prev => [...prev, ...response.messages as Message[]]);
+          setLastPoll(response.messages[response.messages.length - 1].createdAt);
         }
       } catch (error) {
         console.error('Polling error:', error);

@@ -5,6 +5,13 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.3] - 2025-10-12
+
+### Fixed
+- **Human Handoff Message Display**: Fixed critical bug where messages sent by human agents during "Take Over" were not appearing in the user's chat window
+- Corrected polling response handling in ChatPanel - now properly accesses `response.messages` array instead of treating response as direct array
+- Human agent messages now display correctly in real-time via polling mechanism
+
 ## [0.9.2] - 2025-10-12
 
 ### Added
