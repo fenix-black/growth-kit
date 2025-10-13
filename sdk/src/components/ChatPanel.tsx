@@ -15,6 +15,10 @@ interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
   createdAt: string;
+  metadata?: {
+    sentByHuman?: boolean;
+    [key: string]: any;
+  };
 }
 
 export const ChatPanel: React.FC<ChatPanelProps> = ({ 
@@ -73,7 +77,16 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         const since = lastPoll || null;
         const response = await api.pollChatMessages(sessionId, since);
         if (response && response.messages && response.messages.length > 0) {
-          setMessages(prev => [...prev, ...response.messages as Message[]]);
+          // Deduplicate messages - only add messages that don't already exist
+          setMessages(prev => {
+            const existingIds = new Set(prev.map(m => m.id));
+            const newMessages = response.messages.filter(
+              (msg: Message) => !existingIds.has(msg.id) && 
+              // Skip user messages from polling (we add them optimistically)
+              msg.role !== 'user'
+            );
+            return [...prev, ...newMessages as Message[]];
+          });
           setLastPoll(response.messages[response.messages.length - 1].createdAt);
         }
       } catch (error) {
@@ -95,9 +108,10 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
 
     console.log('Sending message:', content);
 
-    // Add user message immediately
+    // Add user message immediately for instant feedback
+    // Bot response will come via polling
     const userMsg: Message = {
-      id: `temp-${Date.now()}`,
+      id: `user-${Date.now()}`,
       role: 'user',
       content,
       createdAt: new Date().toISOString()
@@ -109,17 +123,12 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       const response = await api.sendChatMessage(sessionId, content);
       console.log('Send message response:', response);
       
-      if (response.response) {
-        const assistantMsg: Message = {
-          id: `response-${Date.now()}`,
-          role: 'assistant',
-          content: response.response,
-          createdAt: new Date().toISOString()
-        };
-        setMessages(prev => [...prev, assistantMsg]);
-      }
+      // Bot response will be fetched by polling
+      // User message is already shown above
     } catch (error) {
       console.error('Send message error:', error);
+      // Remove the user message we added optimistically
+      setMessages(prev => prev.filter(m => m.id !== userMsg.id));
       // Show error message
       const errorMsg: Message = {
         id: `error-${Date.now()}`,

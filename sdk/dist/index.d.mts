@@ -506,6 +506,10 @@ interface Message {
     role: 'user' | 'assistant' | 'system';
     content: string;
     createdAt: string;
+    metadata?: {
+        sentByHuman?: boolean;
+        [key: string]: any;
+    };
 }
 interface ChatMessagesProps {
     messages: Message[];

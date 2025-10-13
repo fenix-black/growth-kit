@@ -6,6 +6,10 @@ interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
   createdAt: string;
+  metadata?: {
+    sentByHuman?: boolean;
+    [key: string]: any;
+  };
 }
 
 export interface ChatMessagesProps {
@@ -45,32 +49,52 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
       padding: '20px',
       backgroundColor: '#f9fafb'
     }}>
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          style={{
-            display: 'flex',
-            justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start',
-            marginBottom: '12px'
-          }}
-        >
+      {messages.map((message) => {
+        // Determine background color based on role and whether sent by human
+        const isUser = message.role === 'user';
+        const isHuman = message.metadata?.sentByHuman;
+        
+        let backgroundColor = '#ffffff'; // Default for bot messages
+        let color = '#1f2937';
+        let border = 'none';
+        
+        if (isUser) {
+          backgroundColor = '#3B82F6';
+          color = '#ffffff';
+        } else if (isHuman) {
+          backgroundColor = '#d1fae5'; // Light green for human messages
+          color = '#065f46'; // Dark green text
+          border = '1px solid #6ee7b7'; // Green border
+        }
+        
+        return (
           <div
-            className="chat-message"
+            key={message.id}
             style={{
-              maxWidth: '75%',
-              padding: '10px 14px',
-              borderRadius: '12px',
-              backgroundColor: message.role === 'user' ? '#3B82F6' : '#ffffff',
-              color: message.role === 'user' ? '#ffffff' : '#1f2937',
-              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-              wordBreak: 'break-word',
-              fontSize: '14px',
-              lineHeight: '1.5'
+              display: 'flex',
+              justifyContent: isUser ? 'flex-end' : 'flex-start',
+              marginBottom: '12px'
             }}
-            dangerouslySetInnerHTML={renderMarkdown(message.content)}
-          />
-        </div>
-      ))}
+          >
+            <div
+              className="chat-message"
+              style={{
+                maxWidth: '75%',
+                padding: '10px 14px',
+                borderRadius: '12px',
+                backgroundColor,
+                color,
+                border,
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                wordBreak: 'break-word',
+                fontSize: '14px',
+                lineHeight: '1.5'
+              }}
+              dangerouslySetInnerHTML={renderMarkdown(message.content)}
+            />
+          </div>
+        );
+      })}
       
       {isLoading && (
         <div style={{

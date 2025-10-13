@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
         role: true,
         content: true,
         createdAt: true,
-        creditsUsed: true
+        creditsUsed: true,
+        metadata: true
       }
     });
 

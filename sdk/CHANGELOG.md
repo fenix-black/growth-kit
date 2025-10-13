@@ -5,6 +5,37 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.5] - 2025-10-12
+
+### Added
+- **Visual Distinction for Human Messages**: Messages sent by human agents during "Take Over" now display with a light green background and green border
+- Added metadata support to Message interface to track message source
+- Human messages use `#d1fae5` background with `#6ee7b7` border (similar to admin interface)
+
+### Changed
+- Updated polling endpoint to include message metadata
+- ChatMessages component now renders different colors based on message source:
+  - User messages: Blue background (unchanged)
+  - Bot messages: White background (unchanged)
+  - Human agent messages: Light green background with green border (new)
+
+## [0.9.4] - 2025-10-12
+
+### Fixed
+- **Duplicate Messages**: Fixed issue where user and bot messages appeared twice in chat window
+- Added intelligent message filtering: user messages shown instantly (optimistic), bot messages via polling
+- Message deduplication prevents any duplicates from appearing
+
+### Changed
+- **Optimized UX**: User messages now appear instantly for immediate feedback
+- Bot responses fetched via polling (max 2 second delay)
+- Polling now skips user role messages to prevent duplicates
+- Error handling: failed messages are removed and error shown
+
+### Improved
+- Best of both worlds: instant user feedback + reliable bot responses
+- No duplicate messages while maintaining responsive feel
+
 ## [0.9.3] - 2025-10-12
 
 ### Fixed
