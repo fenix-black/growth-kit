@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Improved Timestamp Layout**: Timestamps now display below message bubbles for cleaner, more professional appearance
+- **Auto-Focus Input**: Input field automatically refocuses after sending a message for seamless multi-message conversations
 - **Smart Adaptive Timestamps**: Intelligent auto-refresh system that adapts to message age
   - Recent messages (< 1min): Update every 4-6 seconds
   - Mid-age messages (1-5min): Update every 8-12 seconds

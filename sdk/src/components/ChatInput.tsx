@@ -14,9 +14,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
       onSend(input);
       setInput('');
       
-      // Reset textarea height
+      // Reset textarea height and refocus
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
+        // Focus back on the input for quick follow-up messages
+        setTimeout(() => {
+          textareaRef.current?.focus();
+        }, 0);
       }
     }
   };
