@@ -5,6 +5,19 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.8] - 2025-10-12
+
+### Fixed
+- **Precise Timestamps**: Now using `date-fns` library for accurate, human-readable relative times
+- Messages show proper granularity: "less than a minute ago", "12 seconds ago", "2 minutes ago", etc.
+- Timestamps automatically update as time passes
+
+### Added
+- Added `date-fns` dependency for professional time formatting
+
+### Changed
+- Replaced custom `formatRelativeTime` with `date-fns` `formatDistanceToNow` for better accuracy and localization support
+
 ## [0.9.7] - 2025-10-12
 
 ### Added

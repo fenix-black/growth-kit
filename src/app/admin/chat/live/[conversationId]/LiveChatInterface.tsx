@@ -205,7 +205,7 @@ export function LiveChatInterface({ conversationId }: { conversationId: string }
       </div>
 
       {/* Markdown Styling */}
-      <style jsx>{`
+      <style>{`
         .admin-chat-message p {
           margin: 0 0 8px 0;
         }
@@ -283,39 +283,44 @@ export function LiveChatInterface({ conversationId }: { conversationId: string }
 
         /* Table styling */
         .admin-chat-message table {
-          border-collapse: collapse;
-          width: 100%;
-          margin: 12px 0;
-          font-size: 13px;
-          border: 1px solid #e5e7eb;
-          border-radius: 6px;
-          overflow: hidden;
+          border-collapse: collapse !important;
+          width: 100% !important;
+          margin: 12px 0 !important;
+          font-size: 13px !important;
+          border: 1px solid #d1d5db !important;
+          background-color: #ffffff !important;
         }
         
         .admin-chat-message thead {
-          background-color: #f3f4f6;
+          background-color: #f3f4f6 !important;
         }
         
         .admin-chat-message th {
-          padding: 8px 12px;
-          text-align: left;
-          font-weight: 600;
-          border-bottom: 2px solid #d1d5db;
-          color: #374151;
+          padding: 10px 12px !important;
+          text-align: left !important;
+          font-weight: 600 !important;
+          border: 1px solid #d1d5db !important;
+          background-color: #f3f4f6 !important;
+          color: #374151 !important;
         }
         
         .admin-chat-message td {
-          padding: 8px 12px;
-          border-bottom: 1px solid #e5e7eb;
-          color: #1f2937;
+          padding: 10px 12px !important;
+          border: 1px solid #e5e7eb !important;
+          color: #1f2937 !important;
+          background-color: #ffffff !important;
         }
         
-        .admin-chat-message tbody tr:last-child td {
-          border-bottom: none;
+        .admin-chat-message tbody tr:hover td {
+          background-color: #f9fafb !important;
         }
         
-        .admin-chat-message tbody tr:hover {
-          background-color: #f9fafb;
+        .admin-chat-message tbody tr:nth-child(even) td {
+          background-color: #fafafa !important;
+        }
+        
+        .admin-chat-message tbody tr:nth-child(even):hover td {
+          background-color: #f3f4f6 !important;
         }
       `}</style>
     </div>

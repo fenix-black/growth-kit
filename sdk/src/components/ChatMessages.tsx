@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { marked } from 'marked';
+import { formatDistanceToNow } from 'date-fns';
 
 interface Message {
   id: string;
@@ -22,30 +23,6 @@ marked.setOptions({
   breaks: true, // Convert \n to <br>
   gfm: true, // GitHub Flavored Markdown
 });
-
-// Format relative time (e.g., "2 minutes ago")
-const formatRelativeTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) {
-    return 'just now';
-  }
-
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) {
-    return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
-  }
-
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) {
-    return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
-  }
-
-  const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
-};
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -135,7 +112,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
                 color: timestampColor,
                 opacity: 0.9
               }}>
-                {formatRelativeTime(message.createdAt)}{senderLabel}
+                {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}{senderLabel}
               </div>
             </div>
           </div>

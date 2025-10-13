@@ -376,10 +376,11 @@ model Fingerprint {
 
 #### RAG Improvements (Optional)
 - [ ] PDF document support (MVP only supports text files)
-- [ ] Source citations in AI responses
 - [ ] Document preview before upload
 
 #### Language & Localization Support
+- [ ] Chat widget UI (client) support for also spanish (as the rest of the widget)
+- [ ] schedule invitation email customization per language
 - [ ] Language detection from fingerprint data (browserLanguage, preferredLanguage)
 - [ ] Language-specific system prompts and responses
 - [ ] Multi-language knowledge base support
@@ -388,16 +389,16 @@ model Fingerprint {
 #### Context Enhancement System
 - [ ] Page context capture (URL, title, content extraction)
 - [ ] User activity integration from existing Activity model
-- [ ] Dynamic context API for app owners to add custom context
 - [ ] Context injection in conversation flows
 - [ ] Cross-app context sharing (for shared accounts)
+- [ ] Dynamic context API for app owners to add custom context (not now)
 
 #### Advanced Conversation Management
-- [ ] Admin conversation list view with filtering and search
 - [ ] Individual conversation detail view with user profile integration
 - [ ] Conversation status management (active, ended, archived)
 - [ ] Conversation export with fingerprint metadata
 - [ ] User identification improvements using multi-fingerprint data
+- [ ] Admin conversation list view with filtering and search
 
 **Stage 2 Success Criteria**:
 - ✅ App owners can subscribe to calendar feed and see bookings in their own calendar apps
@@ -417,17 +418,17 @@ model Fingerprint {
 - [ ] Conversation notes and tagging
 - [ ] Handoff history and analytics
 
-#### Conversation Intelligence
+#### Conversation Intelligence - this is really needed
 - [ ] Background conversation analysis using LLM
 - [ ] Automated extraction of interests, pain points, and intent
 - [ ] Lead scoring based on conversation engagement
 - [ ] Conversation insights dashboard with analytics
 - [ ] Integration with existing Activity system for lead profiles
 
-#### Advanced Chat Features
+#### Advanced Chat Features - not too relevant right now
 - [ ] Advanced analytics and reporting dashboard
 
-#### Enterprise Capabilities
+#### Enterprise Capabilities - this is also really needed
 - [ ] Advanced customization options for branding
 
 **Advanced Success Criteria**:
