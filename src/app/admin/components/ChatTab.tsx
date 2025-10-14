@@ -4,6 +4,7 @@ import { App, ChatConfiguration } from '@prisma/client';
 import { ChatSettingsCard } from './ChatSettingsCard';
 import { KnowledgeBaseCard } from './KnowledgeBaseCard';
 import { CalendarSettingsCard } from './CalendarSettingsCard';
+import { CalendarEventsCard } from './CalendarEventsCard';
 import { LiveConversationsCard } from './LiveConversationsCard';
 
 interface ChatTabProps {
@@ -16,6 +17,7 @@ export function ChatTab({ app }: ChatTabProps) {
       <ChatSettingsCard app={app} />
       <KnowledgeBaseCard app={app} />
       <CalendarSettingsCard app={app} />
+      <CalendarEventsCard appId={app.id} />
       <LiveConversationsCard app={app} />
     </div>
   );

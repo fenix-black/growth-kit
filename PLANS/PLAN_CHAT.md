@@ -368,12 +368,13 @@ model Fingerprint {
 **Priority**: Polish and optimizations
 
 #### Calendar Integration
-- [ ] Generate subscribable ICS calendar feed endpoint
-- [ ] Display calendar URL in app details (e.g., `https://growthkit.app/cal/[appId]/bookings.ics`)
-- [ ] App owners can subscribe in Apple Calendar, Google Calendar, Outlook, etc.
-- [ ] Real-time sync of all chat bookings to owner's personal calendar
-- [ ] Include booking details (attendee name, email, meeting type, notes)
-- [ ] Show a calendar UI card within the 'Chat' tab, near the Calendar Settings or think what could be the best place, but the app owner needs to see the events scheduled.
+- [x] Generate subscribable ICS calendar feed endpoint (`/api/public/calendar/[appId]/bookings.ics`)
+- [x] Display calendar URL in app details with copy button
+- [x] App owners can subscribe in Apple Calendar, Google Calendar, Outlook, etc.
+- [x] Real-time sync of all chat bookings to owner's personal calendar
+- [x] Include booking details (attendee name, email, meeting type, notes)
+- [ ] Add the event .ics calendar attachment to the email for the user.
+- [x] Show a calendar UI card within the 'Chat' tab displaying scheduled events with status and details
 
 #### RAG Improvements (Optional)
 - [ ] PDF document support (MVP only supports text files)
