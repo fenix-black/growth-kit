@@ -302,7 +302,15 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
             }}
           >
             <span>Powered by</span>
-            <span style={{ fontWeight: 600, color: '#10b981' }}>GrowthKit</span>
+            <img
+              src="https://growth.fenixblack.ai/growthkit-logo-alpha-120px.png"
+              alt="GrowthKit"
+              style={{
+                height: '14px',
+                width: 'auto',
+                display: 'block'
+              }}
+            />
           </a>
         </div>
       )}
