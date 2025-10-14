@@ -75,15 +75,6 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     if (!api) return;
 
     const poll = async () => {
-      // Capture the initial load state at the start of this poll
-      const wasInitialLoad = isInitialLoad;
-      
-      // Mark initial load as complete immediately (before the async call)
-      // This prevents duplicate messages when user sends while isInitialLoad is true
-      if (isInitialLoad) {
-        setIsInitialLoad(false);
-      }
-
       try {
         const since = lastPoll || null;
         const response = await api.pollChatMessages(sessionId, since);
@@ -98,7 +89,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
                 
                 // On initial load, include all messages (user + bot) to load history
                 // After initial load, skip user messages (they're added optimistically)
-                if (wasInitialLoad) return true;
+                if (isInitialLoad) return true;
                 return msg.role !== 'user';
               }
             );
@@ -118,7 +109,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     return () => {
       if (pollInterval.current) clearInterval(pollInterval.current);
     };
-  }, [sessionId, lastPoll, api]);
+  }, [sessionId, lastPoll, api, isInitialLoad]);
 
   const sendMessage = async (content: string) => {
     if (!content.trim() || !api) {
