@@ -44,6 +44,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         const config = await api.getChatConfig();
         setChatConfig(config);
         
+        // Add welcome message initially - will be replaced by real messages if conversation exists
         if (config.enabled && config.welcomeMessage) {
           setMessages([{
             id: 'welcome',
@@ -87,18 +88,27 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         const since = lastPoll || null;
         const response = await api.pollChatMessages(sessionId, since);
         if (response && response.messages && response.messages.length > 0) {
-          // Deduplicate messages - only add messages that don't already exist
-          setMessages(prev => {
-            const existingIds = new Set(prev.map(m => m.id));
-            const newMessages = response.messages.filter(
-              (msg: Message) => !existingIds.has(msg.id) && 
-              // On initial load, include all messages (including user's)
-              // After that, skip user messages (we add them optimistically)
-              (wasInitialLoad || msg.role !== 'user')
-            );
-            return [...prev, ...newMessages as Message[]];
-          });
-          setLastPoll(response.messages[response.messages.length - 1].createdAt);
+          
+          if (wasInitialLoad) {
+            // On initial load, replace welcome message with real conversation history
+            setMessages(response.messages as Message[]);
+            setLastPoll(response.messages[response.messages.length - 1].createdAt);
+          } else {
+            // On subsequent polls, only add new messages (skip user messages - they're added optimistically)
+            setMessages(prev => {
+              const existingIds = new Set(prev.map(m => m.id));
+              const newMessages = response.messages.filter(
+                (msg: Message) => !existingIds.has(msg.id) && msg.role !== 'user'
+              );
+              return [...prev, ...newMessages as Message[]];
+            });
+            if (response.messages.length > 0) {
+              setLastPoll(response.messages[response.messages.length - 1].createdAt);
+            }
+          }
+        } else if (wasInitialLoad) {
+          // No messages from server on initial load, keep the welcome message
+          // (This happens for truly new conversations)
         }
       } catch (error) {
         console.error('Polling error:', error);
@@ -118,6 +128,9 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     }
 
     console.log('Sending message:', content);
+
+    // Once user sends first message, we're no longer in initial load mode
+    setIsInitialLoad(false);
 
     // Add user message immediately for instant feedback
     // Bot response will come via polling
