@@ -88,27 +88,26 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         const since = lastPoll || null;
         const response = await api.pollChatMessages(sessionId, since);
         if (response && response.messages && response.messages.length > 0) {
+          // Always merge messages, never replace (to preserve client-side welcome message)
+          setMessages(prev => {
+            const existingIds = new Set(prev.map(m => m.id));
+            const newMessages = response.messages.filter(
+              (msg: Message) => {
+                // Skip if message already exists
+                if (existingIds.has(msg.id)) return false;
+                
+                // On initial load, include all messages (user + bot) to load history
+                // After initial load, skip user messages (they're added optimistically)
+                if (wasInitialLoad) return true;
+                return msg.role !== 'user';
+              }
+            );
+            return [...prev, ...newMessages as Message[]];
+          });
           
-          if (wasInitialLoad) {
-            // On initial load, replace welcome message with real conversation history
-            setMessages(response.messages as Message[]);
+          if (response.messages.length > 0) {
             setLastPoll(response.messages[response.messages.length - 1].createdAt);
-          } else {
-            // On subsequent polls, only add new messages (skip user messages - they're added optimistically)
-            setMessages(prev => {
-              const existingIds = new Set(prev.map(m => m.id));
-              const newMessages = response.messages.filter(
-                (msg: Message) => !existingIds.has(msg.id) && msg.role !== 'user'
-              );
-              return [...prev, ...newMessages as Message[]];
-            });
-            if (response.messages.length > 0) {
-              setLastPoll(response.messages[response.messages.length - 1].createdAt);
-            }
           }
-        } else if (wasInitialLoad) {
-          // No messages from server on initial load, keep the welcome message
-          // (This happens for truly new conversations)
         }
       } catch (error) {
         console.error('Polling error:', error);

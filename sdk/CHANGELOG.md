@@ -8,8 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.11] - 2025-10-12
 
 ### Fixed
-- Fixed duplicate user messages appearing on chat widget first open by improving initial message loading logic
-- Welcome message is now properly replaced with conversation history when reopening existing chats
+- Fixed duplicate user messages appearing when sending first message after opening chat widget
+- Welcome message now persists correctly throughout the conversation
+- Improved message loading logic to properly merge server messages with client-side welcome message
 
 ## [0.9.10] - 2025-10-12
 
