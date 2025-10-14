@@ -1,0 +1,82 @@
+---
+description: Guidelines for implementing optimistic UI updates with polling - lessons from chat message deduplication
+---
+
+# Optimistic UI Updates & Polling Pattern
+
+## Core Principle: Single Source of Truth for State Transitions
+
+When implementing optimistic updates with polling, follow these rules:
+
+### ✅ DO: Let User Actions Control State Transitions
+
+```typescript
+// User action is the ONLY place that changes loading state
+const handleSend = async (message: string) => {
+  setIsInitialLoad(false); // ← Only here
+  
+  // Add message optimistically
+  const userMsg = { id: `temp-${Date.now()}`, content: message };
+  setMessages(prev => [...prev, userMsg]);
+  
+  await api.sendMessage(message);
+};
+```
+
+### ❌ DON'T: Let Polling Manage State Transitions
+
+```typescript
+// BAD: Polling should NOT change loading/initial states
+const poll = async () => {
+  const wasInitialLoad = isInitialLoad;
+  if (isInitialLoad) {
+    setIsInitialLoad(false); // ← NEVER DO THIS
+  }
+  // ...
+};
+```
+
+### Message Deduplication Pattern
+
+**Always merge, never replace** (to preserve client-side only messages like welcome):
+
+```typescript
+setMessages(prev => {
+  const existingIds = new Set(prev.map(m => m.id));
+  const newMessages = response.messages.filter(msg => {
+    if (existingIds.has(msg.id)) return false;
+    
+    // Use state flag to control what gets included
+    if (isInitialLoad) return true; // Load all on first poll
+    return msg.role !== 'user';     // Skip user messages after (added optimistically)
+  });
+  return [...prev, ...newMessages];
+});
+```
+
+## Why This Works
+
+1. **User action triggers state change** → Clear, predictable behavior
+2. **Polling just reads state** → No race conditions
+3. **Always merge** → Client-side messages (welcome, optimistic) are preserved
+4. **Deduplication** → Same message never appears twice
+
+## Common Pitfalls
+
+- ❌ Having multiple places set the same state flag
+- ❌ Using "replace" logic that wipes client-side messages
+- ❌ Capturing state in a variable (`wasInitialLoad`) then changing it
+- ❌ Not including the state flag in useEffect dependencies
+
+## Testing Scenarios
+
+Always test these flows:
+1. **First interaction**: Open → Send → Should see: Welcome + User + Bot (no duplicates)
+2. **Reopen existing**: Close → Reopen → Should see: Welcome + Full history
+3. **Continue conversation**: Send another → Should see: Previous + New user + New bot
+
+## Key Insight
+
+> User interaction = state transition trigger  
+> Polling = passive data sync  
+> Keep these concerns separate!

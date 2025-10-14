@@ -373,6 +373,7 @@ model Fingerprint {
 - [ ] App owners can subscribe in Apple Calendar, Google Calendar, Outlook, etc.
 - [ ] Real-time sync of all chat bookings to owner's personal calendar
 - [ ] Include booking details (attendee name, email, meeting type, notes)
+- [ ] Show a calendar UI card within the 'Chat' tab, near the Calendar Settings or think what could be the best place, but the app owner needs to see the events scheduled.
 
 #### RAG Improvements (Optional)
 - [ ] PDF document support (MVP only supports text files)
@@ -390,6 +391,7 @@ model Fingerprint {
 - [ ] Page context capture (URL, title, content extraction)
 - [ ] User activity integration from existing Activity model
 - [ ] Context injection in conversation flows
+- [ ] Inject info about the known user fingerprint data: name (if known), email (if known), credits available (if any), user timezone, widget language
 - [ ] Cross-app context sharing (for shared accounts)
 - [ ] Dynamic context API for app owners to add custom context (not now)
 
