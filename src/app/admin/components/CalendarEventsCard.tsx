@@ -42,11 +42,14 @@ export const CalendarEventsCard: React.FC<CalendarEventsCardProps> = ({ appId })
       const response = await fetch(`/api/admin/chat/bookings?appId=${appId}`);
       const data = await response.json();
       
-      if (data.success) {
-        setBookings(data.bookings);
+      if (data.success && data.data?.bookings) {
+        setBookings(data.data.bookings);
+      } else {
+        setBookings([]);
       }
     } catch (error) {
       console.error('Failed to fetch bookings:', error);
+      setBookings([]);
     } finally {
       setLoading(false);
     }
