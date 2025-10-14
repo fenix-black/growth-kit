@@ -274,13 +274,11 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       {/* Footer - Powered by GrowthKit */}
       {!app?.hideGrowthKitBranding && (
         <div style={{
-          padding: '16px',
+          padding: '10px 16px',
           borderTop: '1px solid #e5e7eb',
           display: 'flex',
-          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: '8px',
           backgroundColor: '#fafafa'
         }}>
           <a
@@ -289,7 +287,6 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
             rel="noopener noreferrer"
             style={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
               gap: '8px',
               textDecoration: 'none',
@@ -303,11 +300,11 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
             }}
           >
             <img
-              src="https://growth.fenixblack.ai/growthkit-logo-alpha-120px.png"
+              src="https://growth.fenixblack.ai/growthkit-logo-icon-alpha.png"
               alt="GrowthKit"
               style={{
-                height: '32px',
-                width: 'auto',
+                height: '18px',
+                width: '18px',
                 display: 'block'
               }}
             />
