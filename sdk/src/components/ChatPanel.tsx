@@ -274,11 +274,13 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       {/* Footer - Powered by GrowthKit */}
       {!app?.hideGrowthKitBranding && (
         <div style={{
-          padding: '8px 16px',
+          padding: '16px',
           borderTop: '1px solid #e5e7eb',
           display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
+          gap: '8px',
           backgroundColor: '#fafafa'
         }}>
           <a
@@ -287,30 +289,35 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
             rel="noopener noreferrer"
             style={{
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              gap: '6px',
+              gap: '8px',
               textDecoration: 'none',
-              fontSize: '11px',
-              color: '#6b7280',
               transition: 'opacity 0.2s'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.opacity = '0.7';
+              e.currentTarget.style.opacity = '0.8';
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.opacity = '1';
             }}
           >
-            <span>Powered by</span>
             <img
               src="https://growth.fenixblack.ai/growthkit-logo-alpha-120px.png"
               alt="GrowthKit"
               style={{
-                height: '14px',
+                height: '32px',
                 width: 'auto',
                 display: 'block'
               }}
             />
+            <span style={{
+              fontSize: '12px',
+              color: '#9ca3af',
+              fontWeight: 400
+            }}>
+              Powered by GrowthKit
+            </span>
           </a>
         </div>
       )}
