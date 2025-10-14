@@ -32,6 +32,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   const [lastPoll, setLastPoll] = useState<string | null>(null);
   const [chatConfig, setChatConfig] = useState<{ botName?: string; welcomeMessage?: string } | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
   const branding = app;
 
@@ -160,7 +161,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     const baseStyles: React.CSSProperties = {
       position: 'fixed',
       zIndex: 9998,
-      width: '400px',
+      width: isExpanded ? '600px' : '400px',
       height: 'min(70vh, 600px)',
       minHeight: '400px',
       maxHeight: 'calc(100vh - 120px)',
@@ -169,7 +170,8 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
       display: 'flex',
       flexDirection: 'column',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      transition: 'width 0.3s ease'
     };
 
     switch (position) {
@@ -208,20 +210,59 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
             </span>
           )}
         </div>
-        <button
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#ffffff',
-            fontSize: '24px',
-            cursor: 'pointer',
-            padding: '0',
-            lineHeight: 1
-          }}
-        >
-          ×
-        </button>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {/* Expand/Collapse button */}
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#ffffff',
+              fontSize: '20px',
+              cursor: 'pointer',
+              padding: '4px',
+              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              opacity: 0.9
+            }}
+            title={isExpanded ? 'Collapse window' : 'Expand window'}
+          >
+            {isExpanded ? (
+              // Collapse icon (minimize/compress)
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="4 14 10 14 10 20"></polyline>
+                <polyline points="20 10 14 10 14 4"></polyline>
+                <line x1="14" y1="10" x2="21" y2="3"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+            ) : (
+              // Expand icon (maximize/expand)
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+            )}
+          </button>
+          
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#ffffff',
+              fontSize: '24px',
+              cursor: 'pointer',
+              padding: '0',
+              lineHeight: 1
+            }}
+          >
+            ×
+          </button>
+        </div>
       </div>
 
       {/* Messages */}
@@ -229,6 +270,42 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
 
       {/* Input */}
       <ChatInput onSend={sendMessage} disabled={isLoading} />
+
+      {/* Footer - Powered by GrowthKit */}
+      {!app?.hideGrowthKitBranding && (
+        <div style={{
+          padding: '8px 16px',
+          borderTop: '1px solid #e5e7eb',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#fafafa'
+        }}>
+          <a
+            href="https://growth.fenixblack.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              textDecoration: 'none',
+              fontSize: '11px',
+              color: '#6b7280',
+              transition: 'opacity 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.opacity = '0.7';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.opacity = '1';
+            }}
+          >
+            <span>Powered by</span>
+            <span style={{ fontWeight: 600, color: '#10b981' }}>GrowthKit</span>
+          </a>
+        </div>
+      )}
     </div>
   );
 };

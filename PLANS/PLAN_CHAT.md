@@ -376,6 +376,9 @@ model Fingerprint {
 - [ ] Add the event .ics calendar attachment to the email for the user.
 - [x] Show a calendar UI card within the 'Chat' tab displaying scheduled events with status and details
 
+#### Fix issues
+- [ ] check why the waitlist mode is not working
+
 #### RAG Improvements (Optional)
 - [ ] PDF document support (MVP only supports text files)
 - [ ] Document preview before upload
@@ -405,6 +408,7 @@ model Fingerprint {
 
 ### UI Customization - this is also really needed
 - [ ] Advanced customization options for branding: custom colors, like how we customize the 'waitlist' mode colors, but within the admin 'Chat' tab.
+- [ ] React to current widget scheme (light/dark), as the rest of the widget UI components already do.
 
 **Stage 2 Success Criteria**:
 - ✅ App owners can subscribe to calendar feed and see bookings in their own calendar apps

@@ -5,6 +5,17 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.12] - 2025-10-12
+
+### Added
+- **Expand/Collapse Window**: Added button in chat header to expand window width from 400px to 600px
+- **"Powered by GrowthKit" Footer**: Added footer link to chat panel (respects hideGrowthKitBranding setting)
+- Smooth width transition animation when expanding/collapsing chat window
+
+### Changed
+- Chat window header now includes expand/collapse button with appropriate icons
+- Improved header button layout with proper spacing
+
 ## [0.9.11] - 2025-10-12
 
 ### Fixed
