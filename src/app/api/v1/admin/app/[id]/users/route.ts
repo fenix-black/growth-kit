@@ -91,10 +91,45 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       orderBy: Object.keys(orderBy).length > 0 ? orderBy : { createdAt: 'desc' },
     });
 
+    // For shared apps, pre-fetch all credits for all OrgUserAccounts
+    // This is needed to calculate consolidated credit balances correctly
+    const isSharedApp = !(app as any).isolatedAccounts;
+    const orgUserAccountIds = isSharedApp 
+      ? [...new Set(fingerprints.map(fp => (fp as any).orgUserAccountId).filter(Boolean))]
+      : [];
+    
+    // Fetch all fingerprints linked to these OrgUserAccounts for consolidated credit calculation
+    const consolidatedCreditsMap = new Map<string, number>();
+    if (orgUserAccountIds.length > 0) {
+      const allLinkedFingerprints = await prisma.fingerprint.findMany({
+        where: {
+          orgUserAccountId: { in: orgUserAccountIds },
+        },
+        select: {
+          orgUserAccountId: true,
+          credits: {
+            select: { amount: true },
+          },
+        },
+      });
+      
+      // Group credits by OrgUserAccountId
+      for (const fp of allLinkedFingerprints) {
+        const accId = fp.orgUserAccountId!;
+        const fpCredits = fp.credits.reduce((sum, c) => sum + c.amount, 0);
+        consolidatedCreditsMap.set(accId, (consolidatedCreditsMap.get(accId) || 0) + fpCredits);
+      }
+    }
+
     // Process and enrich data
     const users = fingerprints.map(fp => {
       // Calculate credit balance
-      const creditBalance = (fp as any).credits.reduce((sum: number, credit: any) => sum + credit.amount, 0);
+      // For shared apps with OrgUserAccount, use consolidated credits from all linked fingerprints
+      // This fixes the bug where credits from different devices weren't being summed correctly
+      const orgUserAccountId = (fp as any).orgUserAccountId;
+      const creditBalance = (isSharedApp && orgUserAccountId && consolidatedCreditsMap.has(orgUserAccountId))
+        ? consolidatedCreditsMap.get(orgUserAccountId)!
+        : (fp as any).credits.reduce((sum: number, credit: any) => sum + credit.amount, 0);
 
       // Get latest verified lead
       const verifiedLead = (fp as any).leads.find((lead: any) => lead.emailVerified);
@@ -131,7 +166,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       } : null;
 
       // For shared apps, use OrgUserAccount data; for isolated apps, use Lead data
-      const isSharedApp = !(app as any).isolatedAccounts;
       const orgAccount = (fp as any).orgUserAccount;
       
       return {

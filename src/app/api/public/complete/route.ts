@@ -103,29 +103,47 @@ export async function POST(request: NextRequest) {
     let totalCredits = 0;
     
     if (!(app as any).isolatedAccounts && (app as any).organizationId) {
-      // Shared accounts enabled - calculate credits across all shared apps
-      const sharedApps = await prisma.app.findMany({
-        where: {
-          organizationId: (app as any).organizationId,
-          isolatedAccounts: false,
-        } as any,
-        select: { id: true },
-      });
+      // Shared accounts enabled - calculate credits across all linked fingerprints
+      let sharedFingerprints;
       
-      const sharedAppIds = sharedApps.map(a => a.id);
-      
-      // Get all fingerprints across shared apps with the same fingerprint value
-      const sharedFingerprints = await prisma.fingerprint.findMany({
-        where: {
-          fingerprint: fingerprintWithDetails.fingerprint,
-          appId: { in: sharedAppIds },
-        },
-        select: {
-          credits: {
-            select: { amount: true },
+      if ((fingerprintWithDetails as any).orgUserAccountId) {
+        // Use OrgUserAccountId for accurate credit calculation across all linked fingerprints
+        // This correctly handles cases where fingerprints were linked via secondary matching
+        // (canvas, browser-sig, or server fingerprint) but have different primary fingerprints
+        sharedFingerprints = await prisma.fingerprint.findMany({
+          where: {
+            orgUserAccountId: (fingerprintWithDetails as any).orgUserAccountId,
           },
-        },
-      });
+          select: {
+            credits: {
+              select: { amount: true },
+            },
+          },
+        });
+      } else {
+        // Fallback: No OrgUserAccount yet, use primary fingerprint matching across shared apps
+        const sharedApps = await prisma.app.findMany({
+          where: {
+            organizationId: (app as any).organizationId,
+            isolatedAccounts: false,
+          } as any,
+          select: { id: true },
+        });
+        
+        const sharedAppIds = sharedApps.map(a => a.id);
+        
+        sharedFingerprints = await prisma.fingerprint.findMany({
+          where: {
+            fingerprint: fingerprintWithDetails.fingerprint,
+            appId: { in: sharedAppIds },
+          },
+          select: {
+            credits: {
+              select: { amount: true },
+            },
+          },
+        });
+      }
       
       // Sum credits from all shared fingerprints
       totalCredits = sharedFingerprints.reduce(
