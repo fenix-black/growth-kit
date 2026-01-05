@@ -5,6 +5,18 @@ All notable changes to the GrowthKit SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.14] - 2026-01-05
+
+### Added
+- **Self-Service Name Change**: Users with verified emails can now update their display name
+  - New `NameChangeModal` component with 3-step flow (enter name → verify code → success)
+  - Email verification via 6-digit authorization code
+  - 10-minute code expiry with rate limiting
+  - Lock screen after 3 failed attempts (5-minute cooldown)
+  - "Change" button in expanded profile view (only visible when email is verified)
+- New API methods: `requestNameChange(newName)` and `confirmNameChange(code)`
+- Added localization strings for name change feature (English and Spanish)
+
 ## [0.9.12] - 2025-10-12
 
 ### Added

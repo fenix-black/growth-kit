@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrowthKit Embed Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: white;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+    .subtitle {
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 40px;
+      font-size: 18px;
+    }
+    .test-section {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .test-section h2 {
+      color: #1f2937;
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+    .test-section p {
+      color: #6b7280;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    .test-section code {
+      display: block;
+      background: #f3f4f6;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 12px;
+      overflow-x: auto;
+      margin-bottom: 20px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .widget-container {
+      border: 2px dashed #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .events-log {
+      margin-top: 20px;
+      padding: 15px;
+      background: #1f2937;
+      border-radius: 8px;
+      color: #10b981;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .events-log:empty::before {
+      content: 'Events will appear here...';
+      color: #6b7280;
+    }
+    .note {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 30px;
+      color: #92400e;
+      font-size: 14px;
+    }
+    .note strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 GrowthKit Embed Test</h1>
+    <p class="subtitle">Test page for script tag embedding</p>
+
+    <div class="note">
+      <strong>⚠️ Testing Instructions:</strong>
+      Replace <code>pk_YOUR_PUBLIC_KEY</code> with a real public key from your GrowthKit dashboard.
+      For local testing, use: <code>http://localhost:3000/embed/test.html</code>
+    </div>
+
+    <!-- Test 1: Waitlist Widget -->
+    <div class="test-section">
+      <h2>1. Waitlist Widget (Standard)</h2>
+      <p>Basic waitlist form embedded via script tag</p>
+      <code>&lt;script 
+  src="/embed/growthkit.js"
+  data-public-key="pk_YOUR_PUBLIC_KEY"
+  data-widget="waitlist"
+  data-theme="auto"
+  async&gt;&lt;/script&gt;</code>
+      
+      <div class="widget-container" id="waitlist-test">
+        <!-- Widget will be injected here by the script below -->
+      </div>
+      <div class="events-log" id="waitlist-events"></div>
+    </div>
+
+    <!-- Test 2: Account Widget -->
+    <div class="test-section">
+      <h2>2. Account Widget (Slim)</h2>
+      <p>Compact account widget showing credits</p>
+      <code>&lt;script 
+  src="/embed/growthkit.js"
+  data-public-key="pk_YOUR_PUBLIC_KEY"
+  data-widget="account"
+  data-slim="true"
+  async&gt;&lt;/script&gt;</code>
+      
+      <div class="widget-container" id="account-test">
+        <!-- Will be rendered programmatically below -->
+      </div>
+      <div class="events-log" id="account-events"></div>
+    </div>
+
+    <!-- Test 3: Programmatic Usage -->
+    <div class="test-section">
+      <h2>3. Programmatic API</h2>
+      <p>Using the JavaScript API to render widgets</p>
+      <code>// Initialize with config
+GrowthKit.init({
+  publicKey: 'pk_YOUR_PUBLIC_KEY',
+  theme: 'light'
+});
+
+// Render to specific container
+GrowthKit.widgets.waitlist.render('#my-container');
+
+// Listen for events
+GrowthKit.on('waitlist:joined', (data) => {
+  console.log('Joined at position:', data.position);
+});</code>
+    </div>
+  </div>
+
+  <!-- 
+    ACTUAL EMBED TEST
+    The script below tests the embed functionality
+    Replace pk_test with a real public key for full testing
+  -->
+  
+  <script>
+    // Log helper
+    function logEvent(containerId, message) {
+      var log = document.getElementById(containerId);
+      if (log) {
+        var time = new Date().toLocaleTimeString();
+        log.innerHTML += '[' + time + '] ' + message + '\n';
+        log.scrollTop = log.scrollHeight;
+      }
+    }
+  </script>
+
+  <!-- Load the GrowthKit embed script -->
+  <script src="/embed/growthkit.js" 
+          data-public-key="pk_test_placeholder" 
+          data-widget="waitlist"
+          data-container="#waitlist-test"
+          data-theme="auto"
+          async></script>
+
+  <script>
+    // Wait for GrowthKit to initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      // Give the script time to initialize
+      setTimeout(function() {
+        if (window.GrowthKit) {
+          logEvent('waitlist-events', 'GrowthKit loaded - version ' + window.GrowthKit.version);
+          
+          // Listen for events
+          window.GrowthKit.on('waitlist:joined', function(data) {
+            logEvent('waitlist-events', 'User joined waitlist at position: ' + data.position);
+          });
+          
+          window.GrowthKit.on('resize', function(data) {
+            logEvent('waitlist-events', 'Widget resized to: ' + data.height + 'px');
+          });
+
+          window.GrowthKit.on('*', function(event, data) {
+            logEvent('waitlist-events', 'Event: ' + event + ' - ' + JSON.stringify(data));
+          });
+
+          // Render account widget to second container
+          if (window.GrowthKit._config && window.GrowthKit._config.publicKey !== 'pk_test_placeholder') {
+            window.GrowthKit.render('account', '#account-test', { slim: true });
+            logEvent('account-events', 'Account widget rendered');
+          } else {
+            logEvent('account-events', 'Skipped - need real public key');
+          }
+        } else {
+          logEvent('waitlist-events', 'ERROR: GrowthKit not loaded');
+        }
+      }, 1000);
+    });
+  </script>
+
+  <!-- 
+    INSTRUCTIONS FOR REAL TESTING:
+    
+    1. Start the dev server: npm run dev
+    2. Get a public key from an app in your dashboard
+    3. Replace 'pk_test_placeholder' above with your real key
+    4. Open http://localhost:3000/embed/test.html
+    5. The widgets should load and display
+  -->
+</body>
+</html>
+
