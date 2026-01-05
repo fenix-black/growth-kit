@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Code2, 
@@ -19,8 +19,10 @@ export default function IntegrationShowcase() {
   const [quickMode, setQuickMode] = useState<'script' | 'npm'>('script');
   const [activeStep, setActiveStep] = useState(0);
   const [typingText, setTypingText] = useState('');
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
   const { t } = useTranslation();
+  const animationRef = useRef<number | null>(null);
 
   const installCommand = 'npm install @fenixblack/growthkit';
   const setupCommand = 'npx @fenixblack/growthkit setup';
@@ -30,7 +32,7 @@ export default function IntegrationShowcase() {
   async>
 </script>`;
 
-  // Typing animation effect
+  // Typing animation effect using requestAnimationFrame for smoother performance
   useEffect(() => {
     if (activeStep === 0) {
       let command: string;
@@ -39,20 +41,51 @@ export default function IntegrationShowcase() {
       } else {
         command = setupCommand;
       }
-      let i = 0;
-      setTypingText('');
-      const interval = setInterval(() => {
-        setTypingText(command.slice(0, i));
-        i++;
-        if (i > command.length) {
-          clearInterval(interval);
+      
+      // Characters per second: faster for longer text
+      const charsPerSecond = quickMode === 'script' ? 50 : 20;
+      const msPerChar = 1000 / charsPerSecond;
+      
+      let startTime: number | null = null;
+      let currentLength = 0;
+      setIsTypingComplete(false);
+      
+      // Initialize with first character immediately to avoid flash
+      setTypingText(command.slice(0, 1));
+      currentLength = 1;
+      
+      const animate = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const targetLength = Math.min(
+          Math.floor(elapsed / msPerChar) + 1, // +1 because we start with 1 char
+          command.length
+        );
+        
+        if (targetLength > currentLength) {
+          currentLength = targetLength;
+          setTypingText(command.slice(0, currentLength));
         }
-      }, quickMode === 'script' ? 20 : 50); // Faster for longer script tag
-      return () => clearInterval(interval);
+        
+        if (currentLength < command.length) {
+          animationRef.current = requestAnimationFrame(animate);
+        } else {
+          setIsTypingComplete(true);
+        }
+      };
+      
+      animationRef.current = requestAnimationFrame(animate);
+      
+      return () => {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
     }
-  }, [activeStep, activeTab, quickMode]);  // Re-run when tab, step, or mode changes
+  }, [activeStep, activeTab, quickMode]);
 
-  const scriptTagSteps = [
+  // Memoized step arrays to prevent recreation on every render
+  const scriptTagSteps = useMemo(() => [
     {
       step: '01',
       title: t('integration.steps.addScript.title'),
@@ -74,9 +107,9 @@ export default function IntegrationShowcase() {
 </script>`,
       language: 'html'
     }
-  ];
+  ], [t, scriptTagCode]);
 
-  const npmSteps = [
+  const npmSteps = useMemo(() => [
     {
       step: '01',
       title: t('integration.steps.install.title'),
@@ -106,11 +139,14 @@ function App() {
 }`,
       language: 'tsx'
     }
-  ];
+  ], [t, installCommand]);
 
-  const quickStartSteps = quickMode === 'script' ? scriptTagSteps : npmSteps;
+  const quickStartSteps = useMemo(() => 
+    quickMode === 'script' ? scriptTagSteps : npmSteps,
+    [quickMode, scriptTagSteps, npmSteps]
+  );
 
-  const advancedSteps = [
+  const advancedSteps = useMemo(() => [
     {
       step: '01',
       title: t('integration.steps.runSetup.title'),
@@ -130,15 +166,18 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
 // GROWTHKIT_API_URL=https://growth.fenixblack.ai/api`,
       language: 'typescript'
     }
-  ];
+  ], [t, setupCommand]);
 
-  const integrationSteps = activeTab === 'quick' ? quickStartSteps : advancedSteps;
+  const integrationSteps = useMemo(() => 
+    activeTab === 'quick' ? quickStartSteps : advancedSteps,
+    [activeTab, quickStartSteps, advancedSteps]
+  );
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = useCallback((text: string) => {
     navigator.clipboard.writeText(text);
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
-  };
+  }, []);
 
   return (
     <section id="integration" className="py-20 bg-gradient-to-br from-purple-50 via-white to-pink-50">
@@ -305,13 +344,9 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                       <pre className="text-sm text-gray-300 font-mono leading-relaxed overflow-x-auto">
                         <code>
                           {activeStep === 0 && integrationSteps[activeStep].language === 'bash' ? (
-                            <motion.span
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              className="text-green-400"
-                            >
+                            <span className="text-green-400">
                               $ {typingText}
-                              {typingText.length === (activeTab === 'quick' ? installCommand : setupCommand).length && (
+                              {isTypingComplete && (
                                 <motion.span
                                   animate={{ opacity: [1, 0] }}
                                   transition={{ duration: 0.8, repeat: Infinity }}
@@ -320,15 +355,11 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                                   |
                                 </motion.span>
                               )}
-                            </motion.span>
+                            </span>
                           ) : activeStep === 0 && integrationSteps[activeStep].language === 'html' ? (
-                            <motion.span
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              className="text-blue-300"
-                            >
+                            <span className="text-blue-300">
                               {typingText}
-                              {typingText.length === scriptTagCode.length && (
+                              {isTypingComplete && (
                                 <motion.span
                                   animate={{ opacity: [1, 0] }}
                                   transition={{ duration: 0.8, repeat: Infinity }}
@@ -337,7 +368,7 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                                   |
                                 </motion.span>
                               )}
-                            </motion.span>
+                            </span>
                           ) : integrationSteps[activeStep].language === 'bash' ? (
                             <span className="text-green-400">
                               {integrationSteps[activeStep].code}
