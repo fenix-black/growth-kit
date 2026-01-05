@@ -220,16 +220,30 @@
     "advanced": "Advanced (Next.js)",
     "copy": "Copy",
     "copied": "Copied!",
+    "preferNpm": "Building with ReactJS or VueJS?",
+    "useNpmSdk": "Use the npm SDK",
+    "backToScript": "Back to script tag",
     "quickFeatures": {
       "title": "✅ Works everywhere:",
-      "noBackend": "No backend required",
-      "anyFramework": "Any JavaScript framework",
-      "staticSites": "Static site generators",
+      "noBackend": "No build step needed",
+      "anyFramework": "WordPress, Shopify, Webflow",
+      "staticSites": "Static sites & HTML",
       "codepen": "CodePen/CodeSandbox",
       "githubPages": "GitHub Pages ready",
-      "instantDeploy": "Instant deployment",
+      "instantDeploy": "Always up-to-date",
       "secureKeys": "Secure public keys",
-      "worksAnywhere": "Works anywhere JS runs"
+      "worksAnywhere": "Any website or platform"
+    },
+    "npmFeatures": {
+      "title": "⚛️ For React & Vue:",
+      "react": "React & Vue support",
+      "typescript": "Full TypeScript types",
+      "hooks": "Hooks & components",
+      "treeshake": "Tree-shakeable imports",
+      "ide": "IDE autocompletion",
+      "packageManager": "npm/yarn/pnpm",
+      "versionPin": "Version pinning",
+      "testable": "Unit test friendly"
     },
     "advancedFeatures": {
       "title": "⚡ Advanced features:",
@@ -243,9 +257,17 @@
       "maxSecurity": "Maximum security"
     },
     "steps": {
+      "addScript": {
+        "title": "Add to Your Site",
+        "description": "One script tag. Works everywhere instantly."
+      },
+      "simpleConfig": {
+        "title": "Configure in Dashboard",
+        "description": "That's it! Widget auto-detects what to show."
+      },
       "install": {
         "title": "Install the SDK",
-        "description": "Works with React, Vue, Svelte, vanilla JS, anywhere"
+        "description": "For React and Next.js applications"
       },
       "useKey": {
         "title": "Use Your Public Key",

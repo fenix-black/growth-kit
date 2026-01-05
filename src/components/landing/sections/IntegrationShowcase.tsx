@@ -16,6 +16,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 export default function IntegrationShowcase() {
   const [activeTab, setActiveTab] = useState<'quick' | 'advanced'>('quick');
+  const [quickMode, setQuickMode] = useState<'script' | 'npm'>('script');
   const [activeStep, setActiveStep] = useState(0);
   const [typingText, setTypingText] = useState('');
   const [showCopied, setShowCopied] = useState(false);
@@ -23,11 +24,21 @@ export default function IntegrationShowcase() {
 
   const installCommand = 'npm install @fenixblack/growthkit';
   const setupCommand = 'npx @fenixblack/growthkit setup';
+  const scriptTagCode = `<script
+  src="https://growth.fenixblack.ai/embed/growthkit.js"
+  data-public-key="pk_your_public_key"
+  async>
+</script>`;
 
   // Typing animation effect
   useEffect(() => {
     if (activeStep === 0) {
-      const command = activeTab === 'quick' ? installCommand : setupCommand;
+      let command: string;
+      if (activeTab === 'quick') {
+        command = quickMode === 'script' ? scriptTagCode : installCommand;
+      } else {
+        command = setupCommand;
+      }
       let i = 0;
       setTypingText('');
       const interval = setInterval(() => {
@@ -36,12 +47,36 @@ export default function IntegrationShowcase() {
         if (i > command.length) {
           clearInterval(interval);
         }
-      }, 50);
+      }, quickMode === 'script' ? 20 : 50); // Faster for longer script tag
       return () => clearInterval(interval);
     }
-  }, [activeStep, activeTab]);  // Re-run when tab or step changes
+  }, [activeStep, activeTab, quickMode]);  // Re-run when tab, step, or mode changes
 
-  const quickStartSteps = [
+  const scriptTagSteps = [
+    {
+      step: '01',
+      title: t('integration.steps.addScript.title'),
+      description: t('integration.steps.addScript.description'),
+      code: scriptTagCode,
+      language: 'html'
+    },
+    {
+      step: '02',
+      title: t('integration.steps.simpleConfig.title'),
+      description: t('integration.steps.simpleConfig.description'),
+      code: `<!-- Optional: customize appearance -->
+<script
+  src="https://growth.fenixblack.ai/embed/growthkit.js"
+  data-public-key="pk_your_public_key"
+  data-theme="dark"
+  data-language="en"
+  async>
+</script>`,
+      language: 'html'
+    }
+  ];
+
+  const npmSteps = [
     {
       step: '01',
       title: t('integration.steps.install.title'),
@@ -72,6 +107,8 @@ function App() {
       language: 'tsx'
     }
   ];
+
+  const quickStartSteps = quickMode === 'script' ? scriptTagSteps : npmSteps;
 
   const advancedSteps = [
     {
@@ -284,8 +321,29 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                                 </motion.span>
                               )}
                             </motion.span>
+                          ) : activeStep === 0 && integrationSteps[activeStep].language === 'html' ? (
+                            <motion.span
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="text-blue-300"
+                            >
+                              {typingText}
+                              {typingText.length === scriptTagCode.length && (
+                                <motion.span
+                                  animate={{ opacity: [1, 0] }}
+                                  transition={{ duration: 0.8, repeat: Infinity }}
+                                  className="text-gray-400"
+                                >
+                                  |
+                                </motion.span>
+                              )}
+                            </motion.span>
                           ) : integrationSteps[activeStep].language === 'bash' ? (
                             <span className="text-green-400">
+                              {integrationSteps[activeStep].code}
+                            </span>
+                          ) : integrationSteps[activeStep].language === 'html' ? (
+                            <span className="text-blue-300">
                               {integrationSteps[activeStep].code}
                             </span>
                           ) : (
@@ -314,11 +372,40 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
               </div>
             </ScrollReveal>
 
+            {/* Switch to npm/script link - only show in Quick Start tab */}
+            {activeTab === 'quick' && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-6 text-center"
+              >
+                <button
+                  onClick={() => {
+                    setQuickMode(quickMode === 'script' ? 'npm' : 'script');
+                    setActiveStep(0);
+                  }}
+                  className="inline-flex items-center space-x-2 text-sm text-gray-600 hover:text-primary transition-colors"
+                >
+                  <span>{quickMode === 'script' ? '⚛️' : '🌐'}</span>
+                  <span>
+                    {quickMode === 'script' 
+                      ? `${t('integration.preferNpm')} ` 
+                      : `${t('integration.backToScript')}`}
+                  </span>
+                  {quickMode === 'script' && (
+                    <span className="text-primary font-medium hover:underline">
+                      {t('integration.useNpmSdk')} →
+                    </span>
+                  )}
+                </button>
+              </motion.div>
+            )}
+
             {/* Features Highlight */}
             <ScrollReveal delay={0.2} className="mt-8">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={activeTab}
+                  key={`${activeTab}-${quickMode}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -336,29 +423,43 @@ export { middleware, config } from '@fenixblack/growthkit/auto-middleware';
                       <Sparkles className="w-5 h-5 text-fenix-purple" />
                     )}
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {activeTab === 'quick' ? t('integration.quickFeatures.title') : t('integration.advancedFeatures.title')}
+                      {activeTab === 'quick' 
+                        ? (quickMode === 'script' ? t('integration.quickFeatures.title') : t('integration.npmFeatures.title'))
+                        : t('integration.advancedFeatures.title')}
                     </h3>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    {(activeTab === 'quick' ? [
-                      { icon: '✨', text: t('integration.quickFeatures.noBackend') },
-                      { icon: '🚀', text: t('integration.quickFeatures.anyFramework') },
-                      { icon: '📦', text: t('integration.quickFeatures.staticSites') },
-                      { icon: '🎨', text: t('integration.quickFeatures.codepen') },
-                      { icon: '🌐', text: t('integration.quickFeatures.githubPages') },
-                      { icon: '⚡', text: t('integration.quickFeatures.instantDeploy') },
-                      { icon: '🔒', text: t('integration.quickFeatures.secureKeys') },
-                      { icon: '📱', text: t('integration.quickFeatures.worksAnywhere') }
-                    ] : [
-                      { icon: '🔐', text: t('integration.advancedFeatures.serverKeys') },
-                      { icon: '🛣️', text: t('integration.advancedFeatures.customRouting') },
-                      { icon: '🔄', text: t('integration.advancedFeatures.apiProxying') },
-                      { icon: '✉️', text: t('integration.advancedFeatures.emailFlow') },
-                      { icon: '🎯', text: t('integration.advancedFeatures.advancedMiddleware') },
-                      { icon: '⚙️', text: t('integration.advancedFeatures.customConfig') },
-                      { icon: '🏗️', text: t('integration.advancedFeatures.fullStack') },
-                      { icon: '🚀', text: t('integration.advancedFeatures.maxSecurity') }
-                    ]).map((feature, index) => (
+                    {(activeTab === 'quick' 
+                      ? (quickMode === 'script' ? [
+                          { icon: '✨', text: t('integration.quickFeatures.noBackend') },
+                          { icon: '🚀', text: t('integration.quickFeatures.anyFramework') },
+                          { icon: '📦', text: t('integration.quickFeatures.staticSites') },
+                          { icon: '🎨', text: t('integration.quickFeatures.codepen') },
+                          { icon: '🌐', text: t('integration.quickFeatures.githubPages') },
+                          { icon: '⚡', text: t('integration.quickFeatures.instantDeploy') },
+                          { icon: '🔒', text: t('integration.quickFeatures.secureKeys') },
+                          { icon: '📱', text: t('integration.quickFeatures.worksAnywhere') }
+                        ] : [
+                          { icon: '⚛️', text: t('integration.npmFeatures.react') },
+                          { icon: '📘', text: t('integration.npmFeatures.typescript') },
+                          { icon: '🪝', text: t('integration.npmFeatures.hooks') },
+                          { icon: '🌳', text: t('integration.npmFeatures.treeshake') },
+                          { icon: '💻', text: t('integration.npmFeatures.ide') },
+                          { icon: '📦', text: t('integration.npmFeatures.packageManager') },
+                          { icon: '🔄', text: t('integration.npmFeatures.versionPin') },
+                          { icon: '🧪', text: t('integration.npmFeatures.testable') }
+                        ])
+                      : [
+                          { icon: '🔐', text: t('integration.advancedFeatures.serverKeys') },
+                          { icon: '🛣️', text: t('integration.advancedFeatures.customRouting') },
+                          { icon: '🔄', text: t('integration.advancedFeatures.apiProxying') },
+                          { icon: '✉️', text: t('integration.advancedFeatures.emailFlow') },
+                          { icon: '🎯', text: t('integration.advancedFeatures.advancedMiddleware') },
+                          { icon: '⚙️', text: t('integration.advancedFeatures.customConfig') },
+                          { icon: '🏗️', text: t('integration.advancedFeatures.fullStack') },
+                          { icon: '🚀', text: t('integration.advancedFeatures.maxSecurity') }
+                        ]
+                    ).map((feature, index) => (
                       <motion.div
                         key={feature.text}
                         initial={{ opacity: 0, x: -10 }}

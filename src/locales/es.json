@@ -220,16 +220,30 @@
     "advanced": "Avanzado (Next.js)",
     "copy": "Copiar",
     "copied": "¡Copiado!",
+    "preferNpm": "¿Desarrollando con ReactJS o VueJS?",
+    "useNpmSdk": "Usa el SDK npm",
+    "backToScript": "Volver a script tag",
     "quickFeatures": {
       "title": "✅ Funciona en todas partes:",
-      "noBackend": "Sin backend requerido",
-      "anyFramework": "Cualquier framework JS",
-      "staticSites": "Generadores de sitios estáticos",
+      "noBackend": "Sin paso de build",
+      "anyFramework": "WordPress, Shopify, Webflow",
+      "staticSites": "Sitios estáticos y HTML",
       "codepen": "CodePen/CodeSandbox",
       "githubPages": "GitHub Pages ready",
-      "instantDeploy": "Deploy instantáneo",
+      "instantDeploy": "Siempre actualizado",
       "secureKeys": "Public keys seguras",
-      "worksAnywhere": "Funciona donde JS funcione"
+      "worksAnywhere": "Cualquier sitio web"
+    },
+    "npmFeatures": {
+      "title": "⚛️ Para React y Vue:",
+      "react": "Soporte React y Vue",
+      "typescript": "Tipos TypeScript completos",
+      "hooks": "Hooks y componentes",
+      "treeshake": "Imports tree-shakeable",
+      "ide": "Autocompletado IDE",
+      "packageManager": "npm/yarn/pnpm",
+      "versionPin": "Versión fija",
+      "testable": "Fácil de testear"
     },
     "advancedFeatures": {
       "title": "⚡ Features avanzados:",
@@ -243,9 +257,17 @@
       "maxSecurity": "Máxima seguridad"
     },
     "steps": {
+      "addScript": {
+        "title": "Agrega a tu Sitio",
+        "description": "Un script tag. Funciona en todas partes."
+      },
+      "simpleConfig": {
+        "title": "Configura en el Dashboard",
+        "description": "¡Listo! El widget detecta qué mostrar."
+      },
       "install": {
         "title": "Instala el SDK",
-        "description": "Funciona con React, Vue, Svelte, vanilla JS, donde sea"
+        "description": "Para aplicaciones React y Next.js"
       },
       "useKey": {
         "title": "Usa tu Public Key",
