@@ -41,6 +41,7 @@ export interface Translations {
     errorMinimal: string;
     errorOffline: string;
     retry: string;
+    change: string;
   };
   
   // CreditExhaustionModal translations
@@ -114,6 +115,7 @@ const enTranslations: Translations = {
     errorMinimal: "Offline",
     errorOffline: "Connection failed - running in minimal mode",
     retry: "Retry",
+    change: "Change",
   },
   modal: {
     earnCredits: "Earn Credits",
@@ -185,6 +187,7 @@ const esTranslations: Translations = {
     errorMinimal: "Desconectado",
     errorOffline: "Conexión fallida - ejecutando en modo mínimo",
     retry: "Reintentar",
+    change: "Cambiar",
   },
   modal: {
     earnCredits: "Ganar Créditos",

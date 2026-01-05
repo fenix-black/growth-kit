@@ -6,6 +6,8 @@ import { useGrowthKit } from '../useGrowthKit';
 import { WaitlistForm } from './WaitlistForm';
 import { CreditExhaustionModal } from './CreditExhaustionModal';
 import type { CreditExhaustionModalRef } from './CreditExhaustionModal';
+import { NameChangeModal } from './NameChangeModal';
+import type { NameChangeModalRef } from './NameChangeModal';
 import type { GrowthKitConfig, GrowthKitTheme } from '../types';
 import { useTranslation } from '../localization';
 import { GROWTHKIT_LOGO_ICON_BASE64 } from '../assets';
@@ -124,6 +126,7 @@ const AccountWidgetInternal = forwardRef<
   const finalFooterLogoUrl = getFooterLogoUrl(config.apiUrl, effectiveTheme === 'dark', footerLogoUrl);
 
   const creditModalRef = useRef<CreditExhaustionModalRef>(null);
+  const nameChangeModalRef = useRef<NameChangeModalRef>(null);
   const [showProfileExpanded, setShowProfileExpanded] = useState(false);
   const [prevCredits, setPrevCredits] = useState(credits);
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
@@ -450,9 +453,27 @@ const AccountWidgetInternal = forwardRef<
             {showName && (name || !slim) && (
               <div style={styles.expandedRow}>
                 <span style={{ ...styles.expandedLabel, color: themeColors.textSecondary }}>{t('widget.name')}</span>
-                <span style={{ ...styles.expandedValue, color: themeColors.text }}>
-                  {name || t('widget.notSet')}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ ...styles.expandedValue, color: themeColors.text }}>
+                    {name || t('widget.notSet')}
+                  </span>
+                  {hasVerifiedEmail && name && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        nameChangeModalRef.current?.open();
+                        setShowProfileExpanded(false);
+                      }}
+                      style={{
+                        ...styles.changeButton,
+                        color: themeColors.primary,
+                        borderColor: themeColors.primary + '40',
+                      }}
+                    >
+                      {t('widget.change')}
+                    </button>
+                  )}
+                </div>
               </div>
             )}
             
@@ -585,6 +606,9 @@ const AccountWidgetInternal = forwardRef<
 
       {/* Credit modal */}
       <CreditExhaustionModal ref={creditModalRef} />
+
+      {/* Name change modal */}
+      <NameChangeModal ref={nameChangeModalRef} />
 
       {/* Internal notifications */}
       {notification && (
@@ -1056,6 +1080,16 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: '400',
     textAlign: 'center',
     opacity: 0.8,
+  },
+  changeButton: {
+    background: 'none',
+    border: '1px solid',
+    borderRadius: '4px',
+    padding: '2px 8px',
+    fontSize: '11px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
   },
 };
 

@@ -3,6 +3,8 @@ export { GrowthKitStateProvider, useGrowthKitState } from './GrowthKitStateProvi
 export { GrowthKitGate } from './GrowthKitGate';
 export { CreditExhaustionModal } from './CreditExhaustionModal';
 export type { CreditExhaustionModalRef } from './CreditExhaustionModal';
+export { NameChangeModal } from './NameChangeModal';
+export type { NameChangeModalRef } from './NameChangeModal';
 export { WaitlistForm } from './WaitlistForm';
 export { ProductWaitlistWidget } from './ProductWaitlistWidget';
 export { EmbedWaitlistWidget } from './EmbedWaitlistWidget';

@@ -281,6 +281,7 @@ interface Translations {
         errorMinimal: string;
         errorOffline: string;
         retry: string;
+        change: string;
     };
     modal: {
         earnCredits: string;
@@ -408,6 +409,21 @@ declare class GrowthKitAPI {
         welcomeMessage?: string;
         enableCalendar?: boolean;
         enableRAG?: boolean;
+    }>;
+    requestNameChange(newName: string): Promise<{
+        success: boolean;
+        email?: string;
+        expiresAt?: string;
+        error?: string;
+        message?: string;
+        retryAfter?: number;
+    }>;
+    confirmNameChange(code: string): Promise<{
+        success: boolean;
+        name?: string;
+        error?: string;
+        message?: string;
+        remainingAttempts?: number;
     }>;
 }
 

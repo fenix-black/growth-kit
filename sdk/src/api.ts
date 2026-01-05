@@ -730,4 +730,47 @@ export class GrowthKitAPI {
 
     return result.data;
   }
+
+  // ============================================
+  // PROFILE MANAGEMENT API METHODS
+  // ============================================
+
+  async requestNameChange(newName: string): Promise<{
+    success: boolean;
+    email?: string;
+    expiresAt?: string;
+    error?: string;
+    message?: string;
+    retryAfter?: number;
+  }> {
+    const result = await this.request('/public/profile/name/request-change', {
+      method: 'POST',
+      body: JSON.stringify({ newName }),
+    });
+
+    if (!result.success) {
+      return { success: false, error: result.error, message: result.error };
+    }
+
+    return result.data;
+  }
+
+  async confirmNameChange(code: string): Promise<{
+    success: boolean;
+    name?: string;
+    error?: string;
+    message?: string;
+    remainingAttempts?: number;
+  }> {
+    const result = await this.request('/public/profile/name/confirm-change', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    });
+
+    if (!result.success) {
+      return { success: false, error: result.error, message: result.error };
+    }
+
+    return result.data;
+  }
 }

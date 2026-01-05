@@ -127,6 +127,7 @@ model App {
   chatConfig                  ChatConfiguration?
   chatConversations           ChatConversation[]
   chatBookings                ChatBooking[]
+  profileChangeRequests       ProfileChangeRequest[]
 
   @@index([tenantId])
   @@index([organizationId])
@@ -184,6 +185,7 @@ model Fingerprint {
   activities     Activity[]
   orgUserAccount OrgUserAccount? @relation(fields: [orgUserAccountId], references: [id])
   chatConversations ChatConversation[]
+  profileChangeRequests ProfileChangeRequest[]
 
   @@unique([appId, fingerprint])
   @@index([appId])
@@ -591,4 +593,28 @@ model ChatConversationInsights {
   @@index([intent])
   @@index([urgency])
   @@map("chat_conversation_insights")
+}
+
+// ============================================
+// PROFILE CHANGE REQUESTS
+// ============================================
+
+model ProfileChangeRequest {
+  id              String    @id @default(cuid())
+  fingerprintId   String
+  appId           String
+  type            String    // "name", "email" (extensible for future)
+  newValue        String    // The requested new value
+  code            String    // 6-digit code (hashed)
+  expiresAt       DateTime
+  usedAt          DateTime?
+  failedAttempts  Int       @default(0)
+  createdAt       DateTime  @default(now())
+  
+  fingerprint     Fingerprint @relation(fields: [fingerprintId], references: [id], onDelete: Cascade)
+  app             App         @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  @@unique([fingerprintId, appId, type])
+  @@index([expiresAt])
+  @@map("profile_change_requests")
 }
