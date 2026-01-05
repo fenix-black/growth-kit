@@ -30,7 +30,10 @@ import {
   Clock,
   FileText,
   DollarSign,
-  MessageSquare
+  MessageSquare,
+  Share2,
+  Code,
+  ExternalLink
 } from 'lucide-react';
 import { ChatTab } from '../../components/ChatTab';
 import { ChatEnableCard } from '../../components/ChatEnableCard';
@@ -96,7 +99,7 @@ const baseTabs = [
   { id: 'users-leads', name: 'Users & Leads', icon: Users },
   { id: 'waitlist', name: 'Waitlist', icon: Users },
   { id: 'analytics', name: 'Analytics', icon: BarChart3 },
-  { id: 'api-keys', name: 'API Tokens', icon: Key },
+  { id: 'share', name: 'Share', icon: Share2 },
   { id: 'emails', name: 'Email Templates', icon: Mail },
 ];
 
@@ -114,16 +117,20 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   // JSON editing state
   const [policyJsonText, setPolicyJsonText] = useState<string>('');
+  // Embed options state
+  const [embedTheme, setEmbedTheme] = useState<'auto' | 'light' | 'dark'>('auto');
+  const [embedLanguage, setEmbedLanguage] = useState<'en' | 'es'>('en');
+  const [embedPosition, setEmbedPosition] = useState<'bottom-right' | 'bottom-left'>('bottom-right');
   const [policyJsonError, setPolicyJsonError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAppDetails();
   }, [appId]);
 
-  // Auto-generate public key if missing when API tokens tab is viewed
+  // Auto-generate public key if missing when Share tab is viewed
   useEffect(() => {
     const generatePublicKeyIfMissing = async () => {
-      if (activeTab === 'api-keys' && app && !app.publicKey && !loading) {
+      if (activeTab === 'share' && app && !app.publicKey && !loading) {
         try {
           // Call endpoint to generate public key for this app
           const response = await fetch(`/api/v1/admin/app/${appId}/generate-public-key`, {
@@ -958,106 +965,208 @@ export default function AppDetailDashboard({ appId }: { appId: string }) {
         <ActivityAnalytics appId={appId} app={app} />
       )}
 
-      {activeTab === 'api-keys' && (
-        <ContentCard 
-          title="API Tokens"
-          actions={
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<Plus size={16} />}
-              onClick={handleCreateApiKey}
-            >
-              Create New Key
-            </Button>
-          }
-        >
-          {/* Public Key Section */}
-          <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="text-sm font-medium text-emerald-800 dark:text-emerald-200">Public Key</h3>
-                <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                  Safe for client-side usage. Use this in your widget initialization.
-                </p>
-              </div>
-            </div>
-            {app.publicKey ? (
-              <div className="flex items-center space-x-2">
-                <code className="flex-1 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 rounded border font-mono">
-                  {app.publicKey}
-                </code>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleCopyToClipboard(app.publicKey!, 'publicKey')}
-                  className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-900/30"
-                >
-                  {showCopySuccess === 'publicKey' ? <CheckCircle size={16} /> : <Copy size={16} />}
-                </Button>
-              </div>
-            ) : (
-              <div className="text-sm text-gray-500 italic">No public key generated yet</div>
-            )}
-          </div>
-
-          {/* Private API Keys Section */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Private API Keys</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-              These keys have full access to your app data. Keep them secure and never expose them in client-side code.
+      {activeTab === 'share' && (
+        <div className="space-y-6">
+          {/* Embed Code Section */}
+          <ContentCard title="Embed Code">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Add this script to your website. It automatically shows the right widget based on your app settings.
             </p>
-          </div>
+            
+            {/* Currently active info */}
+            <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Currently active:</p>
+              <div className="flex flex-wrap gap-2">
+                <span className={cn(
+                  'px-2 py-1 text-xs rounded-full',
+                  app.waitlistEnabled ? 'bg-primary/10 text-primary' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                )}>
+                  {app.waitlistEnabled ? '✓' : '✗'} Waitlist
+                </span>
+                <span className={cn(
+                  'px-2 py-1 text-xs rounded-full',
+                  app.chatConfig?.enabled ? 'bg-primary/10 text-primary' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                )}>
+                  {app.chatConfig?.enabled ? '✓' : '✗'} Chat
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                Configure these in the <button onClick={() => setActiveTab('settings')} className="text-primary hover:underline">Settings</button> tab.
+              </p>
+            </div>
 
-          {app.apiKeys && app.apiKeys.length > 0 ? (
-            <div className="space-y-3">
-              {app.apiKeys.map((apiKey) => (
-                <div key={apiKey.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{apiKey.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Created: {new Date(apiKey.createdAt).toLocaleDateString()}
-                      {apiKey.lastUsedAt && ` | Last used: ${new Date(apiKey.lastUsedAt).toLocaleDateString()}`}
-                      {apiKey.expiresAt && ` | Expires: ${new Date(apiKey.expiresAt).toLocaleDateString()}`}
-                    </p>
-                    <div className="flex items-center mt-2 space-x-2">
-                      <code className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-2 py-1 rounded font-mono">
-                        {apiKey.keyHint}****
-                      </code>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">Key hint (full key hidden)</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span
-                      className={cn(
-                        'px-2 py-1 text-xs font-semibold rounded-full',
-                        apiKey.isActive
-                          ? 'bg-primary/10 text-primary'
-                          : 'bg-red-100 text-red-800'
-                      )}
+            {/* Embed code block */}
+            {app.publicKey ? (
+              <>
+                <div className="relative">
+                  <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-x-auto">
+{`<script
+  src="https://growth.fenixblack.ai/embed/growthkit.js"
+  data-public-key="${app.publicKey}"${embedTheme !== 'auto' ? `\n  data-theme="${embedTheme}"` : ''}${embedLanguage !== 'en' ? `\n  data-language="${embedLanguage}"` : ''}${embedPosition !== 'bottom-right' ? `\n  data-position="${embedPosition}"` : ''}
+  async>
+</script>`}
+                  </pre>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const code = `<script\n  src="https://growth.fenixblack.ai/embed/growthkit.js"\n  data-public-key="${app.publicKey}"${embedTheme !== 'auto' ? `\n  data-theme="${embedTheme}"` : ''}${embedLanguage !== 'en' ? `\n  data-language="${embedLanguage}"` : ''}${embedPosition !== 'bottom-right' ? `\n  data-position="${embedPosition}"` : ''}\n  async>\n</script>`;
+                      handleCopyToClipboard(code, 'embedCode');
+                    }}
+                    className="absolute top-2 right-2 text-gray-400 hover:text-white hover:bg-gray-700"
+                  >
+                    {showCopySuccess === 'embedCode' ? <CheckCircle size={16} /> : <Copy size={16} />}
+                  </Button>
+                </div>
+
+                {/* Options */}
+                <div className="mt-4 flex flex-wrap gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Theme</label>
+                    <select
+                      value={embedTheme}
+                      onChange={(e) => setEmbedTheme(e.target.value as typeof embedTheme)}
+                      className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800"
                     >
-                      {apiKey.isActive ? 'Active' : 'Revoked'}
-                    </span>
-                    {apiKey.isActive && (
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleRevokeApiKey(apiKey.id)}
-                      >
-                        Revoke
-                      </Button>
-                    )}
+                      <option value="auto">Auto</option>
+                      <option value="light">Light</option>
+                      <option value="dark">Dark</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
+                    <select
+                      value={embedLanguage}
+                      onChange={(e) => setEmbedLanguage(e.target.value as typeof embedLanguage)}
+                      className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800"
+                    >
+                      <option value="en">English</option>
+                      <option value="es">Spanish</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Position</label>
+                    <select
+                      value={embedPosition}
+                      onChange={(e) => setEmbedPosition(e.target.value as typeof embedPosition)}
+                      className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800"
+                    >
+                      <option value="bottom-right">Bottom Right</option>
+                      <option value="bottom-left">Bottom Left</option>
+                    </select>
                   </div>
                 </div>
-              ))}
+              </>
+            ) : (
+              <div className="text-sm text-gray-500 italic">Generating public key...</div>
+            )}
+          </ContentCard>
+
+          {/* React/Next.js SDK Section */}
+          <ContentCard title="React / Next.js SDK">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              For React or Next.js projects, install the SDK package:
+            </p>
+            <div className="relative mb-4">
+              <pre className="bg-gray-900 text-gray-100 p-3 rounded-lg text-sm font-mono">
+                npm install @growthkit/sdk
+              </pre>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleCopyToClipboard('npm install @growthkit/sdk', 'npmInstall')}
+                className="absolute top-2 right-2 text-gray-400 hover:text-white hover:bg-gray-700"
+              >
+                {showCopySuccess === 'npmInstall' ? <CheckCircle size={16} /> : <Copy size={16} />}
+              </Button>
             </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <Key className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p>No API keys created yet</p>
+            
+            {/* Public Key */}
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-emerald-800 dark:text-emerald-200">Public Key</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">Use this to initialize the SDK</p>
+                </div>
+                {app.publicKey && (
+                  <div className="flex items-center space-x-2">
+                    <code className="text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded border font-mono">
+                      {app.publicKey}
+                    </code>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCopyToClipboard(app.publicKey!, 'publicKey')}
+                      className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100"
+                    >
+                      {showCopySuccess === 'publicKey' ? <CheckCircle size={16} /> : <Copy size={16} />}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-        </ContentCard>
+          </ContentCard>
+
+          {/* Server-Side API Keys Section */}
+          <ContentCard 
+            title="Server-Side API"
+            actions={
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<Plus size={16} />}
+                onClick={handleCreateApiKey}
+              >
+                Create Key
+              </Button>
+            }
+          >
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Private keys for backend integrations. Never expose in client-side code.
+            </p>
+
+            {app.apiKeys && app.apiKeys.length > 0 ? (
+              <div className="space-y-3">
+                {app.apiKeys.map((apiKey) => (
+                  <div key={apiKey.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{apiKey.name}</p>
+                      <div className="flex items-center mt-1 space-x-2">
+                        <code className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-2 py-0.5 rounded font-mono">
+                          {apiKey.keyHint}****
+                        </code>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(apiKey.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {apiKey.isActive ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRevokeApiKey(apiKey.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          Revoke
+                        </Button>
+                      ) : (
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                          Revoked
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 text-gray-500">
+                <Key className="mx-auto h-10 w-10 text-gray-400 mb-2" />
+                <p className="text-sm">No API keys yet</p>
+              </div>
+            )}
+          </ContentCard>
+        </div>
       )}
 
       {activeTab === 'emails' && (
