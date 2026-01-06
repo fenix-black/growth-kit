@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
 export interface NavTheme {
@@ -10,56 +10,110 @@ export interface NavTheme {
   buttonStyle: 'light' | 'dark';
 }
 
-const defaultTheme: NavTheme = {
+const lightTheme: NavTheme = {
   isDark: false,
   textColor: 'text-gray-900',
   logoFilter: 'brightness(0)',
   buttonStyle: 'light'
 };
 
-export function useAdaptiveNav() {
-  const [navTheme, setNavTheme] = useState<NavTheme>(defaultTheme);
-  const pathname = usePathname();
+const darkTheme: NavTheme = {
+  isDark: true,
+  textColor: 'text-white',
+  logoFilter: 'brightness(0) invert(1)',
+  buttonStyle: 'dark'
+};
 
-  // Reset to default theme on route change
+// Check point: around logo position, middle of header height
+const CHECK_X = 120; // Around logo position
+const CHECK_Y = 32;  // Middle of header (64px / 2)
+
+export function useAdaptiveNav() {
+  const [navTheme, setNavTheme] = useState<NavTheme>(lightTheme);
+  const pathname = usePathname();
+  const rafRef = useRef<number | null>(null);
+  const headerRef = useRef<HTMLElement | null>(null);
+
+  // Find the header element to exclude it from detection
   useEffect(() => {
-    setNavTheme(defaultTheme);
+    headerRef.current = document.querySelector('header, nav, [role="navigation"]');
   }, [pathname]);
 
+  // Check if an element or any of its ancestors has a dark-section class
+  const hasDarkAncestor = useCallback((element: Element | null): boolean => {
+    let current = element;
+    while (current && current !== document.body) {
+      if (current.id === 'get-started' || current.classList.contains('dark-section')) {
+        return true;
+      }
+      // Also check for light-section to explicitly return false
+      if (current.classList.contains('light-section')) {
+        return false;
+      }
+      current = current.parentElement;
+    }
+    return false;
+  }, []);
+
+  // Get the element behind the header at the check point
+  const getElementBehindHeader = useCallback((): Element | null => {
+    // Temporarily hide the header to get what's behind it
+    const header = headerRef.current;
+    const originalPointerEvents = header?.style.pointerEvents;
+    
+    if (header) {
+      header.style.pointerEvents = 'none';
+    }
+
+    // Get element at the check point
+    const element = document.elementFromPoint(CHECK_X, CHECK_Y);
+
+    // Restore header
+    if (header) {
+      header.style.pointerEvents = originalPointerEvents || '';
+    }
+
+    return element;
+  }, []);
+
+  // Update theme based on what's behind the header
+  const updateTheme = useCallback(() => {
+    const element = getElementBehindHeader();
+    
+    if (element && hasDarkAncestor(element)) {
+      setNavTheme(darkTheme);
+    } else {
+      setNavTheme(lightTheme);
+    }
+  }, [getElementBehindHeader, hasDarkAncestor]);
+
+  // Throttled scroll handler using requestAnimationFrame
+  const handleScroll = useCallback(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+    rafRef.current = requestAnimationFrame(updateTheme);
+  }, [updateTheme]);
+
+  // Set up scroll listener and initial check
   useEffect(() => {
-    const observerOptions = {
-      root: null,
-      rootMargin: '-80px 0px -80px 0px', // Account for nav height
-      threshold: 0.3
-    };
+    // Initial check
+    updateTheme();
+    
+    // Also check after a short delay for hydration
+    const timer = setTimeout(updateTheme, 50);
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const sectionId = entry.target.id;
-          const isDarkSection = sectionId === 'get-started' || 
-                               entry.target.classList.contains('dark-section') ||
-                               !!entry.target.querySelector('.bg-gradient-to-r.from-gray-900') ||
-                               !!entry.target.querySelector('[style*="gray-900"]');
-          
-          setNavTheme({
-            isDark: isDarkSection,
-            textColor: isDarkSection ? 'text-white' : 'text-gray-900',
-            logoFilter: isDarkSection ? 'brightness(0) invert(1)' : 'brightness(0)',
-            buttonStyle: isDarkSection ? 'dark' : 'light'
-          });
-        }
-      });
-    }, observerOptions);
-
-    // Observe all main sections
-    const sections = document.querySelectorAll('section[id], .dark-section, .light-section');
-    sections.forEach((section) => observer.observe(section));
+    // Listen to scroll
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      sections.forEach((section) => observer.unobserve(section));
+      clearTimeout(timer);
+      window.removeEventListener('scroll', handleScroll);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
     };
-  }, [pathname]); // Re-run observer setup on route change
+  }, [pathname, handleScroll, updateTheme]);
 
   return navTheme;
 }
