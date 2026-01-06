@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { GrowthKitProvider } from '../../../../sdk/src/components/GrowthKitProvider';
 import { useGrowthKit } from '../../../../sdk/src/useGrowthKit';
@@ -304,7 +304,7 @@ function AccountWidgetInternal({
   );
 }
 
-export default function EmbedAccountPage() {
+function EmbedAccountContent() {
   const searchParams = useSearchParams();
   const [config, setConfig] = useState<GrowthKitConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -397,6 +397,25 @@ export default function EmbedAccountPage() {
         <AccountWidgetInternal {...options} />
       </GrowthKitProvider>
     </div>
+  );
+}
+
+export default function EmbedAccountPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        padding: '12px 16px',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        color: '#6b7280',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}>
+        Loading...
+      </div>
+    }>
+      <EmbedAccountContent />
+    </Suspense>
   );
 }
 

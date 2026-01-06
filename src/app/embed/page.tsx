@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { GrowthKitProvider } from '../../../sdk/src/components/GrowthKitProvider';
 import { useGrowthKit } from '../../../sdk/src/useGrowthKit';
@@ -133,7 +133,7 @@ function SmartWidget({ position }: { position: 'bottom-right' | 'bottom-left' | 
   return null;
 }
 
-export default function SmartEmbedPage() {
+function SmartEmbedContent() {
   const searchParams = useSearchParams();
   const [config, setConfig] = useState<GrowthKitConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -196,6 +196,25 @@ export default function SmartEmbedPage() {
     <GrowthKitProvider config={config}>
       <SmartWidget position={position} />
     </GrowthKitProvider>
+  );
+}
+
+export default function SmartEmbedPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        padding: '20px',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        color: '#6b7280',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}>
+        Loading...
+      </div>
+    }>
+      <SmartEmbedContent />
+    </Suspense>
   );
 }
 

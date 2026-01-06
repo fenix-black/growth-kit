@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { GrowthKitProvider } from '../../../../sdk/src/components/GrowthKitProvider';
 import { EmbedWaitlistWidget } from '../../../../sdk/src/components/EmbedWaitlistWidget';
@@ -18,7 +18,7 @@ import type { GrowthKitConfig, GrowthKitTheme } from '../../../../sdk/src/types'
  * Example:
  * /embed/waitlist?pk=pk_xxx&theme=dark&lang=es&variant=compact
  */
-export default function EmbedWaitlistPage() {
+function EmbedWaitlistContent() {
   const searchParams = useSearchParams();
   const [config, setConfig] = useState<GrowthKitConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -115,6 +115,25 @@ export default function EmbedWaitlistPage() {
         }}
       />
     </GrowthKitProvider>
+  );
+}
+
+export default function EmbedWaitlistPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        padding: '20px',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        color: '#6b7280',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}>
+        Loading...
+      </div>
+    }>
+      <EmbedWaitlistContent />
+    </Suspense>
   );
 }
 

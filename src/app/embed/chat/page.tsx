@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { GrowthKitProvider } from '../../../../sdk/src/components/GrowthKitProvider';
 import { ChatWidget } from '../../../../sdk/src/components/ChatWidget';
@@ -18,7 +18,7 @@ import type { GrowthKitConfig, GrowthKitTheme } from '../../../../sdk/src/types'
  * Example:
  * /embed/chat?pk=pk_xxx&theme=dark&lang=es&position=bottom-left
  */
-export default function EmbedChatPage() {
+function EmbedChatContent() {
   const searchParams = useSearchParams();
   const [config, setConfig] = useState<GrowthKitConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +113,25 @@ export default function EmbedChatPage() {
         <ChatWidget position={position} />
       </div>
     </GrowthKitProvider>
+  );
+}
+
+export default function EmbedChatPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        padding: '20px',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        color: '#6b7280',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}>
+        Loading...
+      </div>
+    }>
+      <EmbedChatContent />
+    </Suspense>
   );
 }
 
