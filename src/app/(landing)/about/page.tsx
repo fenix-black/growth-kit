@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import { 
   Linkedin, 
@@ -13,42 +13,43 @@ import {
   Heart,
   ArrowRight
 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
-// Featured products data
-const featuredProducts = [
+// Featured products config (without descriptions - those come from translations)
+const featuredProductsConfig = [
   {
+    key: 'growthkit',
     name: 'GrowthKit',
-    description: 'Viral growth engine for any app',
     url: 'https://growth.fenixblack.ai',
     gradient: 'from-emerald-500 to-teal-500',
   },
   {
+    key: 'deskcloud',
     name: 'DeskCloud',
-    description: 'Give AI Agents eyes and hands over virtual desktops',
     url: 'https://www.deskcloud.app',
     gradient: 'from-blue-500 to-indigo-500',
   },
   {
+    key: 'okidoki',
     name: 'OkiDoki.chat',
-    description: 'Intelligent chat platform',
     url: 'https://www.okidoki.chat',
     gradient: 'from-purple-500 to-pink-500',
   },
   {
+    key: 'restore',
     name: 'Restore Photos',
-    description: 'AI photo restoration & animation',
     url: 'https://restore.fenixblack.ai',
     gradient: 'from-orange-500 to-red-500',
   },
   {
+    key: 'docxdiff',
     name: 'DocxDiff',
-    description: 'Smart document comparison',
     url: 'https://www.docxdiff.com',
     gradient: 'from-cyan-500 to-blue-500',
   },
   {
+    key: 'backgrounds',
     name: 'Virtual Backgrounds',
-    description: 'AI-powered Zoom backgrounds',
     url: 'https://backgrounds.fenixblack.ai',
     gradient: 'from-pink-500 to-rose-500',
   },
@@ -90,7 +91,7 @@ function StoryCard({
   description, 
   index 
 }: { 
-  icon: any; 
+  icon: React.ElementType; 
   title: string; 
   description: string; 
   index: number;
@@ -123,7 +124,11 @@ function StoryCard({
 }
 
 // Product card with tilt effect
-function ProductCard({ product, index }: { product: typeof featuredProducts[0]; index: number }) {
+function ProductCard({ product, description, index }: { 
+  product: typeof featuredProductsConfig[0]; 
+  description: string;
+  index: number;
+}) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   const [rotateX, setRotateX] = useState(0);
@@ -154,33 +159,33 @@ function ProductCard({ product, index }: { product: typeof featuredProducts[0]; 
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="block group"
+      className="group block"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{
         transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-        transition: 'transform 0.1s ease-out',
+        transformStyle: 'preserve-3d',
       }}
     >
-      <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-xl transition-all duration-300 h-full">
+      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+        {/* Gradient accent */}
         <div 
-          className={`w-10 h-10 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}
-        >
-          <span className="text-white font-bold text-sm">
-            {product.name.charAt(0)}
-          </span>
-        </div>
-        <h3 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+          className={`w-full h-2 rounded-t-xl -mt-6 -mx-6 mb-6 bg-gradient-to-r ${product.gradient}`}
+          style={{ width: 'calc(100% + 3rem)' }}
+        />
+        
+        <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
           {product.name}
           <ExternalLink className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
         </h3>
-        <p className="text-gray-500 text-sm">{product.description}</p>
+        <p className="text-gray-500 text-sm">{description}</p>
       </div>
     </motion.a>
   );
 }
 
 export default function AboutPage() {
+  const { t } = useTranslation();
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -219,7 +224,7 @@ export default function AboutPage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-emerald-400 text-sm font-medium tracking-widest uppercase mb-6"
           >
-            Building since 1995
+            {t('about.buildingSince')}
           </motion.p>
           
           <motion.h1
@@ -228,7 +233,7 @@ export default function AboutPage() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight"
           >
-            I help founders turn
+            {t('about.heroTitle1')}
             <br />
             <span 
               className="bg-clip-text text-transparent"
@@ -236,10 +241,10 @@ export default function AboutPage() {
                 backgroundImage: 'linear-gradient(to right, #10b981, #a855f7, #ec4899)',
               }}
             >
-              simple apps
+              {t('about.heroTitle2')}
             </span>
             <br />
-            into viral products
+            {t('about.heroTitle3')}
           </motion.h1>
           
           <motion.p
@@ -248,9 +253,7 @@ export default function AboutPage() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto"
           >
-            I wrote my first enterprise software as a teenager.
-            <br className="hidden sm:block" />
-            Three decades and 100+ projects later, I&apos;m still shipping.
+            {t('about.heroSubtitle')}
           </motion.p>
         </motion.div>
 
@@ -266,7 +269,7 @@ export default function AboutPage() {
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             className="flex flex-col items-center text-gray-500"
           >
-            <span className="text-xs uppercase tracking-widest mb-2">Scroll</span>
+            <span className="text-xs uppercase tracking-widest mb-2">{t('about.scroll')}</span>
             <ChevronDown className="w-5 h-5" />
           </motion.div>
         </motion.div>
@@ -302,7 +305,7 @@ export default function AboutPage() {
                     Pablo Schaffner
                   </h2>
                   <p className="text-gray-300 text-sm sm:text-base">
-                    Founder, FenixBlack.ai
+                    {t('about.founder')}
                   </p>
                 </div>
               </div>
@@ -320,7 +323,7 @@ export default function AboutPage() {
                 <AnimatedCounter value={30} />
               </span>
               <span className="text-emerald-100 text-sm font-medium">
-                years building
+                {t('about.stats.years')}
               </span>
             </motion.div>
 
@@ -336,7 +339,7 @@ export default function AboutPage() {
                 <AnimatedCounter value={100} suffix="+" />
               </span>
               <span className="text-purple-100 text-sm font-medium">
-                projects shipped
+                {t('about.stats.projects')}
               </span>
             </motion.div>
 
@@ -352,7 +355,7 @@ export default function AboutPage() {
                 <AnimatedCounter value={15} suffix="+" />
               </span>
               <span className="text-blue-100 text-sm font-medium">
-                live today
+                {t('about.stats.live')}
               </span>
             </motion.div>
 
@@ -399,29 +402,29 @@ export default function AboutPage() {
             className="text-center mb-16"
           >
             <span className="text-emerald-600 text-sm font-semibold tracking-widest uppercase">
-              The Journey
+              {t('about.journey')}
             </span>
           </motion.div>
 
           <div className="space-y-8">
             <StoryCard
               icon={Lightbulb}
-              title="The Problem I Noticed"
-              description="After decades of building software, I kept seeing the same pattern: founders wasting months rebuilding growth features from scratch. Referral systems, credit mechanics, waitlists — the same building blocks, reinvented over and over."
+              title={t('about.story.problem.title')}
+              description={t('about.story.problem.description')}
               index={0}
             />
             
             <StoryCard
               icon={Rocket}
-              title="My Solution"
-              description="I started FenixBlack to change that. Every product I build is designed to give creators superpowers — the same growth mechanics that power billion-dollar apps, available to anyone in minutes, not months."
+              title={t('about.story.solution.title')}
+              description={t('about.story.solution.description')}
               index={1}
             />
             
             <StoryCard
               icon={Heart}
-              title="My Philosophy"
-              description="The best tools are the ones you don't have to think about — they just work. Simple on the surface, powerful underneath. Three decades of experience distilled into tools that anyone can use."
+              title={t('about.story.philosophy.title')}
+              description={t('about.story.philosophy.description')}
               index={2}
             />
           </div>
@@ -438,19 +441,24 @@ export default function AboutPage() {
             className="text-center mb-12"
           >
             <span className="text-purple-600 text-sm font-semibold tracking-widest uppercase mb-4 block">
-              Featured Work
+              {t('about.featuredWork')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              A Few Things I&apos;ve Built
+              {t('about.featuredTitle')}
             </h2>
             <p className="text-gray-600 max-w-xl mx-auto">
-              From AI-powered tools to developer infrastructure — here are some recent projects.
+              {t('about.featuredSubtitle')}
             </p>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {featuredProducts.map((product, index) => (
-              <ProductCard key={product.name} product={product} index={index} />
+            {featuredProductsConfig.map((product, index) => (
+              <ProductCard 
+                key={product.name} 
+                product={product} 
+                description={t(`about.products.${product.key}`)}
+                index={index} 
+              />
             ))}
           </div>
 
@@ -466,7 +474,7 @@ export default function AboutPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium transition-colors"
             >
-              <span>Explore more on GitHub</span>
+              <span>{t('about.exploreGithub')}</span>
               <ArrowRight className="w-4 h-4" />
             </a>
           </motion.div>
@@ -487,10 +495,10 @@ export default function AboutPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
-              Building something interesting?
+              {t('about.connect.title')}
             </h2>
             <p className="text-gray-400 text-lg sm:text-xl mb-10 max-w-xl mx-auto">
-              I&apos;d love to hear about it. Whether you need advice, collaboration, or just want to chat about tech — let&apos;s connect.
+              {t('about.connect.subtitle')}
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -506,7 +514,7 @@ export default function AboutPage() {
                 whileTap={{ scale: 0.98 }}
               >
                 <Linkedin className="w-5 h-5" />
-                <span>Connect on LinkedIn</span>
+                <span>{t('about.connect.linkedin')}</span>
               </motion.a>
               
               <motion.a
@@ -518,7 +526,7 @@ export default function AboutPage() {
                 whileTap={{ scale: 0.98 }}
               >
                 <Github className="w-5 h-5" />
-                <span>View GitHub</span>
+                <span>{t('about.connect.github')}</span>
               </motion.a>
             </div>
           </motion.div>

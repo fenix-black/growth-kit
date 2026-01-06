@@ -349,5 +349,52 @@
     "copyrightSuffix": ". All rights reserved.",
     "builtWith": "Built with",
     "builtWithSuffix": "for developers"
+  },
+  "about": {
+    "buildingSince": "Building since 1995",
+    "heroTitle1": "I help founders turn",
+    "heroTitle2": "simple apps",
+    "heroTitle3": "into viral products",
+    "heroSubtitle": "I wrote my first enterprise software as a teenager. Three decades and 100+ projects later, I'm still shipping.",
+    "scroll": "Scroll",
+    "founder": "Founder, FenixBlack.ai",
+    "stats": {
+      "years": "years building",
+      "projects": "projects shipped",
+      "live": "live today"
+    },
+    "journey": "The Journey",
+    "story": {
+      "problem": {
+        "title": "The Problem I Noticed",
+        "description": "After decades of building software, I kept seeing the same pattern: founders wasting months rebuilding growth features from scratch. Referral systems, credit mechanics, waitlists — the same building blocks, reinvented over and over."
+      },
+      "solution": {
+        "title": "My Solution",
+        "description": "I started FenixBlack to change that. Every product I build is designed to give creators superpowers — the same growth mechanics that power billion-dollar apps, available to anyone in minutes, not months."
+      },
+      "philosophy": {
+        "title": "My Philosophy",
+        "description": "The best tools are the ones you don't have to think about — they just work. Simple on the surface, powerful underneath. Three decades of experience distilled into tools that anyone can use."
+      }
+    },
+    "featuredWork": "Featured Work",
+    "featuredTitle": "A Few Things I've Built",
+    "featuredSubtitle": "From AI-powered tools to developer infrastructure — here are some recent projects.",
+    "exploreGithub": "Explore more on GitHub",
+    "products": {
+      "growthkit": "Viral growth engine for any app",
+      "deskcloud": "Give AI Agents eyes and hands over virtual desktops",
+      "okidoki": "Intelligent chat platform",
+      "restore": "AI photo restoration & animation",
+      "docxdiff": "Smart document comparison",
+      "backgrounds": "AI-powered Zoom backgrounds"
+    },
+    "connect": {
+      "title": "Building something interesting?",
+      "subtitle": "I'd love to hear about it. Whether you need advice, collaboration, or just want to chat about tech — let's connect.",
+      "linkedin": "Connect on LinkedIn",
+      "github": "View GitHub"
+    }
   }
 }
