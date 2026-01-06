@@ -28,6 +28,7 @@ export const miniAppExamples: MiniAppExample[] = [
     name: 'Restore Photos',
     description: 'Breathe new life into your old photographs. Correct, restore, and animate your memories in a few clicks.',
     category: 'SaaS & AI',
+    url: 'https://restore.fenixblack.ai',
     metrics: {
       userGrowth: '300%',
       viralCoefficient: '0.45',
@@ -44,23 +45,24 @@ export const miniAppExamples: MiniAppExample[] = [
     }
   },
   {
-    id: 'creative-design',
-    name: 'PixelCraft Studio',
-    description: 'Creative design tool for social media graphics with AI-powered templates',
-    category: 'Creative & Design',
+    id: 'virtual-backgrounds',
+    name: 'Virtual Background Generator',
+    description: 'Create stunning branded virtual backgrounds for Zoom and Google Meet. Just share your logo and describe the scene style.',
+    category: 'GenAI & Productivity',
+    url: 'https://backgrounds.fenixblack.ai',
     metrics: {
-      userGrowth: '250%',
-      viralCoefficient: '0.38',
-      creditsEarned: '22K',
-      referrals: '1,800',
-      timeframe: '4 months'
+      userGrowth: '185%',
+      viralCoefficient: '0.42',
+      retentionImprovement: '72%',
+      creditsEarned: '12K',
+      timeframe: '2 months'
     },
-    screenshot: '/landing/examples/taskflow-pro-placeholder.svg',
-    tags: ['Creative', 'Design', 'AI', 'Social Media'],
+    screenshot: '/landing/examples/backgrounds-demo2.jpg',
+    tags: ['GenAI', 'Next.js', 'Gemini', 'Vercel'],
     testimonial: {
-      quote: "The credit system keeps users engaged while the referral program brings in high-quality leads. It's brilliant.",
-      author: "Marcus Rodriguez",
-      role: "Founder, PixelCraft Studio"
+      quote: "Integrating GrowthKit took just 10 minutes. The referral system now drives 40% of our new users organically.",
+      author: "Pablo Schaffner",
+      role: "Creator, Virtual Background Generator"
     }
   },
   {

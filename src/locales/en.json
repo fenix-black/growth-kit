@@ -146,16 +146,16 @@
       }
     },
     {
-      "id": "creative-design",
-      "name": "PixelCraft Studio",
-      "description": "Creative design tool for social media graphics with AI-powered templates",
-      "category": "Creative & Design",
-      "timeframe": "4 months",
-      "tags": ["Creative", "Design", "AI", "Social Media"],
+      "id": "virtual-backgrounds",
+      "name": "Virtual Background Generator",
+      "description": "Create stunning branded virtual backgrounds for Zoom and Google Meet. Just share your logo and describe the scene.",
+      "category": "GenAI & Productivity",
+      "timeframe": "2 months",
+      "tags": ["GenAI", "Next.js", "Gemini", "Vercel"],
       "testimonial": {
-        "quote": "The credit system keeps users engaged while the referral program brings in high-quality leads. It's brilliant.",
-        "author": "Marcus Rodriguez",
-        "role": "Founder, PixelCraft Studio"
+        "quote": "Integrating GrowthKit took just 10 minutes. The referral system now drives 40% of our new users organically.",
+        "author": "Pablo Schaffner",
+        "role": "Creator, Virtual Background Generator"
       }
     },
     {
@@ -202,6 +202,7 @@
     "successStory": "Success Story",
     "growthMetrics": "Growth Metrics",
     "technologiesUsed": "Technologies Used",
+    "viewLive": "View Live",
     "ctaTitle": "Ready to join these success stories?",
     "ctaSubtitle": "Transform your app into a viral growth engine with the same features that powered these incredible results. Get started in minutes, not months.",
     "ctaButton": "Start Your Success Story"

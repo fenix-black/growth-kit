@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 export interface NavTheme {
   isDark: boolean;
@@ -9,13 +10,21 @@ export interface NavTheme {
   buttonStyle: 'light' | 'dark';
 }
 
+const defaultTheme: NavTheme = {
+  isDark: false,
+  textColor: 'text-gray-900',
+  logoFilter: 'brightness(0)',
+  buttonStyle: 'light'
+};
+
 export function useAdaptiveNav() {
-  const [navTheme, setNavTheme] = useState<NavTheme>({
-    isDark: false,
-    textColor: 'text-gray-900',
-    logoFilter: 'brightness(0)',
-    buttonStyle: 'light'
-  });
+  const [navTheme, setNavTheme] = useState<NavTheme>(defaultTheme);
+  const pathname = usePathname();
+
+  // Reset to default theme on route change
+  useEffect(() => {
+    setNavTheme(defaultTheme);
+  }, [pathname]);
 
   useEffect(() => {
     const observerOptions = {
@@ -50,7 +59,7 @@ export function useAdaptiveNav() {
     return () => {
       sections.forEach((section) => observer.unobserve(section));
     };
-  }, []);
+  }, [pathname]); // Re-run observer setup on route change
 
   return navTheme;
 }

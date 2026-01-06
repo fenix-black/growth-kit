@@ -15,7 +15,7 @@ import {
 import ScrollReveal, { ScrollRevealStagger, StaggerItem } from '@/components/landing/animations/ScrollReveal';
 import { useTranslation } from '@/hooks/useTranslation';
 
-// Import original examples for metrics and screenshots (not translatable)
+// Import original examples for metrics, screenshots, and URLs (not translatable)
 import { miniAppExamples as originalExamples } from '@/lib/landing/examples';
 
 export default function RealExamplesShowcase() {
@@ -24,14 +24,15 @@ export default function RealExamplesShowcase() {
   const { t } = useTranslation();
   const miniAppExamplesData = t('miniAppExamples') as any[];
   
-  // Merge translated data with original metrics and screenshots (keep translated timeframe)
+  // Merge translated data with original metrics, screenshots, and URLs (keep translated timeframe)
   const miniAppExamples = miniAppExamplesData.map((app: any, index: number) => ({
     ...app,
     metrics: {
       ...originalExamples[index].metrics,
       timeframe: app.timeframe // Use translated timeframe
     },
-    screenshot: originalExamples[index].screenshot
+    screenshot: originalExamples[index].screenshot,
+    url: originalExamples[index].url // Include URL from original data
   }));
 
   const categories = [...new Set(miniAppExamples.map((app: any) => app.category))];
@@ -177,16 +178,40 @@ export default function RealExamplesShowcase() {
                   className="space-y-6"
                 >
                   {/* App Screenshot */}
-                  <div className="relative">
-                    <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl overflow-hidden shadow-xl">
-                      <Image
-                        src={miniAppExamples[selectedExample].screenshot}
-                        alt={`${miniAppExamples[selectedExample].name} Screenshot`}
-                        width={600}
-                        height={400}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
+                  <div className="relative group">
+                    {miniAppExamples[selectedExample].url ? (
+                      <a
+                        href={miniAppExamples[selectedExample].url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl overflow-hidden shadow-xl transition-shadow duration-300 group-hover:shadow-2xl">
+                          <Image
+                            src={miniAppExamples[selectedExample].screenshot}
+                            alt={`${miniAppExamples[selectedExample].name} Screenshot`}
+                            width={600}
+                            height={400}
+                            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+                          />
+                        </div>
+                        {/* View Live Badge - appears on hover */}
+                        <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm text-gray-700 px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
+                          <span>{t('examples.viewLive')}</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </div>
+                      </a>
+                    ) : (
+                      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl overflow-hidden shadow-xl">
+                        <Image
+                          src={miniAppExamples[selectedExample].screenshot}
+                          alt={`${miniAppExamples[selectedExample].name} Screenshot`}
+                          width={600}
+                          height={400}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    )}
                     
                     {/* Success Badge */}
                     <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">

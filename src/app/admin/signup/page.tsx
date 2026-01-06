@@ -488,7 +488,7 @@ function SignupForm() {
         <ScrollReveal direction="up" delay={0.3}>
           <div className="text-center mt-12 text-sm text-slate-500 dark:text-slate-400">
             <p>
-              © 2025 GrowthKit. Powered by{' '}
+              © {new Date().getFullYear()} GrowthKit. Powered by{' '}
               <Link 
                 href="https://www.fenixblack.ai" 
                 target="_blank" 

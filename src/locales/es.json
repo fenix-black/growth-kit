@@ -146,16 +146,16 @@
       }
     },
     {
-      "id": "creative-design",
-      "name": "PixelCraft Studio",
-      "description": "Herramienta de diseño creativo para redes sociales con plantillas potenciadas por AI.",
-      "category": "Creativo & Diseño",
-      "timeframe": "4 meses",
-      "tags": ["Creativo", "Diseño", "AI", "Redes Sociales"],
+      "id": "virtual-backgrounds",
+      "name": "Virtual Background Generator",
+      "description": "Crea fondos virtuales profesionales para Zoom y Google Meet. Solo comparte tu logo y describe el estilo de escena.",
+      "category": "GenAI & Productividad",
+      "timeframe": "2 meses",
+      "tags": ["GenAI", "Next.js", "Gemini", "Vercel"],
       "testimonial": {
-        "quote": "El sistema de créditos mantiene a los usuarios enganchados mientras los referidos traen leads de alta calidad. Es brillante.",
-        "author": "Marcus Rodriguez",
-        "role": "Fundador, PixelCraft Studio"
+        "quote": "Integrar GrowthKit tomó solo 10 minutos. El sistema de referidos ahora genera el 40% de nuestros nuevos usuarios orgánicamente.",
+        "author": "Pablo Schaffner",
+        "role": "Creador, Virtual Background Generator"
       }
     },
     {
@@ -202,6 +202,7 @@
     "successStory": "Caso de Éxito",
     "growthMetrics": "Métricas de Crecimiento",
     "technologiesUsed": "Tecnologías Usadas",
+    "viewLive": "Ver en Vivo",
     "ctaTitle": "¿Listo para tu propio caso de éxito?",
     "ctaSubtitle": "Transforma tu app en un motor de crecimiento viral con los mismos features que impulsaron estos resultados. Comienza en minutos, no meses.",
     "ctaButton": "Comenzar Ahora"

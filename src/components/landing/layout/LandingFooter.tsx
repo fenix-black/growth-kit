@@ -7,13 +7,14 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 export default function LandingFooter() {
   const { t } = useTranslation();
+  const currentYear = new Date().getFullYear();
   
   const footerSections = [
     {
       title: t('footer.product'),
       links: [
-        { href: '#features', label: t('footer.productLinks.features') },
-        { href: '#examples', label: t('footer.productLinks.examples') },
+        { href: '/#features', label: t('footer.productLinks.features') },
+        { href: '/#examples', label: t('footer.productLinks.examples') },
         { href: '/demo', label: t('footer.productLinks.demo') },
         { href: '/admin', label: t('footer.productLinks.dashboard') },
       ]
@@ -111,7 +112,7 @@ export default function LandingFooter() {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('footer.ctaTitle')}</h3>
             <p className="text-gray-600 mb-4">{t('footer.ctaSubtitle')}</p>
             <Link
-              href="#get-started"
+              href="/#get-started"
               className="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg hover:shadow-primary/25 transition-all duration-200 hover:scale-105"
               style={{
                 background: 'linear-gradient(to right, #10b981, #14b8a6)',
@@ -130,7 +131,7 @@ export default function LandingFooter() {
             rel="noopener noreferrer"
             className="text-gray-500 hover:text-primary transition-colors duration-200 text-sm cursor-pointer hover:underline"
           >
-            {t('footer.copyright')} <span className="font-medium">{t('footer.copyrightCompany')}</span>{t('footer.copyrightSuffix')}
+            © {currentYear} GrowthKit by <span className="font-medium">{t('footer.copyrightCompany')}</span>{t('footer.copyrightSuffix')}
           </Link>
           <div className="flex items-center space-x-1 text-gray-500 text-sm">
             <span>{t('footer.builtWith')}</span>

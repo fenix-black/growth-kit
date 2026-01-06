@@ -17,9 +17,9 @@ export default function LandingNav() {
   const { t } = useTranslation();
 
   const navItems = [
-    { href: '#features', label: t('nav.features') },
-    { href: '#examples', label: t('nav.examples') },
-    { href: '#integration', label: t('nav.integration') },
+    { href: '/#features', label: t('nav.features') },
+    { href: '/#examples', label: t('nav.examples') },
+    { href: '/#integration', label: t('nav.integration') },
     { href: '/demo', label: t('nav.demo') },
   ];
 
@@ -97,7 +97,7 @@ export default function LandingNav() {
               <ExternalLink className="w-4 h-4" />
             </Link>
             <Link
-              href="#get-started"
+              href="/#get-started"
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-500 hover:scale-105 ${
                 navTheme.isDark 
                   ? 'bg-white text-gray-900 hover:bg-gray-100 shadow-lg' 
@@ -176,7 +176,7 @@ export default function LandingNav() {
                   <ExternalLink className="w-4 h-4" />
                 </Link>
                 <Link
-                  href="#get-started"
+                  href="/#get-started"
                   onClick={() => setMobileMenuOpen(false)}
                   className={`block mt-2 px-3 py-2 rounded-lg font-medium text-center transition-all duration-500 ${
                     navTheme.isDark 
