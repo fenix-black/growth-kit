@@ -351,37 +351,37 @@
     "builtWithSuffix": "para developers"
   },
   "about": {
-    "buildingSince": "Construyendo desde 1995",
-    "heroTitle1": "Ayudo a founders a convertir",
-    "heroTitle2": "apps simples",
+    "buildingSince": "Creando desde 1995",
+    "heroTitle1": "Ayudo a emprendedores a transformar",
+    "heroTitle2": "sus apps",
     "heroTitle3": "en productos virales",
-    "heroSubtitle": "Escribí mi primer software empresarial siendo adolescente. Tres décadas y más de 100 proyectos después, sigo enviando código.",
+    "heroSubtitle": "Lancé mi primer software empresarial siendo adolescente. Tres décadas y más de 100 proyectos después, sigo creando.",
     "scroll": "Scroll",
     "founder": "Fundador, FenixBlack.ai",
     "stats": {
-      "years": "años construyendo",
-      "projects": "proyectos entregados",
-      "live": "en vivo hoy"
+      "years": "años creando",
+      "projects": "proyectos lanzados",
+      "live": "activos hoy"
     },
-    "journey": "El Camino",
+    "journey": "La Historia",
     "story": {
       "problem": {
-        "title": "El Problema que Noté",
-        "description": "Después de décadas construyendo software, seguía viendo el mismo patrón: founders perdiendo meses reconstruyendo funcionalidades de crecimiento desde cero. Sistemas de referidos, mecánicas de créditos, listas de espera — los mismos bloques, reinventados una y otra vez."
+        "title": "El Patrón que Descubrí",
+        "description": "Durante décadas construyendo software, vi siempre lo mismo: emprendedores desperdiciando meses reinventando la rueda. Sistemas de referidos, créditos, listas de espera — las mismas piezas, una y otra vez."
       },
       "solution": {
-        "title": "Mi Solución",
-        "description": "Fundé FenixBlack para cambiar eso. Cada producto que construyo está diseñado para dar superpoderes a los creadores — las mismas mecánicas de crecimiento que impulsan apps de miles de millones, disponibles para cualquiera en minutos, no meses."
+        "title": "Mi Respuesta",
+        "description": "Creé FenixBlack para cambiar eso. Cada producto que lanzo está diseñado para dar superpoderes a quienes crean — las mismas mecánicas que impulsan apps multimillonarias, accesibles para cualquiera en minutos, no en meses."
       },
       "philosophy": {
         "title": "Mi Filosofía",
-        "description": "Las mejores herramientas son las que no tienes que pensar — simplemente funcionan. Simples en la superficie, poderosas por dentro. Tres décadas de experiencia destiladas en herramientas que cualquiera puede usar."
+        "description": "Las mejores herramientas son las que ni piensas — solo funcionan. Simples por fuera, poderosas por dentro. Tres décadas de experiencia destiladas en herramientas que cualquiera puede dominar."
       }
     },
-    "featuredWork": "Trabajo Destacado",
-    "featuredTitle": "Algunas Cosas que He Construido",
-    "featuredSubtitle": "Desde herramientas potenciadas por IA hasta infraestructura para desarrolladores — aquí hay algunos proyectos recientes.",
-    "exploreGithub": "Explorar más en GitHub",
+    "featuredWork": "Proyectos",
+    "featuredTitle": "Lo que He Creado",
+    "featuredSubtitle": "De herramientas con IA a infraestructura para desarrolladores — una muestra de proyectos recientes.",
+    "exploreGithub": "Descubrir más en GitHub",
     "products": {
       "growthkit": "Motor de crecimiento viral para cualquier app",
       "deskcloud": "Dale ojos y manos a Agentes IA sobre escritorios virtuales",
@@ -391,8 +391,8 @@
       "backgrounds": "Fondos de Zoom potenciados por IA"
     },
     "connect": {
-      "title": "¿Construyendo algo interesante?",
-      "subtitle": "Me encantaría escucharlo. Ya sea que necesites consejo, colaboración, o solo quieras charlar sobre tecnología — conectemos.",
+      "title": "¿Creando algo grande?",
+      "subtitle": "Me encantaría escucharlo. Ya sea que necesites consejo, colaboración, o simplemente conversar sobre tecnología — conectemos.",
       "linkedin": "Conectar en LinkedIn",
       "github": "Ver GitHub"
     }
